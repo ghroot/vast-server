@@ -1,0 +1,8 @@
+/.gradle/
+/.idea/
+/build/
+/out/
+/toast-haste-server.iws
+/toast-haste-server.iml
+/toast-haste-server.ipr
+/snapshot.json
