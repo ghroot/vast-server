@@ -1,0 +1,56 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'artemis'
+
+sourceCompatibility = 1.8
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'net.onedaybeard.artemis:artemis-odb-gradle-plugin:2.1.0'
+    }
+}
+
+repositories {
+    flatDir {
+        dirs 'lib'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb', version: '2.1.0'
+    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer', version: '2.1.0'
+    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer-json', version: '2.1.0'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+    compile group: 'org.jetlang', name: 'jetlang', version: '0.2.12'
+    compile group: 'com.esotericsoftware', name: 'jsonbeans', version: '0.7'
+    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+    compile name: 'haste-all-1.0.0'
+}
+
+weave {
+    classesDir = new File(buildDir, "classes/java/main")
+    dependsOn build
+    enableArtemisPlugin = true
+    enablePooledWeaving = true
+    generateLinkMutators = true
+    optimizeEntitySystems = true
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'test.Main'
+    }
+}
+
+task fatJar(type: Jar) {
+    dependsOn weave
+    manifest.from jar.manifest
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
