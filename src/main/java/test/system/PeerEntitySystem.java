@@ -31,7 +31,7 @@ public class PeerEntitySystem extends BaseSystem {
 	private ComponentMapper<ActiveComponent> activeComponentMapper;
 
 	private List<MyPeer> peers;
-	private Map<String, Integer> entitiesByName;
+	private Map<String, Integer> entitiesByPeerName;
 	private Map<Integer, List<Integer>> nearbyEntitiesByEntity;
 
 	private List<MyPeer> peersLastUpdate;
@@ -39,9 +39,9 @@ public class PeerEntitySystem extends BaseSystem {
 	private List<Integer> reusableRemovedEntities;
 	private Archetype peerEntityArchetype;
 
-	public PeerEntitySystem(List<MyPeer> peers, Map<String, Integer> entitiesByName, Map<Integer, List<Integer>> nearbyEntitiesByEntity) {
+	public PeerEntitySystem(List<MyPeer> peers, Map<String, Integer> entitiesByPeerName, Map<Integer, List<Integer>> nearbyEntitiesByEntity) {
 		this.peers = peers;
-		this.entitiesByName = entitiesByName;
+		this.entitiesByPeerName = entitiesByPeerName;
 		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 
 		peersLastUpdate = new ArrayList<MyPeer>();
@@ -73,12 +73,12 @@ public class PeerEntitySystem extends BaseSystem {
 	private void createEntitiesForNewPeers() {
 		for (MyPeer peer : peers) {
 			if (!peersLastUpdate.contains(peer)) {
-				if (!entitiesByName.containsKey(peer.getName())) {
+				if (!entitiesByPeerName.containsKey(peer.getName())) {
 					int entity = world.create(peerEntityArchetype);
 					peerComponentMapper.get(entity).name = peer.getName();
 					transformComponentMapper.get(entity).position.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
 					logger.info("Creating entity: {} for {} at {}", entity, peer.getName(), transformComponentMapper.get(entity).position);
-					entitiesByName.put(peer.getName(), entity);
+					entitiesByPeerName.put(peer.getName(), entity);
 				}
 				clearEntitiesKnownByPeer(peer);
 			}
@@ -87,7 +87,7 @@ public class PeerEntitySystem extends BaseSystem {
 
 	private void checkAndNotifyAboutNewEntities() {
 		for (MyPeer peer : peers) {
-			int peerEntity = entitiesByName.get(peer.getName());
+			int peerEntity = entitiesByPeerName.get(peer.getName());
 			if (nearbyEntitiesByEntity.containsKey(peerEntity)) {
 				List<Integer> closeEntities = nearbyEntitiesByEntity.get(peerEntity);
 				for (int closeEntity : closeEntities) {
@@ -116,7 +116,7 @@ public class PeerEntitySystem extends BaseSystem {
 
 	private void checkAndNotifyAboutRemovedEntities() {
 		for (MyPeer peer : peers) {
-			int peerEntity = entitiesByName.get(peer.getName());
+			int peerEntity = entitiesByPeerName.get(peer.getName());
 			if (knownEntities.containsKey(peer.getName())) {
 				List<Integer> entitiesKnownByPeer = knownEntities.get(peer.getName());
 				reusableRemovedEntities.clear();
@@ -138,7 +138,7 @@ public class PeerEntitySystem extends BaseSystem {
 		for (MyPeer peer : peers) {
 			if (!peersLastUpdate.contains(peer)) {
 				String name = peer.getName();
-				int entity = entitiesByName.get(name);
+				int entity = entitiesByPeerName.get(name);
 				if (!activeComponentMapper.has(entity)) {
 					logger.info("Activating entity: {} for {}", entity, name);
 					activeComponentMapper.create(entity);
@@ -156,7 +156,7 @@ public class PeerEntitySystem extends BaseSystem {
 		for (MyPeer peer : peersLastUpdate) {
 			if (!peers.contains(peer)) {
 				String name = peer.getName();
-				int entity = entitiesByName.get(name);
+				int entity = entitiesByPeerName.get(name);
 				if (activeComponentMapper.has(entity)) {
 					logger.info("Deactivating entity: {} for {}", entity, name);
 					activeComponentMapper.remove(entity);

@@ -27,11 +27,11 @@ public class WorldSerializationSystem extends IntervalSystem {
 	private ComponentMapper<SyncTransformComponent> syncTransformComponentMapper;
 	private ComponentMapper<AIComponent> aiComponentMapper;
 
-	private Map<String, Integer> entitiesByName;
+	private Map<String, Integer> entitiesByPeerName;
 
-	public WorldSerializationSystem(Map<String, Integer> entitiesByName) {
+	public WorldSerializationSystem(Map<String, Integer> entitiesByPeerName) {
 		super(Aspect.all(), 10000);
-		this.entitiesByName = entitiesByName;
+		this.entitiesByPeerName = entitiesByPeerName;
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 				int entity = saveFileFormat.entities.get(i);
 				logger.info("Loaded entity: {}", entity);
 				String name = peerComponentMapper.get(entity).name;
-				entitiesByName.put(name, entity);
+				entitiesByPeerName.put(name, entity);
 			}
 		} catch (Exception e) {
 			logger.info("No snapshot file found, starting from empty world");
@@ -60,7 +60,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 		WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		IntBag entities = new IntBag();
-		for (int entity : entitiesByName.values()) {
+		for (int entity : entitiesByPeerName.values()) {
 			entities.add(entity);
 		}
 		worldSerializationManager.save(baos, new SaveFileFormat(entities));
