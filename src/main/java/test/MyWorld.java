@@ -20,6 +20,7 @@ public class MyWorld implements Runnable {
 	private List<MyPeer> peers;
 	private List<IncomingRequest> incomingRequests;
 	private Map<String, Integer> entitiesByName;
+	private Map<Integer, List<Integer>> closeEntitiesByEntity;
 
 	private boolean alive;
 
@@ -27,10 +28,12 @@ public class MyWorld implements Runnable {
 		peers = new ArrayList<MyPeer>();
 		incomingRequests = new ArrayList<IncomingRequest>();
 		entitiesByName = new HashMap<String, Integer>();
+		closeEntitiesByEntity = new HashMap<Integer, List<Integer>>();
 		WorldConfiguration config = new WorldConfigurationBuilder().with(
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
-			new PeerEntitySystem(peers, entitiesByName),
+			new CloseEntitySystem(closeEntitiesByEntity),
+			new PeerEntitySystem(peers, entitiesByName, closeEntitiesByEntity),
 			new PathAssignSystem(incomingRequests),
 			new AISystem(),
 			new PathMoveSystem(),

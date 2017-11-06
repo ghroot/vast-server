@@ -13,12 +13,12 @@ public class PathMoveSystem extends IteratingSystem {
     private ComponentMapper<PathComponent> pathComponentMapper;
 
     private float speed;
-    private Vector2f direction;
+    private Vector2f reusableDirection;
 
     public PathMoveSystem() {
         super(Aspect.all(TransformComponent.class, PathComponent.class));
         speed = 0.3f;
-        direction = new Vector2f();
+        reusableDirection = new Vector2f();
     }
 
     @Override
@@ -26,16 +26,16 @@ public class PathMoveSystem extends IteratingSystem {
         TransformComponent transformComponent = transformComponentMapper.get(entity);
         PathComponent pathComponent = pathComponentMapper.get(entity);
 
-        direction.set(pathComponent.targetPosition.x - transformComponent.position.x, pathComponent.targetPosition.y - transformComponent.position.y);
-        if (direction.length() > 0) {
-            float distance = direction.length();
-            direction.normalize();
+        reusableDirection.set(pathComponent.targetPosition.x - transformComponent.position.x, pathComponent.targetPosition.y - transformComponent.position.y);
+        if (reusableDirection.length() > 0) {
+            float distance = reusableDirection.length();
+            reusableDirection.normalize();
             if (speed > distance) {
                 transformComponent.position.set(pathComponent.targetPosition);
                 pathComponentMapper.remove(entity);
             } else {
-                direction.scale(speed);
-                transformComponent.position.add(direction);
+                reusableDirection.scale(speed);
+                transformComponent.position.add(reusableDirection);
             }
         }
     }

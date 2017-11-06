@@ -8,6 +8,10 @@ public class MessageCodes {
 	public static byte ENTITY_CREATED_ACTIVE = 2;
 	public static byte ENTITY_CREATED_POSITION = 3;
 
+	// Server -> Client
+	public static short ENTITY_DESTROYED = 1;
+	public static byte ENTITY_DESTROYED_ENTITY_ID = 0;
+
 	// Client -> Server
 	public static short SET_PATH = 2;
 	public static byte SET_PATH_POSITION = 0;

@@ -1,7 +1,9 @@
 package test.system;
 
-import com.artemis.*;
-import com.artemis.utils.IntBag;
+import com.artemis.Archetype;
+import com.artemis.ArchetypeBuilder;
+import com.artemis.BaseSystem;
+import com.artemis.ComponentMapper;
 import com.nhnent.haste.framework.ClientPeer;
 import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.protocol.data.DataObject;
@@ -30,17 +32,21 @@ public class PeerEntitySystem extends BaseSystem {
 
 	private List<MyPeer> peers;
 	private Map<String, Integer> entitiesByName;
+	private Map<Integer, List<Integer>> closeEntitiesByEntity;
 
 	private List<MyPeer> peersLastUpdate;
 	private Map<String, List<Integer>> knownEntities;
+	List<Integer> reusableRemovedEntities;
 	private Archetype archetype;
 
-	public PeerEntitySystem(List<MyPeer> peers, Map<String, Integer> entitiesByName) {
+	public PeerEntitySystem(List<MyPeer> peers, Map<String, Integer> entitiesByName, Map<Integer, List<Integer>> closeEntitiesByEntity) {
 		this.peers = peers;
 		this.entitiesByName = entitiesByName;
+		this.closeEntitiesByEntity = closeEntitiesByEntity;
 
 		peersLastUpdate = new ArrayList<MyPeer>();
 		knownEntities = new HashMap<String, List<Integer>>();
+		reusableRemovedEntities = new ArrayList<Integer>();
 	}
 
 	@Override
@@ -58,6 +64,7 @@ public class PeerEntitySystem extends BaseSystem {
 		checkAndNotifyAboutNewEntities();
 		checkAndNotifyAboutActivatedEntities();
 		checkAndNotifyAboutDeactivatedEntities();
+		checkAndNotifyAboutRemovedEntities();
 
 		peersLastUpdate.clear();
 		peersLastUpdate.addAll(peers);
@@ -78,28 +85,50 @@ public class PeerEntitySystem extends BaseSystem {
 	}
 
 	private void checkAndNotifyAboutNewEntities() {
-		IntBag transformEntities = world.getAspectSubscriptionManager().get(Aspect.all(TransformComponent.class)).getEntities();
 		for (MyPeer peer : peers) {
-			for (int i = 0; i < transformEntities.size(); i++) {
-				int transformEntity = transformEntities.get(i);
-				if (!isEntityKnownByPeer(transformEntity, peer)) {
-					boolean owner = false;
-					boolean active = true;
-					if (peerComponentMapper.has(transformEntity)) {
-						PeerComponent peerComponent = peerComponentMapper.get(transformEntity);
-						owner = peer.getName().equals(peerComponent.name);
-						active = activeComponentMapper.has(transformEntity);
+			int peerEntity = entitiesByName.get(peer.getName());
+			if (closeEntitiesByEntity.containsKey(peerEntity)) {
+				List<Integer> closeEntities = closeEntitiesByEntity.get(peerEntity);
+				for (int closeEntity : closeEntities) {
+					if (!isEntityKnownByPeer(closeEntity, peer)) {
+						boolean owner = false;
+						boolean active = true;
+						if (peerComponentMapper.has(closeEntity)) {
+							PeerComponent peerComponent = peerComponentMapper.get(closeEntity);
+							owner = peer.getName().equals(peerComponent.name);
+							active = activeComponentMapper.has(closeEntity);
+						}
+						TransformComponent transformComponent = transformComponentMapper.get(closeEntity);
+						logger.info("Notifying peer {} about new entity {}", peer.getName(), closeEntity);
+						peer.send(new EventMessage(MessageCodes.ENTITY_CREATED, new DataObject()
+										.set(MessageCodes.ENTITY_CREATED_ENTITY_ID, closeEntity)
+										.set(MessageCodes.ENTITY_CREATED_OWNER, owner)
+										.set(MessageCodes.ENTITY_CREATED_ACTIVE, active)
+										.set(MessageCodes.ENTITY_CREATED_POSITION, new float[] {transformComponent.position.x, transformComponent.position.y})),
+								SendOptions.ReliableSend);
+						markEntityAsKnownByPeer(closeEntity, peer);
 					}
-					TransformComponent transformComponent = transformComponentMapper.get(transformEntity);
-					logger.info("Notifying peer {} about new entity {}", peer.getName(), transformEntity);
-					peer.send(new EventMessage(MessageCodes.ENTITY_CREATED, new DataObject()
-									.set(MessageCodes.ENTITY_CREATED_ENTITY_ID, transformEntity)
-									.set(MessageCodes.ENTITY_CREATED_OWNER, owner)
-									.set(MessageCodes.ENTITY_CREATED_ACTIVE, active)
-									.set(MessageCodes.ENTITY_CREATED_POSITION, new float[] {transformComponent.position.x, transformComponent.position.y})),
-							SendOptions.ReliableSend);
-					markEntityAsKnownByPeer(transformEntity, peer);
 				}
+			}
+		}
+	}
+
+	private void checkAndNotifyAboutRemovedEntities() {
+		for (MyPeer peer : peers) {
+			int peerEntity = entitiesByName.get(peer.getName());
+			if (knownEntities.containsKey(peer.getName())) {
+				List<Integer> entitiesKnownByPeer = knownEntities.get(peer.getName());
+				reusableRemovedEntities.clear();
+				for (int entityKnownByPeer : entitiesKnownByPeer) {
+					if (!closeEntitiesByEntity.get(peerEntity).contains(entityKnownByPeer)) {
+						logger.info("Notifying peer {} about removed entity {}", peer.getName(), entityKnownByPeer);
+						peer.send(new EventMessage(MessageCodes.ENTITY_DESTROYED, new DataObject()
+										.set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, entityKnownByPeer)),
+								SendOptions.ReliableSend);
+						reusableRemovedEntities.add(entityKnownByPeer);
+					}
+				}
+				removeEntitiesAsKnownByPeer(reusableRemovedEntities, peer);
 			}
 		}
 	}
@@ -141,7 +170,7 @@ public class PeerEntitySystem extends BaseSystem {
 	}
 
 	private void markEntityAsKnownByPeer(int entity, MyPeer peer) {
-		List<Integer> entities = null;
+		List<Integer> entities;
 		if (knownEntities.containsKey(peer.getName())) {
 			entities = knownEntities.get(peer.getName());
 		} else {
@@ -151,6 +180,10 @@ public class PeerEntitySystem extends BaseSystem {
 		if (!entities.contains(entity)) {
 			entities.add(entity);
 		}
+	}
+
+	private void removeEntitiesAsKnownByPeer(List<Integer> entities, MyPeer peer) {
+		knownEntities.get(peer.getName()).removeAll(entities);
 	}
 
 	private void clearEntitiesKnownByPeer(MyPeer peer) {
