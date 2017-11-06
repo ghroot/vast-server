@@ -30,7 +30,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 	private Map<String, Integer> entitiesByName;
 
 	public WorldSerializationSystem(Map<String, Integer> entitiesByName) {
-		super(Aspect.all(), 1000);
+		super(Aspect.all(), 10000);
 		this.entitiesByName = entitiesByName;
 	}
 
@@ -42,6 +42,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 		try {
 			FileInputStream fileInputStream = new FileInputStream("snapshot.json");
 			SaveFileFormat saveFileFormat = worldSerializationManager.load(fileInputStream, SaveFileFormat.class);
+			logger.info("Loading world from snapshot");
 			for (int i = 0; i < saveFileFormat.entities.size(); i++) {
 				int entity = saveFileFormat.entities.get(i);
 				logger.info("Loaded entity: {}", entity);
@@ -49,12 +50,13 @@ public class WorldSerializationSystem extends IntervalSystem {
 				entitiesByName.put(name, entity);
 			}
 		} catch (Exception e) {
-			logger.error(e.toString());
+			logger.info("No snapshot file found, starting from empty world");
 		}
 	}
 
 	@Override
 	protected void processSystem() {
+		logger.debug("Serializing world");
 		WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		IntBag entities = new IntBag();

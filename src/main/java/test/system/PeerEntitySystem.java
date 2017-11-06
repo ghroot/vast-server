@@ -36,7 +36,7 @@ public class PeerEntitySystem extends BaseSystem {
 
 	private List<MyPeer> peersLastUpdate;
 	private Map<String, List<Integer>> knownEntities;
-	List<Integer> reusableRemovedEntities;
+	private List<Integer> reusableRemovedEntities;
 	private Archetype archetype;
 
 	public PeerEntitySystem(List<MyPeer> peers, Map<String, Integer> entitiesByName, Map<Integer, List<Integer>> closeEntitiesByEntity) {
@@ -75,8 +75,9 @@ public class PeerEntitySystem extends BaseSystem {
 			if (!peersLastUpdate.contains(peer)) {
 				if (!entitiesByName.containsKey(peer.getName())) {
 					int entity = world.create(archetype);
-					logger.info("Creating entity: {} for {}", entity, peer.getName());
 					peerComponentMapper.get(entity).name = peer.getName();
+					transformComponentMapper.get(entity).position.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
+					logger.info("Creating entity: {} for {} at {}", entity, peer.getName(), transformComponentMapper.get(entity).position);
 					entitiesByName.put(peer.getName(), entity);
 				}
 				clearEntitiesKnownByPeer(peer);
