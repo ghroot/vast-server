@@ -37,6 +37,7 @@ public class PeerEntitySystem extends BaseSystem {
 	private List<MyPeer> peersLastUpdate;
 	private Map<String, List<Integer>> knownEntities;
 	private List<Integer> reusableRemovedEntities;
+	private float[] reusablePosition;
 	private Archetype peerEntityArchetype;
 
 	public PeerEntitySystem(List<MyPeer> peers, Map<String, Integer> entitiesByPeerName, Map<Integer, List<Integer>> nearbyEntitiesByEntity) {
@@ -47,6 +48,7 @@ public class PeerEntitySystem extends BaseSystem {
 		peersLastUpdate = new ArrayList<MyPeer>();
 		knownEntities = new HashMap<String, List<Integer>>();
 		reusableRemovedEntities = new ArrayList<Integer>();
+		reusablePosition = new float[2];
 	}
 
 	@Override
@@ -99,13 +101,15 @@ public class PeerEntitySystem extends BaseSystem {
 							owner = peer.getName().equals(peerComponent.name);
 							active = activeComponentMapper.has(closeEntity);
 						}
-						TransformComponent transformComponent = transformComponentMapper.get(closeEntity);
 						logger.info("Notifying peer {} about new entity {}", peer.getName(), closeEntity);
+						TransformComponent transformComponent = transformComponentMapper.get(closeEntity);
+						reusablePosition[0] = transformComponent.position.x;
+						reusablePosition[1] = transformComponent.position.y;
 						peer.send(new EventMessage(MessageCodes.ENTITY_CREATED, new DataObject()
 										.set(MessageCodes.ENTITY_CREATED_ENTITY_ID, closeEntity)
 										.set(MessageCodes.ENTITY_CREATED_OWNER, owner)
 										.set(MessageCodes.ENTITY_CREATED_ACTIVE, active)
-										.set(MessageCodes.ENTITY_CREATED_POSITION, new float[] {transformComponent.position.x, transformComponent.position.y})),
+										.set(MessageCodes.ENTITY_CREATED_POSITION, reusablePosition)),
 								SendOptions.ReliableSend);
 						markEntityAsKnownByPeer(closeEntity, peer);
 					}

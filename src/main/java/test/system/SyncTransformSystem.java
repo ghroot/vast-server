@@ -15,34 +15,39 @@ import test.component.TransformComponent;
 import java.util.List;
 
 public class SyncTransformSystem extends IntervalIteratingSystem {
-    private ComponentMapper<TransformComponent> transformComponentMapper;
-    private ComponentMapper<SyncTransformComponent> syncTransformComponentMapper;
+	private ComponentMapper<TransformComponent> transformComponentMapper;
+	private ComponentMapper<SyncTransformComponent> syncTransformComponentMapper;
 
-    private List<MyPeer> peers;
+	private List<MyPeer> peers;
 
-    public SyncTransformSystem(List<MyPeer> peers) {
-        super(Aspect.all(TransformComponent.class, SyncTransformComponent.class), 100);
-        this.peers = peers;
-    }
+	private float[] reusablePosition;
 
-    @Override
-    protected void inserted(int entity) {
-        syncTransformComponentMapper.get(entity).lastSyncedPosition.set(transformComponentMapper.get(entity).position);
-    }
+	public SyncTransformSystem(List<MyPeer> peers) {
+		super(Aspect.all(TransformComponent.class, SyncTransformComponent.class), 100);
+		this.peers = peers;
+		reusablePosition = new float[2];
+	}
 
-    @Override
-    protected void process(int entity) {
-        TransformComponent transformComponent = transformComponentMapper.get(entity);
-        SyncTransformComponent syncTransformComponent = syncTransformComponentMapper.get(entity);
+	@Override
+	protected void inserted(int entity) {
+		syncTransformComponentMapper.get(entity).lastSyncedPosition.set(transformComponentMapper.get(entity).position);
+	}
 
-        if (!transformComponent.position.equals(syncTransformComponent.lastSyncedPosition)) {
-            EventMessage positionMessage = new EventMessage(MessageCodes.SET_POSITION, new DataObject()
-                    .set(MessageCodes.SET_POSITION_ENTITY_ID, entity)
-                    .set(MessageCodes.SET_POSITION_POSITION, new float[] {transformComponent.position.x, transformComponent.position.y}));
-            for (ClientPeer peer : peers) {
-                peer.send(positionMessage, SendOptions.ReliableSend);
-            }
-            syncTransformComponent.lastSyncedPosition.set(transformComponent.position);
-        }
-    }
+	@Override
+	protected void process(int entity) {
+		TransformComponent transformComponent = transformComponentMapper.get(entity);
+		SyncTransformComponent syncTransformComponent = syncTransformComponentMapper.get(entity);
+
+		if (!transformComponent.position.equals(syncTransformComponent.lastSyncedPosition)) {
+			reusablePosition[0] = transformComponent.position.x;
+			reusablePosition[1] = transformComponent.position.y;
+			EventMessage positionMessage = new EventMessage(MessageCodes.SET_POSITION, new DataObject()
+					.set(MessageCodes.SET_POSITION_ENTITY_ID, entity)
+					.set(MessageCodes.SET_POSITION_POSITION, reusablePosition));
+			for (ClientPeer peer : peers) {
+				peer.send(positionMessage, SendOptions.ReliableSend);
+			}
+			syncTransformComponent.lastSyncedPosition.set(transformComponent.position);
+		}
+	}
 }
