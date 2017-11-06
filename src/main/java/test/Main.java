@@ -2,8 +2,6 @@ package test;
 
 import com.nhnent.haste.bootstrap.GameServerBootstrap;
 import com.nhnent.haste.bootstrap.options.UDPOption;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Main {
 	private static final int PORT = 5056;

@@ -13,33 +13,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class CloseEntitySystem extends IntervalIteratingSystem {
-	private static final Logger logger = LoggerFactory.getLogger(CloseEntitySystem.class);
+public class NearbyEntitySystem extends IntervalIteratingSystem {
+	private static final Logger logger = LoggerFactory.getLogger(NearbyEntitySystem.class);
 
 	private final float MAX_DISTANCE_SQUARED = 0.2f * 0.2f;
 
 	private ComponentMapper<TransformComponent> transformComponentMapper;
 
-	private Map<Integer, List<Integer>> closeEntitiesByEntity;
+	private Map<Integer, List<Integer>> nearbyEntitiesByEntity;
 
 	private Vector2f reusableVector;
 
-	public CloseEntitySystem(Map<Integer, List<Integer>> closeEntitiesByEntity) {
+	public NearbyEntitySystem(Map<Integer, List<Integer>> nearbyEntitiesByEntity) {
 		super(Aspect.all(TransformComponent.class), 1000);
-		this.closeEntitiesByEntity = closeEntitiesByEntity;
+		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 		reusableVector = new Vector2f();
 	}
 
 	@Override
 	protected void process(int entity) {
 		TransformComponent transformComponent = transformComponentMapper.get(entity);
-		List<Integer> closeEntities;
-		if (closeEntitiesByEntity.containsKey(entity)) {
-			closeEntities = closeEntitiesByEntity.get(entity);
-			closeEntities.clear();
+		List<Integer> nearbyEntities;
+		if (nearbyEntitiesByEntity.containsKey(entity)) {
+			nearbyEntities = nearbyEntitiesByEntity.get(entity);
+			nearbyEntities.clear();
 		} else {
-			closeEntities = new ArrayList<Integer>();
-			closeEntitiesByEntity.put(entity, closeEntities);
+			nearbyEntities = new ArrayList<Integer>();
+			nearbyEntitiesByEntity.put(entity, nearbyEntities);
 		}
 		IntBag entities = world.getAspectSubscriptionManager().get(Aspect.all(TransformComponent.class)).getEntities();
 		for (int i = 0; i < entities.size(); i++) {
@@ -48,7 +48,7 @@ public class CloseEntitySystem extends IntervalIteratingSystem {
 				TransformComponent othertTransformComponent = transformComponentMapper.get(otherEntity);
 				reusableVector.set(othertTransformComponent.position.x - transformComponent.position.x, othertTransformComponent.position.y - transformComponent.position.y);
 				if (reusableVector.lengthSquared() <= MAX_DISTANCE_SQUARED) {
-					closeEntities.add(otherEntity);
+					nearbyEntities.add(otherEntity);
 				}
 			}
 		}

@@ -32,17 +32,17 @@ public class PeerEntitySystem extends BaseSystem {
 
 	private List<MyPeer> peers;
 	private Map<String, Integer> entitiesByName;
-	private Map<Integer, List<Integer>> closeEntitiesByEntity;
+	private Map<Integer, List<Integer>> nearbyEntitiesByEntity;
 
 	private List<MyPeer> peersLastUpdate;
 	private Map<String, List<Integer>> knownEntities;
 	private List<Integer> reusableRemovedEntities;
-	private Archetype archetype;
+	private Archetype peerEntityArchetype;
 
-	public PeerEntitySystem(List<MyPeer> peers, Map<String, Integer> entitiesByName, Map<Integer, List<Integer>> closeEntitiesByEntity) {
+	public PeerEntitySystem(List<MyPeer> peers, Map<String, Integer> entitiesByName, Map<Integer, List<Integer>> nearbyEntitiesByEntity) {
 		this.peers = peers;
 		this.entitiesByName = entitiesByName;
-		this.closeEntitiesByEntity = closeEntitiesByEntity;
+		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 
 		peersLastUpdate = new ArrayList<MyPeer>();
 		knownEntities = new HashMap<String, List<Integer>>();
@@ -51,7 +51,7 @@ public class PeerEntitySystem extends BaseSystem {
 
 	@Override
 	protected void initialize() {
-		archetype = new ArchetypeBuilder()
+		peerEntityArchetype = new ArchetypeBuilder()
 				.add(PeerComponent.class)
 				.add(TransformComponent.class)
 				.add(SyncTransformComponent.class)
@@ -74,7 +74,7 @@ public class PeerEntitySystem extends BaseSystem {
 		for (MyPeer peer : peers) {
 			if (!peersLastUpdate.contains(peer)) {
 				if (!entitiesByName.containsKey(peer.getName())) {
-					int entity = world.create(archetype);
+					int entity = world.create(peerEntityArchetype);
 					peerComponentMapper.get(entity).name = peer.getName();
 					transformComponentMapper.get(entity).position.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
 					logger.info("Creating entity: {} for {} at {}", entity, peer.getName(), transformComponentMapper.get(entity).position);
@@ -88,8 +88,8 @@ public class PeerEntitySystem extends BaseSystem {
 	private void checkAndNotifyAboutNewEntities() {
 		for (MyPeer peer : peers) {
 			int peerEntity = entitiesByName.get(peer.getName());
-			if (closeEntitiesByEntity.containsKey(peerEntity)) {
-				List<Integer> closeEntities = closeEntitiesByEntity.get(peerEntity);
+			if (nearbyEntitiesByEntity.containsKey(peerEntity)) {
+				List<Integer> closeEntities = nearbyEntitiesByEntity.get(peerEntity);
 				for (int closeEntity : closeEntities) {
 					if (!isEntityKnownByPeer(closeEntity, peer)) {
 						boolean owner = false;
@@ -121,7 +121,7 @@ public class PeerEntitySystem extends BaseSystem {
 				List<Integer> entitiesKnownByPeer = knownEntities.get(peer.getName());
 				reusableRemovedEntities.clear();
 				for (int entityKnownByPeer : entitiesKnownByPeer) {
-					if (!closeEntitiesByEntity.get(peerEntity).contains(entityKnownByPeer)) {
+					if (!nearbyEntitiesByEntity.get(peerEntity).contains(entityKnownByPeer)) {
 						logger.info("Notifying peer {} about removed entity {}", peer.getName(), entityKnownByPeer);
 						peer.send(new EventMessage(MessageCodes.ENTITY_DESTROYED, new DataObject()
 										.set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, entityKnownByPeer)),

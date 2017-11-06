@@ -20,7 +20,7 @@ public class AISystem extends IteratingSystem {
 	private ComponentMapper<AIComponent> aiComponentMapper;
 	private ComponentMapper<PathComponent> pathComponentMapper;
 
-	private Archetype archetype;
+	private Archetype aiEntityArchetype;
 
 	public AISystem() {
 		super(Aspect.all(AIComponent.class));
@@ -28,14 +28,14 @@ public class AISystem extends IteratingSystem {
 
 	@Override
 	protected void initialize() {
-		archetype = new ArchetypeBuilder()
+		aiEntityArchetype = new ArchetypeBuilder()
 				.add(TransformComponent.class)
 				.add(SyncTransformComponent.class)
 				.add(AIComponent.class)
 				.build(world);
 
 		for (int i = 0; i < 10; i++) {
-			int entity = world.create(archetype);
+			int entity = world.create(aiEntityArchetype);
 			logger.info("Creating AI entity: {}", entity);
 		}
 	}
