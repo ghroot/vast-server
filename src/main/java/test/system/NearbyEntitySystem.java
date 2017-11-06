@@ -16,7 +16,7 @@ import java.util.Map;
 public class NearbyEntitySystem extends IntervalIteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(NearbyEntitySystem.class);
 
-	private final float MAX_DISTANCE = 2.0f;
+	private final float MAX_DISTANCE = 5.0f;
 	private final float MAX_DISTANCE_SQUARED = MAX_DISTANCE * MAX_DISTANCE;
 
 	private ComponentMapper<TransformComponent> transformComponentMapper;
@@ -26,22 +26,23 @@ public class NearbyEntitySystem extends IntervalIteratingSystem {
 	private Vector2f reusableVector;
 
 	public NearbyEntitySystem(Map<Integer, List<Integer>> nearbyEntitiesByEntity) {
-		super(Aspect.all(TransformComponent.class), 100);
+		super(Aspect.all(TransformComponent.class), 0.1f);
 		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 		reusableVector = new Vector2f();
 	}
 
 	@Override
+	protected void inserted(int entity) {
+		if (!nearbyEntitiesByEntity.containsKey(entity)) {
+			nearbyEntitiesByEntity.put(entity, new ArrayList<Integer>());
+		}
+	}
+
+	@Override
 	protected void process(int entity) {
 		TransformComponent transformComponent = transformComponentMapper.get(entity);
-		List<Integer> nearbyEntities;
-		if (nearbyEntitiesByEntity.containsKey(entity)) {
-			nearbyEntities = nearbyEntitiesByEntity.get(entity);
-			nearbyEntities.clear();
-		} else {
-			nearbyEntities = new ArrayList<Integer>();
-			nearbyEntitiesByEntity.put(entity, nearbyEntities);
-		}
+		List<Integer> nearbyEntities = nearbyEntitiesByEntity.get(entity);
+		nearbyEntities.clear();
 		IntBag entities = world.getAspectSubscriptionManager().get(Aspect.all(TransformComponent.class)).getEntities();
 		for (int i = 0; i < entities.size(); i++) {
 			int otherEntity = entities.get(i);

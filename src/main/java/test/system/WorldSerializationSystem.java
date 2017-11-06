@@ -30,7 +30,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 	private Map<String, Integer> entitiesByPeerName;
 
 	public WorldSerializationSystem(Map<String, Integer> entitiesByPeerName) {
-		super(Aspect.all(), 10000);
+		super(Aspect.all(), 10.0f);
 		this.entitiesByPeerName = entitiesByPeerName;
 	}
 

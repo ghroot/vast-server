@@ -23,7 +23,7 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 	private float[] reusablePosition;
 
 	public SyncTransformSystem(List<MyPeer> peers) {
-		super(Aspect.all(TransformComponent.class, SyncTransformComponent.class), 100);
+		super(Aspect.all(TransformComponent.class, SyncTransformComponent.class), 0.1f);
 		this.peers = peers;
 		reusablePosition = new float[2];
 	}

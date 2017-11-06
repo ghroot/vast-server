@@ -16,6 +16,8 @@ import java.util.Map;
 public class MyWorld implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(MyWorld.class);
 
+	private final float UPDATE_RATE = 30.0f;
+
 	private World world;
 	private List<MyPeer> peers;
 	private List<IncomingRequest> incomingRequests;
@@ -35,7 +37,7 @@ public class MyWorld implements Runnable {
 			new NearbyEntitySystem(nearbyEntitiesByEntity),
 			new PeerEntitySystem(peers, entitiesByPeerName, nearbyEntitiesByEntity),
 			new PathAssignSystem(incomingRequests),
-			new AISystem(),
+			new AISystem(nearbyEntitiesByEntity),
 			new PathMoveSystem(),
 			new SyncTransformSystem(serverApplication.getPeers()),
 			new IncomingRequestClearSystem(incomingRequests),
@@ -51,9 +53,9 @@ public class MyWorld implements Runnable {
 	public void run() {
 		while (alive) {
 			try {
-				world.setDelta(167);
+				world.setDelta(1 / UPDATE_RATE);
 				world.process();
-				Thread.sleep(167);
+				Thread.sleep((int) (1000 / UPDATE_RATE));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
