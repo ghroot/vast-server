@@ -16,7 +16,8 @@ import java.util.Map;
 public class NearbyEntitySystem extends IntervalIteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(NearbyEntitySystem.class);
 
-	private final float MAX_DISTANCE_SQUARED = 0.2f * 0.2f;
+	private final float MAX_DISTANCE = 2.0f;
+	private final float MAX_DISTANCE_SQUARED = MAX_DISTANCE * MAX_DISTANCE;
 
 	private ComponentMapper<TransformComponent> transformComponentMapper;
 
@@ -25,7 +26,7 @@ public class NearbyEntitySystem extends IntervalIteratingSystem {
 	private Vector2f reusableVector;
 
 	public NearbyEntitySystem(Map<Integer, List<Integer>> nearbyEntitiesByEntity) {
-		super(Aspect.all(TransformComponent.class), 1000);
+		super(Aspect.all(TransformComponent.class), 100);
 		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 		reusableVector = new Vector2f();
 	}
@@ -44,12 +45,10 @@ public class NearbyEntitySystem extends IntervalIteratingSystem {
 		IntBag entities = world.getAspectSubscriptionManager().get(Aspect.all(TransformComponent.class)).getEntities();
 		for (int i = 0; i < entities.size(); i++) {
 			int otherEntity = entities.get(i);
-			if (otherEntity != entity) {
-				TransformComponent othertTransformComponent = transformComponentMapper.get(otherEntity);
-				reusableVector.set(othertTransformComponent.position.x - transformComponent.position.x, othertTransformComponent.position.y - transformComponent.position.y);
-				if (reusableVector.lengthSquared() <= MAX_DISTANCE_SQUARED) {
-					nearbyEntities.add(otherEntity);
-				}
+			TransformComponent otherTransformComponent = transformComponentMapper.get(otherEntity);
+			reusableVector.set(otherTransformComponent.position.x - transformComponent.position.x, otherTransformComponent.position.y - transformComponent.position.y);
+			if (reusableVector.lengthSquared() <= MAX_DISTANCE_SQUARED) {
+				nearbyEntities.add(otherEntity);
 			}
 		}
 	}
