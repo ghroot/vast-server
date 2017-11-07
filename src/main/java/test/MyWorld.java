@@ -37,7 +37,7 @@ public class MyWorld implements Runnable {
 			new FollowSystem(),
 			new PathMoveSystem(),
 			new CollisionSystem(),
-			new SyncTransformSystem(serverApplication.getPeers()),
+			new SyncTransformSystem(peers),
 			new IncomingRequestClearSystem(incomingRequests),
 			new WorldSerializationSystem(entitiesByPeerName),
 
