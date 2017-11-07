@@ -48,7 +48,7 @@ public class AISystem extends IntervalIteratingSystem {
 				logger.info("AI entity {} started following {}", entity, nearbyActivePeerEntity);
 				followComponentMapper.create(entity).followingEntity = nearbyActivePeerEntity;
 			} else {
-				pathComponentMapper.create(entity).targetPosition = new Point2f((float) (-2.5f + Math.random() * 5.0f), (float) (-2.5f + Math.random() * 5.0f));
+				pathComponentMapper.create(entity).targetPosition = new Point2f((float) (-5.0f + Math.random() * 10.0f), (float) (-5.0f + Math.random() * 10.0f));
 			}
 		}
 	}

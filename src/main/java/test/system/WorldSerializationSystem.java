@@ -109,17 +109,18 @@ public class WorldSerializationSystem extends IntervalSystem {
 	}
 
 	private void createWorld() {
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 1; i++) {
 			int aiEntity = world.create(aiArchetype);
 			typeComponentMapper.get(aiEntity).type = "ai";
-			transformComponentMapper.get(aiEntity).position.set(-5.0f + (float) Math.random() * 1.0f, -5.0f + (float) Math.random() * 10.0f);
+			transformComponentMapper.get(aiEntity).position.set(-5.0f + (float) Math.random() * 10.0f, -5.0f + (float) Math.random() * 10.0f);
 			logger.info("Creating AI entity: {}", aiEntity);
 		}
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 20; i++) {
 			int treeEntity = world.create(treeArchetype);
 			typeComponentMapper.get(treeEntity).type = "tree";
-			transformComponentMapper.get(treeEntity).position.set(-5.0f + (float) Math.random() * 1.0f, -5.0f + (float) Math.random() * 10.0f);
+			transformComponentMapper.get(treeEntity).position.set(-5.0f + (float) Math.random() * 10.0f, -5.0f + (float) Math.random() * 10.0f);
+			collisionComponentMapper.get(treeEntity).isStatic = true;
 			collisionComponentMapper.get(treeEntity).radius = 0.1f;
 			logger.info("Creating tree entity: {}", treeEntity);
 		}

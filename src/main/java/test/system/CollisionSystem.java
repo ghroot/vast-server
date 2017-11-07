@@ -37,13 +37,23 @@ public class CollisionSystem extends BaseSystem {
 						reusableVector.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
 					}
 
-					reusableVector.normalize();
-					reusableVector.scale(-overlap * 0.5f);
-					transformComponent.position.add(reusableVector);
+					if (collisionComponent.isStatic && !otherCollisionComponent.isStatic) {
+						reusableVector.normalize();
+						reusableVector.scale(overlap);
+						otherTransformComponent.position.add(reusableVector);
+					} else if (!collisionComponent.isStatic && otherCollisionComponent.isStatic) {
+						reusableVector.normalize();
+						reusableVector.scale(-overlap);
+						transformComponent.position.add(reusableVector);
+					} else {
+						reusableVector.normalize();
+						reusableVector.scale(-overlap * 0.5f);
+						transformComponent.position.add(reusableVector);
 
-					reusableVector.normalize();
-					reusableVector.scale(-overlap * 0.5f);
-					otherTransformComponent.position.add(reusableVector);
+						reusableVector.normalize();
+						reusableVector.scale(-overlap * 0.5f);
+						otherTransformComponent.position.add(reusableVector);
+					}
 				}
 			}
 		}

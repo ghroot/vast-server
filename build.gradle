@@ -30,6 +30,7 @@ dependencies {
     compile group: 'com.esotericsoftware', name: 'jsonbeans', version: '0.7'
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
     compile name: 'haste-all-1.0.0'
+    compile name: 'lanterna-2.1.7'
 }
 
 weave {

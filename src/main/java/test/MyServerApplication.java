@@ -33,7 +33,7 @@ public class MyServerApplication extends ServerApplication {
 
 		// TODO: Add fake peer for testing
 //		synchronized (peers) {
-//			for (int i = 0; i < 20; i++) {
+//			for (int i = 0; i < 3; i++) {
 //				String name = "fakePeer" + (i + 1);
 //				peers.add(new FakePeer(this, name));
 //				logger.info("Added fake peer: {}", name);
