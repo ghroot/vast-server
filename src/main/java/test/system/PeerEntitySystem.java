@@ -12,10 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.MessageCodes;
 import test.MyPeer;
-import test.component.ActiveComponent;
-import test.component.PeerComponent;
-import test.component.SyncTransformComponent;
-import test.component.TransformComponent;
+import test.component.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +53,7 @@ public class PeerEntitySystem extends BaseSystem {
 		peerEntityArchetype = new ArchetypeBuilder()
 				.add(PeerComponent.class)
 				.add(TransformComponent.class)
+				.add(CollisionComponent.class)
 				.add(SyncTransformComponent.class)
 				.build(world);
 	}

@@ -39,9 +39,10 @@ public class AISystem extends IntervalIteratingSystem {
 	@Override
 	protected void initialize() {
 		aiEntityArchetype = new ArchetypeBuilder()
-				.add(TransformComponent.class)
-				.add(SyncTransformComponent.class)
 				.add(AIComponent.class)
+				.add(TransformComponent.class)
+				.add(CollisionComponent.class)
+				.add(SyncTransformComponent.class)
 				.build(world);
 
 		for (int i = 0; i < 10; i++) {
