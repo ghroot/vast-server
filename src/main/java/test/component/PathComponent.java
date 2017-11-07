@@ -10,4 +10,5 @@ import javax.vecmath.Point2f;
 @Transient
 public class PathComponent extends Component {
 	public Point2f targetPosition;
+	public float pathingTimeLeft;
 }

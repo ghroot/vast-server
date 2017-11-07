@@ -71,6 +71,19 @@ public class TerminalRenderSystem extends IntervalSystem {
 			textGraphics.putString(0, 1, "Peer entities: " + peerEntities.size());
 			textGraphics.putString(0, 2, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
 
+			if (showPathTargetPosition) {
+				IntBag pathEntities = world.getAspectSubscriptionManager().get(Aspect.all(TransformComponent.class, PathComponent.class)).getEntities();
+				for (int i = 0; i < pathEntities.size(); i++) {
+					int pathEntity = pathEntities.get(i);
+					PathComponent pathComponent = pathComponentMapper.get(pathEntity);
+					TerminalPosition targetTerminalPosition = getTerminalPositionFromWorldPosition(pathComponent.targetPosition);
+					if (targetTerminalPosition.getColumn() >= 0 && targetTerminalPosition.getColumn() < screen.getTerminalSize().getColumns() &&
+							targetTerminalPosition.getRow() >= 0 && targetTerminalPosition.getRow() < screen.getTerminalSize().getRows()) {
+						screen.setCharacter(targetTerminalPosition, new TextCharacter('x', TextColor.ANSI.RED, TextColor.ANSI.DEFAULT));
+					}
+				}
+			}
+
 			for (int i = 0; i < entities.size(); i++) {
 				int entity = entities.get(i);
 				TransformComponent transformComponent = transformComponentMapper.get(entity);
@@ -91,11 +104,6 @@ public class TerminalRenderSystem extends IntervalSystem {
 						} else {
 							screen.setCharacter(terminalPosition, new TextCharacter('?', TextColor.ANSI.MAGENTA, TextColor.ANSI.DEFAULT));
 						}
-					}
-					if (showPathTargetPosition && pathComponentMapper.has(entity)) {
-						PathComponent pathComponent = pathComponentMapper.get(entity);
-						TerminalPosition targetTerminalPosition = getTerminalPositionFromWorldPosition(pathComponent.targetPosition);
-						screen.setCharacter(targetTerminalPosition, new TextCharacter('x', TextColor.ANSI.RED, TextColor.ANSI.DEFAULT));
 					}
 				}
 			}

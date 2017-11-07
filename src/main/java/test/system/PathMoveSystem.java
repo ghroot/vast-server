@@ -12,6 +12,7 @@ public class PathMoveSystem extends IteratingSystem {
     private ComponentMapper<TransformComponent> transformComponentMapper;
     private ComponentMapper<PathComponent> pathComponentMapper;
 
+    private final float MAX_PATHING_DURATION = 12.0f;
     private final float WALK_SPEED = 0.8f;
     private final float RUN_SPEED = 2.5f;
 
@@ -22,7 +23,12 @@ public class PathMoveSystem extends IteratingSystem {
         reusableDirection = new Vector2f();
     }
 
-    @Override
+	@Override
+	protected void inserted(int entity) {
+		pathComponentMapper.get(entity).pathingTimeLeft = MAX_PATHING_DURATION;
+	}
+
+	@Override
     protected void process(int entity) {
         TransformComponent transformComponent = transformComponentMapper.get(entity);
         PathComponent pathComponent = pathComponentMapper.get(entity);
@@ -43,5 +49,10 @@ public class PathMoveSystem extends IteratingSystem {
                 transformComponent.position.add(reusableDirection);
             }
         }
+
+        pathComponent.pathingTimeLeft -= world.delta;
+        if (pathComponent.pathingTimeLeft <= 0.0f) {
+        	pathComponentMapper.remove(entity);
+		}
     }
 }
