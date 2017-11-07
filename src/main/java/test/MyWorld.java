@@ -8,10 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.system.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MyWorld implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(MyWorld.class);
@@ -22,7 +19,9 @@ public class MyWorld implements Runnable {
 	private List<MyPeer> peers;
 	private List<IncomingRequest> incomingRequests;
 	private Map<String, Integer> entitiesByPeerName;
-	private Map<Integer, List<Integer>> nearbyEntitiesByEntity;
+	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
+
+	private Fps fps = new Fps();
 
 	private boolean alive;
 
@@ -30,7 +29,7 @@ public class MyWorld implements Runnable {
 		peers = new ArrayList<MyPeer>();
 		incomingRequests = new ArrayList<IncomingRequest>();
 		entitiesByPeerName = new HashMap<String, Integer>();
-		nearbyEntitiesByEntity = new HashMap<Integer, List<Integer>>();
+		nearbyEntitiesByEntity = new HashMap<Integer, Set<Integer>>();
 
 		WorldConfiguration config = new WorldConfigurationBuilder().with(
 			new PeerTransferSystem(serverApplication, peers),
@@ -41,9 +40,9 @@ public class MyWorld implements Runnable {
 			new AISystem(nearbyEntitiesByEntity),
 			new FollowSystem(),
 			new PathMoveSystem(),
-			new CollisionSystem(),
+			new CollisionSystem(nearbyEntitiesByEntity),
 			new SyncTransformSystem(peers),
-			new TerminalRenderSystem(),
+			new TerminalRenderSystem(fps),
 			new IncomingRequestClearSystem(incomingRequests),
 			new WorldSerializationSystem(entitiesByPeerName),
 
@@ -59,11 +58,19 @@ public class MyWorld implements Runnable {
 	public void run() {
 		while (alive) {
 			try {
+				long startTime = System.currentTimeMillis();
 				world.setDelta(1 / UPDATE_RATE);
 				world.process();
-				Thread.sleep((int) (1000 / UPDATE_RATE));
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				long endTime = System.currentTimeMillis();
+				int timeToSleep = (int) (1000 / UPDATE_RATE) - (int) (endTime - startTime);
+				if (timeToSleep > 0) {
+					Thread.sleep(timeToSleep);
+				}
+				endTime = System.currentTimeMillis();
+				fps.timePerFrameMs = (int) (endTime - startTime);
+				fps.fps = (int) (1000 / (endTime - startTime));
+			} catch (InterruptedException exception) {
+				logger.error("", exception);
 			}
 		}
 	}

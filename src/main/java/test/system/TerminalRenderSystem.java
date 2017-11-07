@@ -14,6 +14,7 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.Fps;
 import test.component.*;
 
 import javax.vecmath.Point2f;
@@ -32,9 +33,11 @@ public class TerminalRenderSystem extends IntervalSystem {
 	private Point2i offset = new Point2i();
 	private float scale = 3.0f;
 	private boolean showPathTargetPosition = false;
+	private Fps fps;
 
-	public TerminalRenderSystem() {
-		super(Aspect.all(), 0.05f);
+	public TerminalRenderSystem(Fps fps) {
+		super(Aspect.all(), 0.1f);
+		this.fps = fps;
 	}
 
 	@Override
@@ -65,16 +68,11 @@ public class TerminalRenderSystem extends IntervalSystem {
 			IntBag entities = world.getAspectSubscriptionManager().get(Aspect.one(TransformComponent.class)).getEntities();
 			IntBag peerEntities = world.getAspectSubscriptionManager().get(Aspect.one(PeerComponent.class)).getEntities();
 
-			TextGraphics textGraphics = screen.newTextGraphics();
-			textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
-			textGraphics.putString(0, 0, "Total entities: " + entities.size());
-			textGraphics.putString(0, 1, "Peer entities: " + peerEntities.size());
-			textGraphics.putString(0, 2, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
-
 			if (showPathTargetPosition) {
 				IntBag pathEntities = world.getAspectSubscriptionManager().get(Aspect.all(TransformComponent.class, PathComponent.class)).getEntities();
 				for (int i = 0; i < pathEntities.size(); i++) {
 					int pathEntity = pathEntities.get(i);
+
 					PathComponent pathComponent = pathComponentMapper.get(pathEntity);
 					TerminalPosition targetTerminalPosition = getTerminalPositionFromWorldPosition(pathComponent.targetPosition);
 					if (targetTerminalPosition.getColumn() >= 0 && targetTerminalPosition.getColumn() < screen.getTerminalSize().getColumns() &&
@@ -84,6 +82,7 @@ public class TerminalRenderSystem extends IntervalSystem {
 				}
 			}
 
+			int numberOfEntitiesOnScreen = 0;
 			for (int i = 0; i < entities.size(); i++) {
 				int entity = entities.get(i);
 				TransformComponent transformComponent = transformComponentMapper.get(entity);
@@ -105,8 +104,17 @@ public class TerminalRenderSystem extends IntervalSystem {
 							screen.setCharacter(terminalPosition, new TextCharacter('?', TextColor.ANSI.MAGENTA, TextColor.ANSI.DEFAULT));
 						}
 					}
+					numberOfEntitiesOnScreen++;
 				}
 			}
+
+			TextGraphics textGraphics = screen.newTextGraphics();
+			textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
+			textGraphics.putString(0, 0, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
+			textGraphics.putString(0, 1, "Peer entities: " + peerEntities.size());
+			textGraphics.putString(0, 2, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
+			textGraphics.putString(screen.getTerminalSize().getColumns() - 8, 0, "FPS: " + fps.fps);
+			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + fps.timePerFrameMs + "ms");
 
 			screen.refresh();
 		} catch (Exception ignored) {

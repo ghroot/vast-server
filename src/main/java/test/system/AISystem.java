@@ -9,8 +9,8 @@ import test.component.*;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class AISystem extends IntervalIteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(AISystem.class);
@@ -23,10 +23,10 @@ public class AISystem extends IntervalIteratingSystem {
 	private ComponentMapper<ActiveComponent> activeComponentMapper;
 	private ComponentMapper<FollowComponent> followComponentMapper;
 
-	private Map<Integer, List<Integer>> nearbyEntitiesByEntity;
+	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
 	private Vector2f reusableVector;
 
-	public AISystem(Map<Integer, List<Integer>> nearbyEntitiesByEntity) {
+	public AISystem(Map<Integer, Set<Integer>> nearbyEntitiesByEntity) {
 		super(Aspect.one(AIComponent.class).exclude(PathComponent.class), 1.0f);
 		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 		reusableVector = new Vector2f();
@@ -48,14 +48,15 @@ public class AISystem extends IntervalIteratingSystem {
 				logger.info("AI entity {} started following {}", entity, nearbyActivePeerEntity);
 				followComponentMapper.create(entity).followingEntity = nearbyActivePeerEntity;
 			} else {
-				pathComponentMapper.create(entity).targetPosition = new Point2f((float) (-5.0f + Math.random() * 10.0f), (float) (-5.0f + Math.random() * 10.0f));
+				pathComponentMapper.create(entity).targetPosition = new Point2f(transformComponentMapper.get(entity).position);
+				pathComponentMapper.create(entity).targetPosition.add(new Point2f((float) (-2.0f + Math.random() * 4.0f), (float) (-2.0f + Math.random() * 4.0f)));
 			}
 		}
 	}
 
 	private int findNearbyActivePeerEntity(int entity, float distance) {
 		TransformComponent transformComponent = transformComponentMapper.get(entity);
-		List<Integer> nearbyEntities = nearbyEntitiesByEntity.get(entity);
+		Set<Integer> nearbyEntities = nearbyEntitiesByEntity.get(entity);
 		for (int nearbyEntity : nearbyEntities) {
 			if (peerComponentMapper.has(nearbyEntity) && activeComponentMapper.has(nearbyEntity)) {
 				TransformComponent nearbyTransformComponent = transformComponentMapper.get(nearbyEntity);

@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 import test.component.TransformComponent;
 
 import javax.vecmath.Vector2f;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class NearbyEntitySystem extends IntervalIteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(NearbyEntitySystem.class);
@@ -21,11 +21,11 @@ public class NearbyEntitySystem extends IntervalIteratingSystem {
 
 	private ComponentMapper<TransformComponent> transformComponentMapper;
 
-	private Map<Integer, List<Integer>> nearbyEntitiesByEntity;
+	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
 
 	private Vector2f reusableVector;
 
-	public NearbyEntitySystem(Map<Integer, List<Integer>> nearbyEntitiesByEntity) {
+	public NearbyEntitySystem(Map<Integer, Set<Integer>> nearbyEntitiesByEntity) {
 		super(Aspect.all(TransformComponent.class), 0.1f);
 		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 		reusableVector = new Vector2f();
@@ -34,14 +34,14 @@ public class NearbyEntitySystem extends IntervalIteratingSystem {
 	@Override
 	protected void inserted(int entity) {
 		if (!nearbyEntitiesByEntity.containsKey(entity)) {
-			nearbyEntitiesByEntity.put(entity, new ArrayList<Integer>());
+			nearbyEntitiesByEntity.put(entity, new HashSet<Integer>());
 		}
 	}
 
 	@Override
 	protected void process(int entity) {
 		TransformComponent transformComponent = transformComponentMapper.get(entity);
-		List<Integer> nearbyEntities = nearbyEntitiesByEntity.get(entity);
+		Set<Integer> nearbyEntities = nearbyEntitiesByEntity.get(entity);
 		nearbyEntities.clear();
 		IntBag entities = world.getAspectSubscriptionManager().get(Aspect.all(TransformComponent.class)).getEntities();
 		for (int i = 0; i < entities.size(); i++) {

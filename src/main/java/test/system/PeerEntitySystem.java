@@ -14,10 +14,7 @@ import test.MessageCodes;
 import test.MyPeer;
 import test.component.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PeerEntitySystem extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(PeerEntitySystem.class);
@@ -30,21 +27,21 @@ public class PeerEntitySystem extends BaseSystem {
 
 	private List<MyPeer> peers;
 	private Map<String, Integer> entitiesByPeerName;
-	private Map<Integer, List<Integer>> nearbyEntitiesByEntity;
+	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
 
 	private List<MyPeer> peersLastUpdate;
-	private Map<String, List<Integer>> knownEntities;
+	private Map<String, Set<Integer>> knownEntities;
 	private List<Integer> reusableRemovedEntities;
 	private float[] reusablePosition;
 	private Archetype peerEntityArchetype;
 
-	public PeerEntitySystem(List<MyPeer> peers, Map<String, Integer> entitiesByPeerName, Map<Integer, List<Integer>> nearbyEntitiesByEntity) {
+	public PeerEntitySystem(List<MyPeer> peers, Map<String, Integer> entitiesByPeerName, Map<Integer, Set<Integer>> nearbyEntitiesByEntity) {
 		this.peers = peers;
 		this.entitiesByPeerName = entitiesByPeerName;
 		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 
 		peersLastUpdate = new ArrayList<MyPeer>();
-		knownEntities = new HashMap<String, List<Integer>>();
+		knownEntities = new HashMap<String, Set<Integer>>();
 		reusableRemovedEntities = new ArrayList<Integer>();
 		reusablePosition = new float[2];
 	}
@@ -75,7 +72,7 @@ public class PeerEntitySystem extends BaseSystem {
 	private void setupNewPeers() {
 		for (MyPeer peer : peers) {
 			if (!peersLastUpdate.contains(peer)) {
-				knownEntities.put(peer.getName(), new ArrayList<Integer>());
+				knownEntities.put(peer.getName(), new HashSet<Integer>());
 			}
 		}
 	}
@@ -98,7 +95,7 @@ public class PeerEntitySystem extends BaseSystem {
 		for (MyPeer peer : peers) {
 			int peerEntity = entitiesByPeerName.get(peer.getName());
 			if (nearbyEntitiesByEntity.containsKey(peerEntity)) {
-				List<Integer> closeEntities = nearbyEntitiesByEntity.get(peerEntity);
+				Set<Integer> closeEntities = nearbyEntitiesByEntity.get(peerEntity);
 				for (int closeEntity : closeEntities) {
 					if (!isEntityKnownByPeer(closeEntity, peer)) {
 						logger.info("Notifying peer {} about new entity {}", peer.getName(), closeEntity);
@@ -134,7 +131,7 @@ public class PeerEntitySystem extends BaseSystem {
 		for (MyPeer peer : peers) {
 			int peerEntity = entitiesByPeerName.get(peer.getName());
 			if (knownEntities.containsKey(peer.getName())) {
-				List<Integer> entitiesKnownByPeer = knownEntities.get(peer.getName());
+				Set<Integer> entitiesKnownByPeer = knownEntities.get(peer.getName());
 				reusableRemovedEntities.clear();
 				for (int entityKnownByPeer : entitiesKnownByPeer) {
 					if (!nearbyEntitiesByEntity.get(peerEntity).contains(entityKnownByPeer)) {
@@ -187,11 +184,11 @@ public class PeerEntitySystem extends BaseSystem {
 	}
 
 	private void markEntityAsKnownByPeer(int entity, MyPeer peer) {
-		List<Integer> entities;
+		Set<Integer> entities;
 		if (knownEntities.containsKey(peer.getName())) {
 			entities = knownEntities.get(peer.getName());
 		} else {
-			entities = new ArrayList<Integer>();
+			entities = new HashSet<Integer>();
 			knownEntities.put(peer.getName(), entities);
 		}
 		if (!entities.contains(entity)) {
@@ -205,7 +202,7 @@ public class PeerEntitySystem extends BaseSystem {
 
 	private boolean isEntityKnownByPeer(int entity, MyPeer peer) {
 		if (knownEntities.containsKey(peer.getName())) {
-			List<Integer> entities = knownEntities.get(peer.getName());
+			Set<Integer> entities = knownEntities.get(peer.getName());
 			if (entities.contains(entity)) {
 				return true;
 			}

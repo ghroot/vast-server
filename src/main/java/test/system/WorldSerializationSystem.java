@@ -21,6 +21,8 @@ import java.util.Map;
 public class WorldSerializationSystem extends IntervalSystem {
 	private static final Logger logger = LoggerFactory.getLogger(WorldSerializationSystem.class);
 
+	private final float RANDOMIZATION_AREA_SIZE = 20.0f;
+
 	private ComponentMapper<PeerComponent> peerComponentMapper;
 	private ComponentMapper<TransformComponent> transformComponentMapper;
 	private ComponentMapper<SyncTransformComponent> syncTransformComponentMapper;
@@ -74,8 +76,8 @@ public class WorldSerializationSystem extends IntervalSystem {
 			FileOutputStream fileOutputStream = new FileOutputStream("snapshot.json");
 			baos.writeTo(fileOutputStream);
 			fileOutputStream.close();
-		} catch (Exception e) {
-			logger.error(e.toString());
+		} catch (Exception exception) {
+			logger.error("Error saving world", exception);
 		}
 	}
 
@@ -100,26 +102,23 @@ public class WorldSerializationSystem extends IntervalSystem {
 				logger.info("No snapshot file found, creating a new world");
 				createWorld();
 			} else {
-				logger.error("{}", exception.toString());
-				for (StackTraceElement stackTraceElement : exception.getStackTrace()) {
-					logger.error("{}", stackTraceElement.toString());
-				}
+				logger.error("Error loading world", exception);
 			}
 		}
 	}
 
 	private void createWorld() {
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 5; i++) {
 			int aiEntity = world.create(aiArchetype);
 			typeComponentMapper.get(aiEntity).type = "ai";
-			transformComponentMapper.get(aiEntity).position.set(-5.0f + (float) Math.random() * 10.0f, -5.0f + (float) Math.random() * 10.0f);
+			transformComponentMapper.get(aiEntity).position.set(-RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE, -RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE);
 			logger.info("Creating AI entity: {}", aiEntity);
 		}
 
-		for (int i = 0; i < 12; i++) {
+		for (int i = 0; i < 20; i++) {
 			int treeEntity = world.create(treeArchetype);
 			typeComponentMapper.get(treeEntity).type = "tree";
-			transformComponentMapper.get(treeEntity).position.set(-5.0f + (float) Math.random() * 10.0f, -5.0f + (float) Math.random() * 10.0f);
+			transformComponentMapper.get(treeEntity).position.set(-RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE, -RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE);
 			collisionComponentMapper.get(treeEntity).isStatic = true;
 			collisionComponentMapper.get(treeEntity).radius = 0.1f;
 			logger.info("Creating tree entity: {}", treeEntity);
