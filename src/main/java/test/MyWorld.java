@@ -27,6 +27,7 @@ public class MyWorld implements Runnable {
 		incomingRequests = new ArrayList<IncomingRequest>();
 		entitiesByPeerName = new HashMap<String, Integer>();
 		nearbyEntitiesByEntity = new HashMap<Integer, List<Integer>>();
+
 		WorldConfiguration config = new WorldConfigurationBuilder().with(
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
@@ -43,7 +44,9 @@ public class MyWorld implements Runnable {
 
 			new WorldSerializationManager()
 		).build();
+
 		world = new World(config);
+
 		alive = true;
 	}
 

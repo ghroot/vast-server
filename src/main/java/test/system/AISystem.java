@@ -1,7 +1,5 @@
 package test.system;
 
-import com.artemis.Archetype;
-import com.artemis.ArchetypeBuilder;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IntervalIteratingSystem;
@@ -19,7 +17,6 @@ public class AISystem extends IntervalIteratingSystem {
 
 	private final float START_FOLLOWING_DISTANCE = 2.0f;
 
-	private ComponentMapper<AIComponent> aiComponentMapper;
 	private ComponentMapper<PathComponent> pathComponentMapper;
 	private ComponentMapper<TransformComponent> transformComponentMapper;
 	private ComponentMapper<PeerComponent> peerComponentMapper;
@@ -27,28 +24,12 @@ public class AISystem extends IntervalIteratingSystem {
 	private ComponentMapper<FollowComponent> followComponentMapper;
 
 	private Map<Integer, List<Integer>> nearbyEntitiesByEntity;
-	private Archetype aiEntityArchetype;
 	private Vector2f reusableVector;
 
 	public AISystem(Map<Integer, List<Integer>> nearbyEntitiesByEntity) {
 		super(Aspect.one(AIComponent.class).exclude(PathComponent.class), 1.0f);
 		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 		reusableVector = new Vector2f();
-	}
-
-	@Override
-	protected void initialize() {
-		aiEntityArchetype = new ArchetypeBuilder()
-				.add(AIComponent.class)
-				.add(TransformComponent.class)
-				.add(CollisionComponent.class)
-				.add(SyncTransformComponent.class)
-				.build(world);
-
-		for (int i = 0; i < 10; i++) {
-			int entity = world.create(aiEntityArchetype);
-			logger.info("Creating AI entity: {}", entity);
-		}
 	}
 
 	@Override

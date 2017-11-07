@@ -31,13 +31,13 @@ public class PathAssignSystem extends BaseSystem {
     protected void processSystem() {
         for (IncomingRequest request : incomingRequests) {
             if (request.getMessage().getCode() == MessageCodes.SET_PATH) {
-                int entity = getEntityWithPeerName(request.getPeer().getName());
-                if (!pathComponentMapper.has(entity)) {
-                    pathComponentMapper.create(entity);
+                int peerEntity = getEntityWithPeerName(request.getPeer().getName());
+                if (!pathComponentMapper.has(peerEntity)) {
+                    pathComponentMapper.create(peerEntity);
                 }
                 float[] position = (float[]) request.getMessage().getDataObject().get(MessageCodes.SET_PATH_POSITION).value;
-                logger.info("Setting path for entity {}: {}, {}", entity, position[0], position[1]);
-                pathComponentMapper.get(entity).targetPosition = new Point2f(position[0], position[1]);
+                logger.info("Setting path for entity {}: {}, {}", peerEntity, position[0], position[1]);
+                pathComponentMapper.get(peerEntity).targetPosition = new Point2f(position[0], position[1]);
             }
         }
     }
