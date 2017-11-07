@@ -38,6 +38,7 @@ public class MyWorld implements Runnable {
 			new PeerEntitySystem(peers, entitiesByPeerName, nearbyEntitiesByEntity),
 			new PathAssignSystem(incomingRequests),
 			new AISystem(nearbyEntitiesByEntity),
+			new FollowSystem(),
 			new PathMoveSystem(),
 			new SyncTransformSystem(serverApplication.getPeers()),
 			new IncomingRequestClearSystem(incomingRequests),
