@@ -29,8 +29,8 @@ dependencies {
     compile group: 'org.jetlang', name: 'jetlang', version: '0.2.12'
     compile group: 'com.esotericsoftware', name: 'jsonbeans', version: '0.7'
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+    compile group: 'com.googlecode.lanterna', name: 'lanterna', version: '3.0.0'
     compile name: 'haste-all-1.0.0'
-    compile name: 'lanterna-2.1.7'
 }
 
 weave {

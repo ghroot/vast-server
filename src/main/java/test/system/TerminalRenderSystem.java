@@ -4,79 +4,139 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IntervalSystem;
 import com.artemis.utils.IntBag;
-import com.googlecode.lanterna.TerminalFacade;
-import com.googlecode.lanterna.terminal.Terminal;
+import com.googlecode.lanterna.TerminalPosition;
+import com.googlecode.lanterna.TextCharacter;
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.graphics.TextGraphics;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
+import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import test.component.*;
 
-import java.nio.charset.Charset;
+import javax.vecmath.Point2f;
+import javax.vecmath.Point2i;
 
 public class TerminalRenderSystem extends IntervalSystem {
+	private static final Logger logger = LoggerFactory.getLogger(TerminalRenderSystem.class);
+
 	private ComponentMapper<PeerComponent> peerComponentMapper;
 	private ComponentMapper<ActiveComponent> activeComponentMapper;
 	private ComponentMapper<TransformComponent> transformComponentMapper;
 	private ComponentMapper<TypeComponent> typeComponentMapper;
 	private ComponentMapper<PathComponent> pathComponentMapper;
 
-	private Terminal terminal;
+	private Screen screen;
+	private Point2i offset = new Point2i();
+	private float scale = 3.0f;
+	private boolean showPathTargetPosition = false;
 
 	public TerminalRenderSystem() {
-		super(Aspect.all(), 0.2f);
+		super(Aspect.all(), 0.05f);
 	}
 
 	@Override
 	protected void initialize() {
-		terminal = TerminalFacade.createTerminal(System.in, System.out, Charset.forName("UTF8"));
-		terminal.setCursorVisible(false);
-		terminal.enterPrivateMode();
+		try {
+			screen = new DefaultTerminalFactory().createScreen();
+			screen.startScreen();
+		} catch (Exception ignored) {
+		}
+	}
+
+	@Override
+	protected void dispose() {
+		try {
+			screen.stopScreen();
+		} catch (Exception ignored) {
+		}
 	}
 
 	@Override
 	protected void processSystem() {
-		terminal.clearScreen();
-		IntBag entities = world.getAspectSubscriptionManager().get(Aspect.one(TransformComponent.class)).getEntities();
-		terminal.moveCursor(0, 0);
-		terminal.applyForegroundColor(Terminal.Color.WHITE);
-		String s = "Entities: " + entities.size();
-		for (int i = 0; i < s.length(); i++){
-			terminal.putCharacter(s.charAt(i));
-		}
-		for (int i = 0; i < entities.size(); i++) {
-			int entity = entities.get(i);
-			TransformComponent transformComponent = transformComponentMapper.get(entity);
-			int column = terminal.getTerminalSize().getColumns() / 2 + (int) (transformComponent.position.x * 3);
-			int row = terminal.getTerminalSize().getRows() / 2 + (int) (transformComponent.position.y * 3);
-			if (column >= 0 && column < terminal.getTerminalSize().getColumns() &&
-					row >= 0 && row < terminal.getTerminalSize().getRows()) {
-				terminal.moveCursor(column, row);
-				if (peerComponentMapper.has(entity)) {
-					if (activeComponentMapper.has(entity)) {
-						terminal.applyForegroundColor(Terminal.Color.BLUE);
+		try {
+			handleInput();
+
+			screen.doResizeIfNecessary();
+			screen.clear();
+
+			IntBag entities = world.getAspectSubscriptionManager().get(Aspect.one(TransformComponent.class)).getEntities();
+			IntBag peerEntities = world.getAspectSubscriptionManager().get(Aspect.one(PeerComponent.class)).getEntities();
+
+			TextGraphics textGraphics = screen.newTextGraphics();
+			textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
+			textGraphics.putString(0, 0, "Total entities: " + entities.size());
+			textGraphics.putString(0, 1, "Peer entities: " + peerEntities.size());
+			textGraphics.putString(0, 2, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
+
+			for (int i = 0; i < entities.size(); i++) {
+				int entity = entities.get(i);
+				TransformComponent transformComponent = transformComponentMapper.get(entity);
+				TerminalPosition terminalPosition = getTerminalPositionFromWorldPosition(transformComponent.position);
+				if (terminalPosition.getColumn() >= 0 && terminalPosition.getColumn() < screen.getTerminalSize().getColumns() &&
+						terminalPosition.getRow() >= 0 && terminalPosition.getRow() < screen.getTerminalSize().getRows()) {
+					if (peerComponentMapper.has(entity)) {
+						if (activeComponentMapper.has(entity)) {
+							screen.setCharacter(terminalPosition, new TextCharacter('O', TextColor.ANSI.BLUE, TextColor.ANSI.DEFAULT));
+						} else {
+							screen.setCharacter(terminalPosition, new TextCharacter('O', TextColor.ANSI.YELLOW, TextColor.ANSI.DEFAULT));
+						}
 					} else {
-						terminal.applyForegroundColor(Terminal.Color.YELLOW);
+						if (typeComponentMapper.get(entity).type.equals("ai")) {
+							screen.setCharacter(terminalPosition, new TextCharacter('o', TextColor.ANSI.CYAN, TextColor.ANSI.DEFAULT));
+						} else if (typeComponentMapper.get(entity).type.equals("tree")) {
+							screen.setCharacter(terminalPosition, new TextCharacter('+', TextColor.ANSI.GREEN, TextColor.ANSI.DEFAULT));
+						} else {
+							screen.setCharacter(terminalPosition, new TextCharacter('?', TextColor.ANSI.MAGENTA, TextColor.ANSI.DEFAULT));
+						}
 					}
-					terminal.putCharacter('O');
-				} else {
-					if (typeComponentMapper.get(entity).type.equals("ai")) {
-						terminal.applyForegroundColor(Terminal.Color.CYAN);
-						terminal.putCharacter('o');
-					} else if (typeComponentMapper.get(entity).type.equals("tree")) {
-						terminal.applyForegroundColor(Terminal.Color.GREEN);
-						terminal.putCharacter('+');
-					} else {
-						terminal.applyForegroundColor(Terminal.Color.MAGENTA);
-						terminal.putCharacter('x');
+					if (showPathTargetPosition && pathComponentMapper.has(entity)) {
+						PathComponent pathComponent = pathComponentMapper.get(entity);
+						TerminalPosition targetTerminalPosition = getTerminalPositionFromWorldPosition(pathComponent.targetPosition);
+						screen.setCharacter(targetTerminalPosition, new TextCharacter('x', TextColor.ANSI.RED, TextColor.ANSI.DEFAULT));
 					}
-				}
-				if (pathComponentMapper.has(entity)) {
-					PathComponent pathComponent = pathComponentMapper.get(entity);
-					int targetColumn = terminal.getTerminalSize().getColumns() / 2 + (int) (pathComponent.targetPosition.x * 3);
-					int targetRow = terminal.getTerminalSize().getRows() / 2 + (int) (pathComponent.targetPosition.y * 3);
-					terminal.moveCursor(targetColumn, targetRow);
-					terminal.applyForegroundColor(Terminal.Color.RED);
-					terminal.putCharacter('x');
 				}
 			}
+
+			screen.refresh();
+		} catch (Exception ignored) {
 		}
-		terminal.flush();
+	}
+
+	private void handleInput() {
+		try {
+			KeyStroke keyStroke = screen.pollInput();
+			if (keyStroke != null) {
+				if (keyStroke.getKeyType() == KeyType.Character) {
+					if (keyStroke.getCharacter().toString().equals("+")) {
+						scale += 0.5f;
+					} else if (keyStroke.getCharacter().toString().equals("-")) {
+						if (scale > 0.5f) {
+							scale -= 0.5f;
+						}
+					} else if (keyStroke.getCharacter().toString().equals("x")) {
+						showPathTargetPosition = !showPathTargetPosition;
+					}
+				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
+					offset.add(new Point2i(0, keyStroke.isShiftDown() ? -4 : -1));
+				} else if (keyStroke.getKeyType() == KeyType.ArrowUp) {
+					offset.add(new Point2i(0, keyStroke.isShiftDown() ? 4 : 1));
+				} else if (keyStroke.getKeyType() == KeyType.ArrowLeft) {
+					offset.add(new Point2i(keyStroke.isShiftDown() ? 4 : 1, 0));
+				} else if (keyStroke.getKeyType() == KeyType.ArrowRight) {
+					offset.add(new Point2i(keyStroke.isShiftDown() ? -4 : -1, 0));
+				}
+			}
+		} catch (Exception ignored) {
+		}
+	}
+
+	private TerminalPosition getTerminalPositionFromWorldPosition(Point2f position) {
+		return new TerminalPosition(
+				screen.getTerminalSize().getColumns() / 2 + (int) (position.x * scale) + offset.x,
+				screen.getTerminalSize().getRows() / 2 - (int) (position.y * scale) + offset.y
+		);
 	}
 }
