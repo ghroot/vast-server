@@ -53,8 +53,8 @@ public class SpatialSystem extends IteratingSystem {
 			}
 
 			Point2i hash = new Point2i(
-					(int) (Math.round(transformComponent.position.x / worldDimensions.sectionSize) * worldDimensions.sectionSize),
-					(int) (Math.round(transformComponent.position.y / worldDimensions.sectionSize) * worldDimensions.sectionSize)
+					Math.round(transformComponent.position.x / worldDimensions.sectionSize) * worldDimensions.sectionSize,
+					Math.round(transformComponent.position.y / worldDimensions.sectionSize) * worldDimensions.sectionSize
 			);
 
 			spatialComponent.memberOfSpatialHash = hash;

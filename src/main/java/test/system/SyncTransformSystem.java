@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import test.MessageCodes;
 import test.MyPeer;
 import test.Profiler;
+import test.WorldDimensions;
 import test.component.PeerComponent;
 import test.component.SpatialComponent;
 import test.component.SyncTransformComponent;
@@ -32,15 +33,17 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 	private ComponentMapper<SpatialComponent> spatialComponentMapper;
 
 	private Map<String, MyPeer> peers;
+	private WorldDimensions worldDimensions;
 	private Map<Point2i, Set<Integer>> spatialHashes;
 
 	private float[] reusablePosition;
 	private Point2i reusableHash;
 	private Set<Integer> reusableNearbyPeerEntities;
 
-	public SyncTransformSystem(Map<String, MyPeer> peers, Map<Point2i, Set<Integer>> spatialHashes) {
+	public SyncTransformSystem(Map<String, MyPeer> peers, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
 		super(Aspect.all(TransformComponent.class, SyncTransformComponent.class), 0.2f);
 		this.peers = peers;
+		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
 		reusablePosition = new float[2];
 		reusableHash = new Point2i();
@@ -78,8 +81,8 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 		reusableNearbyPeerEntities.clear();
 		SpatialComponent spatialComponent = spatialComponentMapper.get(entity);
 		if (spatialComponent.memberOfSpatialHash != null) {
-			for (int x = spatialComponent.memberOfSpatialHash.x - 1; x < spatialComponent.memberOfSpatialHash.x + 1; x++) {
-				for (int y = spatialComponent.memberOfSpatialHash.y - 1; y < spatialComponent.memberOfSpatialHash.y + 1; y++) {
+			for (int x = spatialComponent.memberOfSpatialHash.x - worldDimensions.sectionSize; x <= spatialComponent.memberOfSpatialHash.x + worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
+				for (int y = spatialComponent.memberOfSpatialHash.y - worldDimensions.sectionSize; y <= spatialComponent.memberOfSpatialHash.y + worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
 					reusableHash.set(x, y);
 					if (spatialHashes.containsKey(reusableHash)) {
 						for (int nearbyEntity : spatialHashes.get(reusableHash)) {

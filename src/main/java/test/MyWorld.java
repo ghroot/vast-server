@@ -40,7 +40,7 @@ public class MyWorld implements Runnable {
 			new PathMoveSystem(),
 			new SpatialSystem(worldDimensions, spatialHashes),
 			new CollisionSystem(spatialHashes),
-			new SyncTransformSystem(peers, spatialHashes),
+			new SyncTransformSystem(peers, worldDimensions, spatialHashes),
 			new IncomingRequestClearSystem(incomingRequests),
 			new WorldSerializationSystem(worldDimensions),
 

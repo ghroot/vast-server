@@ -128,7 +128,8 @@ public class TerminalSystem extends IntervalSystem {
 
 			textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
 			textGraphics.putString(0, 0, "World size: " + worldDimensions.width + " x " + worldDimensions.height);
-			textGraphics.putString(0, 1, "Spatial hash size: " + worldDimensions.sectionSize);
+			textGraphics.putString(0, 1, "Scale: x" + (Math.round(scale * 100.0) / 100.0));
+			textGraphics.putString(0, 2, "Spatial hash size: " + worldDimensions.sectionSize);
 			int numberOfSpatialHashes = 0;
 			int numberOfActiveSpatialHashes = 0;
 			for (Set<Integer> entitiesInSpatialHash : spatialHashes.values()) {
@@ -137,10 +138,10 @@ public class TerminalSystem extends IntervalSystem {
 					numberOfActiveSpatialHashes++;
 				}
 			}
-			textGraphics.putString(0, 2, "Active spatial hashes: " + numberOfActiveSpatialHashes + " (of " + numberOfSpatialHashes + " total)");
-			textGraphics.putString(0, 3, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
-			textGraphics.putString(0, 4, "Peer entities: " + peerEntities.size() + " (" + activePeerEntities.size() + " active)");
-			textGraphics.putString(0, 5, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
+			textGraphics.putString(0, 3, "Active spatial hashes: " + numberOfActiveSpatialHashes + " (of " + numberOfSpatialHashes + " total)");
+			textGraphics.putString(0, 4, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
+			textGraphics.putString(0, 5, "Peer entities: " + peerEntities.size() + " (" + activePeerEntities.size() + " active)");
+			textGraphics.putString(0, 6, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
 
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 8, 0, "FPS: " + metrics.fps);
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + metrics.timePerFrameMs + "ms");
@@ -178,6 +179,14 @@ public class TerminalSystem extends IntervalSystem {
 						showPathTargetPosition = !showPathTargetPosition;
 					} else if (keyStroke.getCharacter().toString().equals("s")) {
 						showSystemProcessingDurations = !showSystemProcessingDurations;
+					} else if (keyStroke.getCharacter().toString().equals("p") || keyStroke.getCharacter().toString().equals("a")) {
+						IntBag peerEntities = world.getAspectSubscriptionManager().get(Aspect.all(PeerComponent.class)).getEntities();
+						if (peerEntities.size() > 0) {
+							int peerEntity = peerEntities.get(0);
+							Point2f position = transformComponentMapper.get(peerEntity).position;
+							offset.setX(-(int) (position.x * scale));
+							offset.setY((int) (position.y * scale));
+						}
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
 					offset.add(new Point2i(0, keyStroke.isShiftDown() ? -4 : -1));

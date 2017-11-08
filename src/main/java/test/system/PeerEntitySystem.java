@@ -3,7 +3,6 @@ package test.system;
 import com.artemis.*;
 import com.artemis.annotations.Profile;
 import com.artemis.utils.IntBag;
-import com.nhnent.haste.framework.ClientPeer;
 import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
@@ -33,10 +32,10 @@ public class PeerEntitySystem extends BaseSystem {
 	private WorldDimensions worldDimensions;
 	private Map<Point2i, Set<Integer>> spatialHashes;
 
-	private List<MyPeer> peersLastUpdate;
-	private Map<String, Integer> entitiesByPeerName;
-	private Map<String, Set<Integer>> knownEntities;
-	private Set<Integer> reusableNearbyEntities;
+	private Set<MyPeer> peersLastUpdate;
+	private Map<String, Integer> entitiesByPeer;
+	private Map<String, Set<Integer>> knownEntitiesByPeer;
+	private Map<String, Set<Integer>> nearbyEntitiesByPeer;
 	private Point2i reusableHash;
 	private List<Integer> reusableRemovedEntities;
 	private float[] reusablePosition;
@@ -45,13 +44,12 @@ public class PeerEntitySystem extends BaseSystem {
 	public PeerEntitySystem(Map<String, MyPeer> peers, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
 		this.peers = peers;
 		this.worldDimensions = worldDimensions;
-		this.entitiesByPeerName = entitiesByPeerName;
 		this.spatialHashes = spatialHashes;
 
-		peersLastUpdate = new ArrayList<MyPeer>();
-		entitiesByPeerName = new HashMap<String, Integer>();
-		knownEntities = new HashMap<String, Set<Integer>>();
-		reusableNearbyEntities = new HashSet<Integer>();
+		peersLastUpdate = new HashSet<MyPeer>();
+		entitiesByPeer = new HashMap<String, Integer>();
+		knownEntitiesByPeer = new HashMap<String, Set<Integer>>();
+		nearbyEntitiesByPeer = new HashMap<String, Set<Integer>>();
 		reusableHash = new Point2i();
 		reusableRemovedEntities = new ArrayList<Integer>();
 		reusablePosition = new float[2];
@@ -69,139 +67,155 @@ public class PeerEntitySystem extends BaseSystem {
 	}
 
 	@Override
-	protected void begin() {
-		entitiesByPeerName.clear();
-		IntBag peerEntities = world.getAspectSubscriptionManager().get(Aspect.one(PeerComponent.class)).getEntities();
-		for (int i = 0; i < peerEntities.size(); i++) {
-			int peerEntity = peerEntities.get(i);
-			entitiesByPeerName.put(peerComponentMapper.get(peerEntity).name, peerEntity);
-		}
-	}
-
-	@Override
 	protected void processSystem() {
-		setupNewPeers();
-		createEntitiesForNewPeers();
-		checkAndNotifyAboutNewEntities();
-		checkAndNotifyAboutActivatedPeerEntities();
-		checkAndNotifyAboutDeactivatedPeerEntities();
-		checkAndNotifyAboutRemovedEntities();
+		for (MyPeer peer : peers.values()) {
+			if (isPeerNew(peer)) {
+				peerJoined(peer);
+			} else {
+				updateNearbyEntities(peer);
+				checkAndNotifyAboutNewEntities(peer);
+				checkAndNotifyAboutActivatedPeerEntity(peer);
+				checkAndNotifyAboutRemovedEntities(peer);
+			}
+		}
+		for (MyPeer peer : peersLastUpdate) {
+			if (!peers.containsValue(peer)) {
+				peerLeft(peer);
+			}
+		}
 
 		peersLastUpdate.clear();
 		peersLastUpdate.addAll(peers.values());
 	}
 
-	private void setupNewPeers() {
-		for (MyPeer peer : peers.values()) {
-			if (!peersLastUpdate.contains(peer)) {
-				knownEntities.put(peer.getName(), new HashSet<Integer>());
+	private boolean isPeerNew(MyPeer peer) {
+		return !peersLastUpdate.contains(peer);
+	}
+
+	private void peerJoined(MyPeer peer) {
+		knownEntitiesByPeer.put(peer.getName(), new HashSet<Integer>());
+		nearbyEntitiesByPeer.put(peer.getName(), new HashSet<Integer>());
+
+		IntBag peerEntities = world.getAspectSubscriptionManager().get(Aspect.all(PeerComponent.class)).getEntities();
+		for (int i = 0; i < peerEntities.size(); i++) {
+			int peerEntity = peerEntities.get(i);
+			String name = peerComponentMapper.get(peerEntity).name;
+			if (!entitiesByPeer.containsKey(name)) {
+				entitiesByPeer.put(name, peerEntity);
 			}
+		}
+
+		if (!entitiesByPeer.containsKey(peer.getName())) {
+			createPeerEntity(peer);
 		}
 	}
 
-	private void createEntitiesForNewPeers() {
-		for (MyPeer peer : peers.values()) {
-			if (!peersLastUpdate.contains(peer)) {
-				if (!entitiesByPeerName.containsKey(peer.getName())) {
-					int peerEntity = world.create(peerEntityArchetype);
-					peerComponentMapper.get(peerEntity).name = peer.getName();
-					transformComponentMapper.get(peerEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
-					entitiesByPeerName.put(peer.getName(), peerEntity);
-					logger.info("Creating peer entity: {} for {} at {}", peerEntity, peer.getName(), transformComponentMapper.get(peerEntity).position);
-				}
-			}
-		}
+	private void peerLeft(MyPeer peer) {
+		checkAndNotifyAboutDeactivatedPeerEntity(peer);
 	}
 
-	private void checkAndNotifyAboutNewEntities() {
-		for (MyPeer peer : peers.values()) {
-			int peerEntity = entitiesByPeerName.get(peer.getName());
-			Set<Integer> nearbyEntities = getNearbyEntities(peerEntity);
-			for (int nearbyEntity : nearbyEntities) {
-				if (!isEntityKnownByPeer(nearbyEntity, peer)) {
-					logger.info("Notifying peer {} about new entity {}", peer.getName(), nearbyEntity);
-					TransformComponent transformComponent = transformComponentMapper.get(nearbyEntity);
-					reusablePosition[0] = transformComponent.position.x;
-					reusablePosition[1] = transformComponent.position.y;
-					if (peerComponentMapper.has(nearbyEntity)) {
-						PeerComponent peerComponent = peerComponentMapper.get(nearbyEntity);
-						boolean owner = peer.getName().equals(peerComponent.name);
-						boolean active = activeComponentMapper.has(nearbyEntity);
-						peer.send(new EventMessage(MessageCodes.PEER_ENTITY_CREATED, new DataObject()
-										.set(MessageCodes.PEER_ENTITY_CREATED_ENTITY_ID, nearbyEntity)
-										.set(MessageCodes.PEER_ENTITY_CREATED_OWNER, owner)
-										.set(MessageCodes.PEER_ENTITY_CREATED_ACTIVE, active)
-										.set(MessageCodes.PEER_ENTITY_CREATED_POSITION, reusablePosition)),
-								SendOptions.ReliableSend);
-					} else {
-						TypeComponent typeComponent = typeComponentMapper.get(nearbyEntity);
-						peer.send(new EventMessage(MessageCodes.ENTITY_CREATED, new DataObject()
-										.set(MessageCodes.ENTITY_CREATED_ENTITY_ID, nearbyEntity)
-										.set(MessageCodes.ENTITY_CREATED_TYPE, typeComponent.type)
-										.set(MessageCodes.ENTITY_CREATED_POSITION, reusablePosition)),
-								SendOptions.ReliableSend);
-					}
-					markEntityAsKnownByPeer(nearbyEntity, peer);
-				}
-			}
-		}
+	private void createPeerEntity(MyPeer peer) {
+		int peerEntity = world.create(peerEntityArchetype);
+		peerComponentMapper.get(peerEntity).name = peer.getName();
+		transformComponentMapper.get(peerEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
+		entitiesByPeer.put(peer.getName(), peerEntity);
+		logger.info("Creating peer entity: {} for {} at {}", peerEntity, peer.getName(), transformComponentMapper.get(peerEntity).position);
 	}
 
-	private void checkAndNotifyAboutRemovedEntities() {
-		for (MyPeer peer : peers.values()) {
-			int peerEntity = entitiesByPeerName.get(peer.getName());
-			Set<Integer> nearbyEntities = getNearbyEntities(peerEntity);
-			if (knownEntities.containsKey(peer.getName())) {
-				Set<Integer> entitiesKnownByPeer = knownEntities.get(peer.getName());
-				reusableRemovedEntities.clear();
-				for (int entityKnownByPeer : entitiesKnownByPeer) {
-					if (!nearbyEntities.contains(entityKnownByPeer)) {
-						logger.info("Notifying peer {} about removed entity {}", peer.getName(), entityKnownByPeer);
-						peer.send(new EventMessage(MessageCodes.ENTITY_DESTROYED, new DataObject()
-										.set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, entityKnownByPeer)),
-								SendOptions.ReliableSend);
-						reusableRemovedEntities.add(entityKnownByPeer);
-					}
-				}
-				removeEntitiesAsKnownByPeer(reusableRemovedEntities, peer);
-			}
-		}
-	}
-
-	private void checkAndNotifyAboutActivatedPeerEntities() {
-		for (MyPeer peer : peers.values()) {
-			if (!peersLastUpdate.contains(peer)) {
-				String name = peer.getName();
-				int peerEntity = entitiesByPeerName.get(name);
-				if (!activeComponentMapper.has(peerEntity)) {
-					logger.info("Activating peer entity: {} for {}", peerEntity, name);
-					activeComponentMapper.create(peerEntity);
-					for (MyPeer peerToSendTo : peers.values()) {
-						if (isEntityKnownByPeer(peerEntity, peerToSendTo)) {
-							peerToSendTo.send(new EventMessage(MessageCodes.PEER_ENTITY_ACTIVATED, new DataObject()
-											.set(MessageCodes.PEER_ENTITY_ACTIVATED_ENTITY_ID, peerEntity)),
-									SendOptions.ReliableSend);
-						}
+	private void updateNearbyEntities(MyPeer peer) {
+		Set<Integer> nearbyEntities = nearbyEntitiesByPeer.get(peer.getName());
+		nearbyEntities.clear();
+		int peerEntity = entitiesByPeer.get(peer.getName());
+		SpatialComponent spatialComponent = spatialComponentMapper.get(peerEntity);
+		if (spatialComponent.memberOfSpatialHash != null) {
+			for (int x = spatialComponent.memberOfSpatialHash.x - worldDimensions.sectionSize; x <= spatialComponent.memberOfSpatialHash.x + worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
+				for (int y = spatialComponent.memberOfSpatialHash.y - worldDimensions.sectionSize; y <= spatialComponent.memberOfSpatialHash.y + worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
+					reusableHash.set(x, y);
+					if (spatialHashes.containsKey(reusableHash)) {
+						nearbyEntities.addAll(spatialHashes.get(reusableHash));
 					}
 				}
 			}
 		}
 	}
 
-	private void checkAndNotifyAboutDeactivatedPeerEntities() {
-		for (MyPeer peer : peersLastUpdate) {
-			if (!peers.containsValue(peer)) {
-				String name = peer.getName();
-				int peerEntity = entitiesByPeerName.get(name);
-				if (activeComponentMapper.has(peerEntity)) {
-					logger.info("Deactivating peer entity: {} for {}", peerEntity, name);
-					activeComponentMapper.remove(peerEntity);
-					for (MyPeer peerToSendTo : peers.values()) {
-						if (isEntityKnownByPeer(peerEntity, peerToSendTo)) {
-							peerToSendTo.send(new EventMessage(MessageCodes.PEER_ENTITY_DEACTIVATED, new DataObject()
-											.set(MessageCodes.PEER_ENTITY_DEACTIVATED_ENTITY_ID, peerEntity)),
-									SendOptions.ReliableSend);
-						}
+	private void checkAndNotifyAboutNewEntities(MyPeer peer) {
+		Set<Integer> nearbyEntities = nearbyEntitiesByPeer.get(peer.getName());
+		for (int nearbyEntity : nearbyEntities) {
+			if (!isEntityKnownByPeer(nearbyEntity, peer)) {
+				logger.info("Notifying peer {} about new entity {}", peer.getName(), nearbyEntity);
+				TransformComponent transformComponent = transformComponentMapper.get(nearbyEntity);
+				reusablePosition[0] = transformComponent.position.x;
+				reusablePosition[1] = transformComponent.position.y;
+				if (peerComponentMapper.has(nearbyEntity)) {
+					PeerComponent peerComponent = peerComponentMapper.get(nearbyEntity);
+					boolean owner = peer.getName().equals(peerComponent.name);
+					boolean active = activeComponentMapper.has(nearbyEntity);
+					peer.send(new EventMessage(MessageCodes.PEER_ENTITY_CREATED, new DataObject()
+									.set(MessageCodes.PEER_ENTITY_CREATED_ENTITY_ID, nearbyEntity)
+									.set(MessageCodes.PEER_ENTITY_CREATED_OWNER, owner)
+									.set(MessageCodes.PEER_ENTITY_CREATED_ACTIVE, active)
+									.set(MessageCodes.PEER_ENTITY_CREATED_POSITION, reusablePosition)),
+							SendOptions.ReliableSend);
+				} else {
+					TypeComponent typeComponent = typeComponentMapper.get(nearbyEntity);
+					peer.send(new EventMessage(MessageCodes.ENTITY_CREATED, new DataObject()
+									.set(MessageCodes.ENTITY_CREATED_ENTITY_ID, nearbyEntity)
+									.set(MessageCodes.ENTITY_CREATED_TYPE, typeComponent.type)
+									.set(MessageCodes.ENTITY_CREATED_POSITION, reusablePosition)),
+							SendOptions.ReliableSend);
+				}
+				markEntityAsKnownByPeer(nearbyEntity, peer);
+			}
+		}
+	}
+
+	private void checkAndNotifyAboutRemovedEntities(MyPeer peer) {
+		Set<Integer> nearbyEntities = nearbyEntitiesByPeer.get(peer.getName());
+		Set<Integer> entitiesKnownByPeer = knownEntitiesByPeer.get(peer.getName());
+		reusableRemovedEntities.clear();
+		for (int entityKnownByPeer : entitiesKnownByPeer) {
+			if (!nearbyEntities.contains(entityKnownByPeer)) {
+				logger.info("Notifying peer {} about removed entity {}", peer.getName(), entityKnownByPeer);
+				peer.send(new EventMessage(MessageCodes.ENTITY_DESTROYED, new DataObject()
+								.set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, entityKnownByPeer)),
+						SendOptions.ReliableSend);
+				reusableRemovedEntities.add(entityKnownByPeer);
+			}
+		}
+		removeEntitiesAsKnownByPeer(reusableRemovedEntities, peer);
+	}
+
+	private void checkAndNotifyAboutActivatedPeerEntity(MyPeer peer) {
+		int peerEntity = entitiesByPeer.get(peer.getName());
+		if (!activeComponentMapper.has(peerEntity)) {
+			String name = peerComponentMapper.get(peerEntity).name;
+			if (peers.containsKey(name)) {
+				logger.info("Activating peer entity: {} for {}", peerEntity, name);
+				activeComponentMapper.create(peerEntity);
+				for (MyPeer peerToSendTo : peers.values()) {
+					if (isEntityKnownByPeer(peerEntity, peerToSendTo)) {
+						peerToSendTo.send(new EventMessage(MessageCodes.PEER_ENTITY_ACTIVATED, new DataObject()
+										.set(MessageCodes.PEER_ENTITY_ACTIVATED_ENTITY_ID, peerEntity)),
+								SendOptions.ReliableSend);
+					}
+				}
+			}
+		}
+	}
+
+	private void checkAndNotifyAboutDeactivatedPeerEntity(MyPeer peer) {
+		int peerEntity = entitiesByPeer.get(peer.getName());
+		if (activeComponentMapper.has(peerEntity)) {
+			String name = peerComponentMapper.get(peerEntity).name;
+			if (!peers.containsKey(name)) {
+				logger.info("Deactivating peer entity: {} for {}", peerEntity, name);
+				activeComponentMapper.remove(peerEntity);
+				for (MyPeer peerToSendTo : peers.values()) {
+					if (isEntityKnownByPeer(peerEntity, peerToSendTo)) {
+						peerToSendTo.send(new EventMessage(MessageCodes.PEER_ENTITY_DEACTIVATED, new DataObject()
+										.set(MessageCodes.PEER_ENTITY_DEACTIVATED_ENTITY_ID, peerEntity)),
+								SendOptions.ReliableSend);
 					}
 				}
 			}
@@ -210,11 +224,11 @@ public class PeerEntitySystem extends BaseSystem {
 
 	private void markEntityAsKnownByPeer(int entity, MyPeer peer) {
 		Set<Integer> entities;
-		if (knownEntities.containsKey(peer.getName())) {
-			entities = knownEntities.get(peer.getName());
+		if (knownEntitiesByPeer.containsKey(peer.getName())) {
+			entities = knownEntitiesByPeer.get(peer.getName());
 		} else {
 			entities = new HashSet<Integer>();
-			knownEntities.put(peer.getName(), entities);
+			knownEntitiesByPeer.put(peer.getName(), entities);
 		}
 		if (!entities.contains(entity)) {
 			entities.add(entity);
@@ -222,32 +236,16 @@ public class PeerEntitySystem extends BaseSystem {
 	}
 
 	private void removeEntitiesAsKnownByPeer(List<Integer> entities, MyPeer peer) {
-		knownEntities.get(peer.getName()).removeAll(entities);
+		knownEntitiesByPeer.get(peer.getName()).removeAll(entities);
 	}
 
 	private boolean isEntityKnownByPeer(int entity, MyPeer peer) {
-		if (knownEntities.containsKey(peer.getName())) {
-			Set<Integer> entities = knownEntities.get(peer.getName());
+		if (knownEntitiesByPeer.containsKey(peer.getName())) {
+			Set<Integer> entities = knownEntitiesByPeer.get(peer.getName());
 			if (entities.contains(entity)) {
 				return true;
 			}
 		}
 		return false;
-	}
-
-	private Set<Integer> getNearbyEntities(int entity) {
-		reusableNearbyEntities.clear();
-		SpatialComponent spatialComponent = spatialComponentMapper.get(entity);
-		if (spatialComponent.memberOfSpatialHash != null) {
-			for (int x = spatialComponent.memberOfSpatialHash.x - 1; x < spatialComponent.memberOfSpatialHash.x + 1; x++) {
-				for (int y = spatialComponent.memberOfSpatialHash.y - 1; y < spatialComponent.memberOfSpatialHash.y + 1; y++) {
-					reusableHash.set(x, y);
-					if (spatialHashes.containsKey(reusableHash)) {
-						reusableNearbyEntities.addAll(spatialHashes.get(reusableHash));
-					}
-				}
-			}
-		}
-		return reusableNearbyEntities;
 	}
 }
