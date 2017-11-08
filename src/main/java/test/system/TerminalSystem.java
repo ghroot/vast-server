@@ -138,11 +138,15 @@ public class TerminalSystem extends IntervalSystem {
 			if (keyStroke != null) {
 				if (keyStroke.getKeyType() == KeyType.Character) {
 					if (keyStroke.getCharacter().toString().equals("+")) {
-						scale += 0.5f;
+						scale += 0.05f;
+					} else if (keyStroke.getCharacter().toString().equals("?")) {
+						scale += 1.0f;
 					} else if (keyStroke.getCharacter().toString().equals("-")) {
-						if (scale > 0.5f) {
-							scale -= 0.5f;
-						}
+						scale -= 0.05f;
+						scale = Math.max(scale, 0.05f);
+					} else if (keyStroke.getCharacter().toString().equals("_")) {
+						scale -= 1.0f;
+						scale = Math.max(scale, 0.05f);
 					} else if (keyStroke.getCharacter().toString().equals("x")) {
 						showPathTargetPosition = !showPathTargetPosition;
 					} else if (keyStroke.getCharacter().toString().equals("s")) {

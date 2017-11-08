@@ -20,7 +20,7 @@ import java.io.FileOutputStream;
 public class WorldSerializationSystem extends IntervalSystem {
 	private static final Logger logger = LoggerFactory.getLogger(WorldSerializationSystem.class);
 
-	private final float RANDOMIZATION_AREA_SIZE = 20.0f;
+	private final float RANDOMIZATION_AREA_SIZE = 400.0f;
 
 	private ComponentMapper<PeerComponent> peerComponentMapper;
 	private ComponentMapper<TransformComponent> transformComponentMapper;
@@ -110,14 +110,14 @@ public class WorldSerializationSystem extends IntervalSystem {
 	}
 
 	private void createWorld() {
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 10000; i++) {
 			int aiEntity = world.create(aiArchetype);
 			typeComponentMapper.get(aiEntity).type = "ai";
 			transformComponentMapper.get(aiEntity).position.set(-RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE, -RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE);
 			logger.info("Creating AI entity: {}", aiEntity);
 		}
 
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 1000; i++) {
 			int treeEntity = world.create(treeArchetype);
 			typeComponentMapper.get(treeEntity).type = "tree";
 			transformComponentMapper.get(treeEntity).position.set(-RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE, -RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE);

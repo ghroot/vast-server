@@ -25,7 +25,7 @@ public class PeerEntitySystem extends BaseSystem {
 	private ComponentMapper<TypeComponent> typeComponentMapper;
 	private ComponentMapper<SpatialComponent> spatialComponentMapper;
 
-	private List<MyPeer> peers;
+	private Map<String, MyPeer> peers;
 	private Map<Point2i, Set<Integer>> spatialHashes;
 
 	private List<MyPeer> peersLastUpdate;
@@ -37,7 +37,7 @@ public class PeerEntitySystem extends BaseSystem {
 	private float[] reusablePosition;
 	private Archetype peerEntityArchetype;
 
-	public PeerEntitySystem(List<MyPeer> peers, Map<Point2i, Set<Integer>> spatialHashes) {
+	public PeerEntitySystem(Map<String, MyPeer> peers, Map<Point2i, Set<Integer>> spatialHashes) {
 		this.peers = peers;
 		this.entitiesByPeerName = entitiesByPeerName;
 		this.spatialHashes = spatialHashes;
@@ -82,11 +82,11 @@ public class PeerEntitySystem extends BaseSystem {
 		checkAndNotifyAboutRemovedEntities();
 
 		peersLastUpdate.clear();
-		peersLastUpdate.addAll(peers);
+		peersLastUpdate.addAll(peers.values());
 	}
 
 	private void setupNewPeers() {
-		for (MyPeer peer : peers) {
+		for (MyPeer peer : peers.values()) {
 			if (!peersLastUpdate.contains(peer)) {
 				knownEntities.put(peer.getName(), new HashSet<Integer>());
 			}
@@ -94,20 +94,21 @@ public class PeerEntitySystem extends BaseSystem {
 	}
 
 	private void createEntitiesForNewPeers() {
-		for (MyPeer peer : peers) {
+		for (MyPeer peer : peers.values()) {
 			if (!peersLastUpdate.contains(peer)) {
 				if (!entitiesByPeerName.containsKey(peer.getName())) {
-					int entity = world.create(peerEntityArchetype);
-					peerComponentMapper.get(entity).name = peer.getName();
-					transformComponentMapper.get(entity).position.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
-					logger.info("Creating peer entity: {} for {} at {}", entity, peer.getName(), transformComponentMapper.get(entity).position);
+					int peerEntity = world.create(peerEntityArchetype);
+					peerComponentMapper.get(peerEntity).name = peer.getName();
+					transformComponentMapper.get(peerEntity).position.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
+					entitiesByPeerName.put(peer.getName(), peerEntity);
+					logger.info("Creating peer entity: {} for {} at {}", peerEntity, peer.getName(), transformComponentMapper.get(peerEntity).position);
 				}
 			}
 		}
 	}
 
 	private void checkAndNotifyAboutNewEntities() {
-		for (MyPeer peer : peers) {
+		for (MyPeer peer : peers.values()) {
 			int peerEntity = entitiesByPeerName.get(peer.getName());
 			Set<Integer> nearbyEntities = getNearbyEntities(peerEntity);
 			for (int nearbyEntity : nearbyEntities) {
@@ -141,7 +142,7 @@ public class PeerEntitySystem extends BaseSystem {
 	}
 
 	private void checkAndNotifyAboutRemovedEntities() {
-		for (MyPeer peer : peers) {
+		for (MyPeer peer : peers.values()) {
 			int peerEntity = entitiesByPeerName.get(peer.getName());
 			Set<Integer> nearbyEntities = getNearbyEntities(peerEntity);
 			if (knownEntities.containsKey(peer.getName())) {
@@ -162,17 +163,19 @@ public class PeerEntitySystem extends BaseSystem {
 	}
 
 	private void checkAndNotifyAboutActivatedPeerEntities() {
-		for (MyPeer peer : peers) {
+		for (MyPeer peer : peers.values()) {
 			if (!peersLastUpdate.contains(peer)) {
 				String name = peer.getName();
 				int peerEntity = entitiesByPeerName.get(name);
 				if (!activeComponentMapper.has(peerEntity)) {
 					logger.info("Activating peer entity: {} for {}", peerEntity, name);
 					activeComponentMapper.create(peerEntity);
-					for (ClientPeer peerToSendTo : peers) {
-						peerToSendTo.send(new EventMessage(MessageCodes.PEER_ENTITY_ACTIVATED, new DataObject()
-										.set(MessageCodes.PEER_ENTITY_ACTIVATED_ENTITY_ID, peerEntity)),
-								SendOptions.ReliableSend);
+					for (MyPeer peerToSendTo : peers.values()) {
+						if (isEntityKnownByPeer(peerEntity, peerToSendTo)) {
+							peerToSendTo.send(new EventMessage(MessageCodes.PEER_ENTITY_ACTIVATED, new DataObject()
+											.set(MessageCodes.PEER_ENTITY_ACTIVATED_ENTITY_ID, peerEntity)),
+									SendOptions.ReliableSend);
+						}
 					}
 				}
 			}
@@ -181,16 +184,18 @@ public class PeerEntitySystem extends BaseSystem {
 
 	private void checkAndNotifyAboutDeactivatedPeerEntities() {
 		for (MyPeer peer : peersLastUpdate) {
-			if (!peers.contains(peer)) {
+			if (!peers.containsValue(peer)) {
 				String name = peer.getName();
 				int peerEntity = entitiesByPeerName.get(name);
 				if (activeComponentMapper.has(peerEntity)) {
 					logger.info("Deactivating peer entity: {} for {}", peerEntity, name);
 					activeComponentMapper.remove(peerEntity);
-					for (ClientPeer peerToSendTo : peers) {
-						peerToSendTo.send(new EventMessage(MessageCodes.PEER_ENTITY_DEACTIVATED, new DataObject()
-										.set(MessageCodes.PEER_ENTITY_DEACTIVATED_ENTITY_ID, peerEntity)),
-								SendOptions.ReliableSend);
+					for (MyPeer peerToSendTo : peers.values()) {
+						if (isEntityKnownByPeer(peerEntity, peerToSendTo)) {
+							peerToSendTo.send(new EventMessage(MessageCodes.PEER_ENTITY_DEACTIVATED, new DataObject()
+											.set(MessageCodes.PEER_ENTITY_DEACTIVATED_ENTITY_ID, peerEntity)),
+									SendOptions.ReliableSend);
+						}
 					}
 				}
 			}

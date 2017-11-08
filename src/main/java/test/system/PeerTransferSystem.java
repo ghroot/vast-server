@@ -4,13 +4,13 @@ import com.artemis.BaseSystem;
 import test.MyPeer;
 import test.MyServerApplication;
 
-import java.util.List;
+import java.util.Map;
 
 public class PeerTransferSystem extends BaseSystem {
 	private MyServerApplication serverApplication;
-	private List<MyPeer> peers;
+	private Map<String, MyPeer> peers;
 
-	public PeerTransferSystem(MyServerApplication serverApplication, List<MyPeer> peers) {
+	public PeerTransferSystem(MyServerApplication serverApplication, Map<String, MyPeer> peers) {
 		this.serverApplication = serverApplication;
 		this.peers = peers;
 	}
@@ -19,7 +19,9 @@ public class PeerTransferSystem extends BaseSystem {
 	protected void processSystem() {
 		synchronized (serverApplication.getPeers()) {
 			peers.clear();
-			peers.addAll(serverApplication.getPeers());
+			for (MyPeer peer : serverApplication.getPeers()) {
+				peers.put(peer.getName(), peer);
+			}
 		}
 	}
 }

@@ -2,8 +2,6 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'artemis'
 
-sourceCompatibility = 1.8
-
 buildscript {
     repositories {
         jcenter()
@@ -32,6 +30,11 @@ dependencies {
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
     compile group: 'com.googlecode.lanterna', name: 'lanterna', version: '3.0.0'
     compile name: 'haste-all-1.0.0'
+}
+
+compileJava {
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
 }
 
 weave {

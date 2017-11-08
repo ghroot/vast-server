@@ -17,7 +17,7 @@ public class MyWorld implements Runnable {
 	private final float UPDATE_RATE = 30.0f;
 
 	private World world;
-	private List<MyPeer> peers;
+	private Map<String, MyPeer> peers;
 	private List<IncomingRequest> incomingRequests;
 	private Map<Point2i, Set<Integer>> spatialHashes;
 
@@ -26,7 +26,7 @@ public class MyWorld implements Runnable {
 	private boolean alive;
 
 	public MyWorld(MyServerApplication serverApplication) {
-		peers = new ArrayList<MyPeer>();
+		peers = new HashMap<String, MyPeer>();
 		incomingRequests = new ArrayList<IncomingRequest>();
 		spatialHashes = new HashMap<Point2i, Set<Integer>>();
 
@@ -39,7 +39,7 @@ public class MyWorld implements Runnable {
 			new PathMoveSystem(),
 			new SpatialSystem(spatialHashes),
 			new CollisionSystem(spatialHashes),
-			new SyncTransformSystem(peers),
+			new SyncTransformSystem(peers, spatialHashes),
 			new TerminalSystem(metrics),
 			new IncomingRequestClearSystem(incomingRequests),
 			new WorldSerializationSystem(),

@@ -3,29 +3,45 @@ package test.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IntervalIteratingSystem;
-import com.nhnent.haste.framework.ClientPeer;
 import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import test.MessageCodes;
 import test.MyPeer;
+import test.component.PeerComponent;
+import test.component.SpatialComponent;
 import test.component.SyncTransformComponent;
 import test.component.TransformComponent;
 
-import java.util.List;
+import javax.vecmath.Point2i;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class SyncTransformSystem extends IntervalIteratingSystem {
+	private static final Logger logger = LoggerFactory.getLogger(SyncTransformSystem.class);
+
 	private ComponentMapper<TransformComponent> transformComponentMapper;
 	private ComponentMapper<SyncTransformComponent> syncTransformComponentMapper;
+	private ComponentMapper<PeerComponent> peerComponentMapper;
+	private ComponentMapper<SpatialComponent> spatialComponentMapper;
 
-	private List<MyPeer> peers;
+	private Map<String, MyPeer> peers;
+	private Map<Point2i, Set<Integer>> spatialHashes;
 
 	private float[] reusablePosition;
+	private Point2i reusableHash;
+	private Set<Integer> reusableNearbyPeerEntities;
 
-	public SyncTransformSystem(List<MyPeer> peers) {
+	public SyncTransformSystem(Map<String, MyPeer> peers, Map<Point2i, Set<Integer>> spatialHashes) {
 		super(Aspect.all(TransformComponent.class, SyncTransformComponent.class), 0.1f);
 		this.peers = peers;
+		this.spatialHashes = spatialHashes;
 		reusablePosition = new float[2];
+		reusableHash = new Point2i();
+		reusableNearbyPeerEntities = new HashSet<Integer>();
 	}
 
 	@Override
@@ -44,10 +60,34 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 			EventMessage positionMessage = new EventMessage(MessageCodes.SET_POSITION, new DataObject()
 					.set(MessageCodes.SET_POSITION_ENTITY_ID, entity)
 					.set(MessageCodes.SET_POSITION_POSITION, reusablePosition));
-			for (ClientPeer peer : peers) {
-				peer.send(positionMessage, SendOptions.ReliableSend);
+			Set<Integer> nearbyPeerEntities = getNearbyPeerEntities(entity);
+			for (int nearbyPeerEntity : nearbyPeerEntities) {
+				MyPeer peer = peers.get(peerComponentMapper.get(nearbyPeerEntity).name);
+				if (peer != null) {
+					peer.send(positionMessage, SendOptions.ReliableSend);
+				}
 			}
 			syncTransformComponent.lastSyncedPosition.set(transformComponent.position);
 		}
+	}
+
+	private Set<Integer> getNearbyPeerEntities(int entity) {
+		reusableNearbyPeerEntities.clear();
+		SpatialComponent spatialComponent = spatialComponentMapper.get(entity);
+		if (spatialComponent.memberOfSpatialHash != null) {
+			for (int x = spatialComponent.memberOfSpatialHash.x - 10; x < spatialComponent.memberOfSpatialHash.x + 10; x++) {
+				for (int y = spatialComponent.memberOfSpatialHash.y - 10; y < spatialComponent.memberOfSpatialHash.y + 10; y++) {
+					reusableHash.set(x, y);
+					if (spatialHashes.containsKey(reusableHash)) {
+						for (int nearbyEntity : spatialHashes.get(reusableHash)) {
+							if (peerComponentMapper.has(nearbyEntity)) {
+								reusableNearbyPeerEntities.add(nearbyEntity);
+							}
+						}
+					}
+				}
+			}
+		}
+		return reusableNearbyPeerEntities;
 	}
 }
