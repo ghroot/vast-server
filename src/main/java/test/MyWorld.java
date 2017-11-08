@@ -25,12 +25,12 @@ public class MyWorld implements Runnable {
 
 	private boolean alive;
 
-	public MyWorld(MyServerApplication serverApplication) {
+	public MyWorld(MyServerApplication serverApplication, boolean showMonitor) {
 		peers = new HashMap<String, MyPeer>();
 		incomingRequests = new ArrayList<IncomingRequest>();
 		spatialHashes = new HashMap<Point2i, Set<Integer>>();
 
-		WorldConfiguration config = new WorldConfigurationBuilder().with(
+		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
 			new PeerEntitySystem(peers, spatialHashes),
@@ -40,15 +40,19 @@ public class MyWorld implements Runnable {
 			new SpatialSystem(spatialHashes),
 			new CollisionSystem(spatialHashes),
 			new SyncTransformSystem(peers, spatialHashes),
-			new TerminalSystem(metrics),
 			new IncomingRequestClearSystem(incomingRequests),
 			new WorldSerializationSystem(),
 
 			new WorldSerializationManager(),
 			new MetricsManager(metrics)
-		).build();
+		);
 
-		world = new World(config);
+		if (showMonitor) {
+			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(metrics));
+		}
+
+		WorldConfiguration worldConfiguration = worldConfigurationBuilder.build();
+		world = new World(worldConfiguration);
 
 		alive = true;
 	}

@@ -39,7 +39,7 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 	private Set<Integer> reusableNearbyPeerEntities;
 
 	public SyncTransformSystem(Map<String, MyPeer> peers, Map<Point2i, Set<Integer>> spatialHashes) {
-		super(Aspect.all(TransformComponent.class, SyncTransformComponent.class), 0.1f);
+		super(Aspect.all(TransformComponent.class, SyncTransformComponent.class), 0.2f);
 		this.peers = peers;
 		this.spatialHashes = spatialHashes;
 		reusablePosition = new float[2];

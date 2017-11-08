@@ -16,24 +16,30 @@ import java.util.List;
 public class MyServerApplication extends ServerApplication {
 	private static final Logger logger = LoggerFactory.getLogger(MyServerApplication.class);
 
+	private boolean showMonitor;
+
 	private List<MyPeer> peers;
 	private List<IncomingRequest> incomingRequests;
 
 	private MyWorld world;
 	private Thread worldThread;
 
+	public MyServerApplication(boolean showMonitor) {
+		this.showMonitor = showMonitor;
+	}
+
 	@Override
 	protected void setup() {
 		peers = new ArrayList<MyPeer>();
 		incomingRequests = new ArrayList<IncomingRequest>();
 
-		world = new MyWorld(this);
+		world = new MyWorld(this, showMonitor);
 		worldThread = new Thread(world, "World");
 		worldThread.start();
 
 		// TODO: Add fake peer for testing
 //		synchronized (peers) {
-//			for (int i = 0; i < 3; i++) {
+//			for (int i = 0; i < 1500; i++) {
 //				String name = "fakePeer" + (i + 1);
 //				peers.add(new FakePeer(this, name));
 //				logger.info("Added fake peer: {}", name);

@@ -29,6 +29,7 @@ dependencies {
     compile group: 'com.esotericsoftware', name: 'jsonbeans', version: '0.7'
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
     compile group: 'com.googlecode.lanterna', name: 'lanterna', version: '3.0.0'
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
     compile name: 'haste-all-1.0.0'
 }
 

@@ -12,7 +12,9 @@ import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.googlecode.lanterna.terminal.Terminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.Metrics;
@@ -47,7 +49,8 @@ public class TerminalSystem extends IntervalSystem {
 	@Override
 	protected void initialize() {
 		try {
-			screen = new DefaultTerminalFactory().createScreen();
+			Terminal terminal = new DefaultTerminalFactory().createTerminalEmulator();
+			screen = new TerminalScreen(terminal);
 			screen.startScreen();
 		} catch (Exception ignored) {
 		}
