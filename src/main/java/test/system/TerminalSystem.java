@@ -2,6 +2,7 @@ package test.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.artemis.annotations.Profile;
 import com.artemis.systems.IntervalSystem;
 import com.artemis.utils.IntBag;
 import com.googlecode.lanterna.TerminalPosition;
@@ -15,11 +16,13 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.Metrics;
+import test.Profiler;
 import test.component.*;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Point2i;
 
+@Profile(enabled = true, using = Profiler.class)
 public class TerminalSystem extends IntervalSystem {
 	private static final Logger logger = LoggerFactory.getLogger(TerminalSystem.class);
 

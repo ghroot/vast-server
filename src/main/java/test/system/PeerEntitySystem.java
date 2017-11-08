@@ -1,6 +1,7 @@
 package test.system;
 
 import com.artemis.*;
+import com.artemis.annotations.Profile;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.framework.ClientPeer;
 import com.nhnent.haste.framework.SendOptions;
@@ -10,11 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.MessageCodes;
 import test.MyPeer;
+import test.Profiler;
 import test.component.*;
 
 import javax.vecmath.Point2i;
 import java.util.*;
 
+@Profile(enabled = true, using = Profiler.class)
 public class PeerEntitySystem extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(PeerEntitySystem.class);
 

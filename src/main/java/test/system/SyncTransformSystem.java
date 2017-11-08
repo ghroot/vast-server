@@ -2,6 +2,7 @@ package test.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.artemis.annotations.Profile;
 import com.artemis.systems.IntervalIteratingSystem;
 import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.protocol.data.DataObject;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.MessageCodes;
 import test.MyPeer;
+import test.Profiler;
 import test.component.PeerComponent;
 import test.component.SpatialComponent;
 import test.component.SyncTransformComponent;
@@ -20,6 +22,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@Profile(enabled = true, using = Profiler.class)
 public class SyncTransformSystem extends IntervalIteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(SyncTransformSystem.class);
 

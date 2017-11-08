@@ -2,12 +2,15 @@ package test.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
+import test.Profiler;
 import test.component.PathComponent;
 import test.component.TransformComponent;
 
 import javax.vecmath.Vector2f;
 
+@Profile(enabled = true, using = Profiler.class)
 public class PathMoveSystem extends IteratingSystem {
     private ComponentMapper<TransformComponent> transformComponentMapper;
     private ComponentMapper<PathComponent> pathComponentMapper;
