@@ -21,7 +21,7 @@ public class MyWorld implements Runnable {
 	private Map<String, Integer> entitiesByPeerName;
 	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
 
-	private Fps fps = new Fps();
+	private Metrics metrics = new Metrics();
 
 	private boolean alive;
 
@@ -42,11 +42,12 @@ public class MyWorld implements Runnable {
 			new PathMoveSystem(),
 			new CollisionSystem(nearbyEntitiesByEntity),
 			new SyncTransformSystem(peers),
-			new TerminalRenderSystem(fps),
+			new TerminalSystem(metrics),
 			new IncomingRequestClearSystem(incomingRequests),
 			new WorldSerializationSystem(entitiesByPeerName),
 
-			new WorldSerializationManager()
+			new WorldSerializationManager(),
+			new MetricsManager(metrics)
 		).build();
 
 		world = new World(config);
@@ -67,8 +68,8 @@ public class MyWorld implements Runnable {
 					Thread.sleep(timeToSleep);
 				}
 				endTime = System.currentTimeMillis();
-				fps.timePerFrameMs = (int) (endTime - startTime);
-				fps.fps = (int) (1000 / (endTime - startTime));
+				metrics.timePerFrameMs = (int) (endTime - startTime);
+				metrics.fps = (int) (1000 / (endTime - startTime));
 			} catch (InterruptedException exception) {
 				logger.error("", exception);
 			}

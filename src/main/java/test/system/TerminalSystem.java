@@ -14,14 +14,14 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import test.Fps;
+import test.Metrics;
 import test.component.*;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Point2i;
 
-public class TerminalRenderSystem extends IntervalSystem {
-	private static final Logger logger = LoggerFactory.getLogger(TerminalRenderSystem.class);
+public class TerminalSystem extends IntervalSystem {
+	private static final Logger logger = LoggerFactory.getLogger(TerminalSystem.class);
 
 	private ComponentMapper<PeerComponent> peerComponentMapper;
 	private ComponentMapper<ActiveComponent> activeComponentMapper;
@@ -33,11 +33,12 @@ public class TerminalRenderSystem extends IntervalSystem {
 	private Point2i offset = new Point2i();
 	private float scale = 3.0f;
 	private boolean showPathTargetPosition = false;
-	private Fps fps;
+	private boolean showSystemProcessingDurations = false;
+	private Metrics metrics;
 
-	public TerminalRenderSystem(Fps fps) {
+	public TerminalSystem(Metrics fps) {
 		super(Aspect.all(), 0.1f);
-		this.fps = fps;
+		this.metrics = fps;
 	}
 
 	@Override
@@ -113,8 +114,17 @@ public class TerminalRenderSystem extends IntervalSystem {
 			textGraphics.putString(0, 0, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
 			textGraphics.putString(0, 1, "Peer entities: " + peerEntities.size());
 			textGraphics.putString(0, 2, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
-			textGraphics.putString(screen.getTerminalSize().getColumns() - 8, 0, "FPS: " + fps.fps);
-			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + fps.timePerFrameMs + "ms");
+			textGraphics.putString(screen.getTerminalSize().getColumns() - 8, 0, "FPS: " + metrics.fps);
+			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + metrics.timePerFrameMs + "ms");
+
+			if (showSystemProcessingDurations) {
+				int row = 4;
+				for (String systemName : metrics.systemProcessingTimes.keySet()) {
+					int processingDuration = metrics.systemProcessingTimes.get(systemName);
+					textGraphics.putString(screen.getTerminalSize().getColumns() - 50, row, systemName + " " + processingDuration + "ms");
+					row++;
+				}
+			}
 
 			screen.refresh();
 		} catch (Exception ignored) {
@@ -134,6 +144,8 @@ public class TerminalRenderSystem extends IntervalSystem {
 						}
 					} else if (keyStroke.getCharacter().toString().equals("x")) {
 						showPathTargetPosition = !showPathTargetPosition;
+					} else if (keyStroke.getCharacter().toString().equals("s")) {
+						showSystemProcessingDurations = !showSystemProcessingDurations;
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
 					offset.add(new Point2i(0, keyStroke.isShiftDown() ? -4 : -1));

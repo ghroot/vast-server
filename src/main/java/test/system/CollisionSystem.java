@@ -3,9 +3,11 @@ package test.system;
 import com.artemis.Aspect;
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
+import com.artemis.annotations.Profile;
 import com.artemis.utils.IntBag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.Profiler;
 import test.component.CollisionComponent;
 import test.component.TransformComponent;
 
@@ -13,6 +15,7 @@ import javax.vecmath.Vector2f;
 import java.util.Map;
 import java.util.Set;
 
+@Profile(enabled = true, using = Profiler.class)
 public class CollisionSystem extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem.class);
 
