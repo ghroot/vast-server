@@ -14,6 +14,7 @@ import test.MessageCodes;
 import test.MyPeer;
 import test.component.*;
 
+import javax.vecmath.Point2i;
 import java.util.*;
 
 public class PeerEntitySystem extends BaseSystem {
@@ -24,24 +25,29 @@ public class PeerEntitySystem extends BaseSystem {
 	private ComponentMapper<SyncTransformComponent> syncTransformComponentMapper;
 	private ComponentMapper<ActiveComponent> activeComponentMapper;
 	private ComponentMapper<TypeComponent> typeComponentMapper;
+	private ComponentMapper<SpatialComponent> spatialComponentMapper;
 
 	private List<MyPeer> peers;
 	private Map<String, Integer> entitiesByPeerName;
-	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
+	private Map<Point2i, Set<Integer>> spatialHashes;
 
 	private List<MyPeer> peersLastUpdate;
 	private Map<String, Set<Integer>> knownEntities;
+	private Set<Integer> reusableNearbyEntities;
+	private Point2i reusableHash;
 	private List<Integer> reusableRemovedEntities;
 	private float[] reusablePosition;
 	private Archetype peerEntityArchetype;
 
-	public PeerEntitySystem(List<MyPeer> peers, Map<String, Integer> entitiesByPeerName, Map<Integer, Set<Integer>> nearbyEntitiesByEntity) {
+	public PeerEntitySystem(List<MyPeer> peers, Map<String, Integer> entitiesByPeerName, Map<Point2i, Set<Integer>> spatialHashes) {
 		this.peers = peers;
 		this.entitiesByPeerName = entitiesByPeerName;
-		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
+		this.spatialHashes = spatialHashes;
 
 		peersLastUpdate = new ArrayList<MyPeer>();
 		knownEntities = new HashMap<String, Set<Integer>>();
+		reusableNearbyEntities = new HashSet<Integer>();
+		reusableHash = new Point2i();
 		reusableRemovedEntities = new ArrayList<Integer>();
 		reusablePosition = new float[2];
 	}
@@ -51,6 +57,7 @@ public class PeerEntitySystem extends BaseSystem {
 		peerEntityArchetype = new ArchetypeBuilder()
 				.add(PeerComponent.class)
 				.add(TransformComponent.class)
+				.add(SpatialComponent.class)
 				.add(CollisionComponent.class)
 				.add(SyncTransformComponent.class)
 				.build(world);
@@ -94,34 +101,32 @@ public class PeerEntitySystem extends BaseSystem {
 	private void checkAndNotifyAboutNewEntities() {
 		for (MyPeer peer : peers) {
 			int peerEntity = entitiesByPeerName.get(peer.getName());
-			if (nearbyEntitiesByEntity.containsKey(peerEntity)) {
-				Set<Integer> closeEntities = nearbyEntitiesByEntity.get(peerEntity);
-				for (int closeEntity : closeEntities) {
-					if (!isEntityKnownByPeer(closeEntity, peer)) {
-						logger.info("Notifying peer {} about new entity {}", peer.getName(), closeEntity);
-						TransformComponent transformComponent = transformComponentMapper.get(closeEntity);
-						reusablePosition[0] = transformComponent.position.x;
-						reusablePosition[1] = transformComponent.position.y;
-						if (peerComponentMapper.has(closeEntity)) {
-							PeerComponent peerComponent = peerComponentMapper.get(closeEntity);
-							boolean owner = peer.getName().equals(peerComponent.name);
-							boolean active = activeComponentMapper.has(closeEntity);
-							peer.send(new EventMessage(MessageCodes.PEER_ENTITY_CREATED, new DataObject()
-											.set(MessageCodes.PEER_ENTITY_CREATED_ENTITY_ID, closeEntity)
-											.set(MessageCodes.PEER_ENTITY_CREATED_OWNER, owner)
-											.set(MessageCodes.PEER_ENTITY_CREATED_ACTIVE, active)
-											.set(MessageCodes.PEER_ENTITY_CREATED_POSITION, reusablePosition)),
-									SendOptions.ReliableSend);
-						} else {
-							TypeComponent typeComponent = typeComponentMapper.get(closeEntity);
-							peer.send(new EventMessage(MessageCodes.ENTITY_CREATED, new DataObject()
-											.set(MessageCodes.ENTITY_CREATED_ENTITY_ID, closeEntity)
-											.set(MessageCodes.ENTITY_CREATED_TYPE, typeComponent.type)
-											.set(MessageCodes.ENTITY_CREATED_POSITION, reusablePosition)),
-									SendOptions.ReliableSend);
-						}
-						markEntityAsKnownByPeer(closeEntity, peer);
+			Set<Integer> nearbyEntities = getNearbyEntities(peerEntity);
+			for (int nearbyEntity : nearbyEntities) {
+				if (!isEntityKnownByPeer(nearbyEntity, peer)) {
+					logger.info("Notifying peer {} about new entity {}", peer.getName(), nearbyEntity);
+					TransformComponent transformComponent = transformComponentMapper.get(nearbyEntity);
+					reusablePosition[0] = transformComponent.position.x;
+					reusablePosition[1] = transformComponent.position.y;
+					if (peerComponentMapper.has(nearbyEntity)) {
+						PeerComponent peerComponent = peerComponentMapper.get(nearbyEntity);
+						boolean owner = peer.getName().equals(peerComponent.name);
+						boolean active = activeComponentMapper.has(nearbyEntity);
+						peer.send(new EventMessage(MessageCodes.PEER_ENTITY_CREATED, new DataObject()
+										.set(MessageCodes.PEER_ENTITY_CREATED_ENTITY_ID, nearbyEntity)
+										.set(MessageCodes.PEER_ENTITY_CREATED_OWNER, owner)
+										.set(MessageCodes.PEER_ENTITY_CREATED_ACTIVE, active)
+										.set(MessageCodes.PEER_ENTITY_CREATED_POSITION, reusablePosition)),
+								SendOptions.ReliableSend);
+					} else {
+						TypeComponent typeComponent = typeComponentMapper.get(nearbyEntity);
+						peer.send(new EventMessage(MessageCodes.ENTITY_CREATED, new DataObject()
+										.set(MessageCodes.ENTITY_CREATED_ENTITY_ID, nearbyEntity)
+										.set(MessageCodes.ENTITY_CREATED_TYPE, typeComponent.type)
+										.set(MessageCodes.ENTITY_CREATED_POSITION, reusablePosition)),
+								SendOptions.ReliableSend);
 					}
+					markEntityAsKnownByPeer(nearbyEntity, peer);
 				}
 			}
 		}
@@ -130,11 +135,12 @@ public class PeerEntitySystem extends BaseSystem {
 	private void checkAndNotifyAboutRemovedEntities() {
 		for (MyPeer peer : peers) {
 			int peerEntity = entitiesByPeerName.get(peer.getName());
+			Set<Integer> nearbyEntities = getNearbyEntities(peerEntity);
 			if (knownEntities.containsKey(peer.getName())) {
 				Set<Integer> entitiesKnownByPeer = knownEntities.get(peer.getName());
 				reusableRemovedEntities.clear();
 				for (int entityKnownByPeer : entitiesKnownByPeer) {
-					if (!nearbyEntitiesByEntity.get(peerEntity).contains(entityKnownByPeer)) {
+					if (!nearbyEntities.contains(entityKnownByPeer)) {
 						logger.info("Notifying peer {} about removed entity {}", peer.getName(), entityKnownByPeer);
 						peer.send(new EventMessage(MessageCodes.ENTITY_DESTROYED, new DataObject()
 										.set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, entityKnownByPeer)),
@@ -208,5 +214,21 @@ public class PeerEntitySystem extends BaseSystem {
 			}
 		}
 		return false;
+	}
+
+	private Set<Integer> getNearbyEntities(int entity) {
+		reusableNearbyEntities.clear();
+		SpatialComponent spatialComponent = spatialComponentMapper.get(entity);
+		if (spatialComponent.memberOfSpatialHash != null) {
+			for (int x = spatialComponent.memberOfSpatialHash.x - 10; x < spatialComponent.memberOfSpatialHash.x + 10; x++) {
+				for (int y = spatialComponent.memberOfSpatialHash.y - 10; y < spatialComponent.memberOfSpatialHash.y + 10; y++) {
+					reusableHash.set(x, y);
+					if (spatialHashes.containsKey(reusableHash)) {
+						reusableNearbyEntities.addAll(spatialHashes.get(reusableHash));
+					}
+				}
+			}
+		}
+		return reusableNearbyEntities;
 	}
 }

@@ -68,6 +68,7 @@ public class TerminalSystem extends IntervalSystem {
 
 			IntBag entities = world.getAspectSubscriptionManager().get(Aspect.one(TransformComponent.class)).getEntities();
 			IntBag peerEntities = world.getAspectSubscriptionManager().get(Aspect.one(PeerComponent.class)).getEntities();
+			IntBag activePeerEntities = world.getAspectSubscriptionManager().get(Aspect.all(PeerComponent.class, ActiveComponent.class)).getEntities();
 
 			if (showPathTargetPosition) {
 				IntBag pathEntities = world.getAspectSubscriptionManager().get(Aspect.all(TransformComponent.class, PathComponent.class)).getEntities();
@@ -112,7 +113,7 @@ public class TerminalSystem extends IntervalSystem {
 			TextGraphics textGraphics = screen.newTextGraphics();
 			textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
 			textGraphics.putString(0, 0, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
-			textGraphics.putString(0, 1, "Peer entities: " + peerEntities.size());
+			textGraphics.putString(0, 1, "Peer entities: " + peerEntities.size() + " (" + activePeerEntities.size() + " active)");
 			textGraphics.putString(0, 2, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 8, 0, "FPS: " + metrics.fps);
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + metrics.timePerFrameMs + "ms");

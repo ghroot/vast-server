@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.system.*;
 
+import javax.vecmath.Point2i;
 import java.util.*;
 
 public class MyWorld implements Runnable {
@@ -19,7 +20,7 @@ public class MyWorld implements Runnable {
 	private List<MyPeer> peers;
 	private List<IncomingRequest> incomingRequests;
 	private Map<String, Integer> entitiesByPeerName;
-	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
+	private Map<Point2i, Set<Integer>> spatialHashes;
 
 	private Metrics metrics = new Metrics();
 
@@ -29,18 +30,17 @@ public class MyWorld implements Runnable {
 		peers = new ArrayList<MyPeer>();
 		incomingRequests = new ArrayList<IncomingRequest>();
 		entitiesByPeerName = new HashMap<String, Integer>();
-		nearbyEntitiesByEntity = new HashMap<Integer, Set<Integer>>();
+		spatialHashes = new HashMap<Point2i, Set<Integer>>();
 
 		WorldConfiguration config = new WorldConfigurationBuilder().with(
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
-			new NearbyEntitySystem(nearbyEntitiesByEntity),
-			new PeerEntitySystem(peers, entitiesByPeerName, nearbyEntitiesByEntity),
+			new PeerEntitySystem(peers, entitiesByPeerName, spatialHashes),
 			new PathAssignSystem(incomingRequests),
-			new AISystem(nearbyEntitiesByEntity),
-			new FollowSystem(),
+			new AISystem(),
 			new PathMoveSystem(),
-			new CollisionSystem(nearbyEntitiesByEntity),
+			new SpatialSystem(spatialHashes),
+			new CollisionSystem(spatialHashes),
 			new SyncTransformSystem(peers),
 			new TerminalSystem(metrics),
 			new IncomingRequestClearSystem(incomingRequests),

@@ -1,47 +1,64 @@
 package test.system;
 
 import com.artemis.Aspect;
-import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
-import com.artemis.utils.IntBag;
+import com.artemis.systems.IteratingSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.Profiler;
 import test.component.CollisionComponent;
+import test.component.SpatialComponent;
 import test.component.TransformComponent;
 
+import javax.vecmath.Point2i;
 import javax.vecmath.Vector2f;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 @Profile(enabled = true, using = Profiler.class)
-public class CollisionSystem extends BaseSystem {
+public class CollisionSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem.class);
 
 	private ComponentMapper<TransformComponent> transformComponentMapper;
+	private ComponentMapper<SpatialComponent> spatialComponentMapper;
 	private ComponentMapper<CollisionComponent> collisionComponentMapper;
 
-	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
+	private Map<Point2i, Set<Integer>> spatialHashes;
+	private Set<Integer> handledEntities;
 	private Vector2f reusableVector;
 
-	public CollisionSystem(Map<Integer, Set<Integer>> nearbyEntitiesByEntity) {
-		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
+	public CollisionSystem(Map<Point2i, Set<Integer>> spatialHashes) {
+		super(Aspect.all(TransformComponent.class, SpatialComponent.class, CollisionComponent.class));
+		this.spatialHashes = spatialHashes;
+		handledEntities = new HashSet<Integer>();
 		reusableVector = new Vector2f();
 	}
 
 	@Override
-	protected void processSystem() {
-		IntBag entities = world.getAspectSubscriptionManager().get(Aspect.all(TransformComponent.class, CollisionComponent.class)).getEntities();
-		for (int i = 0; i < entities.size(); i++) {
-			int entity = entities.get(i);
+	protected void end() {
+		handledEntities.clear();
+	}
+
+	@Override
+	protected void process(int entity) {
+		if (handledEntities.contains(entity)) {
+			return;
+		} else {
+			handledEntities.add(entity);
+		}
+
+		SpatialComponent spatialComponent = spatialComponentMapper.get(entity);
+
+		if (spatialComponent.memberOfSpatialHash != null) {
 			TransformComponent transformComponent = transformComponentMapper.get(entity);
 			CollisionComponent collisionComponent = collisionComponentMapper.get(entity);
-			for (int j = i + 1; j < entities.size(); j++) {
-				int otherEntity = entities.get(j);
-				if (nearbyEntitiesByEntity.get(entity).contains(otherEntity)) {
-					TransformComponent otherTransformComponent = transformComponentMapper.get(otherEntity);
-					CollisionComponent otherCollisionComponent = collisionComponentMapper.get(otherEntity);
+			Set<Integer> entitiesInSameSpatialHash = spatialHashes.get(spatialComponent.memberOfSpatialHash);
+			for (int entityInSameSpatialHash : entitiesInSameSpatialHash) {
+				if (entityInSameSpatialHash != entity) {
+					TransformComponent otherTransformComponent = transformComponentMapper.get(entityInSameSpatialHash);
+					CollisionComponent otherCollisionComponent = collisionComponentMapper.get(entityInSameSpatialHash);
 					reusableVector.set(otherTransformComponent.position.x - transformComponent.position.x, otherTransformComponent.position.y - transformComponent.position.y);
 					float overlap = (collisionComponent.radius + otherCollisionComponent.radius) - reusableVector.length();
 					if (overlap > 0.0f) {
@@ -57,7 +74,7 @@ public class CollisionSystem extends BaseSystem {
 							reusableVector.normalize();
 							reusableVector.scale(-overlap);
 							transformComponent.position.add(reusableVector);
-						} else {
+						} else if (!collisionComponent.isStatic && !otherCollisionComponent.isStatic) {
 							reusableVector.normalize();
 							reusableVector.scale(-overlap * 0.5f);
 							transformComponent.position.add(reusableVector);
@@ -69,6 +86,7 @@ public class CollisionSystem extends BaseSystem {
 					}
 				}
 			}
+			handledEntities.addAll(entitiesInSameSpatialHash);
 		}
 	}
 }

@@ -46,6 +46,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 				.add(AIComponent.class)
 				.add(TypeComponent.class)
 				.add(TransformComponent.class)
+				.add(SpatialComponent.class)
 				.add(CollisionComponent.class)
 				.add(SyncTransformComponent.class)
 				.build(world);
@@ -53,6 +54,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 		treeArchetype = new ArchetypeBuilder()
 				.add(TypeComponent.class)
 				.add(TransformComponent.class)
+				.add(SpatialComponent.class)
 				.add(CollisionComponent.class)
 				.build(world);
 
@@ -108,14 +110,14 @@ public class WorldSerializationSystem extends IntervalSystem {
 	}
 
 	private void createWorld() {
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 100; i++) {
 			int aiEntity = world.create(aiArchetype);
 			typeComponentMapper.get(aiEntity).type = "ai";
 			transformComponentMapper.get(aiEntity).position.set(-RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE, -RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE);
 			logger.info("Creating AI entity: {}", aiEntity);
 		}
 
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 100; i++) {
 			int treeEntity = world.create(treeArchetype);
 			typeComponentMapper.get(treeEntity).type = "tree";
 			transformComponentMapper.get(treeEntity).position.set(-RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE, -RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE);
