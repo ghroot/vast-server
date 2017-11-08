@@ -24,6 +24,7 @@ dependencies {
     compile group: 'net.onedaybeard.artemis', name: 'artemis-odb', version: '2.1.0'
     compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer', version: '2.1.0'
     compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer-json', version: '2.1.0'
+    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer-kryo', version: '2.1.0'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
     compile group: 'org.jetlang', name: 'jetlang', version: '0.2.12'

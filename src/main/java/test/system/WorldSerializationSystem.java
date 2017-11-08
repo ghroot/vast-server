@@ -32,6 +32,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 
 	private Map<String, Integer> entitiesByPeerName;
 
+	private String snapshotFileName;
 	private Archetype aiArchetype;
 	private Archetype treeArchetype;
 
@@ -59,7 +60,12 @@ public class WorldSerializationSystem extends IntervalSystem {
 				.build(world);
 
 		WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
+
 		worldSerializationManager.setSerializer(new JsonArtemisSerializer(world));
+		snapshotFileName = "snapshot.json";
+
+//		worldSerializationManager.setSerializer(new KryoArtemisSerializer(world));
+//		snapshotFileName = "snapshot.bin";
 
 		loadWorld();
 	}
@@ -70,12 +76,12 @@ public class WorldSerializationSystem extends IntervalSystem {
 	}
 
 	private void saveWorld() {
-		logger.debug("Serializing world");
+		logger.debug("Serializing world to snapshot {}", snapshotFileName);
 		WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		worldSerializationManager.save(baos, new SaveFileFormat(world.getAspectSubscriptionManager().get(Aspect.all()).getEntities()));
 		try {
-			FileOutputStream fileOutputStream = new FileOutputStream("snapshot.json");
+			FileOutputStream fileOutputStream = new FileOutputStream(snapshotFileName);
 			baos.writeTo(fileOutputStream);
 			fileOutputStream.close();
 		} catch (Exception exception) {
@@ -86,9 +92,9 @@ public class WorldSerializationSystem extends IntervalSystem {
 	private void loadWorld() {
 		try {
 			WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
-			FileInputStream fileInputStream = new FileInputStream("snapshot.json");
+			FileInputStream fileInputStream = new FileInputStream(snapshotFileName);
 			SaveFileFormat saveFileFormat = worldSerializationManager.load(fileInputStream, SaveFileFormat.class);
-			logger.info("Loading world from snapshot");
+			logger.info("Loading world from snapshot {}", snapshotFileName);
 			for (int i = 0; i < saveFileFormat.entities.size(); i++) {
 				int entity = saveFileFormat.entities.get(i);
 				if (peerComponentMapper.has(entity)) {
