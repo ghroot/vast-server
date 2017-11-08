@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import test.MessageCodes;
 import test.MyPeer;
 import test.Profiler;
+import test.WorldDimensions;
 import test.component.*;
 
 import javax.vecmath.Point2i;
@@ -29,6 +30,7 @@ public class PeerEntitySystem extends BaseSystem {
 	private ComponentMapper<SpatialComponent> spatialComponentMapper;
 
 	private Map<String, MyPeer> peers;
+	private WorldDimensions worldDimensions;
 	private Map<Point2i, Set<Integer>> spatialHashes;
 
 	private List<MyPeer> peersLastUpdate;
@@ -40,8 +42,9 @@ public class PeerEntitySystem extends BaseSystem {
 	private float[] reusablePosition;
 	private Archetype peerEntityArchetype;
 
-	public PeerEntitySystem(Map<String, MyPeer> peers, Map<Point2i, Set<Integer>> spatialHashes) {
+	public PeerEntitySystem(Map<String, MyPeer> peers, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
 		this.peers = peers;
+		this.worldDimensions = worldDimensions;
 		this.entitiesByPeerName = entitiesByPeerName;
 		this.spatialHashes = spatialHashes;
 
@@ -102,7 +105,7 @@ public class PeerEntitySystem extends BaseSystem {
 				if (!entitiesByPeerName.containsKey(peer.getName())) {
 					int peerEntity = world.create(peerEntityArchetype);
 					peerComponentMapper.get(peerEntity).name = peer.getName();
-					transformComponentMapper.get(peerEntity).position.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
+					transformComponentMapper.get(peerEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
 					entitiesByPeerName.put(peer.getName(), peerEntity);
 					logger.info("Creating peer entity: {} for {} at {}", peerEntity, peer.getName(), transformComponentMapper.get(peerEntity).position);
 				}
@@ -236,8 +239,8 @@ public class PeerEntitySystem extends BaseSystem {
 		reusableNearbyEntities.clear();
 		SpatialComponent spatialComponent = spatialComponentMapper.get(entity);
 		if (spatialComponent.memberOfSpatialHash != null) {
-			for (int x = spatialComponent.memberOfSpatialHash.x - 10; x < spatialComponent.memberOfSpatialHash.x + 10; x++) {
-				for (int y = spatialComponent.memberOfSpatialHash.y - 10; y < spatialComponent.memberOfSpatialHash.y + 10; y++) {
+			for (int x = spatialComponent.memberOfSpatialHash.x - 1; x < spatialComponent.memberOfSpatialHash.x + 1; x++) {
+				for (int y = spatialComponent.memberOfSpatialHash.y - 1; y < spatialComponent.memberOfSpatialHash.y + 1; y++) {
 					reusableHash.set(x, y);
 					if (spatialHashes.containsKey(reusableHash)) {
 						reusableNearbyEntities.addAll(spatialHashes.get(reusableHash));

@@ -1,7 +1,6 @@
 package test;
 
 import com.artemis.World;
-import com.artemis.WorldConfiguration;
 import com.artemis.WorldConfigurationBuilder;
 import com.artemis.managers.WorldSerializationManager;
 import org.slf4j.Logger;
@@ -30,29 +29,28 @@ public class MyWorld implements Runnable {
 		incomingRequests = new ArrayList<IncomingRequest>();
 		spatialHashes = new HashMap<Point2i, Set<Integer>>();
 
+		WorldDimensions worldDimensions = new WorldDimensions(10000, 10000, 10);
+
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
-			new PeerEntitySystem(peers, spatialHashes),
+			new PeerEntitySystem(peers, worldDimensions, spatialHashes),
 			new PathAssignSystem(incomingRequests),
 			new AISystem(),
 			new PathMoveSystem(),
-			new SpatialSystem(spatialHashes),
+			new SpatialSystem(worldDimensions, spatialHashes),
 			new CollisionSystem(spatialHashes),
 			new SyncTransformSystem(peers, spatialHashes),
 			new IncomingRequestClearSystem(incomingRequests),
-			new WorldSerializationSystem(),
+			new WorldSerializationSystem(worldDimensions),
 
 			new WorldSerializationManager(),
 			new MetricsManager(metrics)
 		);
-
 		if (showMonitor) {
-			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(metrics));
+			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(metrics, worldDimensions, spatialHashes));
 		}
-
-		WorldConfiguration worldConfiguration = worldConfigurationBuilder.build();
-		world = new World(worldConfiguration);
+		world = new World(worldConfigurationBuilder.build());
 
 		alive = true;
 	}

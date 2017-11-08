@@ -78,8 +78,8 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 		reusableNearbyPeerEntities.clear();
 		SpatialComponent spatialComponent = spatialComponentMapper.get(entity);
 		if (spatialComponent.memberOfSpatialHash != null) {
-			for (int x = spatialComponent.memberOfSpatialHash.x - 10; x < spatialComponent.memberOfSpatialHash.x + 10; x++) {
-				for (int y = spatialComponent.memberOfSpatialHash.y - 10; y < spatialComponent.memberOfSpatialHash.y + 10; y++) {
+			for (int x = spatialComponent.memberOfSpatialHash.x - 1; x < spatialComponent.memberOfSpatialHash.x + 1; x++) {
+				for (int y = spatialComponent.memberOfSpatialHash.y - 1; y < spatialComponent.memberOfSpatialHash.y + 1; y++) {
 					reusableHash.set(x, y);
 					if (spatialHashes.containsKey(reusableHash)) {
 						for (int nearbyEntity : spatialHashes.get(reusableHash)) {

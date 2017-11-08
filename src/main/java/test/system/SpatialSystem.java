@@ -7,6 +7,7 @@ import com.artemis.systems.IteratingSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.Profiler;
+import test.WorldDimensions;
 import test.component.SpatialComponent;
 import test.component.TransformComponent;
 
@@ -20,15 +21,15 @@ import java.util.Set;
 public class SpatialSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(SpatialSystem.class);
 
-	private final float SECTION_SIZE = 2.0f;
-
 	private ComponentMapper<TransformComponent> transformComponentMapper;
 	private ComponentMapper<SpatialComponent> spatialComponentMapper;
 
+	private WorldDimensions worldDimensions;
 	private Map<Point2i, Set<Integer>> spatialHashes;
 
-	public SpatialSystem(Map<Point2i, Set<Integer>> spatialHashes) {
+	public SpatialSystem(WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
 		super(Aspect.all(TransformComponent.class, SpatialComponent.class));
+		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
 	}
 
@@ -52,8 +53,8 @@ public class SpatialSystem extends IteratingSystem {
 			}
 
 			Point2i hash = new Point2i(
-					(int) (Math.round(transformComponent.position.x / SECTION_SIZE) * SECTION_SIZE),
-					(int) (Math.round(transformComponent.position.y / SECTION_SIZE) * SECTION_SIZE)
+					(int) (Math.round(transformComponent.position.x / worldDimensions.sectionSize) * worldDimensions.sectionSize),
+					(int) (Math.round(transformComponent.position.y / worldDimensions.sectionSize) * worldDimensions.sectionSize)
 			);
 
 			spatialComponent.memberOfSpatialHash = hash;

@@ -12,6 +12,7 @@ import com.artemis.systems.IntervalSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.Profiler;
+import test.WorldDimensions;
 import test.component.*;
 
 import java.io.ByteArrayOutputStream;
@@ -23,8 +24,6 @@ import java.io.FileOutputStream;
 public class WorldSerializationSystem extends IntervalSystem {
 	private static final Logger logger = LoggerFactory.getLogger(WorldSerializationSystem.class);
 
-	private final float RANDOMIZATION_AREA_SIZE = 400.0f;
-
 	private ComponentMapper<PeerComponent> peerComponentMapper;
 	private ComponentMapper<TransformComponent> transformComponentMapper;
 	private ComponentMapper<SyncTransformComponent> syncTransformComponentMapper;
@@ -32,12 +31,15 @@ public class WorldSerializationSystem extends IntervalSystem {
 	private ComponentMapper<TypeComponent> typeComponentMapper;
 	private ComponentMapper<CollisionComponent> collisionComponentMapper;
 
+	private WorldDimensions worldDimensions;
+
 	private String snapshotFileName;
 	private Archetype aiArchetype;
 	private Archetype treeArchetype;
 
-	public WorldSerializationSystem() {
+	public WorldSerializationSystem(WorldDimensions worldDimensions) {
 		super(Aspect.all(), 10.0f);
+		this.worldDimensions = worldDimensions;
 	}
 
 	@Override
@@ -113,17 +115,17 @@ public class WorldSerializationSystem extends IntervalSystem {
 	}
 
 	private void createWorld() {
-		for (int i = 0; i < 500; i++) {
+		for (int i = 0; i < 10000; i++) {
 			int aiEntity = world.create(aiArchetype);
 			typeComponentMapper.get(aiEntity).type = "ai";
-			transformComponentMapper.get(aiEntity).position.set(-RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE, -RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE);
+			transformComponentMapper.get(aiEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
 			logger.info("Creating AI entity: {}", aiEntity);
 		}
 
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 500; i++) {
 			int treeEntity = world.create(treeArchetype);
 			typeComponentMapper.get(treeEntity).type = "tree";
-			transformComponentMapper.get(treeEntity).position.set(-RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE, -RANDOMIZATION_AREA_SIZE / 2 + (float) Math.random() * RANDOMIZATION_AREA_SIZE);
+			transformComponentMapper.get(treeEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
 			collisionComponentMapper.get(treeEntity).isStatic = true;
 			collisionComponentMapper.get(treeEntity).radius = 0.1f;
 			logger.info("Creating tree entity: {}", treeEntity);

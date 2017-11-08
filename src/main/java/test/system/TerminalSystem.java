@@ -19,10 +19,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.Metrics;
 import test.Profiler;
+import test.WorldDimensions;
 import test.component.*;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Point2i;
+import java.util.Map;
+import java.util.Set;
 
 @Profile(enabled = true, using = Profiler.class)
 public class TerminalSystem extends IntervalSystem {
@@ -34,16 +37,21 @@ public class TerminalSystem extends IntervalSystem {
 	private ComponentMapper<TypeComponent> typeComponentMapper;
 	private ComponentMapper<PathComponent> pathComponentMapper;
 
+	private Metrics metrics;
+	private WorldDimensions worldDimensions;
+	Map<Point2i, Set<Integer>> spatialHashes;
+
 	private Screen screen;
 	private Point2i offset = new Point2i();
 	private float scale = 3.0f;
 	private boolean showPathTargetPosition = false;
 	private boolean showSystemProcessingDurations = false;
-	private Metrics metrics;
 
-	public TerminalSystem(Metrics fps) {
+	public TerminalSystem(Metrics fps, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
 		super(Aspect.all(), 0.1f);
 		this.metrics = fps;
+		this.worldDimensions = worldDimensions;
+		this.spatialHashes = spatialHashes;
 	}
 
 	@Override
@@ -117,10 +125,23 @@ public class TerminalSystem extends IntervalSystem {
 			}
 
 			TextGraphics textGraphics = screen.newTextGraphics();
+
 			textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
-			textGraphics.putString(0, 0, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
-			textGraphics.putString(0, 1, "Peer entities: " + peerEntities.size() + " (" + activePeerEntities.size() + " active)");
-			textGraphics.putString(0, 2, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
+			textGraphics.putString(0, 0, "World size: " + worldDimensions.width + " x " + worldDimensions.height);
+			textGraphics.putString(0, 1, "Spatial hash size: " + worldDimensions.sectionSize);
+			int numberOfSpatialHashes = 0;
+			int numberOfActiveSpatialHashes = 0;
+			for (Set<Integer> entitiesInSpatialHash : spatialHashes.values()) {
+				numberOfSpatialHashes++;
+				if (entitiesInSpatialHash.size() > 0) {
+					numberOfActiveSpatialHashes++;
+				}
+			}
+			textGraphics.putString(0, 2, "Active spatial hashes: " + numberOfActiveSpatialHashes + " (of " + numberOfSpatialHashes + " total)");
+			textGraphics.putString(0, 3, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
+			textGraphics.putString(0, 4, "Peer entities: " + peerEntities.size() + " (" + activePeerEntities.size() + " active)");
+			textGraphics.putString(0, 5, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
+
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 8, 0, "FPS: " + metrics.fps);
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + metrics.timePerFrameMs + "ms");
 
