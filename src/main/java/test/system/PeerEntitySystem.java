@@ -1,9 +1,7 @@
 package test.system;
 
-import com.artemis.Archetype;
-import com.artemis.ArchetypeBuilder;
-import com.artemis.BaseSystem;
-import com.artemis.ComponentMapper;
+import com.artemis.*;
+import com.artemis.utils.IntBag;
 import com.nhnent.haste.framework.ClientPeer;
 import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.protocol.data.DataObject;
@@ -28,10 +26,10 @@ public class PeerEntitySystem extends BaseSystem {
 	private ComponentMapper<SpatialComponent> spatialComponentMapper;
 
 	private List<MyPeer> peers;
-	private Map<String, Integer> entitiesByPeerName;
 	private Map<Point2i, Set<Integer>> spatialHashes;
 
 	private List<MyPeer> peersLastUpdate;
+	private Map<String, Integer> entitiesByPeerName;
 	private Map<String, Set<Integer>> knownEntities;
 	private Set<Integer> reusableNearbyEntities;
 	private Point2i reusableHash;
@@ -39,12 +37,13 @@ public class PeerEntitySystem extends BaseSystem {
 	private float[] reusablePosition;
 	private Archetype peerEntityArchetype;
 
-	public PeerEntitySystem(List<MyPeer> peers, Map<String, Integer> entitiesByPeerName, Map<Point2i, Set<Integer>> spatialHashes) {
+	public PeerEntitySystem(List<MyPeer> peers, Map<Point2i, Set<Integer>> spatialHashes) {
 		this.peers = peers;
 		this.entitiesByPeerName = entitiesByPeerName;
 		this.spatialHashes = spatialHashes;
 
 		peersLastUpdate = new ArrayList<MyPeer>();
+		entitiesByPeerName = new HashMap<String, Integer>();
 		knownEntities = new HashMap<String, Set<Integer>>();
 		reusableNearbyEntities = new HashSet<Integer>();
 		reusableHash = new Point2i();
@@ -61,6 +60,16 @@ public class PeerEntitySystem extends BaseSystem {
 				.add(CollisionComponent.class)
 				.add(SyncTransformComponent.class)
 				.build(world);
+	}
+
+	@Override
+	protected void begin() {
+		entitiesByPeerName.clear();
+		IntBag peerEntities = world.getAspectSubscriptionManager().get(Aspect.one(PeerComponent.class)).getEntities();
+		for (int i = 0; i < peerEntities.size(); i++) {
+			int peerEntity = peerEntities.get(i);
+			entitiesByPeerName.put(peerComponentMapper.get(peerEntity).name, peerEntity);
+		}
 	}
 
 	@Override
@@ -92,7 +101,6 @@ public class PeerEntitySystem extends BaseSystem {
 					peerComponentMapper.get(entity).name = peer.getName();
 					transformComponentMapper.get(entity).position.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
 					logger.info("Creating peer entity: {} for {} at {}", entity, peer.getName(), transformComponentMapper.get(entity).position);
-					entitiesByPeerName.put(peer.getName(), entity);
 				}
 			}
 		}

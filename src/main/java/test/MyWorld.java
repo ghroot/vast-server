@@ -19,7 +19,6 @@ public class MyWorld implements Runnable {
 	private World world;
 	private List<MyPeer> peers;
 	private List<IncomingRequest> incomingRequests;
-	private Map<String, Integer> entitiesByPeerName;
 	private Map<Point2i, Set<Integer>> spatialHashes;
 
 	private Metrics metrics = new Metrics();
@@ -29,13 +28,12 @@ public class MyWorld implements Runnable {
 	public MyWorld(MyServerApplication serverApplication) {
 		peers = new ArrayList<MyPeer>();
 		incomingRequests = new ArrayList<IncomingRequest>();
-		entitiesByPeerName = new HashMap<String, Integer>();
 		spatialHashes = new HashMap<Point2i, Set<Integer>>();
 
 		WorldConfiguration config = new WorldConfigurationBuilder().with(
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
-			new PeerEntitySystem(peers, entitiesByPeerName, spatialHashes),
+			new PeerEntitySystem(peers, spatialHashes),
 			new PathAssignSystem(incomingRequests),
 			new AISystem(),
 			new PathMoveSystem(),
@@ -44,7 +42,7 @@ public class MyWorld implements Runnable {
 			new SyncTransformSystem(peers),
 			new TerminalSystem(metrics),
 			new IncomingRequestClearSystem(incomingRequests),
-			new WorldSerializationSystem(entitiesByPeerName),
+			new WorldSerializationSystem(),
 
 			new WorldSerializationManager(),
 			new MetricsManager(metrics)

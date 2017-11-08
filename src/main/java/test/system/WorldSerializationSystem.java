@@ -16,7 +16,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.util.Map;
 
 public class WorldSerializationSystem extends IntervalSystem {
 	private static final Logger logger = LoggerFactory.getLogger(WorldSerializationSystem.class);
@@ -30,15 +29,12 @@ public class WorldSerializationSystem extends IntervalSystem {
 	private ComponentMapper<TypeComponent> typeComponentMapper;
 	private ComponentMapper<CollisionComponent> collisionComponentMapper;
 
-	private Map<String, Integer> entitiesByPeerName;
-
 	private String snapshotFileName;
 	private Archetype aiArchetype;
 	private Archetype treeArchetype;
 
-	public WorldSerializationSystem(Map<String, Integer> entitiesByPeerName) {
+	public WorldSerializationSystem() {
 		super(Aspect.all(), 10.0f);
-		this.entitiesByPeerName = entitiesByPeerName;
 	}
 
 	@Override
@@ -99,8 +95,6 @@ public class WorldSerializationSystem extends IntervalSystem {
 				int entity = saveFileFormat.entities.get(i);
 				if (peerComponentMapper.has(entity)) {
 					logger.info("Loaded entity: {} (peer)", entity);
-					String name = peerComponentMapper.get(entity).name;
-					entitiesByPeerName.put(name, entity);
 				} else {
 					logger.info("Loaded entity: {} ({})", entity, typeComponentMapper.get(entity).type);
 				}
