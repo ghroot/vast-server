@@ -13,7 +13,9 @@ import java.util.*;
 public class MyWorld implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(MyWorld.class);
 
-	private final float UPDATE_RATE = 30.0f;
+	private final int UPDATE_RATE = 30;
+	private final float FRAME_TIME_MILLIS = (float) 1000 / UPDATE_RATE;
+	private final float FRAME_TIME_SECONDS = FRAME_TIME_MILLIS / 1000;
 
 	private World world;
 	private Metrics metrics = new Metrics();
@@ -54,19 +56,19 @@ public class MyWorld implements Runnable {
 	public void run() {
 		while (alive) {
 			try {
-				long startTime = System.currentTimeMillis();
-				world.setDelta(1 / UPDATE_RATE);
+				long frameStartTime = System.currentTimeMillis();
+				world.setDelta(FRAME_TIME_SECONDS);
 				world.process();
-				long endTime = System.currentTimeMillis();
-				int timeToSleep = (int) (1000 / UPDATE_RATE) - (int) (endTime - startTime);
+				long processEndTime = System.currentTimeMillis();
+				int processDuration = (int) (processEndTime - frameStartTime);
+				int timeToSleep = (int) (FRAME_TIME_MILLIS - processDuration);
 				if (timeToSleep > 0) {
 					Thread.sleep(timeToSleep);
 				}
-				endTime = System.currentTimeMillis();
-				metrics.timePerFrameMs = (int) (endTime - startTime);
-				metrics.fps = (int) (1000 / (endTime - startTime));
+				long frameEndTime = System.currentTimeMillis();
+				metrics.setTimePerFrameMs((int) (frameEndTime - frameStartTime));
 			} catch (InterruptedException exception) {
-				logger.error("", exception);
+				logger.error("Error in world loop", exception);
 			}
 		}
 	}

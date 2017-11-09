@@ -146,8 +146,8 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.putString(0, 6, "Peer entities: " + peerEntities.size() + " (" + activePeerEntities.size() + " active)");
 			textGraphics.putString(0, 7, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
 
-			textGraphics.putString(screen.getTerminalSize().getColumns() - 8, 0, "FPS: " + metrics.fps);
-			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + metrics.timePerFrameMs + "ms");
+			textGraphics.putString(screen.getTerminalSize().getColumns() - 8, 0, "FPS: " + metrics.getFps());
+			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + metrics.getTimePerFrameMs() + "ms");
 
 			if (showSystemProcessingDurations) {
 				int row = 4;
