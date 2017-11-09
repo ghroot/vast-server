@@ -11,11 +11,13 @@ public class Main {
 	private static final int PORT = 5056;
 
 	public static void main(String[] args) {
+		String snapshotFormat;
 		boolean showMonitor = false;
 
 		try {
 			Options options = new Options();
 			options.addOption("log", true, "Logging level");
+			options.addOption("snapshotFormat", true, "Snapshot format (json or bin)");
 			options.addOption("monitor","Show monitor");
 			CommandLineParser parser = new DefaultParser();
 			CommandLine cmd = parser.parse(options, args);
@@ -25,15 +27,14 @@ public class Main {
 			} else {
 				System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
 			}
-
-			if (cmd.hasOption("monitor")) {
-				showMonitor = true;
-			}
+			snapshotFormat = cmd.getOptionValue("snapshotFormat", "json");
+			showMonitor = cmd.hasOption("monitor");
 		} catch (Exception ignored) {
+			snapshotFormat = "json";
 		}
 
 		GameServerBootstrap bootstrap = new GameServerBootstrap();
-		bootstrap.application(new MyServerApplication(showMonitor))
+		bootstrap.application(new MyServerApplication(snapshotFormat, showMonitor))
 				.option(UDPOption.THREAD_COUNT, 2)
 				.option(UDPOption.SO_RCVBUF, 1024 * 60)
 				.option(UDPOption.SO_SNDBUF, 1024 * 60)

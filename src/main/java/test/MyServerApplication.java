@@ -16,6 +16,7 @@ import java.util.List;
 public class MyServerApplication extends ServerApplication {
 	private static final Logger logger = LoggerFactory.getLogger(MyServerApplication.class);
 
+	private String snapshotFormat;
 	private boolean showMonitor;
 
 	private List<MyPeer> peers;
@@ -24,7 +25,8 @@ public class MyServerApplication extends ServerApplication {
 	private MyWorld world;
 	private Thread worldThread;
 
-	public MyServerApplication(boolean showMonitor) {
+	public MyServerApplication(String snapshotFormat, boolean showMonitor) {
+		this.snapshotFormat = snapshotFormat;
 		this.showMonitor = showMonitor;
 	}
 
@@ -33,7 +35,7 @@ public class MyServerApplication extends ServerApplication {
 		peers = new ArrayList<MyPeer>();
 		incomingRequests = new ArrayList<IncomingRequest>();
 
-		world = new MyWorld(this, showMonitor);
+		world = new MyWorld(this, snapshotFormat, showMonitor);
 		worldThread = new Thread(world, "World");
 		worldThread.start();
 

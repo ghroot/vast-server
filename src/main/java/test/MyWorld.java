@@ -19,7 +19,7 @@ public class MyWorld implements Runnable {
 	private Metrics metrics = new Metrics();
 	private boolean alive;
 
-	public MyWorld(MyServerApplication serverApplication, boolean showMonitor) {
+	public MyWorld(MyServerApplication serverApplication, String snapshotFormat, boolean showMonitor) {
 		Map<String, MyPeer> peers = new HashMap<String, MyPeer>();
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
 		Map<Point2i, Set<Integer>> spatialHashes = new HashMap<Point2i, Set<Integer>>();
@@ -40,7 +40,7 @@ public class MyWorld implements Runnable {
 			new CollisionSystem(spatialHashes),
 			new SyncTransformSystem(peers, worldDimensions, spatialHashes),
 			new IncomingRequestClearSystem(incomingRequests),
-			new WorldSerializationSystem("json")
+			new WorldSerializationSystem(snapshotFormat)
 		);
 		if (showMonitor) {
 			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(metrics, worldDimensions, spatialHashes));
