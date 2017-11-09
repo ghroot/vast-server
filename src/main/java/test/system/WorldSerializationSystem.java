@@ -8,6 +8,7 @@ import com.artemis.io.KryoArtemisSerializer;
 import com.artemis.io.SaveFileFormat;
 import com.artemis.managers.WorldSerializationManager;
 import com.artemis.systems.IntervalSystem;
+import com.artemis.utils.IntBag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.Profiler;
@@ -59,7 +60,6 @@ public class WorldSerializationSystem extends IntervalSystem {
 				snapshotFileName = "snapshot";
 				break;
 		}
-		logger.debug("Serializing world to snapshot file {}", snapshotFileName);
 		long startTime = System.currentTimeMillis();
 		WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
 		if (format.equals("json")) {
@@ -67,17 +67,19 @@ public class WorldSerializationSystem extends IntervalSystem {
 		} else if (format.equals("bin") || format.equals("binary")) {
 			worldSerializationManager.setSerializer(new KryoArtemisSerializer(world));
 		}
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		worldSerializationManager.save(baos, new SaveFileFormat(world.getAspectSubscriptionManager().get(Aspect.all()).getEntities()));
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		IntBag entitiesToSerialize = world.getAspectSubscriptionManager().get(Aspect.all()).getEntities();
+		logger.info("Serializing world ({} entities) to snapshot file {}", entitiesToSerialize.size(), snapshotFileName);
+		worldSerializationManager.save(byteArrayOutputStream, new SaveFileFormat(entitiesToSerialize));
 		int generateDuration = (int) (System.currentTimeMillis() - startTime);
 		startTime = System.currentTimeMillis();
 		try {
 			FileOutputStream fileOutputStream = new FileOutputStream(snapshotFileName);
-			baos.writeTo(fileOutputStream);
+			byteArrayOutputStream.writeTo(fileOutputStream);
 			fileOutputStream.close();
-			baos.close();
+			byteArrayOutputStream.close();
 			int saveDuration = (int) (System.currentTimeMillis() - startTime);
-			logger.debug("Serialization completed successfully (generate: {} ms, save: {} ms)", generateDuration, saveDuration);
+			logger.info("Serialization completed successfully (generate: {} ms, save: {} ms)", generateDuration, saveDuration);
 		} catch (Exception exception) {
 			logger.error("Error saving world", exception);
 		}
@@ -103,11 +105,12 @@ public class WorldSerializationSystem extends IntervalSystem {
 			for (int i = 0; i < saveFileFormat.entities.size(); i++) {
 				int entity = saveFileFormat.entities.get(i);
 				if (peerComponentMapper.has(entity)) {
-					logger.info("Loaded entity: {} (peer)", entity);
+					logger.debug("Loaded entity: {} (peer)", entity);
 				} else {
-					logger.info("Loaded entity: {} ({})", entity, typeComponentMapper.get(entity).type);
+					logger.debug("Loaded entity: {} ({})", entity, typeComponentMapper.get(entity).type);
 				}
 			}
+			logger.info("Loaded {} entities", saveFileFormat.entities.size());
 		} catch (Exception exception) {
 			if (exception instanceof FileNotFoundException) {
 				logger.info("No snapshot file found, creating a new world");
