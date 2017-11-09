@@ -164,6 +164,12 @@ public class TerminalSystem extends IntervalSystem {
 				}
 			}
 
+			if (lastFocusedEntity >= 0) {
+				Point2f position = transformComponentMapper.get(lastFocusedEntity).position;
+				cameraPosition.set(position.x, -position.y);
+				textGraphics.putString(0, 8, "Following peer entity: " + peerComponentMapper.get(lastFocusedEntity).name);
+			}
+
 			screen.refresh();
 		} catch (Exception ignored) {
 		}
