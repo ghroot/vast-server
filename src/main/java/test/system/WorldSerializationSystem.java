@@ -59,28 +59,28 @@ public class WorldSerializationSystem extends IntervalSystem {
 				snapshotFileName = "snapshot";
 				break;
 		}
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				logger.debug("Serializing world to snapshot file {}", snapshotFileName);
-				WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
-				if (format.equals("json")) {
-					worldSerializationManager.setSerializer(new JsonArtemisSerializer(world));
-				} else if (format.equals("bin") || format.equals("binary")) {
-					worldSerializationManager.setSerializer(new KryoArtemisSerializer(world));
-				}
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				worldSerializationManager.save(baos, new SaveFileFormat(world.getAspectSubscriptionManager().get(Aspect.all()).getEntities()));
-				try {
-					FileOutputStream fileOutputStream = new FileOutputStream(snapshotFileName);
-					baos.writeTo(fileOutputStream);
-					fileOutputStream.close();
-					logger.debug("Serialization completed successfully");
-				} catch (Exception exception) {
-					logger.error("Error saving world", exception);
-				}
-			}
-		}).start();
+		logger.debug("Serializing world to snapshot file {}", snapshotFileName);
+		long startTime = System.currentTimeMillis();
+		WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
+		if (format.equals("json")) {
+			worldSerializationManager.setSerializer(new JsonArtemisSerializer(world));
+		} else if (format.equals("bin") || format.equals("binary")) {
+			worldSerializationManager.setSerializer(new KryoArtemisSerializer(world));
+		}
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		worldSerializationManager.save(baos, new SaveFileFormat(world.getAspectSubscriptionManager().get(Aspect.all()).getEntities()));
+		int generateDuration = (int) (System.currentTimeMillis() - startTime);
+		startTime = System.currentTimeMillis();
+		try {
+			FileOutputStream fileOutputStream = new FileOutputStream(snapshotFileName);
+			baos.writeTo(fileOutputStream);
+			fileOutputStream.close();
+			baos.close();
+			int saveDuration = (int) (System.currentTimeMillis() - startTime);
+			logger.debug("Serialization completed successfully (generate: {} ms, save: {} ms)", generateDuration, saveDuration);
+		} catch (Exception exception) {
+			logger.error("Error saving world", exception);
+		}
 	}
 
 	private void loadWorld() {
@@ -98,6 +98,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 				worldSerializationManager.setSerializer(new KryoArtemisSerializer(world));
 			}
 			SaveFileFormat saveFileFormat = worldSerializationManager.load(fileInputStream, SaveFileFormat.class);
+			fileInputStream.close();
 			logger.info("Loading world from snapshot file {}", snapshotFileName);
 			for (int i = 0; i < saveFileFormat.entities.size(); i++) {
 				int entity = saveFileFormat.entities.get(i);
