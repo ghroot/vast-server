@@ -42,10 +42,11 @@ public class TerminalSystem extends IntervalSystem {
 	Map<Point2i, Set<Integer>> spatialHashes;
 
 	private Screen screen;
-	private Point2i offset = new Point2i();
 	private float scale = 3.0f;
+	private Point2f cameraPosition = new Point2f();
 	private boolean showPathTargetPosition = false;
 	private boolean showSystemProcessingDurations = false;
+	private int lastFocusedEntity = -1;
 
 	public TerminalSystem(Metrics fps, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
 		super(Aspect.all(), 0.1f);
@@ -59,6 +60,7 @@ public class TerminalSystem extends IntervalSystem {
 		try {
 			Terminal terminal = new DefaultTerminalFactory().createTerminalEmulator();
 			screen = new TerminalScreen(terminal);
+			screen.setCursorPosition(null);
 			screen.startScreen();
 		} catch (Exception ignored) {
 		}
@@ -129,7 +131,8 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
 			textGraphics.putString(0, 0, "World size: " + worldDimensions.width + " x " + worldDimensions.height);
 			textGraphics.putString(0, 1, "Scale: x" + (Math.round(scale * 100.0) / 100.0));
-			textGraphics.putString(0, 2, "Spatial hash size: " + worldDimensions.sectionSize);
+			textGraphics.putString(0, 2, "Camera position: " + (Math.round(cameraPosition.x * 100.0) / 100.0) + ", " + (Math.round(cameraPosition.y * 100.0) / 100.0));
+			textGraphics.putString(0, 3, "Spatial hash size: " + worldDimensions.sectionSize);
 			int numberOfSpatialHashes = 0;
 			int numberOfActiveSpatialHashes = 0;
 			for (Set<Integer> entitiesInSpatialHash : spatialHashes.values()) {
@@ -138,10 +141,10 @@ public class TerminalSystem extends IntervalSystem {
 					numberOfActiveSpatialHashes++;
 				}
 			}
-			textGraphics.putString(0, 3, "Active spatial hashes: " + numberOfActiveSpatialHashes + " (of " + numberOfSpatialHashes + " total)");
-			textGraphics.putString(0, 4, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
-			textGraphics.putString(0, 5, "Peer entities: " + peerEntities.size() + " (" + activePeerEntities.size() + " active)");
-			textGraphics.putString(0, 6, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
+			textGraphics.putString(0, 4, "Active spatial hashes: " + numberOfActiveSpatialHashes + " (of " + numberOfSpatialHashes + " total)");
+			textGraphics.putString(0, 5, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
+			textGraphics.putString(0, 6, "Peer entities: " + peerEntities.size() + " (" + activePeerEntities.size() + " active)");
+			textGraphics.putString(0, 7, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
 
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 8, 0, "FPS: " + metrics.fps);
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + metrics.timePerFrameMs + "ms");
@@ -166,36 +169,71 @@ public class TerminalSystem extends IntervalSystem {
 			if (keyStroke != null) {
 				if (keyStroke.getKeyType() == KeyType.Character) {
 					if (keyStroke.getCharacter().toString().equals("+")) {
-						scale += 0.05f;
+						if (scale <= 0.04f) {
+							scale += 0.01f;
+						} else {
+							scale += 0.05f;
+						}
 					} else if (keyStroke.getCharacter().toString().equals("?")) {
 						scale += 1.0f;
 					} else if (keyStroke.getCharacter().toString().equals("-")) {
-						scale -= 0.05f;
-						scale = Math.max(scale, 0.05f);
+						if (scale <= 0.05f) {
+							scale -= 0.01f;
+						} else {
+							scale -= 0.05f;
+						}
+						scale = Math.max(scale, 0.01f);
 					} else if (keyStroke.getCharacter().toString().equals("_")) {
 						scale -= 1.0f;
-						scale = Math.max(scale, 0.05f);
+						scale = Math.max(scale, 0.01f);
 					} else if (keyStroke.getCharacter().toString().equals("x")) {
 						showPathTargetPosition = !showPathTargetPosition;
 					} else if (keyStroke.getCharacter().toString().equals("s")) {
 						showSystemProcessingDurations = !showSystemProcessingDurations;
 					} else if (keyStroke.getCharacter().toString().equals("p") || keyStroke.getCharacter().toString().equals("a")) {
-						IntBag peerEntities = world.getAspectSubscriptionManager().get(Aspect.all(PeerComponent.class)).getEntities();
-						if (peerEntities.size() > 0) {
-							int peerEntity = peerEntities.get(0);
-							Point2f position = transformComponentMapper.get(peerEntity).position;
-							offset.setX(-(int) (position.x * scale));
-							offset.setY((int) (position.y * scale));
+						IntBag peerEntities;
+						if (keyStroke.getCharacter().toString().equals("p")) {
+							peerEntities = world.getAspectSubscriptionManager().get(Aspect.all(PeerComponent.class)).getEntities();
+						} else {
+							peerEntities = world.getAspectSubscriptionManager().get(Aspect.all(PeerComponent.class, ActiveComponent.class)).getEntities();
 						}
+						if (peerEntities.size() > 0) {
+							int peerEntity;
+							if (lastFocusedEntity == -1) {
+								peerEntity = peerEntities.get(0);
+							} else {
+								int index = peerEntities.indexOf(lastFocusedEntity);
+								if (index >= 0) {
+									int nextIndex = index + 1;
+									if (nextIndex < peerEntities.size()) {
+										peerEntity = peerEntities.get(nextIndex);
+									} else {
+										peerEntity = peerEntities.get(0);
+									}
+								} else {
+									peerEntity = peerEntities.get(0);
+								}
+							}
+							Point2f position = transformComponentMapper.get(peerEntity).position;
+							cameraPosition.set(position.x, -position.y);
+							lastFocusedEntity = peerEntity;
+						}
+					} else if (keyStroke.getCharacter().toString().equals("r")) {
+						cameraPosition.set(0.0f, 0.0f);
+						lastFocusedEntity = -1;
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
-					offset.add(new Point2i(0, keyStroke.isShiftDown() ? -4 : -1));
+					cameraPosition.add(new Point2f(0.0f, (1 / scale)));
+					lastFocusedEntity = -1;
 				} else if (keyStroke.getKeyType() == KeyType.ArrowUp) {
-					offset.add(new Point2i(0, keyStroke.isShiftDown() ? 4 : 1));
+					cameraPosition.add(new Point2f(0.0f, -(1 / scale)));
+					lastFocusedEntity = -1;
 				} else if (keyStroke.getKeyType() == KeyType.ArrowLeft) {
-					offset.add(new Point2i(keyStroke.isShiftDown() ? 4 : 1, 0));
+					cameraPosition.add(new Point2f(-(1 / scale), 0.0f));
+					lastFocusedEntity = -1;
 				} else if (keyStroke.getKeyType() == KeyType.ArrowRight) {
-					offset.add(new Point2i(keyStroke.isShiftDown() ? -4 : -1, 0));
+					cameraPosition.add(new Point2f((1 / scale), 0.0f));
+					lastFocusedEntity = -1;
 				}
 			}
 		} catch (Exception ignored) {
@@ -204,8 +242,8 @@ public class TerminalSystem extends IntervalSystem {
 
 	private TerminalPosition getTerminalPositionFromWorldPosition(Point2f position) {
 		return new TerminalPosition(
-				screen.getTerminalSize().getColumns() / 2 + (int) (position.x * scale) + offset.x,
-				screen.getTerminalSize().getRows() / 2 - (int) (position.y * scale) + offset.y
+				screen.getTerminalSize().getColumns() / 2 + (int) (position.x * scale) - (int) (cameraPosition.x * scale),
+				screen.getTerminalSize().getRows() / 2 - (int) (position.y * scale) - (int) (cameraPosition.y * scale)
 		);
 	}
 }
