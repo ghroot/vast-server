@@ -32,6 +32,9 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 	private ComponentMapper<PeerComponent> peerComponentMapper;
 	private ComponentMapper<SpatialComponent> spatialComponentMapper;
 
+	private final float SYNC_THRESHOLD = 0.05f;
+	private final float SYNC_THRESHOLD_SQUARED = SYNC_THRESHOLD * SYNC_THRESHOLD;
+
 	private Map<String, MyPeer> peers;
 	private WorldDimensions worldDimensions;
 	private Map<Point2i, Set<Integer>> spatialHashes;
@@ -60,7 +63,7 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 		TransformComponent transformComponent = transformComponentMapper.get(entity);
 		SyncTransformComponent syncTransformComponent = syncTransformComponentMapper.get(entity);
 
-		if (!transformComponent.position.equals(syncTransformComponent.lastSyncedPosition)) {
+		if (transformComponent.position.distanceSquared(syncTransformComponent.lastSyncedPosition) >= SYNC_THRESHOLD_SQUARED) {
 			reusablePosition[0] = transformComponent.position.x;
 			reusablePosition[1] = transformComponent.position.y;
 			EventMessage positionMessage = new EventMessage(MessageCodes.SET_POSITION, new DataObject()
