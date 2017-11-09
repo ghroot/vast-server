@@ -94,12 +94,12 @@ public class WorldSerializationSystem extends IntervalSystem {
 				worldSerializationManager.setSerializer(new KryoArtemisSerializer(world));
 			}
 			SaveFileFormat saveFileFormat = worldSerializationManager.load(fileInputStream, SaveFileFormat.class);
-			logger.debug("Loading world from snapshot file {}, size: {} bytes", snapshotFileName, fileInputStream.getChannel().size());
+			logger.info("Loading world from snapshot file {}, size: {} bytes", snapshotFileName, fileInputStream.getChannel().size());
 			fileInputStream.close();
 			logger.debug("Loaded {} entities", saveFileFormat.entities.size());
 		} catch (Exception exception) {
 			if (exception instanceof FileNotFoundException) {
-				logger.debug("No snapshot file found, creating a new world");
+				logger.info("No snapshot file found, creating a new world");
 				CreationManager creationManager = world.getSystem(CreationManager.class);
 				creationManager.createWorld();
 			} else {
