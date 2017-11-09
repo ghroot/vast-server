@@ -78,16 +78,21 @@ public class WorldSerializationSystem extends IntervalSystem {
 
 	private void saveWorld() {
 		logger.debug("Serializing world to snapshot {}", snapshotFileName);
-		WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		worldSerializationManager.save(baos, new SaveFileFormat(world.getAspectSubscriptionManager().get(Aspect.all()).getEntities()));
-		try {
-			FileOutputStream fileOutputStream = new FileOutputStream(snapshotFileName);
-			baos.writeTo(fileOutputStream);
-			fileOutputStream.close();
-		} catch (Exception exception) {
-			logger.error("Error saving world", exception);
-		}
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				worldSerializationManager.save(baos, new SaveFileFormat(world.getAspectSubscriptionManager().get(Aspect.all()).getEntities()));
+				try {
+					FileOutputStream fileOutputStream = new FileOutputStream(snapshotFileName);
+					baos.writeTo(fileOutputStream);
+					fileOutputStream.close();
+				} catch (Exception exception) {
+					logger.error("Error saving world", exception);
+				}
+			}
+		}).start();
 	}
 
 	private void loadWorld() {
