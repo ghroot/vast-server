@@ -45,12 +45,11 @@ public class TerminalSystem extends IntervalSystem {
 	private float scale = 3.0f;
 	private Point2f cameraPosition = new Point2f();
 	private boolean showPathTargetPosition = false;
-	private boolean showSystemProcessingDurations = false;
 	private int lastFocusedEntity = -1;
 
-	public TerminalSystem(Metrics fps, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
+	public TerminalSystem(Metrics metrics, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
 		super(Aspect.all(), 0.1f);
-		this.metrics = fps;
+		this.metrics = metrics;
 		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
 	}
@@ -146,14 +145,21 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.putString(0, 6, "Peer entities: " + peerEntities.size() + " (" + activePeerEntities.size() + " active)");
 			textGraphics.putString(0, 7, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
 
-			textGraphics.putString(screen.getTerminalSize().getColumns() - 8, 0, "FPS: " + metrics.getFps());
-			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + metrics.getTimePerFrameMs() + "ms");
+			textGraphics.putString(screen.getTerminalSize().getColumns() - 7, 0, "FPS: " + metrics.getFps());
+			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + metrics.getTimePerFrameMs() + " ms");
 
-			if (showSystemProcessingDurations) {
+			if (metrics.getSystemProcessingTimes().size() > 0) {
+				int longestLength = 0;
+				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
+					longestLength = Math.max(systemName.length(), longestLength);
+				}
 				int row = 4;
-				for (String systemName : metrics.systemProcessingTimes.keySet()) {
-					int processingDuration = metrics.systemProcessingTimes.get(systemName);
-					textGraphics.putString(screen.getTerminalSize().getColumns() - 50, row, systemName + " " + processingDuration + "ms");
+				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
+					int processingDuration = metrics.getSystemProcessingTimes().get(systemName);
+					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestLength - 1, row, systemName);
+					String processDurationString = Integer.toString(processingDuration);
+					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 + (3 - processDurationString.length()), row, processDurationString);
+					textGraphics.putString(screen.getTerminalSize().getColumns() - 2, row, "ms");
 					row++;
 				}
 			}
@@ -188,8 +194,6 @@ public class TerminalSystem extends IntervalSystem {
 						scale = Math.max(scale, 0.01f);
 					} else if (keyStroke.getCharacter().toString().equals("x")) {
 						showPathTargetPosition = !showPathTargetPosition;
-					} else if (keyStroke.getCharacter().toString().equals("s")) {
-						showSystemProcessingDurations = !showSystemProcessingDurations;
 					} else if (keyStroke.getCharacter().toString().equals("p") || keyStroke.getCharacter().toString().equals("a")) {
 						IntBag peerEntities;
 						if (keyStroke.getCharacter().toString().equals("p")) {
