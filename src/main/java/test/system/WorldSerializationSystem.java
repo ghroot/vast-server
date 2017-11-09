@@ -59,10 +59,10 @@ public class WorldSerializationSystem extends IntervalSystem {
 				snapshotFileName = "snapshot";
 				break;
 		}
-		logger.debug("Serializing world to snapshot file {}", snapshotFileName);
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
+				logger.debug("Serializing world to snapshot file {}", snapshotFileName);
 				WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
 				if (format.equals("json")) {
 					worldSerializationManager.setSerializer(new JsonArtemisSerializer(world));
@@ -75,6 +75,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 					FileOutputStream fileOutputStream = new FileOutputStream(snapshotFileName);
 					baos.writeTo(fileOutputStream);
 					fileOutputStream.close();
+					logger.debug("Serialization completed successfully");
 				} catch (Exception exception) {
 					logger.error("Error saving world", exception);
 				}
