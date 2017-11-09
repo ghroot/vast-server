@@ -14,10 +14,6 @@ public class MetricsManager extends BaseSystem {
 	protected void processSystem() {
 	}
 
-	public Metrics getMetrics() {
-		return metrics;
-	}
-
 	public void setSystemProcessingTime(BaseSystem system, int processingTime) {
 		metrics.systemProcessingTimes.put(system.toString(), processingTime);
 	}

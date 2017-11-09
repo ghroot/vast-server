@@ -68,6 +68,8 @@ public class PeerEntitySystem extends BaseSystem {
 
 	@Override
 	protected void processSystem() {
+		updateEntitiesByPeer();
+
 		for (MyPeer peer : peers.values()) {
 			if (isPeerNew(peer)) {
 				peerJoined(peer);
@@ -79,7 +81,7 @@ public class PeerEntitySystem extends BaseSystem {
 			}
 		}
 		for (MyPeer peer : peersLastUpdate) {
-			if (!peers.containsValue(peer)) {
+			if (hasPeerLeft(peer)) {
 				peerLeft(peer);
 			}
 		}
@@ -88,14 +90,8 @@ public class PeerEntitySystem extends BaseSystem {
 		peersLastUpdate.addAll(peers.values());
 	}
 
-	private boolean isPeerNew(MyPeer peer) {
-		return !peersLastUpdate.contains(peer);
-	}
-
-	private void peerJoined(MyPeer peer) {
-		knownEntitiesByPeer.put(peer.getName(), new HashSet<Integer>());
-		nearbyEntitiesByPeer.put(peer.getName(), new HashSet<Integer>());
-
+	private void updateEntitiesByPeer() {
+		entitiesByPeer.clear();
 		IntBag peerEntities = world.getAspectSubscriptionManager().get(Aspect.all(PeerComponent.class)).getEntities();
 		for (int i = 0; i < peerEntities.size(); i++) {
 			int peerEntity = peerEntities.get(i);
@@ -104,6 +100,19 @@ public class PeerEntitySystem extends BaseSystem {
 				entitiesByPeer.put(name, peerEntity);
 			}
 		}
+	}
+
+	private boolean isPeerNew(MyPeer peer) {
+		return !peersLastUpdate.contains(peer);
+	}
+
+	private boolean hasPeerLeft(MyPeer peer) {
+		return !peers.containsValue(peer);
+	}
+
+	private void peerJoined(MyPeer peer) {
+		knownEntitiesByPeer.put(peer.getName(), new HashSet<Integer>());
+		nearbyEntitiesByPeer.put(peer.getName(), new HashSet<Integer>());
 
 		if (!entitiesByPeer.containsKey(peer.getName())) {
 			createPeerEntity(peer);

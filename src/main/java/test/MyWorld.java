@@ -16,22 +16,20 @@ public class MyWorld implements Runnable {
 	private final float UPDATE_RATE = 30.0f;
 
 	private World world;
-	private Map<String, MyPeer> peers;
-	private List<IncomingRequest> incomingRequests;
-	private Map<Point2i, Set<Integer>> spatialHashes;
-
 	private Metrics metrics = new Metrics();
-
 	private boolean alive;
 
 	public MyWorld(MyServerApplication serverApplication, boolean showMonitor) {
-		peers = new HashMap<String, MyPeer>();
-		incomingRequests = new ArrayList<IncomingRequest>();
-		spatialHashes = new HashMap<Point2i, Set<Integer>>();
-
-		WorldDimensions worldDimensions = new WorldDimensions(10000, 10000, 10);
+		Map<String, MyPeer> peers = new HashMap<String, MyPeer>();
+		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
+		Map<Point2i, Set<Integer>> spatialHashes = new HashMap<Point2i, Set<Integer>>();
+		WorldDimensions worldDimensions = new WorldDimensions(5000, 5000, 10);
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
+			new CreationManager(worldDimensions),
+			new WorldSerializationManager(),
+			new MetricsManager(metrics),
+
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
 			new PeerEntitySystem(peers, worldDimensions, spatialHashes),
@@ -42,10 +40,7 @@ public class MyWorld implements Runnable {
 			new CollisionSystem(spatialHashes),
 			new SyncTransformSystem(peers, worldDimensions, spatialHashes),
 			new IncomingRequestClearSystem(incomingRequests),
-			new WorldSerializationSystem(worldDimensions),
-
-			new WorldSerializationManager(),
-			new MetricsManager(metrics)
+			new WorldSerializationSystem("json")
 		);
 		if (showMonitor) {
 			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(metrics, worldDimensions, spatialHashes));
