@@ -21,12 +21,11 @@ import java.util.*;
 public class PeerEntitySystem extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(PeerEntitySystem.class);
 
-	private ComponentMapper<PeerComponent> peerComponentMapper;
-	private ComponentMapper<TransformComponent> transformComponentMapper;
-	private ComponentMapper<SyncTransformComponent> syncTransformComponentMapper;
-	private ComponentMapper<ActiveComponent> activeComponentMapper;
-	private ComponentMapper<TypeComponent> typeComponentMapper;
-	private ComponentMapper<SpatialComponent> spatialComponentMapper;
+	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Transform> transformMapper;
+	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Type> typeMapper;
+	private ComponentMapper<Spatial> spatialMapper;
 
 	private Map<String, VastPeer> peers;
 	private WorldDimensions worldDimensions;
@@ -39,7 +38,7 @@ public class PeerEntitySystem extends BaseSystem {
 	private Point2i reusableHash;
 	private List<Integer> reusableRemovedEntities;
 	private float[] reusablePosition;
-	private Archetype peerEntityArchetype;
+	private Archetype playerEntityArchetype;
 
 	public PeerEntitySystem(Map<String, VastPeer> peers, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
 		this.peers = peers;
@@ -57,12 +56,12 @@ public class PeerEntitySystem extends BaseSystem {
 
 	@Override
 	protected void initialize() {
-		peerEntityArchetype = new ArchetypeBuilder()
-				.add(PeerComponent.class)
-				.add(TransformComponent.class)
-				.add(SpatialComponent.class)
-				.add(CollisionComponent.class)
-				.add(SyncTransformComponent.class)
+		playerEntityArchetype = new ArchetypeBuilder()
+				.add(Player.class)
+				.add(Transform.class)
+				.add(Spatial.class)
+				.add(Collision.class)
+				.add(SyncTransform.class)
 				.build(world);
 	}
 
@@ -92,12 +91,12 @@ public class PeerEntitySystem extends BaseSystem {
 
 	private void updateEntitiesByPeer() {
 		entitiesByPeer.clear();
-		IntBag peerEntities = world.getAspectSubscriptionManager().get(Aspect.all(PeerComponent.class)).getEntities();
-		for (int i = 0; i < peerEntities.size(); i++) {
-			int peerEntity = peerEntities.get(i);
-			String name = peerComponentMapper.get(peerEntity).name;
+		IntBag playerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class)).getEntities();
+		for (int i = 0; i < playerEntities.size(); i++) {
+			int playerEntity = playerEntities.get(i);
+			String name = playerMapper.get(playerEntity).name;
 			if (!entitiesByPeer.containsKey(name)) {
-				entitiesByPeer.put(name, peerEntity);
+				entitiesByPeer.put(name, playerEntity);
 			}
 		}
 	}
@@ -124,21 +123,21 @@ public class PeerEntitySystem extends BaseSystem {
 	}
 
 	private void createPeerEntity(VastPeer peer) {
-		int peerEntity = world.create(peerEntityArchetype);
-		peerComponentMapper.get(peerEntity).name = peer.getName();
-		transformComponentMapper.get(peerEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
-		entitiesByPeer.put(peer.getName(), peerEntity);
-		logger.info("Creating peer entity: {} for {} at {}", peerEntity, peer.getName(), transformComponentMapper.get(peerEntity).position);
+		int playerEntity = world.create(playerEntityArchetype);
+		playerMapper.get(playerEntity).name = peer.getName();
+		transformMapper.get(playerEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
+		entitiesByPeer.put(peer.getName(), playerEntity);
+		logger.info("Creating peer entity: {} for {} at {}", playerEntity, peer.getName(), transformMapper.get(playerEntity).position);
 	}
 
 	private void updateNearbyEntities(VastPeer peer) {
 		Set<Integer> nearbyEntities = nearbyEntitiesByPeer.get(peer.getName());
 		nearbyEntities.clear();
-		int peerEntity = entitiesByPeer.get(peer.getName());
-		SpatialComponent spatialComponent = spatialComponentMapper.get(peerEntity);
-		if (spatialComponent.memberOfSpatialHash != null) {
-			for (int x = spatialComponent.memberOfSpatialHash.x - worldDimensions.sectionSize; x <= spatialComponent.memberOfSpatialHash.x + worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
-				for (int y = spatialComponent.memberOfSpatialHash.y - worldDimensions.sectionSize; y <= spatialComponent.memberOfSpatialHash.y + worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
+		int playerEntity = entitiesByPeer.get(peer.getName());
+		Spatial spatial = spatialMapper.get(playerEntity);
+		if (spatial.memberOfSpatialHash != null) {
+			for (int x = spatial.memberOfSpatialHash.x - worldDimensions.sectionSize; x <= spatial.memberOfSpatialHash.x + worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
+				for (int y = spatial.memberOfSpatialHash.y - worldDimensions.sectionSize; y <= spatial.memberOfSpatialHash.y + worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
 					reusableHash.set(x, y);
 					if (spatialHashes.containsKey(reusableHash)) {
 						nearbyEntities.addAll(spatialHashes.get(reusableHash));
@@ -153,13 +152,13 @@ public class PeerEntitySystem extends BaseSystem {
 		for (int nearbyEntity : nearbyEntities) {
 			if (!isEntityKnownByPeer(nearbyEntity, peer)) {
 				logger.info("Notifying peer {} about new entity {}", peer.getName(), nearbyEntity);
-				TransformComponent transformComponent = transformComponentMapper.get(nearbyEntity);
-				reusablePosition[0] = transformComponent.position.x;
-				reusablePosition[1] = transformComponent.position.y;
-				if (peerComponentMapper.has(nearbyEntity)) {
-					PeerComponent peerComponent = peerComponentMapper.get(nearbyEntity);
-					boolean owner = peer.getName().equals(peerComponent.name);
-					boolean active = activeComponentMapper.has(nearbyEntity);
+				Transform transform = transformMapper.get(nearbyEntity);
+				reusablePosition[0] = transform.position.x;
+				reusablePosition[1] = transform.position.y;
+				if (playerMapper.has(nearbyEntity)) {
+					Player player = playerMapper.get(nearbyEntity);
+					boolean owner = peer.getName().equals(player.name);
+					boolean active = activeMapper.has(nearbyEntity);
 					peer.send(new EventMessage(MessageCodes.PEER_ENTITY_CREATED, new DataObject()
 									.set(MessageCodes.PEER_ENTITY_CREATED_ENTITY_ID, nearbyEntity)
 									.set(MessageCodes.PEER_ENTITY_CREATED_OWNER, owner)
@@ -167,10 +166,10 @@ public class PeerEntitySystem extends BaseSystem {
 									.set(MessageCodes.PEER_ENTITY_CREATED_POSITION, reusablePosition)),
 							SendOptions.ReliableSend);
 				} else {
-					TypeComponent typeComponent = typeComponentMapper.get(nearbyEntity);
+					Type type = typeMapper.get(nearbyEntity);
 					peer.send(new EventMessage(MessageCodes.ENTITY_CREATED, new DataObject()
 									.set(MessageCodes.ENTITY_CREATED_ENTITY_ID, nearbyEntity)
-									.set(MessageCodes.ENTITY_CREATED_TYPE, typeComponent.type)
+									.set(MessageCodes.ENTITY_CREATED_TYPE, type.type)
 									.set(MessageCodes.ENTITY_CREATED_POSITION, reusablePosition)),
 							SendOptions.ReliableSend);
 				}
@@ -196,16 +195,16 @@ public class PeerEntitySystem extends BaseSystem {
 	}
 
 	private void checkAndNotifyAboutActivatedPeerEntity(VastPeer peer) {
-		int peerEntity = entitiesByPeer.get(peer.getName());
-		if (!activeComponentMapper.has(peerEntity)) {
-			String name = peerComponentMapper.get(peerEntity).name;
+		int playerEntity = entitiesByPeer.get(peer.getName());
+		if (!activeMapper.has(playerEntity)) {
+			String name = playerMapper.get(playerEntity).name;
 			if (peers.containsKey(name)) {
-				logger.info("Activating peer entity: {} for {}", peerEntity, name);
-				activeComponentMapper.create(peerEntity);
+				logger.info("Activating peer entity: {} for {}", playerEntity, name);
+				activeMapper.create(playerEntity);
 				for (VastPeer peerToSendTo : peers.values()) {
-					if (isEntityKnownByPeer(peerEntity, peerToSendTo)) {
+					if (isEntityKnownByPeer(playerEntity, peerToSendTo)) {
 						peerToSendTo.send(new EventMessage(MessageCodes.PEER_ENTITY_ACTIVATED, new DataObject()
-										.set(MessageCodes.PEER_ENTITY_ACTIVATED_ENTITY_ID, peerEntity)),
+										.set(MessageCodes.PEER_ENTITY_ACTIVATED_ENTITY_ID, playerEntity)),
 								SendOptions.ReliableSend);
 					}
 				}
@@ -214,16 +213,16 @@ public class PeerEntitySystem extends BaseSystem {
 	}
 
 	private void checkAndNotifyAboutDeactivatedPeerEntity(VastPeer peer) {
-		int peerEntity = entitiesByPeer.get(peer.getName());
-		if (activeComponentMapper.has(peerEntity)) {
-			String name = peerComponentMapper.get(peerEntity).name;
+		int playerEntity = entitiesByPeer.get(peer.getName());
+		if (activeMapper.has(playerEntity)) {
+			String name = playerMapper.get(playerEntity).name;
 			if (!peers.containsKey(name)) {
-				logger.info("Deactivating peer entity: {} for {}", peerEntity, name);
-				activeComponentMapper.remove(peerEntity);
+				logger.info("Deactivating peer entity: {} for {}", playerEntity, name);
+				activeMapper.remove(playerEntity);
 				for (VastPeer peerToSendTo : peers.values()) {
-					if (isEntityKnownByPeer(peerEntity, peerToSendTo)) {
+					if (isEntityKnownByPeer(playerEntity, peerToSendTo)) {
 						peerToSendTo.send(new EventMessage(MessageCodes.PEER_ENTITY_DEACTIVATED, new DataObject()
-										.set(MessageCodes.PEER_ENTITY_DEACTIVATED_ENTITY_ID, peerEntity)),
+										.set(MessageCodes.PEER_ENTITY_DEACTIVATED_ENTITY_ID, playerEntity)),
 								SendOptions.ReliableSend);
 					}
 				}

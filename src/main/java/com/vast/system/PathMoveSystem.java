@@ -5,15 +5,19 @@ import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.vast.Profiler;
-import com.vast.component.PathComponent;
-import com.vast.component.TransformComponent;
+import com.vast.component.Path;
+import com.vast.component.Transform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Vector2f;
 
 @Profile(enabled = true, using = Profiler.class)
 public class PathMoveSystem extends IteratingSystem {
-    private ComponentMapper<TransformComponent> transformComponentMapper;
-    private ComponentMapper<PathComponent> pathComponentMapper;
+	private static final Logger logger = LoggerFactory.getLogger(PathMoveSystem.class);
+
+    private ComponentMapper<Transform> transformMapper;
+    private ComponentMapper<Path> pathMapper;
 
     private final float MAX_PATHING_DURATION = 12.0f;
     private final float WALK_SPEED = 0.8f;
@@ -22,21 +26,21 @@ public class PathMoveSystem extends IteratingSystem {
     private Vector2f reusableDirection;
 
     public PathMoveSystem() {
-        super(Aspect.all(TransformComponent.class, PathComponent.class));
+        super(Aspect.all(Transform.class, Path.class));
         reusableDirection = new Vector2f();
     }
 
 	@Override
 	protected void inserted(int entity) {
-		pathComponentMapper.get(entity).pathingTimeLeft = MAX_PATHING_DURATION;
+		pathMapper.get(entity).pathingTimeLeft = MAX_PATHING_DURATION;
 	}
 
 	@Override
     protected void process(int entity) {
-        TransformComponent transformComponent = transformComponentMapper.get(entity);
-        PathComponent pathComponent = pathComponentMapper.get(entity);
+        Transform transform = transformMapper.get(entity);
+        Path path = pathMapper.get(entity);
 
-        reusableDirection.set(pathComponent.targetPosition.x - transformComponent.position.x, pathComponent.targetPosition.y - transformComponent.position.y);
+        reusableDirection.set(path.targetPosition.x - transform.position.x, path.targetPosition.y - transform.position.y);
         if (reusableDirection.length() > 0) {
             float distance = reusableDirection.length();
             float speed = WALK_SPEED;
@@ -45,17 +49,17 @@ public class PathMoveSystem extends IteratingSystem {
 			}
             reusableDirection.normalize();
             if (speed * world.delta > distance) {
-                transformComponent.position.set(pathComponent.targetPosition);
-                pathComponentMapper.remove(entity);
+                transform.position.set(path.targetPosition);
+                pathMapper.remove(entity);
             } else {
                 reusableDirection.scale(speed * world.delta);
-                transformComponent.position.add(reusableDirection);
+                transform.position.add(reusableDirection);
             }
         }
 
-        pathComponent.pathingTimeLeft -= world.delta;
-        if (pathComponent.pathingTimeLeft <= 0.0f) {
-        	pathComponentMapper.remove(entity);
+        path.pathingTimeLeft -= world.delta;
+        if (path.pathingTimeLeft <= 0.0f) {
+        	pathMapper.remove(entity);
 		}
     }
 }

@@ -11,10 +11,10 @@ import com.vast.MessageCodes;
 import com.vast.VastPeer;
 import com.vast.Profiler;
 import com.vast.WorldDimensions;
-import com.vast.component.PeerComponent;
-import com.vast.component.SpatialComponent;
-import com.vast.component.SyncTransformComponent;
-import com.vast.component.TransformComponent;
+import com.vast.component.Player;
+import com.vast.component.Spatial;
+import com.vast.component.SyncTransform;
+import com.vast.component.Transform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +27,10 @@ import java.util.Set;
 public class SyncTransformSystem extends IntervalIteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(SyncTransformSystem.class);
 
-	private ComponentMapper<TransformComponent> transformComponentMapper;
-	private ComponentMapper<SyncTransformComponent> syncTransformComponentMapper;
-	private ComponentMapper<PeerComponent> peerComponentMapper;
-	private ComponentMapper<SpatialComponent> spatialComponentMapper;
+	private ComponentMapper<Transform> transformMapper;
+	private ComponentMapper<SyncTransform> syncTransformMapper;
+	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Spatial> spatialMapper;
 
 	private final float SYNC_THRESHOLD = 0.05f;
 	private final float SYNC_THRESHOLD_SQUARED = SYNC_THRESHOLD * SYNC_THRESHOLD;
@@ -44,7 +44,7 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 	private Set<Integer> reusableNearbyPeerEntities;
 
 	public SyncTransformSystem(Map<String, VastPeer> peers, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
-		super(Aspect.all(TransformComponent.class, SyncTransformComponent.class), 0.2f);
+		super(Aspect.all(Transform.class, SyncTransform.class), 0.2f);
 		this.peers = peers;
 		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
@@ -55,41 +55,41 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 
 	@Override
 	protected void inserted(int entity) {
-		syncTransformComponentMapper.get(entity).lastSyncedPosition.set(transformComponentMapper.get(entity).position);
+		syncTransformMapper.get(entity).lastSyncedPosition.set(transformMapper.get(entity).position);
 	}
 
 	@Override
 	protected void process(int entity) {
-		TransformComponent transformComponent = transformComponentMapper.get(entity);
-		SyncTransformComponent syncTransformComponent = syncTransformComponentMapper.get(entity);
+		Transform transform = transformMapper.get(entity);
+		SyncTransform syncTransform = syncTransformMapper.get(entity);
 
-		if (transformComponent.position.distanceSquared(syncTransformComponent.lastSyncedPosition) >= SYNC_THRESHOLD_SQUARED) {
-			reusablePosition[0] = transformComponent.position.x;
-			reusablePosition[1] = transformComponent.position.y;
+		if (transform.position.distanceSquared(syncTransform.lastSyncedPosition) >= SYNC_THRESHOLD_SQUARED) {
+			reusablePosition[0] = transform.position.x;
+			reusablePosition[1] = transform.position.y;
 			EventMessage positionMessage = new EventMessage(MessageCodes.SET_POSITION, new DataObject()
 					.set(MessageCodes.SET_POSITION_ENTITY_ID, entity)
 					.set(MessageCodes.SET_POSITION_POSITION, reusablePosition));
 			Set<Integer> nearbyPeerEntities = getNearbyPeerEntities(entity);
 			for (int nearbyPeerEntity : nearbyPeerEntities) {
-				VastPeer peer = peers.get(peerComponentMapper.get(nearbyPeerEntity).name);
+				VastPeer peer = peers.get(playerMapper.get(nearbyPeerEntity).name);
 				if (peer != null) {
 					peer.send(positionMessage, SendOptions.ReliableSend);
 				}
 			}
-			syncTransformComponent.lastSyncedPosition.set(transformComponent.position);
+			syncTransform.lastSyncedPosition.set(transform.position);
 		}
 	}
 
 	private Set<Integer> getNearbyPeerEntities(int entity) {
 		reusableNearbyPeerEntities.clear();
-		SpatialComponent spatialComponent = spatialComponentMapper.get(entity);
-		if (spatialComponent.memberOfSpatialHash != null) {
-			for (int x = spatialComponent.memberOfSpatialHash.x - worldDimensions.sectionSize; x <= spatialComponent.memberOfSpatialHash.x + worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
-				for (int y = spatialComponent.memberOfSpatialHash.y - worldDimensions.sectionSize; y <= spatialComponent.memberOfSpatialHash.y + worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
+		Spatial spatial = spatialMapper.get(entity);
+		if (spatial.memberOfSpatialHash != null) {
+			for (int x = spatial.memberOfSpatialHash.x - worldDimensions.sectionSize; x <= spatial.memberOfSpatialHash.x + worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
+				for (int y = spatial.memberOfSpatialHash.y - worldDimensions.sectionSize; y <= spatial.memberOfSpatialHash.y + worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
 					reusableHash.set(x, y);
 					if (spatialHashes.containsKey(reusableHash)) {
 						for (int nearbyEntity : spatialHashes.get(reusableHash)) {
-							if (peerComponentMapper.has(nearbyEntity)) {
+							if (playerMapper.has(nearbyEntity)) {
 								reusableNearbyPeerEntities.add(nearbyEntity);
 							}
 						}

@@ -4,5 +4,5 @@ import com.artemis.Component;
 import com.artemis.annotations.PooledWeaver;
 
 @PooledWeaver
-public class AIComponent extends Component {
+public class AI extends Component {
 }

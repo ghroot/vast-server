@@ -31,15 +31,15 @@ import java.util.Set;
 public class TerminalSystem extends IntervalSystem {
 	private static final Logger logger = LoggerFactory.getLogger(TerminalSystem.class);
 
-	private ComponentMapper<PeerComponent> peerComponentMapper;
-	private ComponentMapper<ActiveComponent> activeComponentMapper;
-	private ComponentMapper<TransformComponent> transformComponentMapper;
-	private ComponentMapper<TypeComponent> typeComponentMapper;
-	private ComponentMapper<PathComponent> pathComponentMapper;
+	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Transform> transformMapper;
+	private ComponentMapper<Type> typeMapper;
+	private ComponentMapper<Path> pathMapper;
 
 	private Metrics metrics;
 	private WorldDimensions worldDimensions;
-	Map<Point2i, Set<Integer>> spatialHashes;
+	private Map<Point2i, Set<Integer>> spatialHashes;
 
 	private Screen screen;
 	private float scale = 3.0f;
@@ -81,17 +81,17 @@ public class TerminalSystem extends IntervalSystem {
 			screen.doResizeIfNecessary();
 			screen.clear();
 
-			IntBag entities = world.getAspectSubscriptionManager().get(Aspect.one(TransformComponent.class)).getEntities();
-			IntBag peerEntities = world.getAspectSubscriptionManager().get(Aspect.one(PeerComponent.class)).getEntities();
-			IntBag activePeerEntities = world.getAspectSubscriptionManager().get(Aspect.all(PeerComponent.class, ActiveComponent.class)).getEntities();
+			IntBag entities = world.getAspectSubscriptionManager().get(Aspect.one(Transform.class)).getEntities();
+			IntBag playerEntities = world.getAspectSubscriptionManager().get(Aspect.one(Player.class)).getEntities();
+			IntBag activePlayerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class, Active.class)).getEntities();
 
 			if (showPathTargetPosition) {
-				IntBag pathEntities = world.getAspectSubscriptionManager().get(Aspect.all(TransformComponent.class, PathComponent.class)).getEntities();
+				IntBag pathEntities = world.getAspectSubscriptionManager().get(Aspect.all(Transform.class, Path.class)).getEntities();
 				for (int i = 0; i < pathEntities.size(); i++) {
 					int pathEntity = pathEntities.get(i);
 
-					PathComponent pathComponent = pathComponentMapper.get(pathEntity);
-					TerminalPosition targetTerminalPosition = getTerminalPositionFromWorldPosition(pathComponent.targetPosition);
+					Path path = pathMapper.get(pathEntity);
+					TerminalPosition targetTerminalPosition = getTerminalPositionFromWorldPosition(path.targetPosition);
 					if (targetTerminalPosition.getColumn() >= 0 && targetTerminalPosition.getColumn() < screen.getTerminalSize().getColumns() &&
 							targetTerminalPosition.getRow() >= 0 && targetTerminalPosition.getRow() < screen.getTerminalSize().getRows()) {
 						screen.setCharacter(targetTerminalPosition, new TextCharacter('x', TextColor.ANSI.RED, TextColor.ANSI.DEFAULT));
@@ -102,20 +102,20 @@ public class TerminalSystem extends IntervalSystem {
 			int numberOfEntitiesOnScreen = 0;
 			for (int i = 0; i < entities.size(); i++) {
 				int entity = entities.get(i);
-				TransformComponent transformComponent = transformComponentMapper.get(entity);
-				TerminalPosition terminalPosition = getTerminalPositionFromWorldPosition(transformComponent.position);
+				Transform transform = transformMapper.get(entity);
+				TerminalPosition terminalPosition = getTerminalPositionFromWorldPosition(transform.position);
 				if (terminalPosition.getColumn() >= 0 && terminalPosition.getColumn() < screen.getTerminalSize().getColumns() &&
 						terminalPosition.getRow() >= 0 && terminalPosition.getRow() < screen.getTerminalSize().getRows()) {
-					if (peerComponentMapper.has(entity)) {
-						if (activeComponentMapper.has(entity)) {
+					if (playerMapper.has(entity)) {
+						if (activeMapper.has(entity)) {
 							screen.setCharacter(terminalPosition, new TextCharacter('O', TextColor.ANSI.BLUE, TextColor.ANSI.DEFAULT));
 						} else {
 							screen.setCharacter(terminalPosition, new TextCharacter('O', TextColor.ANSI.YELLOW, TextColor.ANSI.DEFAULT));
 						}
 					} else {
-						if (typeComponentMapper.get(entity).type.equals("ai")) {
+						if (typeMapper.get(entity).type.equals("ai")) {
 							screen.setCharacter(terminalPosition, new TextCharacter('o', TextColor.ANSI.CYAN, TextColor.ANSI.DEFAULT));
-						} else if (typeComponentMapper.get(entity).type.equals("tree")) {
+						} else if (typeMapper.get(entity).type.equals("tree")) {
 							screen.setCharacter(terminalPosition, new TextCharacter('+', TextColor.ANSI.GREEN, TextColor.ANSI.DEFAULT));
 						} else {
 							screen.setCharacter(terminalPosition, new TextCharacter('?', TextColor.ANSI.MAGENTA, TextColor.ANSI.DEFAULT));
@@ -142,7 +142,7 @@ public class TerminalSystem extends IntervalSystem {
 			}
 			textGraphics.putString(0, 4, "Active spatial hashes: " + numberOfActiveSpatialHashes + " (of " + numberOfSpatialHashes + " total)");
 			textGraphics.putString(0, 5, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
-			textGraphics.putString(0, 6, "Peer entities: " + peerEntities.size() + " (" + activePeerEntities.size() + " active)");
+			textGraphics.putString(0, 6, "Player entities: " + playerEntities.size() + " (" + activePlayerEntities.size() + " active)");
 			textGraphics.putString(0, 7, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
 
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 7, 0, "FPS: " + metrics.getFps());
@@ -165,9 +165,9 @@ public class TerminalSystem extends IntervalSystem {
 			}
 
 			if (lastFocusedEntity >= 0) {
-				Point2f position = transformComponentMapper.get(lastFocusedEntity).position;
+				Point2f position = transformMapper.get(lastFocusedEntity).position;
 				cameraPosition.set(position.x, -position.y);
-				textGraphics.putString(0, 8, "Following peer entity: " + peerComponentMapper.get(lastFocusedEntity).name);
+				textGraphics.putString(0, 8, "Following peer entity: " + playerMapper.get(lastFocusedEntity).name);
 			}
 
 			screen.refresh();
@@ -201,32 +201,32 @@ public class TerminalSystem extends IntervalSystem {
 					} else if (keyStroke.getCharacter().toString().equals("x")) {
 						showPathTargetPosition = !showPathTargetPosition;
 					} else if (keyStroke.getCharacter().toString().equals("p") || keyStroke.getCharacter().toString().equals("a")) {
-						IntBag peerEntities;
+						IntBag playerEntities;
 						if (keyStroke.getCharacter().toString().equals("p")) {
-							peerEntities = world.getAspectSubscriptionManager().get(Aspect.all(PeerComponent.class)).getEntities();
+							playerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class)).getEntities();
 						} else {
-							peerEntities = world.getAspectSubscriptionManager().get(Aspect.all(PeerComponent.class, ActiveComponent.class)).getEntities();
+							playerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class, Active.class)).getEntities();
 						}
-						if (peerEntities.size() > 0) {
-							int peerEntity;
+						if (playerEntities.size() > 0) {
+							int playerEntity;
 							if (lastFocusedEntity == -1) {
-								peerEntity = peerEntities.get(0);
+								playerEntity = playerEntities.get(0);
 							} else {
-								int index = peerEntities.indexOf(lastFocusedEntity);
+								int index = playerEntities.indexOf(lastFocusedEntity);
 								if (index >= 0) {
 									int nextIndex = index + 1;
-									if (nextIndex < peerEntities.size()) {
-										peerEntity = peerEntities.get(nextIndex);
+									if (nextIndex < playerEntities.size()) {
+										playerEntity = playerEntities.get(nextIndex);
 									} else {
-										peerEntity = peerEntities.get(0);
+										playerEntity = playerEntities.get(0);
 									}
 								} else {
-									peerEntity = peerEntities.get(0);
+									playerEntity = playerEntities.get(0);
 								}
 							}
-							Point2f position = transformComponentMapper.get(peerEntity).position;
+							Point2f position = transformMapper.get(playerEntity).position;
 							cameraPosition.set(position.x, -position.y);
-							lastFocusedEntity = peerEntity;
+							lastFocusedEntity = playerEntity;
 						}
 					} else if (keyStroke.getCharacter().toString().equals("r")) {
 						cameraPosition.set(0.0f, 0.0f);

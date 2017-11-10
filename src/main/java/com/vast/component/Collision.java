@@ -4,6 +4,7 @@ import com.artemis.Component;
 import com.artemis.annotations.PooledWeaver;
 
 @PooledWeaver
-public class PeerComponent extends Component {
-    public String name = "unknown";
+public class Collision extends Component {
+	public boolean isStatic = false;
+	public float radius = 0.2f;
 }

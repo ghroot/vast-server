@@ -6,7 +6,7 @@ import com.vast.IncomingRequest;
 import java.util.List;
 
 public class IncomingRequestClearSystem extends BaseSystem {
-	List<IncomingRequest> incomingRequests;
+	private List<IncomingRequest> incomingRequests;
 
 	public IncomingRequestClearSystem(List<IncomingRequest> incomingRequests) {
 		this.incomingRequests = incomingRequests;

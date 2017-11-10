@@ -5,9 +5,9 @@ import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IntervalIteratingSystem;
 import com.vast.Profiler;
-import com.vast.component.AIComponent;
-import com.vast.component.PathComponent;
-import com.vast.component.TransformComponent;
+import com.vast.component.AI;
+import com.vast.component.Path;
+import com.vast.component.Transform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,16 +17,16 @@ import javax.vecmath.Point2f;
 public class AISystem extends IntervalIteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(AISystem.class);
 
-	private ComponentMapper<PathComponent> pathComponentMapper;
-	private ComponentMapper<TransformComponent> transformComponentMapper;
+	private ComponentMapper<Path> pathMapper;
+	private ComponentMapper<Transform> transformMapper;
 
 	public AISystem() {
-		super(Aspect.one(AIComponent.class).exclude(PathComponent.class), 1.0f);
+		super(Aspect.one(AI.class).exclude(Path.class), 1.0f);
 	}
 
 	@Override
 	protected void process(int entity) {
-		pathComponentMapper.create(entity).targetPosition = new Point2f(transformComponentMapper.get(entity).position);
-		pathComponentMapper.create(entity).targetPosition.add(new Point2f((float) (-2.0f + Math.random() * 4.0f), (float) (-2.0f + Math.random() * 4.0f)));
+		pathMapper.create(entity).targetPosition = new Point2f(transformMapper.get(entity).position);
+		pathMapper.create(entity).targetPosition.add(new Point2f((float) (-2.0f + Math.random() * 4.0f), (float) (-2.0f + Math.random() * 4.0f)));
 	}
 }
