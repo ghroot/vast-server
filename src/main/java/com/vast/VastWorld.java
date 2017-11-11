@@ -3,6 +3,8 @@ package com.vast;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.artemis.managers.WorldSerializationManager;
+import com.vast.collision.CollisionHandler;
+import com.vast.collision.PlayerWithPickupCollisionHandler;
 import com.vast.system.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +27,7 @@ public class VastWorld implements Runnable {
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
 		Map<Point2i, Set<Integer>> spatialHashes = new HashMap<Point2i, Set<Integer>>();
-		WorldDimensions worldDimensions = new WorldDimensions(5000, 5000, 10);
+		WorldDimensions worldDimensions = new WorldDimensions(5000, 5000, 5);
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldDimensions),
@@ -39,7 +41,9 @@ public class VastWorld implements Runnable {
 			new AISystem(),
 			new PathMoveSystem(),
 			new SpatialSystem(worldDimensions, spatialHashes),
-			new CollisionSystem(spatialHashes),
+			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(
+				new PlayerWithPickupCollisionHandler()
+			)), worldDimensions, spatialHashes),
 			new SyncTransformSystem(peers, worldDimensions, spatialHashes),
 			new IncomingRequestClearSystem(incomingRequests),
 			new WorldSerializationSystem(snapshotFormat)

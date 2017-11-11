@@ -42,6 +42,15 @@ public class SpatialSystem extends IteratingSystem {
 	}
 
 	@Override
+	protected void removed(int entity) {
+		Spatial spatial = spatialMapper.get(entity);
+
+		if (spatial.memberOfSpatialHash != null) {
+			spatialHashes.get(spatial.memberOfSpatialHash).remove(entity);
+		}
+	}
+
+	@Override
 	protected void process(int entity) {
 		Transform transform = transformMapper.get(entity);
 		Spatial spatial = spatialMapper.get(entity);

@@ -89,7 +89,7 @@ public class VastServerApplication extends ServerApplication {
 		synchronized (incomingRequests) {
 			incomingRequests.add(new IncomingRequest(peer, requestMessage));
 		}
-		logger.info("Got request message from peer: {} from {}", requestMessage, peer.getName());
+		logger.debug("Got request message from peer: {} from {}", requestMessage, peer.getName());
 	}
 }
 

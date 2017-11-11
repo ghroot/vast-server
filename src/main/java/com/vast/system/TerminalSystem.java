@@ -117,6 +117,8 @@ public class TerminalSystem extends IntervalSystem {
 							screen.setCharacter(terminalPosition, new TextCharacter('o', TextColor.ANSI.CYAN, TextColor.ANSI.DEFAULT));
 						} else if (typeMapper.get(entity).type.equals("tree")) {
 							screen.setCharacter(terminalPosition, new TextCharacter('+', TextColor.ANSI.GREEN, TextColor.ANSI.DEFAULT));
+						} else if (typeMapper.get(entity).type.equals("pickup")) {
+							screen.setCharacter(terminalPosition, new TextCharacter('.', TextColor.ANSI.RED, TextColor.ANSI.DEFAULT));
 						} else {
 							screen.setCharacter(terminalPosition, new TextCharacter('?', TextColor.ANSI.MAGENTA, TextColor.ANSI.DEFAULT));
 						}
@@ -167,7 +169,7 @@ public class TerminalSystem extends IntervalSystem {
 			if (lastFocusedEntity >= 0) {
 				Point2f position = transformMapper.get(lastFocusedEntity).position;
 				cameraPosition.set(position.x, -position.y);
-				textGraphics.putString(0, 8, "Following peer entity: " + playerMapper.get(lastFocusedEntity).name);
+				textGraphics.putString(0, 8, "Following peer entity: " + lastFocusedEntity + " (" + playerMapper.get(lastFocusedEntity).name + ")");
 			}
 
 			screen.refresh();

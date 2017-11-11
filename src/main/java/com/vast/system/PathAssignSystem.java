@@ -35,7 +35,7 @@ public class PathAssignSystem extends BaseSystem {
                     pathMapper.create(playerEntity);
                 }
                 float[] position = (float[]) request.getMessage().getDataObject().get(MessageCodes.SET_PATH_POSITION).value;
-                logger.info("Setting path for entity {}: {}, {}", playerEntity, position[0], position[1]);
+                logger.debug("Setting path for entity {}: {}, {}", playerEntity, position[0], position[1]);
                 pathMapper.get(playerEntity).targetPosition = new Point2f(position[0], position[1]);
             }
         }

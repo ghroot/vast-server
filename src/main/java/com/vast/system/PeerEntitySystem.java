@@ -58,6 +58,7 @@ public class PeerEntitySystem extends BaseSystem {
 	protected void initialize() {
 		playerEntityArchetype = new ArchetypeBuilder()
 				.add(Player.class)
+				.add(Inventory.class)
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)
@@ -151,7 +152,7 @@ public class PeerEntitySystem extends BaseSystem {
 		Set<Integer> nearbyEntities = nearbyEntitiesByPeer.get(peer.getName());
 		for (int nearbyEntity : nearbyEntities) {
 			if (!isEntityKnownByPeer(nearbyEntity, peer)) {
-				logger.info("Notifying peer {} about new entity {}", peer.getName(), nearbyEntity);
+				logger.debug("Notifying peer {} about new entity {}", peer.getName(), nearbyEntity);
 				Transform transform = transformMapper.get(nearbyEntity);
 				reusablePosition[0] = transform.position.x;
 				reusablePosition[1] = transform.position.y;
@@ -184,7 +185,7 @@ public class PeerEntitySystem extends BaseSystem {
 		reusableRemovedEntities.clear();
 		for (int entityKnownByPeer : entitiesKnownByPeer) {
 			if (!nearbyEntities.contains(entityKnownByPeer)) {
-				logger.info("Notifying peer {} about removed entity {}", peer.getName(), entityKnownByPeer);
+				logger.debug("Notifying peer {} about removed entity {}", peer.getName(), entityKnownByPeer);
 				peer.send(new EventMessage(MessageCodes.ENTITY_DESTROYED, new DataObject()
 								.set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, entityKnownByPeer)),
 						SendOptions.ReliableSend);

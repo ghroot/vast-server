@@ -15,11 +15,13 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<Collision> collisionMapper;
+	private ComponentMapper<Pickup> pickupMapper;
 
 	private WorldDimensions worldDimensions;
 
 	private Archetype aiArchetype;
 	private Archetype treeArchetype;
+	private Archetype pickupArchetype;
 
 	public CreationManager(WorldDimensions worldDimensions) {
 		this.worldDimensions = worldDimensions;
@@ -42,6 +44,14 @@ public class CreationManager extends BaseSystem {
 				.add(Spatial.class)
 				.add(Collision.class)
 				.build(world);
+
+		pickupArchetype = new ArchetypeBuilder()
+				.add(Type.class)
+				.add(Transform.class)
+				.add(Spatial.class)
+				.add(Collision.class)
+				.add(Pickup.class)
+				.build(world);
 	}
 
 	@Override
@@ -61,6 +71,15 @@ public class CreationManager extends BaseSystem {
 			transformMapper.get(treeEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
 			collisionMapper.get(treeEntity).isStatic = true;
 			collisionMapper.get(treeEntity).radius = 0.1f;
+		}
+
+		for (int i = 0; i < 1000; i++) {
+			int pickupEntity = world.create(pickupArchetype);
+			typeMapper.get(pickupEntity).type = "pickup";
+			transformMapper.get(pickupEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
+			collisionMapper.get(pickupEntity).isStatic = true;
+			collisionMapper.get(pickupEntity).radius = 0.1f;
+			pickupMapper.create(pickupEntity).type = 3;
 		}
 	}
 }
