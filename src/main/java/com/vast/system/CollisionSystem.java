@@ -4,6 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
+import com.vast.Metrics;
 import com.vast.Profiler;
 import com.vast.WorldDimensions;
 import com.vast.collision.CollisionHandler;
@@ -30,18 +31,21 @@ public class CollisionSystem extends IteratingSystem {
 	private Set<CollisionHandler> collisionHandlers;
 	private WorldDimensions worldDimensions;
 	private Map<Point2i, Set<Integer>> spatialHashes;
+	private Metrics metrics;
 
 	private Set<Integer> checkedEntites;
 	private Point2i reusableCheckedEntity;
 	private Point2i reusableHash;
 	private Set<Integer> reusableNearbyEntities;
 	private Vector2f reusableVector;
+	private int numberOfCollisionChecks;
 
-	public CollisionSystem(Set<CollisionHandler> collisionHandlers, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
+	public CollisionSystem(Set<CollisionHandler> collisionHandlers, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes, Metrics metrics) {
 		super(Aspect.all(Transform.class, Spatial.class, Collision.class));
 		this.collisionHandlers = collisionHandlers;
 		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
+		this.metrics = metrics;
 		checkedEntites = new HashSet<Integer>();
 		reusableCheckedEntity = new Point2i();
 		reusableHash = new Point2i();
@@ -60,6 +64,12 @@ public class CollisionSystem extends IteratingSystem {
 	@Override
 	protected void begin() {
 		checkedEntites.clear();
+		numberOfCollisionChecks = 0;
+	}
+
+	@Override
+	protected void end() {
+		metrics.setNumberOfCollisionChecks(numberOfCollisionChecks);
 	}
 
 	@Override
@@ -123,6 +133,7 @@ public class CollisionSystem extends IteratingSystem {
 							}
 						}
 						checkedEntites.add(checkedEntity);
+						numberOfCollisionChecks++;
 					}
 				}
 			}

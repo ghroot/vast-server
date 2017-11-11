@@ -8,6 +8,7 @@ import java.util.Map;
 public class Metrics {
 	private int timePerFrameMs;
 	private Map<String, Integer> systemProcessingTimes = new HashMap<String, Integer>();
+	private int numberOfCollisionChecks;
 
 	public int getTimePerFrameMs() {
 		return timePerFrameMs;
@@ -27,5 +28,13 @@ public class Metrics {
 
 	public Map<String, Integer> getSystemProcessingTimes() {
 		return systemProcessingTimes;
+	}
+
+	public void setNumberOfCollisionChecks(int numberOfCollisionChecks) {
+		this.numberOfCollisionChecks = numberOfCollisionChecks;
+	}
+
+	public int getNumberOfCollisionChecks() {
+		return numberOfCollisionChecks;
 	}
 }

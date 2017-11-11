@@ -149,13 +149,14 @@ public class TerminalSystem extends IntervalSystem {
 
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 7, 0, "FPS: " + metrics.getFps());
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + metrics.getTimePerFrameMs() + " ms");
+			textGraphics.putString(screen.getTerminalSize().getColumns() - 23, 3, "Collision checks: " + metrics.getNumberOfCollisionChecks());
 
 			if (metrics.getSystemProcessingTimes().size() > 0) {
 				int longestLength = 0;
 				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
 					longestLength = Math.max(systemName.length(), longestLength);
 				}
-				int row = 4;
+				int row = 5;
 				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
 					int processingDuration = metrics.getSystemProcessingTimes().get(systemName);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestLength - 1, row, systemName);

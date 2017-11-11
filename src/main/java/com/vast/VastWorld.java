@@ -27,7 +27,7 @@ public class VastWorld implements Runnable {
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
 		Map<Point2i, Set<Integer>> spatialHashes = new HashMap<Point2i, Set<Integer>>();
-		WorldDimensions worldDimensions = new WorldDimensions(5000, 5000, 5);
+		WorldDimensions worldDimensions = new WorldDimensions(5000, 5000, 2);
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldDimensions),
@@ -43,7 +43,7 @@ public class VastWorld implements Runnable {
 			new SpatialSystem(worldDimensions, spatialHashes),
 			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(
 				new PlayerWithPickupCollisionHandler()
-			)), worldDimensions, spatialHashes),
+			)), worldDimensions, spatialHashes, metrics),
 			new SyncTransformSystem(peers, worldDimensions, spatialHashes),
 			new IncomingRequestClearSystem(incomingRequests),
 			new WorldSerializationSystem(snapshotFormat)
@@ -69,8 +69,6 @@ public class VastWorld implements Runnable {
 				if (timeToSleep > 0) {
 					Thread.sleep(timeToSleep);
 				}
-				long frameEndTime = System.currentTimeMillis();
-				metrics.setTimePerFrameMs((int) (frameEndTime - frameStartTime));
 			} catch (InterruptedException exception) {
 				logger.error("Error in world loop", exception);
 			}
