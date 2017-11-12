@@ -9,7 +9,6 @@ import com.vast.system.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.vecmath.Point2i;
 import java.util.*;
 
 public class VastWorld implements Runnable {
@@ -25,7 +24,7 @@ public class VastWorld implements Runnable {
 	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, boolean showMonitor, Metrics metrics) {
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
-		Map<Point2i, Set<Integer>> spatialHashes = new HashMap<Point2i, Set<Integer>>();
+		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
 		WorldDimensions worldDimensions = new WorldDimensions(5000, 5000, 2);
 		Map<String, Set<Integer>> nearbyEntitiesByPeer = new HashMap<String, Set<Integer>>();
 		Map<String, Set<Integer>> knownEntitiesByPeer = new HashMap<String, Set<Integer>>();

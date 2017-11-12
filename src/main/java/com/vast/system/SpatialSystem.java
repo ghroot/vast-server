@@ -25,9 +25,9 @@ public class SpatialSystem extends IteratingSystem {
 	private ComponentMapper<Spatial> spatialMapper;
 
 	private WorldDimensions worldDimensions;
-	private Map<Point2i, Set<Integer>> spatialHashes;
+	private Map<Integer, Set<Integer>> spatialHashes;
 
-	public SpatialSystem(WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
+	public SpatialSystem(WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes) {
 		super(Aspect.all(Transform.class, Spatial.class));
 		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
@@ -46,7 +46,7 @@ public class SpatialSystem extends IteratingSystem {
 		Spatial spatial = spatialMapper.get(entity);
 
 		if (spatial.memberOfSpatialHash != null) {
-			spatialHashes.get(spatial.memberOfSpatialHash).remove(entity);
+			spatialHashes.get(spatial.memberOfSpatialHash.hashCode()).remove(entity);
 		}
 	}
 
@@ -57,26 +57,24 @@ public class SpatialSystem extends IteratingSystem {
 
 		if (spatial.lastUsedPosition == null || !spatial.lastUsedPosition.equals(transform.position)) {
 			if (spatial.memberOfSpatialHash != null) {
-				spatialHashes.get(spatial.memberOfSpatialHash).remove(entity);
-				spatial.memberOfSpatialHash = null;
+				spatialHashes.get(spatial.memberOfSpatialHash.hashCode()).remove(entity);
+			} else {
+				spatial.memberOfSpatialHash = new Point2i();
 			}
 
-			Point2i hash = new Point2i(
-					Math.round(transform.position.x / worldDimensions.sectionSize) * worldDimensions.sectionSize,
-					Math.round(transform.position.y / worldDimensions.sectionSize) * worldDimensions.sectionSize
-			);
-
-			spatial.memberOfSpatialHash = hash;
-			spatial.lastUsedPosition = new Point2f(transform.position);
+			spatial.memberOfSpatialHash.x = Math.round(transform.position.x / worldDimensions.sectionSize) * worldDimensions.sectionSize;
+			spatial.memberOfSpatialHash.y = Math.round(transform.position.y / worldDimensions.sectionSize) * worldDimensions.sectionSize;
 
 			Set<Integer> entitiesInHash;
-			if (spatialHashes.containsKey(hash)) {
-				entitiesInHash = spatialHashes.get(hash);
+			if (spatialHashes.containsKey(spatial.memberOfSpatialHash.hashCode())) {
+				entitiesInHash = spatialHashes.get(spatial.memberOfSpatialHash.hashCode());
 			} else {
 				entitiesInHash = new HashSet<Integer>();
-				spatialHashes.put(hash, entitiesInHash);
+				spatialHashes.put(spatial.memberOfSpatialHash.hashCode(), entitiesInHash);
 			}
 			entitiesInHash.add(entity);
+
+			spatial.lastUsedPosition = new Point2f(transform.position);
 		}
 	}
 }

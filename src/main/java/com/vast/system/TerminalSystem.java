@@ -39,7 +39,7 @@ public class TerminalSystem extends IntervalSystem {
 
 	private Metrics metrics;
 	private WorldDimensions worldDimensions;
-	private Map<Point2i, Set<Integer>> spatialHashes;
+	private Map<Integer, Set<Integer>> spatialHashes;
 
 	private Screen screen;
 	private float scale = 3.0f;
@@ -47,7 +47,7 @@ public class TerminalSystem extends IntervalSystem {
 	private boolean showPathTargetPosition = false;
 	private int lastFocusedEntity = -1;
 
-	public TerminalSystem(Metrics metrics, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
+	public TerminalSystem(Metrics metrics, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes) {
 		super(Aspect.all(), 0.1f);
 		this.metrics = metrics;
 		this.worldDimensions = worldDimensions;

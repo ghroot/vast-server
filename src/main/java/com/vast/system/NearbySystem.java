@@ -28,11 +28,11 @@ public class NearbySystem extends IteratingSystem {
 
 	private Map<String, Set<Integer>> nearbyEntitiesByPeer;
 	private WorldDimensions worldDimensions;
-	private Map<Point2i, Set<Integer>> spatialHashes;
+	private Map<Integer, Set<Integer>> spatialHashes;
 
 	private Point2i reusableHash;
 
-	public NearbySystem(Map<String, Set<Integer>> nearbyEntitiesByPeer, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes) {
+	public NearbySystem(Map<String, Set<Integer>> nearbyEntitiesByPeer, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes) {
 		super(Aspect.all(Player.class, Active.class));
 		this.nearbyEntitiesByPeer = nearbyEntitiesByPeer;
 		this.worldDimensions = worldDimensions;
@@ -61,8 +61,8 @@ public class NearbySystem extends IteratingSystem {
 			for (int x = spatial.memberOfSpatialHash.x - n * worldDimensions.sectionSize; x <= spatial.memberOfSpatialHash.x + 2 * n * worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
 				for (int y = spatial.memberOfSpatialHash.y - n * worldDimensions.sectionSize; y <= spatial.memberOfSpatialHash.y + 2 * n * worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
 					reusableHash.set(x, y);
-					if (spatialHashes.containsKey(reusableHash)) {
-						nearbyEntities.addAll(spatialHashes.get(reusableHash));
+					if (spatialHashes.containsKey(reusableHash.hashCode())) {
+						nearbyEntities.addAll(spatialHashes.get(reusableHash.hashCode()));
 					}
 				}
 			}

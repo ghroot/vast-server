@@ -30,7 +30,7 @@ public class CollisionSystem extends IteratingSystem {
 
 	private Set<CollisionHandler> collisionHandlers;
 	private WorldDimensions worldDimensions;
-	private Map<Point2i, Set<Integer>> spatialHashes;
+	private Map<Integer, Set<Integer>> spatialHashes;
 	private Metrics metrics;
 
 	private Set<Integer> checkedEntities;
@@ -40,7 +40,7 @@ public class CollisionSystem extends IteratingSystem {
 	private Vector2f reusableVector;
 	private int numberOfCollisionChecks;
 
-	public CollisionSystem(Set<CollisionHandler> collisionHandlers, WorldDimensions worldDimensions, Map<Point2i, Set<Integer>> spatialHashes, Metrics metrics) {
+	public CollisionSystem(Set<CollisionHandler> collisionHandlers, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes, Metrics metrics) {
 		super(Aspect.all(Transform.class, Spatial.class, Collision.class));
 		this.collisionHandlers = collisionHandlers;
 		this.worldDimensions = worldDimensions;
@@ -135,8 +135,8 @@ public class CollisionSystem extends IteratingSystem {
 			for (int x = spatial.memberOfSpatialHash.x - worldDimensions.sectionSize; x <= spatial.memberOfSpatialHash.x + worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
 				for (int y = spatial.memberOfSpatialHash.y - worldDimensions.sectionSize; y <= spatial.memberOfSpatialHash.y + worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
 					reusableHash.set(x, y);
-					if (spatialHashes.containsKey(reusableHash)) {
-						reusableAdjacentEntities.addAll(spatialHashes.get(reusableHash));
+					if (spatialHashes.containsKey(reusableHash.hashCode())) {
+						reusableAdjacentEntities.addAll(spatialHashes.get(reusableHash.hashCode()));
 					}
 				}
 			}
