@@ -56,8 +56,8 @@ public class CollisionSystem extends IteratingSystem {
 	@Override
 	protected void initialize() {
 		for (CollisionHandler collisionHandler : collisionHandlers) {
-			collisionHandler.setWorld(world);
 			world.inject(collisionHandler);
+			collisionHandler.initialize();
 		}
 	}
 

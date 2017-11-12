@@ -4,7 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.World;
 
 public abstract class AbstractCollisionHandler implements CollisionHandler {
-	protected World world;
+	private World world;
 
 	private Aspect.Builder aspectBuilder1;
 	private Aspect.Builder aspectBuilder2;
@@ -17,9 +17,7 @@ public abstract class AbstractCollisionHandler implements CollisionHandler {
 		this.aspectBuilder2 = aspectBuilder2;
 	}
 
-	public void setWorld(World world) {
-		this.world = world;
-
+	public void initialize() {
 		aspect1 = aspectBuilder1.build(world);
 		aspect2 = aspectBuilder2.build(world);
 	}
