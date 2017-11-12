@@ -47,13 +47,13 @@ public class VastServerApplication extends ServerApplication {
 		worldThread.start();
 
 		// TODO: Add fake peer for testing
-		synchronized (peers) {
-			for (int i = 0; i < 1500; i++) {
-				String name = "fakePeer" + (i + 1);
-				peers.add(new FakePeer(this, name));
-				logger.info("Added fake peer: {}", name);
-			}
-		}
+//		synchronized (peers) {
+//			for (int i = 0; i < 1500; i++) {
+//				String name = "fakePeer" + (i + 1);
+//				peers.add(new FakePeer(this, name));
+//				logger.info("Added fake peer: {}", name);
+//			}
+//		}
 	}
 
 	public List<VastPeer> getPeers() {

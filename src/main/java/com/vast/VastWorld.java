@@ -27,6 +27,8 @@ public class VastWorld implements Runnable {
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
 		Map<Point2i, Set<Integer>> spatialHashes = new HashMap<Point2i, Set<Integer>>();
 		WorldDimensions worldDimensions = new WorldDimensions(5000, 5000, 2);
+		Map<String, Set<Integer>> nearbyEntitiesByPeer = new HashMap<String, Set<Integer>>();
+		Map<String, Set<Integer>> knownEntitiesByPeer = new HashMap<String, Set<Integer>>();
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldDimensions),
@@ -35,7 +37,12 @@ public class VastWorld implements Runnable {
 
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
-			new PeerEntitySystem(peers, worldDimensions, spatialHashes),
+			new DeleteSystem(peers, knownEntitiesByPeer),
+			new PeerEntitySystem(peers, worldDimensions),
+			new NearbySystem(nearbyEntitiesByPeer, worldDimensions, spatialHashes),
+			new CullingSystem(peers, knownEntitiesByPeer, nearbyEntitiesByPeer),
+			new DeactivateSystem(peers, knownEntitiesByPeer),
+			new ActivateSystem(peers, knownEntitiesByPeer),
 			new PathAssignSystem(incomingRequests),
 			new AISystem(),
 			new PathMoveSystem(),

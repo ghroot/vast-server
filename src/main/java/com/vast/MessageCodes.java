@@ -7,16 +7,19 @@ public class MessageCodes {
 	public static byte PEER_ENTITY_CREATED_OWNER = 1;
 	public static byte PEER_ENTITY_CREATED_ACTIVE = 2;
 	public static byte PEER_ENTITY_CREATED_POSITION = 3;
+	public static byte PEER_ENTITY_CREATED_REASON = 4;
 
 	// Server -> Client
 	public static short ENTITY_CREATED = 1;
 	public static byte ENTITY_CREATED_ENTITY_ID = 0;
 	public static byte ENTITY_CREATED_TYPE = 1;
 	public static byte ENTITY_CREATED_POSITION = 2;
+	public static byte ENTITY_CREATED_REASON = 3;
 
 	// Server -> Client
 	public static short ENTITY_DESTROYED = 2;
 	public static byte ENTITY_DESTROYED_ENTITY_ID = 0;
+	public static byte ENTITY_DESTROYED_REASON = 1;
 
 	// Server -> Client
 	public static short SET_POSITION = 3;

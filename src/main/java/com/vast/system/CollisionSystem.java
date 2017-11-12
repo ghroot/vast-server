@@ -33,10 +33,10 @@ public class CollisionSystem extends IteratingSystem {
 	private Map<Point2i, Set<Integer>> spatialHashes;
 	private Metrics metrics;
 
-	private Set<Integer> checkedEntites;
+	private Set<Integer> checkedEntities;
 	private Point2i reusableCheckedEntity;
 	private Point2i reusableHash;
-	private Set<Integer> reusableNearbyEntities;
+	private Set<Integer> reusableAdjacentEntities;
 	private Vector2f reusableVector;
 	private int numberOfCollisionChecks;
 
@@ -46,10 +46,10 @@ public class CollisionSystem extends IteratingSystem {
 		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
 		this.metrics = metrics;
-		checkedEntites = new HashSet<Integer>();
+		checkedEntities = new HashSet<Integer>();
 		reusableCheckedEntity = new Point2i();
 		reusableHash = new Point2i();
-		reusableNearbyEntities = new HashSet<Integer>();
+		reusableAdjacentEntities = new HashSet<Integer>();
 		reusableVector = new Vector2f();
 	}
 
@@ -63,7 +63,7 @@ public class CollisionSystem extends IteratingSystem {
 
 	@Override
 	protected void begin() {
-		checkedEntites.clear();
+		checkedEntities.clear();
 		numberOfCollisionChecks = 0;
 	}
 
@@ -74,69 +74,73 @@ public class CollisionSystem extends IteratingSystem {
 
 	@Override
 	protected void process(int entity) {
+		Transform transform = transformMapper.get(entity);
+		Collision collision = collisionMapper.get(entity);
+		for (int adjacentEntity : getAdjacentEntities(entity)) {
+			if (adjacentEntity != entity) {
+				reusableCheckedEntity.set(entity, adjacentEntity);
+				int checkedEntity = reusableCheckedEntity.hashCode();
+				if (!checkedEntities.contains(checkedEntity)) {
+					Transform adjacentTransform = transformMapper.get(adjacentEntity);
+					Collision adjacentCollision = collisionMapper.get(adjacentEntity);
+					reusableVector.set(adjacentTransform.position.x - transform.position.x, adjacentTransform.position.y - transform.position.y);
+					float overlap = (collision.radius + adjacentCollision.radius) - reusableVector.length();
+					if (overlap > 0.0f) {
+						boolean handled = false;
+						for (CollisionHandler collisionHandler : collisionHandlers) {
+							if (collisionHandler.getAspect1().isInterested(world.getEntity(entity)) &&
+									collisionHandler.getAspect2().isInterested(world.getEntity(adjacentEntity))) {
+								collisionHandler.handleCollision(entity, adjacentEntity);
+								handled = true;
+							} else if (collisionHandler.getAspect1().isInterested(world.getEntity(adjacentEntity)) &&
+									collisionHandler.getAspect2().isInterested(world.getEntity(entity))) {
+								collisionHandler.handleCollision(adjacentEntity, entity);
+								handled = true;
+							}
+						}
+						if (!handled) {
+							if (reusableVector.lengthSquared() == 0.0f) {
+								reusableVector.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
+							}
+							if (collision.isStatic && !adjacentCollision.isStatic) {
+								reusableVector.normalize();
+								reusableVector.scale(overlap);
+								adjacentTransform.position.add(reusableVector);
+							} else if (!collision.isStatic && adjacentCollision.isStatic) {
+								reusableVector.normalize();
+								reusableVector.scale(-overlap);
+								transform.position.add(reusableVector);
+							} else if (!collision.isStatic && !adjacentCollision.isStatic) {
+								reusableVector.normalize();
+								reusableVector.scale(-overlap * 0.5f);
+								transform.position.add(reusableVector);
+
+								reusableVector.normalize();
+								reusableVector.scale(-overlap * 0.5f);
+								adjacentTransform.position.add(reusableVector);
+							}
+						}
+						numberOfCollisionChecks++;
+					}
+					checkedEntities.add(checkedEntity);
+				}
+			}
+		}
+	}
+
+	private Set<Integer> getAdjacentEntities(int entity) {
+		reusableAdjacentEntities.clear();
 		Spatial spatial = spatialMapper.get(entity);
 		if (spatial.memberOfSpatialHash != null) {
-			Transform transform = transformMapper.get(entity);
-			Collision collision = collisionMapper.get(entity);
-			reusableNearbyEntities.clear();
 			for (int x = spatial.memberOfSpatialHash.x - worldDimensions.sectionSize; x <= spatial.memberOfSpatialHash.x + worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
 				for (int y = spatial.memberOfSpatialHash.y - worldDimensions.sectionSize; y <= spatial.memberOfSpatialHash.y + worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
 					reusableHash.set(x, y);
 					if (spatialHashes.containsKey(reusableHash)) {
-						reusableNearbyEntities.addAll(spatialHashes.get(reusableHash));
-					}
-				}
-			}
-			for (int nearbyEntity : reusableNearbyEntities) {
-				if (nearbyEntity != entity) {
-					reusableCheckedEntity.set(entity, nearbyEntity);
-					int checkedEntity = reusableCheckedEntity.hashCode();
-					if (!checkedEntites.contains(checkedEntity)) {
-						Transform otherTransform = transformMapper.get(nearbyEntity);
-						Collision otherCollision = collisionMapper.get(nearbyEntity);
-						reusableVector.set(otherTransform.position.x - transform.position.x, otherTransform.position.y - transform.position.y);
-						float overlap = (collision.radius + otherCollision.radius) - reusableVector.length();
-						if (overlap > 0.0f) {
-							boolean handled = false;
-							for (CollisionHandler collisionHandler : collisionHandlers) {
-								if (collisionHandler.getAspect1().isInterested(world.getEntity(entity)) &&
-										collisionHandler.getAspect2().isInterested(world.getEntity(nearbyEntity))) {
-									collisionHandler.handleCollision(entity, nearbyEntity);
-									handled = true;
-								} else if (collisionHandler.getAspect1().isInterested(world.getEntity(nearbyEntity)) &&
-										collisionHandler.getAspect2().isInterested(world.getEntity(entity))) {
-									collisionHandler.handleCollision(nearbyEntity, entity);
-									handled = true;
-								}
-							}
-							if (!handled) {
-								if (reusableVector.lengthSquared() == 0.0f) {
-									reusableVector.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
-								}
-								if (collision.isStatic && !otherCollision.isStatic) {
-									reusableVector.normalize();
-									reusableVector.scale(overlap);
-									otherTransform.position.add(reusableVector);
-								} else if (!collision.isStatic && otherCollision.isStatic) {
-									reusableVector.normalize();
-									reusableVector.scale(-overlap);
-									transform.position.add(reusableVector);
-								} else if (!collision.isStatic && !otherCollision.isStatic) {
-									reusableVector.normalize();
-									reusableVector.scale(-overlap * 0.5f);
-									transform.position.add(reusableVector);
-
-									reusableVector.normalize();
-									reusableVector.scale(-overlap * 0.5f);
-									otherTransform.position.add(reusableVector);
-								}
-							}
-						}
-						checkedEntites.add(checkedEntity);
-						numberOfCollisionChecks++;
+						reusableAdjacentEntities.addAll(spatialHashes.get(reusableHash));
 					}
 				}
 			}
 		}
+		return reusableAdjacentEntities;
 	}
 }
