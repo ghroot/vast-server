@@ -50,7 +50,7 @@ public class VastWorld implements Runnable {
 				new PlayerWithPickupCollisionHandler()
 			)), worldDimensions, spatialHashes, metrics),
 			new DeleteSystem(peers, knownEntitiesByPeer),
-			new SyncTransformSystem(peers, worldDimensions, spatialHashes),
+			new SyncTransformSystem(peers, knownEntitiesByPeer),
 			new IncomingRequestClearSystem(incomingRequests),
 			new WorldSerializationSystem(snapshotFormat)
 		);
