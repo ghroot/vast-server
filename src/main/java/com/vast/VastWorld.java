@@ -37,7 +37,6 @@ public class VastWorld implements Runnable {
 
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
-			new DeleteSystem(peers, knownEntitiesByPeer),
 			new PeerEntitySystem(peers, worldDimensions),
 			new NearbySystem(nearbyEntitiesByPeer, worldDimensions, spatialHashes),
 			new CullingSystem(peers, knownEntitiesByPeer, nearbyEntitiesByPeer),
@@ -50,6 +49,7 @@ public class VastWorld implements Runnable {
 			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(
 				new PlayerWithPickupCollisionHandler()
 			)), worldDimensions, spatialHashes, metrics),
+			new DeleteSystem(peers, knownEntitiesByPeer),
 			new SyncTransformSystem(peers, worldDimensions, spatialHashes),
 			new IncomingRequestClearSystem(incomingRequests),
 			new WorldSerializationSystem(snapshotFormat)
