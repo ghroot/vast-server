@@ -23,6 +23,7 @@ public class VastServerApplication extends ServerApplication {
 
 	private String snapshotFormat;
 	private boolean showMonitor;
+	private Metrics metrics;
 
 	private List<VastPeer> peers;
 	private List<IncomingRequest> incomingRequests;
@@ -30,9 +31,10 @@ public class VastServerApplication extends ServerApplication {
 	private VastWorld world;
 	private Thread worldThread;
 
-	public VastServerApplication(String snapshotFormat, boolean showMonitor) {
+	public VastServerApplication(String snapshotFormat, boolean showMonitor, Metrics metrics) {
 		this.snapshotFormat = snapshotFormat;
 		this.showMonitor = showMonitor;
+		this.metrics = metrics;
 	}
 
 	@Override
@@ -40,18 +42,18 @@ public class VastServerApplication extends ServerApplication {
 		peers = new ArrayList<VastPeer>();
 		incomingRequests = new ArrayList<IncomingRequest>();
 
-		world = new VastWorld(this, snapshotFormat, showMonitor);
+		world = new VastWorld(this, snapshotFormat, showMonitor, metrics);
 		worldThread = new Thread(world, "World");
 		worldThread.start();
 
 		// TODO: Add fake peer for testing
-//		synchronized (peers) {
-//			for (int i = 0; i < 1500; i++) {
-//				String name = "fakePeer" + (i + 1);
-//				peers.add(new FakePeer(this, name));
-//				logger.info("Added fake peer: {}", name);
-//			}
-//		}
+		synchronized (peers) {
+			for (int i = 0; i < 1500; i++) {
+				String name = "fakePeer" + (i + 1);
+				peers.add(new FakePeer(this, name));
+				logger.info("Added fake peer: {}", name);
+			}
+		}
 	}
 
 	public List<VastPeer> getPeers() {

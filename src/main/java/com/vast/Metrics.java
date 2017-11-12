@@ -9,6 +9,8 @@ public class Metrics {
 	private int timePerFrameMs;
 	private Map<String, Integer> systemProcessingTimes = new HashMap<String, Integer>();
 	private int numberOfCollisionChecks;
+	private double meanOfRoundTripTime;
+	private double meanOfRoundTripTimeDeviation;
 
 	public int getTimePerFrameMs() {
 		return timePerFrameMs;
@@ -36,5 +38,19 @@ public class Metrics {
 
 	public int getNumberOfCollisionChecks() {
 		return numberOfCollisionChecks;
+	}
+
+	public void setRoundTripTime(double meanOfRoundTripTime, double meanOfRoundTripTimeDeviation) {
+
+		this.meanOfRoundTripTime = meanOfRoundTripTime;
+		this.meanOfRoundTripTimeDeviation = meanOfRoundTripTimeDeviation;
+	}
+
+	public double getMeanOfRoundTripTime() {
+		return meanOfRoundTripTime;
+	}
+
+	public double getMeanOfRoundTripTimeDeviation() {
+		return meanOfRoundTripTimeDeviation;
 	}
 }

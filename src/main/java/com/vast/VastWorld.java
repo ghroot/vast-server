@@ -20,10 +20,9 @@ public class VastWorld implements Runnable {
 	private final float FRAME_TIME_SECONDS = FRAME_TIME_MILLIS / 1000;
 
 	private World world;
-	private Metrics metrics = new Metrics();
 	private boolean alive;
 
-	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, boolean showMonitor) {
+	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, boolean showMonitor, Metrics metrics) {
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
 		Map<Point2i, Set<Integer>> spatialHashes = new HashMap<Point2i, Set<Integer>>();

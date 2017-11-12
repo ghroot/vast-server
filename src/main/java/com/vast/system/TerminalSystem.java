@@ -131,8 +131,8 @@ public class TerminalSystem extends IntervalSystem {
 
 			textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
 			textGraphics.putString(0, 0, "World size: " + worldDimensions.width + " x " + worldDimensions.height);
-			textGraphics.putString(0, 1, "Scale: x" + (Math.round(scale * 100.0) / 100.0));
-			textGraphics.putString(0, 2, "Camera position: " + (Math.round(cameraPosition.x * 100.0) / 100.0) + ", " + (Math.round(cameraPosition.y * 100.0) / 100.0));
+			textGraphics.putString(0, 1, "Scale: x" + (Math.round(scale * 100.0f) / 100.0f));
+			textGraphics.putString(0, 2, "Camera position: " + (Math.round(cameraPosition.x * 100.0f) / 100.0f) + ", " + (Math.round(cameraPosition.y * 100.0f) / 100.0f));
 			textGraphics.putString(0, 3, "Spatial hash size: " + worldDimensions.sectionSize);
 			int numberOfSpatialHashes = 0;
 			int numberOfActiveSpatialHashes = 0;
@@ -149,14 +149,16 @@ public class TerminalSystem extends IntervalSystem {
 
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 7, 0, "FPS: " + metrics.getFps());
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + metrics.getTimePerFrameMs() + " ms");
-			textGraphics.putString(screen.getTerminalSize().getColumns() - 23, 3, "Collision checks: " + metrics.getNumberOfCollisionChecks());
+			String roundTripString = "Roundtrip: " + metrics.getMeanOfRoundTripTime() + " (" + metrics.getMeanOfRoundTripTimeDeviation() + ")";
+			textGraphics.putString(screen.getTerminalSize().getColumns() - roundTripString.length(), 2, roundTripString);
+			textGraphics.putString(screen.getTerminalSize().getColumns() - 23, 4, "Collision checks: " + metrics.getNumberOfCollisionChecks());
 
 			if (metrics.getSystemProcessingTimes().size() > 0) {
 				int longestLength = 0;
 				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
 					longestLength = Math.max(systemName.length(), longestLength);
 				}
-				int row = 5;
+				int row = 6;
 				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
 					int processingDuration = metrics.getSystemProcessingTimes().get(systemName);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestLength - 1, row, systemName);
