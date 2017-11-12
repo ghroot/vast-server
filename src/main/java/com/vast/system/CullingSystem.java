@@ -46,14 +46,20 @@ public class CullingSystem extends IteratingSystem {
 	}
 
 	@Override
-	protected void inserted(int playerEntity) {
-		Player player = playerMapper.get(playerEntity);
+	protected void inserted(int activePlayerEntity) {
+		Player player = playerMapper.get(activePlayerEntity);
 		knownEntitiesByPeer.put(player.name, new HashSet<Integer>());
 	}
 
 	@Override
-	protected void process(int playerEntity) {
-		Player player = playerMapper.get(playerEntity);
+	protected void removed(int activePlayerEntity) {
+		Player player = playerMapper.get(activePlayerEntity);
+		knownEntitiesByPeer.remove(player.name);
+	}
+
+	@Override
+	protected void process(int activePlayerEntity) {
+		Player player = playerMapper.get(activePlayerEntity);
 
 		if (peers.containsKey(player.name)) {
 			VastPeer peer = peers.get(player.name);

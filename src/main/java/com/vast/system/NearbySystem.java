@@ -42,20 +42,25 @@ public class NearbySystem extends IteratingSystem {
 	}
 
 	@Override
-	protected void inserted(int playerEntity) {
-		Player player = playerMapper.get(playerEntity);
+	protected void inserted(int activePlayerEntity) {
+		Player player = playerMapper.get(activePlayerEntity);
 		nearbyEntitiesByPeer.put(player.name, new HashSet<Integer>());
 	}
 
+	@Override
+	protected void removed(int activePlayerEntity) {
+		Player player = playerMapper.get(activePlayerEntity);
+		nearbyEntitiesByPeer.remove(player.name);
+	}
 
 	@Override
-	protected void process(int playerEntity) {
-		Player player = playerMapper.get(playerEntity);
+	protected void process(int activePlayerEntity) {
+		Player player = playerMapper.get(activePlayerEntity);
 
 		Set<Integer> nearbyEntities = nearbyEntitiesByPeer.get(player.name);
 		nearbyEntities.clear();
 
-		Spatial spatial = spatialMapper.get(playerEntity);
+		Spatial spatial = spatialMapper.get(activePlayerEntity);
 		if (spatial.memberOfSpatialHash != null) {
 			int n = (int) Math.ceil((float) NEARBY_THRESHOLD / worldDimensions.sectionSize);
 			for (int x = spatial.memberOfSpatialHash.x - n * worldDimensions.sectionSize; x <= spatial.memberOfSpatialHash.x + 2 * n * worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
