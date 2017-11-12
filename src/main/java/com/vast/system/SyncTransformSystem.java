@@ -4,6 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IntervalIteratingSystem;
+import com.artemis.utils.IntBag;
 import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
@@ -44,6 +45,10 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 	@Override
 	protected void inserted(int entity) {
 		syncTransformMapper.get(entity).lastSyncedPosition.set(transformMapper.get(entity).position);
+	}
+
+	@Override
+	public void removed(IntBag entities) {
 	}
 
 	@Override

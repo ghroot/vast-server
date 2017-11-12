@@ -4,6 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
+import com.artemis.utils.IntBag;
 import com.vast.Profiler;
 import com.vast.component.Path;
 import com.vast.component.Transform;
@@ -34,6 +35,10 @@ public class PathMoveSystem extends IteratingSystem {
 	@Override
 	protected void inserted(int entity) {
 		pathMapper.get(entity).pathingTimeLeft = MAX_PATHING_DURATION;
+	}
+
+	@Override
+	public void removed(IntBag entities) {
 	}
 
 	@Override

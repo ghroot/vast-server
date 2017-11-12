@@ -4,6 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
+import com.artemis.utils.IntBag;
 import com.vast.Metrics;
 import com.vast.Profiler;
 import com.vast.WorldDimensions;
@@ -70,6 +71,14 @@ public class CollisionSystem extends IteratingSystem {
 	@Override
 	protected void end() {
 		metrics.setNumberOfCollisionChecks(numberOfCollisionChecks);
+	}
+
+	@Override
+	public void inserted(IntBag entities) {
+	}
+
+	@Override
+	public void removed(IntBag entities) {
 	}
 
 	@Override

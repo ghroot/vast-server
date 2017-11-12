@@ -4,6 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IntervalIteratingSystem;
+import com.artemis.utils.IntBag;
 import com.vast.Profiler;
 import com.vast.component.AI;
 import com.vast.component.Path;
@@ -22,6 +23,14 @@ public class AISystem extends IntervalIteratingSystem {
 
 	public AISystem() {
 		super(Aspect.one(AI.class).exclude(Path.class), 1.0f);
+	}
+
+	@Override
+	public void inserted(IntBag entities) {
+	}
+
+	@Override
+	public void removed(IntBag entities) {
 	}
 
 	@Override

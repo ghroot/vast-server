@@ -3,6 +3,7 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
+import com.artemis.utils.IntBag;
 import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
@@ -27,6 +28,14 @@ public class DeleteSystem extends IteratingSystem {
 		super(Aspect.one(Delete.class));
 		this.peers = peers;
 		this.knownEntitiesByPeer = knownEntitiesByPeer;
+	}
+
+	@Override
+	public void inserted(IntBag entities) {
+	}
+
+	@Override
+	public void removed(IntBag entities) {
 	}
 
 	@Override

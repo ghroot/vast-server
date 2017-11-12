@@ -4,6 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
+import com.artemis.utils.IntBag;
 import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
@@ -32,6 +33,14 @@ public class ActivateSystem extends IteratingSystem {
 		super(Aspect.one(Player.class).exclude(Active.class));
 		this.peers = peers;
 		this.knownEntitiesByPeer = knownEntitiesByPeer;
+	}
+
+	@Override
+	public void inserted(IntBag entities) {
+	}
+
+	@Override
+	public void removed(IntBag entities) {
 	}
 
 	@Override
