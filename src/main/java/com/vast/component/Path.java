@@ -6,8 +6,8 @@ import com.artemis.annotations.Transient;
 
 import javax.vecmath.Point2f;
 
-@PooledWeaver
 @Transient
+@PooledWeaver
 public class Path extends Component {
 	public Point2f targetPosition;
 	public float pathingTimeLeft;

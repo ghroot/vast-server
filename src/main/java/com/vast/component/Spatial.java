@@ -6,8 +6,8 @@ import javax.vecmath.Point2f;
 import javax.vecmath.Point2i;
 
 public class Spatial extends PooledComponent {
-	public Point2i memberOfSpatialHash;
-	public Point2f lastUsedPosition;
+	public transient Point2i memberOfSpatialHash;
+	public transient Point2f lastUsedPosition;
 
 	@Override
 	protected void reset() {
