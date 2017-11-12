@@ -22,6 +22,7 @@ public class PathMoveSystem extends IteratingSystem {
     private final float MAX_PATHING_DURATION = 12.0f;
     private final float WALK_SPEED = 0.8f;
     private final float RUN_SPEED = 2.5f;
+	private final float RUN_FAST_SPEED = 5.0f;
 
     private Vector2f reusableDirection;
 
@@ -43,9 +44,13 @@ public class PathMoveSystem extends IteratingSystem {
         reusableDirection.set(path.targetPosition.x - transform.position.x, path.targetPosition.y - transform.position.y);
         if (reusableDirection.length() > 0) {
             float distance = reusableDirection.length();
-            float speed = WALK_SPEED;
+            float speed;
             if (distance > 2.0f) {
+				speed = RUN_FAST_SPEED;
+			} else if (distance > 1.0f) {
             	speed = RUN_SPEED;
+			} else {
+            	speed = WALK_SPEED;
 			}
             reusableDirection.normalize();
             if (speed * world.delta > distance) {
