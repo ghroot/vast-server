@@ -40,6 +40,7 @@ public class VastWorld implements Runnable {
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
 			new PeerEntitySystem(peers, worldDimensions),
 			new NearbySystem(nearbyEntitiesByPeer, worldDimensions, spatialHashes),
+			new CreateSystem(peers, knownEntitiesByPeer, nearbyEntitiesByPeer),
 			new CullingSystem(peers, knownEntitiesByPeer, nearbyEntitiesByPeer),
 			new DeactivateSystem(peers, knownEntitiesByPeer),
 			new ActivateSystem(peers, knownEntitiesByPeer),

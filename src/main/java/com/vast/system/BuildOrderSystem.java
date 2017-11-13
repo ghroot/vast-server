@@ -17,7 +17,7 @@ import java.util.List;
 
 @Profile(enabled = true, using = Profiler.class)
 public class BuildOrderSystem extends AbstractOrderSystem {
-    private static final Logger logger = LoggerFactory.getLogger(BuildOrderSystem.class);
+	private static final Logger logger = LoggerFactory.getLogger(BuildOrderSystem.class);
 
     private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Order> orderMapper;
@@ -25,14 +25,15 @@ public class BuildOrderSystem extends AbstractOrderSystem {
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Building> buildingMapper;
+	private ComponentMapper<Create> createMapper;
 
     private List<IncomingRequest> incomingRequests;
 
-    private Archetype buildingArcheType;
+	private Archetype buildingArcheType;
 
     public BuildOrderSystem(List<IncomingRequest> incomingRequests) {
         this.incomingRequests = incomingRequests;
-    }
+	}
 
 	@Override
 	protected void initialize() {
@@ -61,6 +62,7 @@ public class BuildOrderSystem extends AbstractOrderSystem {
 				collisionMapper.get(buildingEntity).isStatic = true;
 				collisionMapper.get(buildingEntity).radius = 0.5f;
 				buildingMapper.get(buildingEntity).type = type;
+				createMapper.create(buildingEntity).reason = "built";
 				iterator.remove();
 			}
 		}

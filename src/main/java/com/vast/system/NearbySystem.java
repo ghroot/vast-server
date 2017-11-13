@@ -24,7 +24,7 @@ public class NearbySystem extends IteratingSystem {
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Spatial> spatialMapper;
 
-	private final int NEARBY_THRESHOLD = 4;
+	private final int NEARBY_THRESHOLD = 6;
 
 	private Map<String, Set<Integer>> nearbyEntitiesByPeer;
 	private WorldDimensions worldDimensions;
