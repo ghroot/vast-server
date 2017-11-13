@@ -9,7 +9,8 @@ import com.artemis.annotations.Transient;
 public class Order extends Component {
 	public enum Type {
 		MOVE,
-		INTERACT
+		INTERACT,
+		BUILD
 	}
 	public Type type;
 }

@@ -45,6 +45,7 @@ public class VastWorld implements Runnable {
 			new ActivateSystem(peers, knownEntitiesByPeer),
 			new MoveOrderSystem(incomingRequests),
 			new InteractOrderSystem(incomingRequests),
+			new BuildOrderSystem(incomingRequests),
 			new AISystem(),
 			new PathMoveSystem(),
 			new InteractSystem(new HashSet<InteractionHandler>(Arrays.asList(

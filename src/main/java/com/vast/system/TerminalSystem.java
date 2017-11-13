@@ -118,6 +118,8 @@ public class TerminalSystem extends IntervalSystem {
 							screen.setCharacter(terminalPosition, new TextCharacter('+', TextColor.ANSI.GREEN, TextColor.ANSI.DEFAULT));
 						} else if (typeMapper.get(entity).type.equals("pickup")) {
 							screen.setCharacter(terminalPosition, new TextCharacter('.', TextColor.ANSI.RED, TextColor.ANSI.DEFAULT));
+						} else if (typeMapper.get(entity).type.equals("building")) {
+							screen.setCharacter(terminalPosition, new TextCharacter('#', TextColor.ANSI.WHITE, TextColor.ANSI.DEFAULT));
 						} else {
 							screen.setCharacter(terminalPosition, new TextCharacter('?', TextColor.ANSI.MAGENTA, TextColor.ANSI.DEFAULT));
 						}

@@ -42,4 +42,9 @@ public class MessageCodes {
 	// Client -> Server
 	public static short INTERACT = 101;
 	public static byte INTERACT_ENTITY_ID = 0;
+
+	// Client -> Server
+	public static short BUILD = 102;
+	public static byte BUILD_TYPE = 0;
+	public static byte BUILD_POSITION = 1;
 }
