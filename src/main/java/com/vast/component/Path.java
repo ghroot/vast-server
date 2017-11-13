@@ -10,5 +10,4 @@ import javax.vecmath.Point2f;
 @PooledWeaver
 public class Path extends Component {
 	public Point2f targetPosition;
-	public float pathingTimeLeft;
 }
