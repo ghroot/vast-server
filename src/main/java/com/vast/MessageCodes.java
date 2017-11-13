@@ -37,4 +37,8 @@ public class MessageCodes {
 	// Client -> Server
 	public static short SET_PATH = 100;
 	public static byte SET_PATH_POSITION = 0;
+
+	// Client -> Server
+	public static short INTERACT = 101;
+	public static byte INTERACT_ENTITY_ID = 0;
 }
