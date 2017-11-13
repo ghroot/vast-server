@@ -40,17 +40,18 @@ public class DeleteSystem extends IteratingSystem {
 
 	@Override
 	protected void process(int deleteEntity) {
+		String reason = deleteMapper.get(deleteEntity).reason;
+		logger.debug("Deleting entity {} ({})", deleteEntity, reason);
 		for (VastPeer peer : peers.values()) {
 			if (knownEntitiesByPeer.containsKey(peer.getName()) && knownEntitiesByPeer.get(peer.getName()).contains(deleteEntity)) {
-				notifyAboutRemovedEntity(peer, deleteEntity);
+				notifyAboutRemovedEntity(peer, deleteEntity, reason);
 				knownEntitiesByPeer.get(peer.getName()).remove(deleteEntity);
-				world.delete(deleteEntity);
 			}
 		}
+		world.delete(deleteEntity);
 	}
 
-	private void notifyAboutRemovedEntity(VastPeer peer, int deleteEntity) {
-		String reason = deleteMapper.get(deleteEntity).reason;
+	private void notifyAboutRemovedEntity(VastPeer peer, int deleteEntity, String reason) {
 		logger.debug("Notifying peer {} about removed entity {} ({})", peer.getName(), deleteEntity, reason);
 		peer.send(new EventMessage(MessageCodes.ENTITY_DESTROYED, new DataObject()
 						.set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, deleteEntity)

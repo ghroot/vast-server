@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
-import javax.vecmath.Point2i;
 import java.util.Map;
 import java.util.Set;
 

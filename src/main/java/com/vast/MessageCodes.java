@@ -15,6 +15,7 @@ public class MessageCodes {
 	public static byte ENTITY_CREATED_TYPE = 1;
 	public static byte ENTITY_CREATED_POSITION = 2;
 	public static byte ENTITY_CREATED_REASON = 3;
+	public static byte ENTITY_CREATED_INTERACTABLE = 4;
 
 	// Server -> Client
 	public static short ENTITY_DESTROYED = 2;
@@ -35,8 +36,8 @@ public class MessageCodes {
 	public static byte PEER_ENTITY_DEACTIVATED_ENTITY_ID = 0;
 
 	// Client -> Server
-	public static short SET_PATH = 100;
-	public static byte SET_PATH_POSITION = 0;
+	public static short MOVE = 100;
+	public static byte MOVE_POSITION = 0;
 
 	// Client -> Server
 	public static short INTERACT = 101;

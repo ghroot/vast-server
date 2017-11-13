@@ -1,9 +1,9 @@
-package com.vast.collision;
+package com.vast.interact;
 
 import com.artemis.Aspect;
 import com.artemis.World;
 
-public abstract class AbstractCollisionHandler implements CollisionHandler {
+public abstract class AbstractInteractionHandler implements InteractionHandler {
 	protected World world;
 
 	private Aspect.Builder aspectBuilder1;
@@ -12,7 +12,7 @@ public abstract class AbstractCollisionHandler implements CollisionHandler {
 	private Aspect aspect1;
 	private Aspect aspect2;
 
-	public AbstractCollisionHandler(Aspect.Builder aspectBuilder1, Aspect.Builder aspectBuilder2) {
+	public AbstractInteractionHandler(Aspect.Builder aspectBuilder1, Aspect.Builder aspectBuilder2) {
 		this.aspectBuilder1 = aspectBuilder1;
 		this.aspectBuilder2 = aspectBuilder2;
 	}
@@ -33,5 +33,5 @@ public abstract class AbstractCollisionHandler implements CollisionHandler {
 	}
 
 	@Override
-	public abstract void handleCollision(int entity1, int entity2);
+	public abstract boolean process(int entity1, int entity2);
 }

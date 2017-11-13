@@ -5,6 +5,8 @@ import com.artemis.WorldConfigurationBuilder;
 import com.artemis.managers.WorldSerializationManager;
 import com.vast.collision.CollisionHandler;
 import com.vast.collision.PlayerWithPickupCollisionHandler;
+import com.vast.interact.HarvestableInteractionHandler;
+import com.vast.interact.InteractionHandler;
 import com.vast.system.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +27,7 @@ public class VastWorld implements Runnable {
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
-		WorldDimensions worldDimensions = new WorldDimensions(5000, 5000, 2);
+		WorldDimensions worldDimensions = new WorldDimensions(30, 30, 2);
 		Map<String, Set<Integer>> nearbyEntitiesByPeer = new HashMap<String, Set<Integer>>();
 		Map<String, Set<Integer>> knownEntitiesByPeer = new HashMap<String, Set<Integer>>();
 
@@ -41,16 +43,19 @@ public class VastWorld implements Runnable {
 			new CullingSystem(peers, knownEntitiesByPeer, nearbyEntitiesByPeer),
 			new DeactivateSystem(peers, knownEntitiesByPeer),
 			new ActivateSystem(peers, knownEntitiesByPeer),
-			new PathAssignSystem(incomingRequests),
+			new MoveOrderSystem(incomingRequests),
+			new InteractOrderSystem(incomingRequests),
 			new AISystem(),
 			new PathMoveSystem(),
+			new InteractSystem(new HashSet<InteractionHandler>(Arrays.asList(
+				new HarvestableInteractionHandler()
+			))),
 			new SpatialSystem(worldDimensions, spatialHashes),
 			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(
 				new PlayerWithPickupCollisionHandler()
 			)), worldDimensions, spatialHashes, metrics),
 			new DeleteSystem(peers, knownEntitiesByPeer),
 			new SyncTransformSystem(peers, knownEntitiesByPeer),
-			new IncomingRequestClearSystem(incomingRequests),
 			new WorldSerializationSystem(snapshotFormat)
 		);
 		if (showMonitor) {

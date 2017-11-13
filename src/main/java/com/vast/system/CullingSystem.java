@@ -10,10 +10,7 @@ import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
 import com.vast.Profiler;
 import com.vast.VastPeer;
-import com.vast.component.Active;
-import com.vast.component.Player;
-import com.vast.component.Transform;
-import com.vast.component.Type;
+import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +24,7 @@ public class CullingSystem extends IteratingSystem {
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Transform> transformMapper;
+	private ComponentMapper<Interactable> interactableMapper;
 
 	private Map<String, VastPeer> peers;
 	private Map<String, Set<Integer>> knownEntitiesByPeer;
@@ -120,7 +118,8 @@ public class CullingSystem extends IteratingSystem {
 							.set(MessageCodes.ENTITY_CREATED_ENTITY_ID, newEntity)
 							.set(MessageCodes.ENTITY_CREATED_TYPE, type.type)
 							.set(MessageCodes.ENTITY_CREATED_POSITION, reusablePosition)
-							.set(MessageCodes.ENTITY_CREATED_REASON, "culling")),
+							.set(MessageCodes.ENTITY_CREATED_REASON, "culling")
+							.set(MessageCodes.ENTITY_CREATED_INTERACTABLE, interactableMapper.has(newEntity))),
 					SendOptions.ReliableSend);
 		}
 	}
