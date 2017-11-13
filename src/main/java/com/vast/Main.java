@@ -7,6 +7,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -36,6 +38,7 @@ public class Main {
 			snapshotFormat = "json";
 		}
 
+		final Logger logger = LoggerFactory.getLogger(Main.class);
 		final Metrics metrics = new Metrics();
 
 		GameServerBootstrap bootstrap = new GameServerBootstrap();
@@ -46,12 +49,13 @@ public class Main {
 				.metricListener(new MetricListener() {
 					@Override
 					public long periodMilliseconds() {
-						return TimeUnit.SECONDS.toMillis(1);
+						return TimeUnit.SECONDS.toMillis(20);
 					}
 
 					@Override
 					public void onReceive(int peerCount, double meanOfRoundTripTime, double meanOfRoundTripTimeDeviation) {
 						metrics.setRoundTripTime(meanOfRoundTripTime, meanOfRoundTripTimeDeviation);
+						logger.debug("peerCount: {}, meanOfRoundTripTime: {}, meanOfRoundTripTimeDeviation: {}", peerCount, meanOfRoundTripTime, meanOfRoundTripTimeDeviation);
 					}
 				})
 				.bind(PORT).start();
