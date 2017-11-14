@@ -39,18 +39,20 @@ public class TerminalSystem extends IntervalSystem {
 	private Metrics metrics;
 	private WorldDimensions worldDimensions;
 	private Map<Integer, Set<Integer>> spatialHashes;
+	private Map<String, Set<Integer>> nearbyEntitiesByPeer;
 
 	private Screen screen;
 	private float scale = 3.0f;
 	private Point2f cameraPosition = new Point2f();
 	private boolean showPathTargetPosition = false;
-	private int lastFocusedEntity = -1;
+	private int focusedEntity = -1;
 
-	public TerminalSystem(Metrics metrics, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes) {
+	public TerminalSystem(Metrics metrics, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes, Map<String, Set<Integer>> nearbyEntitiesByPeer) {
 		super(Aspect.all(), 0.1f);
 		this.metrics = metrics;
 		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
+		this.nearbyEntitiesByPeer = nearbyEntitiesByPeer;
 	}
 
 	@Override
@@ -102,6 +104,16 @@ public class TerminalSystem extends IntervalSystem {
 			for (int i = 0; i < entities.size(); i++) {
 				int entity = entities.get(i);
 				Transform transform = transformMapper.get(entity);
+
+				boolean colored = true;
+				if (focusedEntity >= 0 && playerMapper.has(focusedEntity)) {
+					String name = playerMapper.get(focusedEntity).name;
+					if (nearbyEntitiesByPeer.containsKey(name)) {
+						colored = nearbyEntitiesByPeer.get(name).contains(entity);
+					}
+				}
+				TextColor gray = TextColor.ANSI.Indexed.fromRGB(60, 60, 60);
+
 				TerminalPosition terminalPosition = getTerminalPositionFromWorldPosition(transform.position);
 				if (terminalPosition.getColumn() >= 0 && terminalPosition.getColumn() < screen.getTerminalSize().getColumns() &&
 						terminalPosition.getRow() >= 0 && terminalPosition.getRow() < screen.getTerminalSize().getRows()) {
@@ -113,15 +125,15 @@ public class TerminalSystem extends IntervalSystem {
 						}
 					} else {
 						if (typeMapper.get(entity).type.equals("ai")) {
-							screen.setCharacter(terminalPosition, new TextCharacter('o', TextColor.ANSI.CYAN, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('o', colored ? TextColor.ANSI.CYAN : gray, TextColor.ANSI.DEFAULT));
 						} else if (typeMapper.get(entity).type.equals("tree")) {
-							screen.setCharacter(terminalPosition, new TextCharacter('+', TextColor.ANSI.GREEN, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('+', colored ? TextColor.ANSI.GREEN : gray, TextColor.ANSI.DEFAULT));
 						} else if (typeMapper.get(entity).type.equals("pickup")) {
-							screen.setCharacter(terminalPosition, new TextCharacter('.', TextColor.ANSI.RED, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('.', colored ? TextColor.ANSI.RED : gray, TextColor.ANSI.DEFAULT));
 						} else if (typeMapper.get(entity).type.equals("building")) {
-							screen.setCharacter(terminalPosition, new TextCharacter('#', TextColor.ANSI.WHITE, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('#', colored ? TextColor.ANSI.WHITE : gray, TextColor.ANSI.DEFAULT));
 						} else {
-							screen.setCharacter(terminalPosition, new TextCharacter('?', TextColor.ANSI.MAGENTA, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('?', colored ? TextColor.ANSI.MAGENTA : gray, TextColor.ANSI.DEFAULT));
 						}
 					}
 					numberOfEntitiesOnScreen++;
@@ -170,10 +182,10 @@ public class TerminalSystem extends IntervalSystem {
 				}
 			}
 
-			if (lastFocusedEntity >= 0) {
-				Point2f position = transformMapper.get(lastFocusedEntity).position;
+			if (focusedEntity >= 0) {
+				Point2f position = transformMapper.get(focusedEntity).position;
 				cameraPosition.set(position.x, -position.y);
-				textGraphics.putString(0, 8, "Following peer entity: " + lastFocusedEntity + " (" + playerMapper.get(lastFocusedEntity).name + ")");
+				textGraphics.putString(0, 8, "Following peer entity: " + focusedEntity + " (" + playerMapper.get(focusedEntity).name + ")");
 			}
 
 			screen.refresh();
@@ -215,10 +227,10 @@ public class TerminalSystem extends IntervalSystem {
 						}
 						if (playerEntities.size() > 0) {
 							int playerEntity;
-							if (lastFocusedEntity == -1) {
+							if (focusedEntity == -1) {
 								playerEntity = playerEntities.get(0);
 							} else {
-								int index = playerEntities.indexOf(lastFocusedEntity);
+								int index = playerEntities.indexOf(focusedEntity);
 								if (index >= 0) {
 									int nextIndex = index + 1;
 									if (nextIndex < playerEntities.size()) {
@@ -232,24 +244,24 @@ public class TerminalSystem extends IntervalSystem {
 							}
 							Point2f position = transformMapper.get(playerEntity).position;
 							cameraPosition.set(position.x, -position.y);
-							lastFocusedEntity = playerEntity;
+							focusedEntity = playerEntity;
 						}
 					} else if (keyStroke.getCharacter().toString().equals("r")) {
 						cameraPosition.set(0.0f, 0.0f);
-						lastFocusedEntity = -1;
+						focusedEntity = -1;
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
 					cameraPosition.add(new Point2f(0.0f, (1 / scale)));
-					lastFocusedEntity = -1;
+					focusedEntity = -1;
 				} else if (keyStroke.getKeyType() == KeyType.ArrowUp) {
 					cameraPosition.add(new Point2f(0.0f, -(1 / scale)));
-					lastFocusedEntity = -1;
+					focusedEntity = -1;
 				} else if (keyStroke.getKeyType() == KeyType.ArrowLeft) {
 					cameraPosition.add(new Point2f(-(1 / scale), 0.0f));
-					lastFocusedEntity = -1;
+					focusedEntity = -1;
 				} else if (keyStroke.getKeyType() == KeyType.ArrowRight) {
 					cameraPosition.add(new Point2f((1 / scale), 0.0f));
-					lastFocusedEntity = -1;
+					focusedEntity = -1;
 				}
 			}
 		} catch (Exception ignored) {

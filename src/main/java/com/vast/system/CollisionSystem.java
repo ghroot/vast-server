@@ -7,6 +7,7 @@ import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.Metrics;
 import com.vast.Profiler;
+import com.vast.SpatialHash;
 import com.vast.WorldDimensions;
 import com.vast.collision.CollisionHandler;
 import com.vast.component.Collision;
@@ -36,7 +37,7 @@ public class CollisionSystem extends IteratingSystem {
 
 	private Set<Integer> checkedEntities;
 	private Point2i reusableCheckedEntity;
-	private Point2i reusableHash;
+	private SpatialHash reusableHash;
 	private Set<Integer> reusableAdjacentEntities;
 	private Vector2f reusableVector;
 	private int numberOfCollisionChecks;
@@ -49,7 +50,7 @@ public class CollisionSystem extends IteratingSystem {
 		this.metrics = metrics;
 		checkedEntities = new HashSet<Integer>();
 		reusableCheckedEntity = new Point2i();
-		reusableHash = new Point2i();
+		reusableHash = new SpatialHash();
 		reusableAdjacentEntities = new HashSet<Integer>();
 		reusableVector = new Vector2f();
 	}
@@ -144,8 +145,8 @@ public class CollisionSystem extends IteratingSystem {
 			for (int x = spatial.memberOfSpatialHash.x - worldDimensions.sectionSize; x <= spatial.memberOfSpatialHash.x + worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
 				for (int y = spatial.memberOfSpatialHash.y - worldDimensions.sectionSize; y <= spatial.memberOfSpatialHash.y + worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
 					reusableHash.set(x, y);
-					if (spatialHashes.containsKey(reusableHash.hashCode())) {
-						reusableAdjacentEntities.addAll(spatialHashes.get(reusableHash.hashCode()));
+					if (spatialHashes.containsKey(reusableHash.uniqueKey())) {
+						reusableAdjacentEntities.addAll(spatialHashes.get(reusableHash.uniqueKey()));
 					}
 				}
 			}

@@ -5,6 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.vast.Profiler;
+import com.vast.SpatialHash;
 import com.vast.WorldDimensions;
 import com.vast.component.Active;
 import com.vast.component.Player;
@@ -12,7 +13,6 @@ import com.vast.component.Spatial;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.vecmath.Point2i;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -24,13 +24,14 @@ public class NearbySystem extends IteratingSystem {
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Spatial> spatialMapper;
 
-	private final int NEARBY_THRESHOLD = 6;
+	private final int NEARBY_THRESHOLD = 8;
 
 	private Map<String, Set<Integer>> nearbyEntitiesByPeer;
 	private WorldDimensions worldDimensions;
 	private Map<Integer, Set<Integer>> spatialHashes;
 
-	private Point2i reusableHash;
+	private int sectionsInEachDirection;
+	private SpatialHash reusableHash;
 
 	public NearbySystem(Map<String, Set<Integer>> nearbyEntitiesByPeer, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes) {
 		super(Aspect.all(Player.class, Active.class));
@@ -38,7 +39,8 @@ public class NearbySystem extends IteratingSystem {
 		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
 
-		reusableHash = new Point2i();
+		sectionsInEachDirection = (int) Math.ceil((float) NEARBY_THRESHOLD / worldDimensions.sectionSize);
+		reusableHash = new SpatialHash();
 	}
 
 	@Override
@@ -62,12 +64,11 @@ public class NearbySystem extends IteratingSystem {
 
 		Spatial spatial = spatialMapper.get(activePlayerEntity);
 		if (spatial.memberOfSpatialHash != null) {
-			int n = (int) Math.ceil((float) NEARBY_THRESHOLD / worldDimensions.sectionSize);
-			for (int x = spatial.memberOfSpatialHash.x - n * worldDimensions.sectionSize; x <= spatial.memberOfSpatialHash.x + 2 * n * worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
-				for (int y = spatial.memberOfSpatialHash.y - n * worldDimensions.sectionSize; y <= spatial.memberOfSpatialHash.y + 2 * n * worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
+			for (int x = spatial.memberOfSpatialHash.x - sectionsInEachDirection * worldDimensions.sectionSize; x <= spatial.memberOfSpatialHash.x + sectionsInEachDirection * worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
+				for (int y = spatial.memberOfSpatialHash.y - sectionsInEachDirection * worldDimensions.sectionSize; y <= spatial.memberOfSpatialHash.y + sectionsInEachDirection * worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
 					reusableHash.set(x, y);
-					if (spatialHashes.containsKey(reusableHash.hashCode())) {
-						nearbyEntities.addAll(spatialHashes.get(reusableHash.hashCode()));
+					if (spatialHashes.containsKey(reusableHash.uniqueKey())) {
+						nearbyEntities.addAll(spatialHashes.get(reusableHash.uniqueKey()));
 					}
 				}
 			}

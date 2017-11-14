@@ -62,7 +62,7 @@ public class CreationManager extends BaseSystem {
 	}
 
 	public void createWorld() {
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 200; i++) {
 			int treeEntity = world.create(treeArchetype);
 			typeMapper.get(treeEntity).type = "tree";
 			transformMapper.get(treeEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);

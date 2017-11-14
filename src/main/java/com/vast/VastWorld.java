@@ -27,7 +27,7 @@ public class VastWorld implements Runnable {
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
-		WorldDimensions worldDimensions = new WorldDimensions(30, 30, 2);
+		WorldDimensions worldDimensions = new WorldDimensions(100, 100, 2);
 		Map<String, Set<Integer>> nearbyEntitiesByPeer = new HashMap<String, Set<Integer>>();
 		Map<String, Set<Integer>> knownEntitiesByPeer = new HashMap<String, Set<Integer>>();
 
@@ -61,7 +61,7 @@ public class VastWorld implements Runnable {
 			new WorldSerializationSystem(snapshotFormat)
 		);
 		if (showMonitor) {
-			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(metrics, worldDimensions, spatialHashes));
+			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(metrics, worldDimensions, spatialHashes, nearbyEntitiesByPeer));
 		}
 		world = new World(worldConfigurationBuilder.build());
 
