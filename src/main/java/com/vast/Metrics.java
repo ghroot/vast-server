@@ -11,6 +11,7 @@ public class Metrics {
 	private int numberOfCollisionChecks;
 	private double meanOfRoundTripTime;
 	private double meanOfRoundTripTimeDeviation;
+	private int numberOfSentMessages;
 
 	public int getTimePerFrameMs() {
 		return timePerFrameMs;
@@ -52,5 +53,13 @@ public class Metrics {
 
 	public double getMeanOfRoundTripTimeDeviation() {
 		return meanOfRoundTripTimeDeviation;
+	}
+
+	public int getNumberOfSentMessages() {
+		return numberOfSentMessages;
+	}
+
+	public void incrementNumberOfSentMessages() {
+		this.numberOfSentMessages++;
 	}
 }

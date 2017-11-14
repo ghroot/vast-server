@@ -62,7 +62,7 @@ public class CreationManager extends BaseSystem {
 	}
 
 	public void createWorld() {
-		for (int i = 0; i < 200; i++) {
+		for (int i = 0; i < 50000; i++) {
 			int treeEntity = world.create(treeArchetype);
 			typeMapper.get(treeEntity).type = "tree";
 			transformMapper.get(treeEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
@@ -72,7 +72,7 @@ public class CreationManager extends BaseSystem {
 			harvestableMapper.get(treeEntity).itemCount = 4;
 		}
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 10000; i++) {
 			int pickupEntity = world.create(pickupArchetype);
 			typeMapper.get(pickupEntity).type = "pickup";
 			transformMapper.get(pickupEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
@@ -81,7 +81,7 @@ public class CreationManager extends BaseSystem {
 			pickupMapper.create(pickupEntity).type = 3;
 		}
 
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 1000; i++) {
 			int aiEntity = world.create(aiArchetype);
 			typeMapper.get(aiEntity).type = "ai";
 			transformMapper.get(aiEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);

@@ -17,6 +17,7 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.vast.Metrics;
 import com.vast.Profiler;
+import com.vast.VastPeer;
 import com.vast.WorldDimensions;
 import com.vast.component.*;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ public class TerminalSystem extends IntervalSystem {
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<Path> pathMapper;
 
+	private Map<String, VastPeer> peers;
 	private Metrics metrics;
 	private WorldDimensions worldDimensions;
 	private Map<Integer, Set<Integer>> spatialHashes;
@@ -48,8 +50,9 @@ public class TerminalSystem extends IntervalSystem {
 	private boolean showPlayerNames = false;
 	private int focusedEntity = -1;
 
-	public TerminalSystem(Metrics metrics, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes, Map<String, Set<Integer>> nearbyEntitiesByPeer) {
+	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes, Map<String, Set<Integer>> nearbyEntitiesByPeer) {
 		super(Aspect.all(), 0.1f);
+		this.peers = peers;
 		this.metrics = metrics;
 		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
@@ -166,18 +169,25 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.putString(0, 5, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
 			textGraphics.putString(0, 6, "Player entities: " + playerEntities.size() + " (" + activePlayerEntities.size() + " active)");
 
-			textGraphics.putString(screen.getTerminalSize().getColumns() - 7, 0, "FPS: " + metrics.getFps());
-			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + metrics.getTimePerFrameMs() + " ms");
-			String roundTripString = "Roundtrip: " + metrics.getMeanOfRoundTripTime() + " (" + metrics.getMeanOfRoundTripTimeDeviation() + ")";
-			textGraphics.putString(screen.getTerminalSize().getColumns() - roundTripString.length(), 2, roundTripString);
-			textGraphics.putString(screen.getTerminalSize().getColumns() - 23, 4, "Collision checks: " + metrics.getNumberOfCollisionChecks());
+			String fpsString = "FPS: " + metrics.getFps();
+			textGraphics.putString(screen.getTerminalSize().getColumns() - fpsString.length(), 0, fpsString);
+			String frameTimeString = "Frame time: " + metrics.getTimePerFrameMs() + " ms";
+			textGraphics.putString(screen.getTerminalSize().getColumns() - frameTimeString.length(), 1, frameTimeString);
+			String peersString = "Peers: " + peers.size();
+			textGraphics.putString(screen.getTerminalSize().getColumns() - peersString.length(), 2, peersString);
+			String roundTripString = "Roundtrip: " + (int) metrics.getMeanOfRoundTripTime();
+			textGraphics.putString(screen.getTerminalSize().getColumns() - roundTripString.length(), 3, roundTripString);
+			String sendMessagesString = "Sent messages: " + metrics.getNumberOfSentMessages();
+			textGraphics.putString(screen.getTerminalSize().getColumns() - sendMessagesString.length(), 4, sendMessagesString);
+			String collisionsString = "Collision checks: " + metrics.getNumberOfCollisionChecks();
+			textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 5, collisionsString);
 
 			if (metrics.getSystemProcessingTimes().size() > 0) {
 				int longestLength = 0;
 				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
 					longestLength = Math.max(systemName.length(), longestLength);
 				}
-				int row = 6;
+				int row = 7;
 				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
 					int processingDuration = metrics.getSystemProcessingTimes().get(systemName);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestLength - 1, row, systemName);

@@ -47,13 +47,13 @@ public class VastServerApplication extends ServerApplication {
 		worldThread.start();
 
 		// TODO: Add fake peer for testing
-//		synchronized (peers) {
-//			for (int i = 0; i < 1500; i++) {
-//				String name = "fakePeer" + (i + 1);
-//				peers.add(new FakePeer(this, name));
-//				logger.info("Added fake peer: {}", name);
-//			}
-//		}
+		synchronized (peers) {
+			for (int i = 0; i < 2000; i++) {
+				String name = "fakePeer" + (i + 1);
+				peers.add(new FakePeer(this, name, metrics));
+				logger.info("Added fake peer: {}", name);
+			}
+		}
 	}
 
 	public List<VastPeer> getPeers() {
@@ -72,7 +72,7 @@ public class VastServerApplication extends ServerApplication {
 	@Override
 	protected ClientPeer createPeer(InitialRequest initialRequest, NetworkPeer networkPeer) {
 		String name = new String(initialRequest.getCustomData(), StandardCharsets.UTF_8);
-		VastPeer peer = new VastPeer(initialRequest, networkPeer, this, name);
+		VastPeer peer = new VastPeer(initialRequest, networkPeer, this, name, metrics);
 		synchronized (peers) {
 			peers.add(peer);
 		}
@@ -96,7 +96,9 @@ public class VastServerApplication extends ServerApplication {
 }
 
 class FakePeer extends VastPeer {
-	public FakePeer(VastServerApplication serverApplication, String name) {
+	private Metrics metrics;
+
+	public FakePeer(VastServerApplication serverApplication, String name, Metrics metrics) {
 		super(new InitialRequest(), new NetworkPeer() {
 			@Override
 			public long getMeanOfRoundTripTime() {
@@ -135,43 +137,48 @@ class FakePeer extends VastPeer {
 
 			@Override
 			public void setApplicationPeer(ApplicationPeer applicationPeer) {
-
 			}
 
 			@Override
 			public void disconnect(DisconnectReason disconnectReason, String s) {
-
 			}
-		}, serverApplication, name);
+		}, serverApplication, name, metrics);
+		this.metrics = metrics;
 	}
 
 	@Override
 	protected boolean send(ResponseMessage response, SendOptions options) {
+		metrics.incrementNumberOfSentMessages();
 		return true;
 	}
 
 	@Override
 	protected boolean send(ResponseMessage response, byte channel, boolean encrypt, QoS qos) {
+		metrics.incrementNumberOfSentMessages();
 		return true;
 	}
 
 	@Override
 	public boolean send(Message message, SendOptions options) {
+		metrics.incrementNumberOfSentMessages();
 		return true;
 	}
 
 	@Override
 	protected boolean send(Message message, byte channel, boolean encrypt, QoS qos) {
+		metrics.incrementNumberOfSentMessages();
 		return true;
 	}
 
 	@Override
 	protected boolean send(InitialResponse initialResponse, byte channel, boolean encrypt, QoS qos) {
+		metrics.incrementNumberOfSentMessages();
 		return true;
 	}
 
 	@Override
 	protected boolean send(byte[] payload, int payloadLength, byte channel, boolean encrypt, QoS qos) {
+		metrics.incrementNumberOfSentMessages();
 		return true;
 	}
 
