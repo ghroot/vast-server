@@ -3,6 +3,7 @@ package com.vast.system;
 import com.artemis.*;
 import com.artemis.annotations.Profile;
 import com.artemis.utils.IntBag;
+import com.vast.FakePeer;
 import com.vast.Profiler;
 import com.vast.VastPeer;
 import com.vast.WorldDimensions;
@@ -21,6 +22,7 @@ public class PeerEntitySystem extends BaseSystem {
 
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Transform> transformMapper;
+	private ComponentMapper<AI> aiMapper;
 
 	private Map<String, VastPeer> peers;
 	private WorldDimensions worldDimensions;
@@ -89,6 +91,9 @@ public class PeerEntitySystem extends BaseSystem {
 		int playerEntity = world.create(playerEntityArchetype);
 		playerMapper.get(playerEntity).name = peer.getName();
 		transformMapper.get(playerEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
+		if (peer instanceof FakePeer) {
+			aiMapper.create(playerEntity);
+		}
 		entitiesByPeer.put(peer.getName(), playerEntity);
 		logger.info("Creating peer entity: {} for {} at {}", playerEntity, peer.getName(), transformMapper.get(playerEntity).position);
 	}
