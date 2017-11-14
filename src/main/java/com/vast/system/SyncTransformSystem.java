@@ -33,6 +33,7 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 	private Map<String, Set<Integer>> knownEntitiesByPeer;
 
 	private float[] reusablePosition;
+	private EventMessage reusableEventMessage;
 
 	public SyncTransformSystem(Map<String, VastPeer> peers, Map<String, Set<Integer>> knownEntitiesByPeer) {
 		super(Aspect.all(Transform.class, SyncTransform.class), 0.2f);
@@ -40,6 +41,7 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 		this.knownEntitiesByPeer = knownEntitiesByPeer;
 
 		reusablePosition = new float[2];
+		reusableEventMessage = new EventMessage(MessageCodes.SET_POSITION, new DataObject());
 	}
 
 	@Override
@@ -59,12 +61,11 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 		if (transform.position.distanceSquared(syncTransform.lastSyncedPosition) >= SYNC_THRESHOLD_SQUARED) {
 			reusablePosition[0] = transform.position.x;
 			reusablePosition[1] = transform.position.y;
-			EventMessage positionMessage = new EventMessage(MessageCodes.SET_POSITION, new DataObject()
-					.set(MessageCodes.SET_POSITION_ENTITY_ID, entity)
-					.set(MessageCodes.SET_POSITION_POSITION, reusablePosition));
+			reusableEventMessage.getDataObject().set(MessageCodes.SET_POSITION_ENTITY_ID, entity);
+			reusableEventMessage.getDataObject().set(MessageCodes.SET_POSITION_POSITION, reusablePosition);
 			for (VastPeer peer : peers.values()) {
 				if (knownEntitiesByPeer.containsKey(peer.getName()) && knownEntitiesByPeer.get(peer.getName()).contains(entity)) {
-					peer.send(positionMessage, SendOptions.ReliableSend);
+					peer.send(reusableEventMessage, SendOptions.ReliableSend);
 				}
 			}
 			syncTransform.lastSyncedPosition.set(transform.position);

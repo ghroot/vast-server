@@ -1,10 +1,18 @@
 package com.vast.component;
 
-import com.artemis.Component;
-import com.artemis.annotations.PooledWeaver;
+import com.artemis.PooledComponent;
 
-@PooledWeaver
-public class Collision extends Component {
+import javax.vecmath.Point2f;
+
+public class Collision extends PooledComponent {
 	public boolean isStatic = false;
 	public float radius = 0.2f;
+	public transient Point2f lastCheckedPosition;
+
+	@Override
+	protected void reset() {
+		isStatic = false;
+		radius = 0.2f;
+		lastCheckedPosition = null;
+	}
 }

@@ -27,7 +27,7 @@ public class VastWorld implements Runnable {
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
-		WorldDimensions worldDimensions = new WorldDimensions(10000, 10000, 4);
+		WorldDimensions worldDimensions = new WorldDimensions(5000, 5000, 4);
 		Map<String, Set<Integer>> nearbyEntitiesByPeer = new HashMap<String, Set<Integer>>();
 		Map<String, Set<Integer>> knownEntitiesByPeer = new HashMap<String, Set<Integer>>();
 

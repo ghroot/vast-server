@@ -16,7 +16,7 @@ import com.vast.component.Transform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.vecmath.Point2i;
+import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,8 +35,6 @@ public class CollisionSystem extends IteratingSystem {
 	private Map<Integer, Set<Integer>> spatialHashes;
 	private Metrics metrics;
 
-	private Set<Integer> checkedEntities;
-	private Point2i reusableCheckedEntity;
 	private SpatialHash reusableHash;
 	private Set<Integer> reusableAdjacentEntities;
 	private Vector2f reusableVector;
@@ -48,8 +46,7 @@ public class CollisionSystem extends IteratingSystem {
 		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
 		this.metrics = metrics;
-		checkedEntities = new HashSet<Integer>();
-		reusableCheckedEntity = new Point2i();
+
 		reusableHash = new SpatialHash();
 		reusableAdjacentEntities = new HashSet<Integer>();
 		reusableVector = new Vector2f();
@@ -65,7 +62,6 @@ public class CollisionSystem extends IteratingSystem {
 
 	@Override
 	protected void begin() {
-		checkedEntities.clear();
 		numberOfCollisionChecks = 0;
 	}
 
@@ -86,11 +82,15 @@ public class CollisionSystem extends IteratingSystem {
 	protected void process(int entity) {
 		Transform transform = transformMapper.get(entity);
 		Collision collision = collisionMapper.get(entity);
-		for (int adjacentEntity : getAdjacentEntities(entity)) {
-			if (adjacentEntity != entity) {
-				reusableCheckedEntity.set(entity, adjacentEntity);
-				int checkedEntity = reusableCheckedEntity.hashCode();
-				if (!checkedEntities.contains(checkedEntity)) {
+
+		if (collision.lastCheckedPosition == null || !collision.lastCheckedPosition.equals(transform.position)) {
+			if (collision.lastCheckedPosition == null) {
+				collision.lastCheckedPosition = new Point2f(transform.position);
+			} else {
+				collision.lastCheckedPosition.set(transform.position);
+			}
+			for (int adjacentEntity : getAdjacentEntities(entity)) {
+				if (adjacentEntity != entity) {
 					Transform adjacentTransform = transformMapper.get(adjacentEntity);
 					Collision adjacentCollision = collisionMapper.get(adjacentEntity);
 					reusableVector.set(adjacentTransform.position.x - transform.position.x, adjacentTransform.position.y - transform.position.y);
@@ -132,7 +132,6 @@ public class CollisionSystem extends IteratingSystem {
 						}
 						numberOfCollisionChecks++;
 					}
-					checkedEntities.add(checkedEntity);
 				}
 			}
 		}
