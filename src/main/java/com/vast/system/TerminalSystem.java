@@ -45,6 +45,7 @@ public class TerminalSystem extends IntervalSystem {
 	private float scale = 3.0f;
 	private Point2f cameraPosition = new Point2f();
 	private boolean showPathTargetPosition = false;
+	private boolean showPlayerNames = false;
 	private int focusedEntity = -1;
 
 	public TerminalSystem(Metrics metrics, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes, Map<String, Set<Integer>> nearbyEntitiesByPeer) {
@@ -112,16 +113,22 @@ public class TerminalSystem extends IntervalSystem {
 						colored = nearbyEntitiesByPeer.get(name).contains(entity);
 					}
 				}
-				TextColor gray = TextColor.ANSI.Indexed.fromRGB(60, 60, 60);
+				TextColor gray = TextColor.ANSI.Indexed.fromRGB(50, 50, 50);
 
 				TerminalPosition terminalPosition = getTerminalPositionFromWorldPosition(transform.position);
 				if (terminalPosition.getColumn() >= 0 && terminalPosition.getColumn() < screen.getTerminalSize().getColumns() &&
 						terminalPosition.getRow() >= 0 && terminalPosition.getRow() < screen.getTerminalSize().getRows()) {
 					if (playerMapper.has(entity)) {
+						TextGraphics textGraphics = screen.newTextGraphics();
 						if (activeMapper.has(entity)) {
 							screen.setCharacter(terminalPosition, new TextCharacter('O', TextColor.ANSI.BLUE, TextColor.ANSI.DEFAULT));
+							textGraphics.setForegroundColor(TextColor.ANSI.BLUE);
 						} else {
 							screen.setCharacter(terminalPosition, new TextCharacter('O', TextColor.ANSI.YELLOW, TextColor.ANSI.DEFAULT));
+							textGraphics.setForegroundColor(TextColor.ANSI.YELLOW);
+						}
+						if (showPlayerNames) {
+							textGraphics.putString(terminalPosition.getColumn() + 2, terminalPosition.getRow(), playerMapper.get(entity).name);
 						}
 					} else {
 						if (typeMapper.get(entity).type.equals("ai")) {
@@ -158,7 +165,6 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.putString(0, 4, "Active spatial hashes: " + numberOfActiveSpatialHashes + " (of " + numberOfSpatialHashes + " total)");
 			textGraphics.putString(0, 5, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
 			textGraphics.putString(0, 6, "Player entities: " + playerEntities.size() + " (" + activePlayerEntities.size() + " active)");
-			textGraphics.putString(0, 7, "Showing path targets: " + (showPathTargetPosition ? "Yes" : "No"));
 
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 7, 0, "FPS: " + metrics.getFps());
 			textGraphics.putString(screen.getTerminalSize().getColumns() - 17, 1, "Frame time: " + metrics.getTimePerFrameMs() + " ms");
@@ -249,6 +255,8 @@ public class TerminalSystem extends IntervalSystem {
 					} else if (keyStroke.getCharacter().toString().equals("r")) {
 						cameraPosition.set(0.0f, 0.0f);
 						focusedEntity = -1;
+					} else if (keyStroke.getCharacter().toString().equals("n")) {
+						showPlayerNames = !showPlayerNames;
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
 					cameraPosition.add(new Point2f(0.0f, (1 / scale)));
