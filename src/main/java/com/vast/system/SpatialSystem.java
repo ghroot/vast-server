@@ -65,10 +65,8 @@ public class SpatialSystem extends IteratingSystem {
 			spatial.memberOfSpatialHash.x = Math.round(transform.position.x / worldDimensions.sectionSize) * worldDimensions.sectionSize;
 			spatial.memberOfSpatialHash.y = Math.round(transform.position.y / worldDimensions.sectionSize) * worldDimensions.sectionSize;
 
-			Set<Integer> entitiesInHash;
-			if (spatialHashes.containsKey(spatial.memberOfSpatialHash.uniqueKey())) {
-				entitiesInHash = spatialHashes.get(spatial.memberOfSpatialHash.uniqueKey());
-			} else {
+			Set<Integer> entitiesInHash = spatialHashes.get(spatial.memberOfSpatialHash.uniqueKey());
+			if (entitiesInHash == null) {
 				entitiesInHash = new HashSet<Integer>();
 				spatialHashes.put(spatial.memberOfSpatialHash.uniqueKey(), entitiesInHash);
 			}

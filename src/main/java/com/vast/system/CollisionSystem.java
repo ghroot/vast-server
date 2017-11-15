@@ -144,8 +144,9 @@ public class CollisionSystem extends IteratingSystem {
 			for (int x = spatial.memberOfSpatialHash.x - worldDimensions.sectionSize; x <= spatial.memberOfSpatialHash.x + worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
 				for (int y = spatial.memberOfSpatialHash.y - worldDimensions.sectionSize; y <= spatial.memberOfSpatialHash.y + worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
 					reusableHash.set(x, y);
-					if (spatialHashes.containsKey(reusableHash.uniqueKey())) {
-						reusableAdjacentEntities.addAll(spatialHashes.get(reusableHash.uniqueKey()));
+					Set<Integer> entitiesInHash = spatialHashes.get(reusableHash.uniqueKey());
+					if (entitiesInHash != null) {
+						reusableAdjacentEntities.addAll(entitiesInHash);
 					}
 				}
 			}
