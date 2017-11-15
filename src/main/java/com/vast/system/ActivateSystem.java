@@ -53,7 +53,6 @@ public class ActivateSystem extends IteratingSystem {
 		if (peers.containsKey(player.name)) {
 			logger.info("Activating peer entity: {} for {}", inactivePlayerEntity, player.name);
 			activeMapper.create(inactivePlayerEntity);
-			knownMapper.get(inactivePlayerEntity).knownEntities.clear();
 			for (int nearbyEntity : scanMapper.get(inactivePlayerEntity).nearbyEntities) {
 				if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity) && knownMapper.get(nearbyEntity).knownEntities.contains(inactivePlayerEntity)) {
 					VastPeer peer = peers.get(playerMapper.get(nearbyEntity).name);
