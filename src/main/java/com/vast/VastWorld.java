@@ -16,19 +16,20 @@ import java.util.*;
 public class VastWorld implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(VastWorld.class);
 
-	private final int UPDATE_RATE = 30;
-	private final float FRAME_TIME_MILLIS = (float) 1000 / UPDATE_RATE;
-	private final float FRAME_TIME_SECONDS = FRAME_TIME_MILLIS / 1000;
+	private final int FRAME_RATE = 30;
+	private final int FRAME_DURATION_MILLIS = 1000 / FRAME_RATE;
 
 	private World world;
 	private boolean alive;
+	private long lastFrameStartTime;
 
 	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, boolean showMonitor, Metrics metrics) {
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
 		WorldDimensions worldDimensions = new WorldDimensions(5000, 5000, 4);
-		Map<String, Set<Integer>> nearbyEntitiesByPeer = new HashMap<String, Set<Integer>>();
+		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
+		Map<Integer, Set<Integer>> nearbyEntitiesByEntity = new HashMap<Integer, Set<Integer>>();
 		Map<String, Set<Integer>> knownEntitiesByPeer = new HashMap<String, Set<Integer>>();
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
@@ -38,10 +39,10 @@ public class VastWorld implements Runnable {
 
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
-			new PeerEntitySystem(peers, worldDimensions),
-			new NearbySystem(nearbyEntitiesByPeer, worldDimensions, spatialHashes),
-			new CreateSystem(peers, knownEntitiesByPeer, nearbyEntitiesByPeer),
-			new CullingSystem(peers, knownEntitiesByPeer, nearbyEntitiesByPeer),
+			new PeerEntitySystem(peers, entitiesByPeer, worldDimensions),
+			new NearbySystem(nearbyEntitiesByEntity, worldDimensions, spatialHashes),
+			new CreateSystem(peers, entitiesByPeer, knownEntitiesByPeer, nearbyEntitiesByEntity),
+			new CullingSystem(peers, entitiesByPeer, knownEntitiesByPeer, nearbyEntitiesByEntity),
 			new DeactivateSystem(peers, knownEntitiesByPeer),
 			new ActivateSystem(peers, knownEntitiesByPeer),
 			new MoveOrderSystem(incomingRequests),
@@ -57,11 +58,11 @@ public class VastWorld implements Runnable {
 				new PlayerWithPickupCollisionHandler()
 			)), worldDimensions, spatialHashes, metrics),
 			new DeleteSystem(peers, knownEntitiesByPeer),
-			new SyncTransformSystem(peers, knownEntitiesByPeer),
+			new SyncTransformSystem(peers, nearbyEntitiesByEntity),
 			new WorldSerializationSystem(snapshotFormat)
 		);
 		if (showMonitor) {
-			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(peers, metrics, worldDimensions, spatialHashes, nearbyEntitiesByPeer));
+			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(peers, metrics, worldDimensions, spatialHashes, nearbyEntitiesByEntity));
 		}
 		world = new World(worldConfigurationBuilder.build());
 
@@ -70,20 +71,25 @@ public class VastWorld implements Runnable {
 
 	@Override
 	public void run() {
+		lastFrameStartTime = System.currentTimeMillis();
 		while (alive) {
-			try {
-				long frameStartTime = System.currentTimeMillis();
-				world.setDelta(FRAME_TIME_SECONDS);
-				world.process();
-				long processEndTime = System.currentTimeMillis();
-				int processDuration = (int) (processEndTime - frameStartTime);
-				int timeToSleep = (int) (FRAME_TIME_MILLIS - processDuration);
-				if (timeToSleep > 0) {
-					Thread.sleep(timeToSleep);
+			long frameStartTime = System.currentTimeMillis();
+			int timeSinceLastFrame = (int) (frameStartTime - lastFrameStartTime);
+			float delta = (float) timeSinceLastFrame / 1000;
+			world.setDelta(delta);
+			long processStartTime = System.currentTimeMillis();
+			world.process();
+			long processEndTime = System.currentTimeMillis();
+			int processDuration = (int) (processEndTime - processStartTime);
+			int sleepDuration = FRAME_DURATION_MILLIS - processDuration;
+			if (sleepDuration > 0) {
+				try {
+					Thread.sleep(sleepDuration);
+				} catch (InterruptedException exception) {
+					logger.error("Interrupted while sleeping after processing world", exception);
 				}
-			} catch (InterruptedException exception) {
-				logger.error("Error in world loop", exception);
 			}
+			lastFrameStartTime = frameStartTime;
 		}
 	}
 

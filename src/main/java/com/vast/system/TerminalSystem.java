@@ -41,7 +41,7 @@ public class TerminalSystem extends IntervalSystem {
 	private Metrics metrics;
 	private WorldDimensions worldDimensions;
 	private Map<Integer, Set<Integer>> spatialHashes;
-	private Map<String, Set<Integer>> nearbyEntitiesByPeer;
+	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
 
 	private Screen screen;
 	private float scale = 3.0f;
@@ -50,13 +50,13 @@ public class TerminalSystem extends IntervalSystem {
 	private boolean showPlayerNames = false;
 	private int focusedEntity = -1;
 
-	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes, Map<String, Set<Integer>> nearbyEntitiesByPeer) {
+	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes, Map<Integer, Set<Integer>> nearbyEntitiesByEntity) {
 		super(Aspect.all(), 0.1f);
 		this.peers = peers;
 		this.metrics = metrics;
 		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
-		this.nearbyEntitiesByPeer = nearbyEntitiesByPeer;
+		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 	}
 
 	@Override
@@ -112,8 +112,8 @@ public class TerminalSystem extends IntervalSystem {
 				boolean colored = true;
 				if (focusedEntity >= 0 && playerMapper.has(focusedEntity)) {
 					String name = playerMapper.get(focusedEntity).name;
-					if (nearbyEntitiesByPeer.containsKey(name)) {
-						colored = nearbyEntitiesByPeer.get(name).contains(entity);
+					if (nearbyEntitiesByEntity.containsKey(focusedEntity)) {
+						colored = nearbyEntitiesByEntity.get(focusedEntity).contains(entity);
 					}
 				}
 				TextColor gray = TextColor.ANSI.Indexed.fromRGB(50, 50, 50);

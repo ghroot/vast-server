@@ -3,7 +3,7 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
-import com.artemis.systems.IntervalIteratingSystem;
+import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.protocol.data.DataObject;
@@ -11,6 +11,8 @@ import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
 import com.vast.Profiler;
 import com.vast.VastPeer;
+import com.vast.component.Active;
+import com.vast.component.Player;
 import com.vast.component.SyncTransform;
 import com.vast.component.Transform;
 import org.slf4j.Logger;
@@ -20,25 +22,27 @@ import java.util.Map;
 import java.util.Set;
 
 @Profile(enabled = true, using = Profiler.class)
-public class SyncTransformSystem extends IntervalIteratingSystem {
+public class SyncTransformSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(SyncTransformSystem.class);
 
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<SyncTransform> syncTransformMapper;
+	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
 
-	private final float SYNC_THRESHOLD = 0.05f;
+	private final float SYNC_THRESHOLD = 0.1f;
 	private final float SYNC_THRESHOLD_SQUARED = SYNC_THRESHOLD * SYNC_THRESHOLD;
 
 	private Map<String, VastPeer> peers;
-	private Map<String, Set<Integer>> knownEntitiesByPeer;
+	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
 
 	private float[] reusablePosition;
 	private EventMessage reusableEventMessage;
 
-	public SyncTransformSystem(Map<String, VastPeer> peers, Map<String, Set<Integer>> knownEntitiesByPeer) {
-		super(Aspect.all(Transform.class, SyncTransform.class), 0.2f);
+	public SyncTransformSystem(Map<String, VastPeer> peers, Map<Integer, Set<Integer>> nearbyEntitiesByEntity) {
+		super(Aspect.all(Transform.class, SyncTransform.class));
 		this.peers = peers;
-		this.knownEntitiesByPeer = knownEntitiesByPeer;
+		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 
 		reusablePosition = new float[2];
 		reusableEventMessage = new EventMessage(MessageCodes.SET_POSITION, new DataObject());
@@ -63,9 +67,13 @@ public class SyncTransformSystem extends IntervalIteratingSystem {
 			reusablePosition[1] = transform.position.y;
 			reusableEventMessage.getDataObject().set(MessageCodes.SET_POSITION_ENTITY_ID, entity);
 			reusableEventMessage.getDataObject().set(MessageCodes.SET_POSITION_POSITION, reusablePosition);
-			for (VastPeer peer : peers.values()) {
-				if (knownEntitiesByPeer.containsKey(peer.getName()) && knownEntitiesByPeer.get(peer.getName()).contains(entity)) {
-					peer.send(reusableEventMessage, SendOptions.ReliableSend);
+			Set<Integer> nearbyEntities = nearbyEntitiesByEntity.get(entity);
+			for (int nearbyEntity : nearbyEntities) {
+				if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
+					VastPeer peer = peers.get(playerMapper.get(nearbyEntity).name);
+					if (peer != null) {
+						peer.send(reusableEventMessage, SendOptions.ReliableSend);
+					}
 				}
 			}
 			syncTransform.lastSyncedPosition.set(transform.position);

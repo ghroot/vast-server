@@ -30,16 +30,18 @@ public class CreateSystem extends IteratingSystem {
 	private ComponentMapper<Interactable> interactableMapper;
 
 	private Map<String, VastPeer> peers;
+	private Map<String, Integer> entitiesByPeer;
 	private Map<String, Set<Integer>> knownEntitiesByPeer;
-	private Map<String, Set<Integer>> nearbyEntitiesByPeer;
+	private  Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
 
 	private float[] reusablePosition;
 
-	public CreateSystem(Map<String, VastPeer> peers, Map<String, Set<Integer>> knownEntitiesByPeer, Map<String, Set<Integer>> nearbyEntitiesByPeer) {
+	public CreateSystem(Map<String, VastPeer> peers, Map<String, Integer> entitiesByPeer, Map<String, Set<Integer>> knownEntitiesByPeer, Map<Integer, Set<Integer>> nearbyEntitiesByEntity) {
 		super(Aspect.all(Create.class, Transform.class, Type.class));
 		this.peers = peers;
+		this.entitiesByPeer = entitiesByPeer;
 		this.knownEntitiesByPeer = knownEntitiesByPeer;
-		this.nearbyEntitiesByPeer = nearbyEntitiesByPeer;
+		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 
 		reusablePosition = new float[2];
 	}
@@ -47,7 +49,8 @@ public class CreateSystem extends IteratingSystem {
 	@Override
 	protected void process(int createEntity) {
 		for (VastPeer peer : peers.values()) {
-			Set<Integer> nearbyEntities = nearbyEntitiesByPeer.get(peer.getName());
+			int  playerEntity = entitiesByPeer.get(peer.getName());
+			Set<Integer> nearbyEntities = nearbyEntitiesByEntity.get(playerEntity);
 			Set<Integer> knownEntities = knownEntitiesByPeer.get(peer.getName());
 			if (nearbyEntities.contains(createEntity) && !knownEntities.contains(createEntity)) {
 				String reason = createMapper.get(createEntity).reason;

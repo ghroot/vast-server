@@ -27,17 +27,19 @@ public class CullingSystem extends IteratingSystem {
 	private ComponentMapper<Interactable> interactableMapper;
 
 	private Map<String, VastPeer> peers;
+	private Map<String, Integer> entitiesByPeer;
 	private Map<String, Set<Integer>> knownEntitiesByPeer;
-	private Map<String, Set<Integer>> nearbyEntitiesByPeer;
+	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
 
 	private float[] reusablePosition;
 	private List<Integer> reusableRemovedEntities;
 
-	public CullingSystem(Map<String, VastPeer> peers, Map<String, Set<Integer>> knownEntitiesByPeer, Map<String, Set<Integer>> nearbyEntitiesByPeer) {
+	public CullingSystem(Map<String, VastPeer> peers, Map<String, Integer> entitiesByPeer, Map<String, Set<Integer>> knownEntitiesByPeer, Map<Integer, Set<Integer>> nearbyEntitiesByEntity) {
 		super(Aspect.all(Player.class, Active.class));
 		this.peers = peers;
+		this.entitiesByPeer = entitiesByPeer;
 		this.knownEntitiesByPeer = knownEntitiesByPeer;
-		this.nearbyEntitiesByPeer = nearbyEntitiesByPeer;
+		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 
 		reusablePosition = new float[2];
 		reusableRemovedEntities = new ArrayList<Integer>();
@@ -67,7 +69,8 @@ public class CullingSystem extends IteratingSystem {
 	}
 
 	private void notifyAboutRemovedEntities(VastPeer peer) {
-		Set<Integer> nearbyEntities = nearbyEntitiesByPeer.get(peer.getName());
+		int playerEntity = entitiesByPeer.get(peer.getName());
+		Set<Integer> nearbyEntities = nearbyEntitiesByEntity.get(playerEntity);
 		reusableRemovedEntities.clear();
 		for (int knownEntity : knownEntitiesByPeer.get(peer.getName())) {
 			if (!nearbyEntities.contains(knownEntity)) {
@@ -87,7 +90,8 @@ public class CullingSystem extends IteratingSystem {
 	}
 
 	private void notifyAboutNewEntities(VastPeer peer) {
-		Set<Integer> nearbyEntities = nearbyEntitiesByPeer.get(peer.getName());
+		int playerEntity = entitiesByPeer.get(peer.getName());
+		Set<Integer> nearbyEntities = nearbyEntitiesByEntity.get(playerEntity);
 		for (int nearbyEntity : nearbyEntities) {
 			if (!knownEntitiesByPeer.get(peer.getName()).contains(nearbyEntity)) {
 				notifyAboutNewEntity(peers.get(peer.getName()), nearbyEntity);

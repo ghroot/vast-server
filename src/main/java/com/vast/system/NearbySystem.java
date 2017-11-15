@@ -7,9 +7,8 @@ import com.artemis.systems.IteratingSystem;
 import com.vast.Profiler;
 import com.vast.SpatialHash;
 import com.vast.WorldDimensions;
-import com.vast.component.Active;
-import com.vast.component.Player;
 import com.vast.component.Spatial;
+import com.vast.component.SyncTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,21 +20,20 @@ import java.util.Set;
 public class NearbySystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(NearbySystem.class);
 
-	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Spatial> spatialMapper;
 
 	private final int NEARBY_THRESHOLD = 8;
 
-	private Map<String, Set<Integer>> nearbyEntitiesByPeer;
+	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
 	private WorldDimensions worldDimensions;
 	private Map<Integer, Set<Integer>> spatialHashes;
 
 	private int sectionsInEachDirection;
 	private SpatialHash reusableHash;
 
-	public NearbySystem(Map<String, Set<Integer>> nearbyEntitiesByPeer, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes) {
-		super(Aspect.all(Player.class, Active.class));
-		this.nearbyEntitiesByPeer = nearbyEntitiesByPeer;
+	public NearbySystem(Map<Integer, Set<Integer>> nearbyEntitiesByEntity, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes) {
+		super(Aspect.all(SyncTransform.class, Spatial.class));
+		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
 
@@ -44,25 +42,21 @@ public class NearbySystem extends IteratingSystem {
 	}
 
 	@Override
-	protected void inserted(int activePlayerEntity) {
-		Player player = playerMapper.get(activePlayerEntity);
-		nearbyEntitiesByPeer.put(player.name, new HashSet<Integer>());
+	protected void inserted(int spatialEntity) {
+		nearbyEntitiesByEntity.put(spatialEntity, new HashSet<Integer>());
 	}
 
 	@Override
-	protected void removed(int activePlayerEntity) {
-		Player player = playerMapper.get(activePlayerEntity);
-		nearbyEntitiesByPeer.remove(player.name);
+	protected void removed(int spatialEntity) {
+		nearbyEntitiesByEntity.remove(spatialEntity);
 	}
 
 	@Override
-	protected void process(int activePlayerEntity) {
-		Player player = playerMapper.get(activePlayerEntity);
-
-		Set<Integer> nearbyEntities = nearbyEntitiesByPeer.get(player.name);
+	protected void process(int spatialEntity) {
+		Set<Integer> nearbyEntities = nearbyEntitiesByEntity.get(spatialEntity);
 		nearbyEntities.clear();
 
-		Spatial spatial = spatialMapper.get(activePlayerEntity);
+		Spatial spatial = spatialMapper.get(spatialEntity);
 		if (spatial.memberOfSpatialHash != null) {
 			for (int x = spatial.memberOfSpatialHash.x - sectionsInEachDirection * worldDimensions.sectionSize; x <= spatial.memberOfSpatialHash.x + sectionsInEachDirection * worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
 				for (int y = spatial.memberOfSpatialHash.y - sectionsInEachDirection * worldDimensions.sectionSize; y <= spatial.memberOfSpatialHash.y + sectionsInEachDirection * worldDimensions.sectionSize; y += worldDimensions.sectionSize) {

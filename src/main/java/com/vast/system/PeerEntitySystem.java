@@ -25,18 +25,18 @@ public class PeerEntitySystem extends BaseSystem {
 	private ComponentMapper<AI> aiMapper;
 
 	private Map<String, VastPeer> peers;
+	private Map<String, Integer> entitiesByPeer;
 	private WorldDimensions worldDimensions;
 
 	private Set<VastPeer> peersLastUpdate;
-	private Map<String, Integer> entitiesByPeer;
 	private Archetype playerEntityArchetype;
 
-	public PeerEntitySystem(Map<String, VastPeer> peers, WorldDimensions worldDimensions) {
+	public PeerEntitySystem(Map<String, VastPeer> peers, Map<String, Integer> entitiesByPeer, WorldDimensions worldDimensions) {
 		this.peers = peers;
+		this.entitiesByPeer = entitiesByPeer;
 		this.worldDimensions = worldDimensions;
 
 		peersLastUpdate = new HashSet<VastPeer>();
-		entitiesByPeer = new HashMap<String, Integer>();
 	}
 
 	@Override
