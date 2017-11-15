@@ -41,7 +41,7 @@ public class SyncTransformSystem extends IteratingSystem {
 		this.peers = peers;
 
 		reusablePosition = new float[2];
-		reusableEventMessage = new EventMessage(MessageCodes.SET_POSITION, new DataObject());
+		reusableEventMessage = new EventMessage(MessageCodes.SET_POSITION);
 	}
 
 	@Override

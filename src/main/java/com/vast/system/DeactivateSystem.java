@@ -6,7 +6,6 @@ import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.framework.SendOptions;
-import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
 import com.vast.Profiler;
@@ -31,9 +30,13 @@ public class DeactivateSystem extends IteratingSystem {
 
 	private Map<String, VastPeer> peers;
 
+	private EventMessage reusableEventMessage;
+
 	public DeactivateSystem(Map<String, VastPeer> peers) {
 		super(Aspect.all(Player.class, Active.class, Scan.class));
 		this.peers = peers;
+
+		reusableEventMessage = new EventMessage(MessageCodes.PEER_ENTITY_DEACTIVATED);
 	}
 
 	@Override
@@ -53,9 +56,8 @@ public class DeactivateSystem extends IteratingSystem {
 			for (int nearbyEntity : scanMapper.get(activePlayerEntity).nearbyEntities) {
 				if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity) && knownMapper.get(nearbyEntity).knownEntities.contains(activePlayerEntity)) {
 					VastPeer peer = peers.get(playerMapper.get(nearbyEntity).name);
-					peer.send(new EventMessage(MessageCodes.PEER_ENTITY_DEACTIVATED, new DataObject()
-									.set(MessageCodes.PEER_ENTITY_DEACTIVATED_ENTITY_ID, activePlayerEntity)),
-							SendOptions.ReliableSend);
+					reusableEventMessage.getDataObject().set(MessageCodes.PEER_ENTITY_DEACTIVATED_ENTITY_ID, activePlayerEntity);
+					peer.send(reusableEventMessage, SendOptions.ReliableSend);
 				}
 			}
 		}

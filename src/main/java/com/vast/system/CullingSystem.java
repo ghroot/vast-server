@@ -6,7 +6,6 @@ import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.framework.SendOptions;
-import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
 import com.vast.Profiler;
@@ -36,6 +35,9 @@ public class CullingSystem extends IteratingSystem {
 
 	private float[] reusablePosition;
 	private List<Integer> reusableRemovedEntities;
+	private EventMessage reusableDestroyedEventMessage;
+	private EventMessage reusableCreatedEventMessage;
+	private EventMessage reusablePeerCreatedEventMessage;
 
 	public CullingSystem(Map<String, VastPeer> peers) {
 		super(Aspect.all(Player.class, Active.class, Scan.class, Known.class));
@@ -43,6 +45,9 @@ public class CullingSystem extends IteratingSystem {
 
 		reusablePosition = new float[2];
 		reusableRemovedEntities = new ArrayList<Integer>();
+		reusableDestroyedEventMessage = new EventMessage(MessageCodes.ENTITY_DESTROYED);
+		reusableCreatedEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
+		reusablePeerCreatedEventMessage = new EventMessage(MessageCodes.PEER_ENTITY_CREATED);
 	}
 
 	@Override
@@ -79,10 +84,9 @@ public class CullingSystem extends IteratingSystem {
 
 	private void notifyAboutRemovedEntity(VastPeer peer, int deletedEntity) {
 		logger.debug("Notifying peer {} about removed entity {} (culling)", peer.getName(), deletedEntity);
-		peer.send(new EventMessage(MessageCodes.ENTITY_DESTROYED, new DataObject()
-						.set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, deletedEntity)
-						.set(MessageCodes.ENTITY_DESTROYED_REASON, "culling")),
-				SendOptions.ReliableSend);
+		reusableDestroyedEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, deletedEntity);
+		reusableDestroyedEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_REASON, "culling");
+		peer.send(reusableDestroyedEventMessage, SendOptions.ReliableSend);
 	}
 
 	private void notifyAboutNewEntities(VastPeer peer, Set<Integer> nearbyEntities, Set<Integer> knownEntities) {
@@ -103,22 +107,21 @@ public class CullingSystem extends IteratingSystem {
 			Player player = playerMapper.get(newEntity);
 			boolean owner = peer.getName().equals(player.name);
 			boolean active = activeMapper.has(newEntity);
-			peer.send(new EventMessage(MessageCodes.PEER_ENTITY_CREATED, new DataObject()
-							.set(MessageCodes.PEER_ENTITY_CREATED_ENTITY_ID, newEntity)
-							.set(MessageCodes.PEER_ENTITY_CREATED_OWNER, owner)
-							.set(MessageCodes.PEER_ENTITY_CREATED_ACTIVE, active)
-							.set(MessageCodes.PEER_ENTITY_CREATED_POSITION, reusablePosition)
-							.set(MessageCodes.PEER_ENTITY_CREATED_REASON, "culling")),
-					SendOptions.ReliableSend);
+			reusablePeerCreatedEventMessage.getDataObject().set(MessageCodes.PEER_ENTITY_CREATED_ENTITY_ID, newEntity);
+			reusablePeerCreatedEventMessage.getDataObject().set(MessageCodes.PEER_ENTITY_CREATED_OWNER, owner);
+			reusablePeerCreatedEventMessage.getDataObject().set(MessageCodes.PEER_ENTITY_CREATED_ACTIVE, active);
+			reusablePeerCreatedEventMessage.getDataObject().set(MessageCodes.PEER_ENTITY_CREATED_POSITION, reusablePosition);
+			reusablePeerCreatedEventMessage.getDataObject().set(MessageCodes.PEER_ENTITY_CREATED_REASON, "culling");
+			peer.send(reusablePeerCreatedEventMessage, SendOptions.ReliableSend);
 		} else {
 			Type type = typeMapper.get(newEntity);
-			peer.send(new EventMessage(MessageCodes.ENTITY_CREATED, new DataObject()
-							.set(MessageCodes.ENTITY_CREATED_ENTITY_ID, newEntity)
-							.set(MessageCodes.ENTITY_CREATED_TYPE, type.type)
-							.set(MessageCodes.ENTITY_CREATED_POSITION, reusablePosition)
-							.set(MessageCodes.ENTITY_CREATED_REASON, "culling")
-							.set(MessageCodes.ENTITY_CREATED_INTERACTABLE, interactableMapper.has(newEntity))),
-					SendOptions.ReliableSend);
+			boolean interactable = interactableMapper.has(newEntity);
+			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, newEntity);
+			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, type.type);
+			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_POSITION, reusablePosition);
+			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, "culling");
+			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_INTERACTABLE, interactable);
+			peer.send(reusableCreatedEventMessage, SendOptions.ReliableSend);
 		}
 	}
 }
