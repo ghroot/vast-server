@@ -28,9 +28,6 @@ public class VastWorld implements Runnable {
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
 		WorldDimensions worldDimensions = new WorldDimensions(5000, 5000, 4);
-		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
-		Map<Integer, Set<Integer>> nearbyEntitiesByEntity = new HashMap<Integer, Set<Integer>>();
-		Map<String, Set<Integer>> knownEntitiesByPeer = new HashMap<String, Set<Integer>>();
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldDimensions),
@@ -39,12 +36,12 @@ public class VastWorld implements Runnable {
 
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
-			new PeerEntitySystem(peers, entitiesByPeer, worldDimensions),
-			new NearbySystem(nearbyEntitiesByEntity, worldDimensions, spatialHashes),
-			new CreateSystem(peers, entitiesByPeer, knownEntitiesByPeer, nearbyEntitiesByEntity),
-			new CullingSystem(peers, entitiesByPeer, knownEntitiesByPeer, nearbyEntitiesByEntity),
-			new DeactivateSystem(peers, knownEntitiesByPeer),
-			new ActivateSystem(peers, knownEntitiesByPeer),
+			new PeerEntitySystem(peers, worldDimensions),
+			new ScanSystem(worldDimensions, spatialHashes),
+			new CreateSystem(peers),
+			new CullingSystem(peers),
+			new DeactivateSystem(peers),
+			new ActivateSystem(peers),
 			new MoveOrderSystem(incomingRequests),
 			new InteractOrderSystem(incomingRequests),
 			new BuildOrderSystem(incomingRequests),
@@ -57,12 +54,12 @@ public class VastWorld implements Runnable {
 			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(
 				new PlayerWithPickupCollisionHandler()
 			)), worldDimensions, spatialHashes, metrics),
-			new DeleteSystem(peers, knownEntitiesByPeer),
-			new SyncTransformSystem(peers, nearbyEntitiesByEntity),
+			new DeleteSystem(peers),
+			new SyncTransformSystem(peers),
 			new WorldSerializationSystem(snapshotFormat)
 		);
 		if (showMonitor) {
-			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(peers, metrics, worldDimensions, spatialHashes, nearbyEntitiesByEntity));
+			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(peers, metrics, worldDimensions, spatialHashes));
 		}
 		world = new World(worldConfigurationBuilder.build());
 

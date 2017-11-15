@@ -12,12 +12,13 @@ import com.vast.MessageCodes;
 import com.vast.Profiler;
 import com.vast.VastPeer;
 import com.vast.component.Active;
+import com.vast.component.Known;
 import com.vast.component.Player;
+import com.vast.component.Scan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Set;
 
 @Profile(enabled = true, using = Profiler.class)
 public class DeactivateSystem extends IteratingSystem {
@@ -25,14 +26,14 @@ public class DeactivateSystem extends IteratingSystem {
 
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Scan> scanMapper;
+	private ComponentMapper<Known> knownMapper;
 
 	private Map<String, VastPeer> peers;
-	private Map<String, Set<Integer>> knownEntitiesByPeer;
 
-	public DeactivateSystem(Map<String, VastPeer> peers, Map<String, Set<Integer>> knownEntitiesByPeer) {
-		super(Aspect.all(Player.class, Active.class));
+	public DeactivateSystem(Map<String, VastPeer> peers) {
+		super(Aspect.all(Player.class, Active.class, Scan.class));
 		this.peers = peers;
-		this.knownEntitiesByPeer = knownEntitiesByPeer;
 	}
 
 	@Override
@@ -49,9 +50,10 @@ public class DeactivateSystem extends IteratingSystem {
 		if (!peers.containsKey(player.name)) {
 			logger.info("Deactivating peer entity: {} for {}", activePlayerEntity, player.name);
 			activeMapper.remove(activePlayerEntity);
-			for (VastPeer peerToSendTo : peers.values()) {
-				if (knownEntitiesByPeer.containsKey(peerToSendTo.getName()) && knownEntitiesByPeer.get(peerToSendTo.getName()).contains(activePlayerEntity)) {
-					peerToSendTo.send(new EventMessage(MessageCodes.PEER_ENTITY_DEACTIVATED, new DataObject()
+			for (int nearbyEntity : scanMapper.get(activePlayerEntity).nearbyEntities) {
+				if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity) && knownMapper.get(nearbyEntity).knownEntities.contains(activePlayerEntity)) {
+					VastPeer peer = peers.get(playerMapper.get(nearbyEntity).name);
+					peer.send(new EventMessage(MessageCodes.PEER_ENTITY_DEACTIVATED, new DataObject()
 									.set(MessageCodes.PEER_ENTITY_DEACTIVATED_ENTITY_ID, activePlayerEntity)),
 							SendOptions.ReliableSend);
 				}

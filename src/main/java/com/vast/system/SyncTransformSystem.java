@@ -11,10 +11,7 @@ import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
 import com.vast.Profiler;
 import com.vast.VastPeer;
-import com.vast.component.Active;
-import com.vast.component.Player;
-import com.vast.component.SyncTransform;
-import com.vast.component.Transform;
+import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,20 +26,19 @@ public class SyncTransformSystem extends IteratingSystem {
 	private ComponentMapper<SyncTransform> syncTransformMapper;
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Scan> scanMapper;
 
 	private final float SYNC_THRESHOLD = 0.1f;
 	private final float SYNC_THRESHOLD_SQUARED = SYNC_THRESHOLD * SYNC_THRESHOLD;
 
 	private Map<String, VastPeer> peers;
-	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
 
 	private float[] reusablePosition;
 	private EventMessage reusableEventMessage;
 
-	public SyncTransformSystem(Map<String, VastPeer> peers, Map<Integer, Set<Integer>> nearbyEntitiesByEntity) {
-		super(Aspect.all(Transform.class, SyncTransform.class));
+	public SyncTransformSystem(Map<String, VastPeer> peers) {
+		super(Aspect.all(Transform.class, SyncTransform.class, Scan.class));
 		this.peers = peers;
-		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 
 		reusablePosition = new float[2];
 		reusableEventMessage = new EventMessage(MessageCodes.SET_POSITION, new DataObject());
@@ -61,14 +57,14 @@ public class SyncTransformSystem extends IteratingSystem {
 	protected void process(int entity) {
 		Transform transform = transformMapper.get(entity);
 		SyncTransform syncTransform = syncTransformMapper.get(entity);
+		Scan scan = scanMapper.get(entity);
 
 		if (transform.position.distanceSquared(syncTransform.lastSyncedPosition) >= SYNC_THRESHOLD_SQUARED) {
 			reusablePosition[0] = transform.position.x;
 			reusablePosition[1] = transform.position.y;
 			reusableEventMessage.getDataObject().set(MessageCodes.SET_POSITION_ENTITY_ID, entity);
 			reusableEventMessage.getDataObject().set(MessageCodes.SET_POSITION_POSITION, reusablePosition);
-			Set<Integer> nearbyEntities = nearbyEntitiesByEntity.get(entity);
-			for (int nearbyEntity : nearbyEntities) {
+			for (int nearbyEntity : scan.nearbyEntities) {
 				if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
 					VastPeer peer = peers.get(playerMapper.get(nearbyEntity).name);
 					if (peer != null) {

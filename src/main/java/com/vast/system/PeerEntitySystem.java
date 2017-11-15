@@ -25,17 +25,17 @@ public class PeerEntitySystem extends BaseSystem {
 	private ComponentMapper<AI> aiMapper;
 
 	private Map<String, VastPeer> peers;
-	private Map<String, Integer> entitiesByPeer;
 	private WorldDimensions worldDimensions;
 
+	private Map<String, Integer> entitiesByPeer;
 	private Set<VastPeer> peersLastUpdate;
 	private Archetype playerEntityArchetype;
 
-	public PeerEntitySystem(Map<String, VastPeer> peers, Map<String, Integer> entitiesByPeer, WorldDimensions worldDimensions) {
+	public PeerEntitySystem(Map<String, VastPeer> peers, WorldDimensions worldDimensions) {
 		this.peers = peers;
-		this.entitiesByPeer = entitiesByPeer;
 		this.worldDimensions = worldDimensions;
 
+		entitiesByPeer = new HashMap<String, Integer>();
 		peersLastUpdate = new HashSet<VastPeer>();
 	}
 
@@ -48,6 +48,8 @@ public class PeerEntitySystem extends BaseSystem {
 				.add(Spatial.class)
 				.add(Collision.class)
 				.add(SyncTransform.class)
+				.add(Scan.class)
+				.add(Known.class)
 				.build(world);
 	}
 

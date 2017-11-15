@@ -36,12 +36,12 @@ public class TerminalSystem extends IntervalSystem {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<Path> pathMapper;
+	private ComponentMapper<Scan> scanMapper;
 
 	private Map<String, VastPeer> peers;
 	private Metrics metrics;
 	private WorldDimensions worldDimensions;
 	private Map<Integer, Set<Integer>> spatialHashes;
-	private Map<Integer, Set<Integer>> nearbyEntitiesByEntity;
 
 	private Screen screen;
 	private float scale = 3.0f;
@@ -50,13 +50,12 @@ public class TerminalSystem extends IntervalSystem {
 	private boolean showPlayerNames = false;
 	private int focusedEntity = -1;
 
-	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes, Map<Integer, Set<Integer>> nearbyEntitiesByEntity) {
+	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes) {
 		super(Aspect.all(), 0.1f);
 		this.peers = peers;
 		this.metrics = metrics;
 		this.worldDimensions = worldDimensions;
 		this.spatialHashes = spatialHashes;
-		this.nearbyEntitiesByEntity = nearbyEntitiesByEntity;
 	}
 
 	@Override
@@ -110,11 +109,8 @@ public class TerminalSystem extends IntervalSystem {
 				Transform transform = transformMapper.get(entity);
 
 				boolean colored = true;
-				if (focusedEntity >= 0 && playerMapper.has(focusedEntity)) {
-					String name = playerMapper.get(focusedEntity).name;
-					if (nearbyEntitiesByEntity.containsKey(focusedEntity)) {
-						colored = nearbyEntitiesByEntity.get(focusedEntity).contains(entity);
-					}
+				if (focusedEntity >= 0 && scanMapper.has(focusedEntity)) {
+					colored = scanMapper.get(focusedEntity).nearbyEntities.contains(entity);
 				}
 				TextColor gray = TextColor.ANSI.Indexed.fromRGB(50, 50, 50);
 

@@ -9,7 +9,7 @@ import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
 import com.vast.VastPeer;
-import com.vast.component.Delete;
+import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,15 +19,17 @@ import java.util.Set;
 public class DeleteSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(DeleteSystem.class);
 
+	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Delete> deleteMapper;
+	private ComponentMapper<Scan> scanMapper;
+	private ComponentMapper<Known> knownMapper;
 
 	private Map<String, VastPeer> peers;
-	private Map<String, Set<Integer>> knownEntitiesByPeer;
 
-	public DeleteSystem(Map<String, VastPeer> peers, Map<String, Set<Integer>> knownEntitiesByPeer) {
+	public DeleteSystem(Map<String, VastPeer> peers) {
 		super(Aspect.one(Delete.class));
 		this.peers = peers;
-		this.knownEntitiesByPeer = knownEntitiesByPeer;
 	}
 
 	@Override
@@ -42,10 +44,14 @@ public class DeleteSystem extends IteratingSystem {
 	protected void process(int deleteEntity) {
 		String reason = deleteMapper.get(deleteEntity).reason;
 		logger.debug("Deleting entity {} ({})", deleteEntity, reason);
-		for (VastPeer peer : peers.values()) {
-			if (knownEntitiesByPeer.containsKey(peer.getName()) && knownEntitiesByPeer.get(peer.getName()).contains(deleteEntity)) {
+		IntBag activePlayerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class, Active.class, Known.class)).getEntities();
+		for (int i = 0; i < activePlayerEntities.size(); i++) {
+			int activePlayerEntity = activePlayerEntities.get(i);
+			Set<Integer> knownEntities = knownMapper.get(activePlayerEntity).knownEntities;
+			if (knownEntities.contains(deleteEntity)) {
+				VastPeer peer = peers.get(playerMapper.get(activePlayerEntity).name);
 				notifyAboutRemovedEntity(peer, deleteEntity, reason);
-				knownEntitiesByPeer.get(peer.getName()).remove(deleteEntity);
+				knownEntities.remove(deleteEntity);
 			}
 		}
 		world.delete(deleteEntity);
