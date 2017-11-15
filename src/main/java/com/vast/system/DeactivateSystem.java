@@ -33,7 +33,7 @@ public class DeactivateSystem extends IteratingSystem {
 	private EventMessage reusableEventMessage;
 
 	public DeactivateSystem(Map<String, VastPeer> peers) {
-		super(Aspect.all(Player.class, Active.class, Scan.class));
+		super(Aspect.all(Player.class, Active.class, Scan.class, Known.class));
 		this.peers = peers;
 
 		reusableEventMessage = new EventMessage(MessageCodes.PEER_ENTITY_DEACTIVATED);
@@ -53,6 +53,7 @@ public class DeactivateSystem extends IteratingSystem {
 		if (!peers.containsKey(player.name)) {
 			logger.info("Deactivating peer entity: {} for {}", activePlayerEntity, player.name);
 			activeMapper.remove(activePlayerEntity);
+			knownMapper.get(activePlayerEntity).knownEntities.clear();
 			for (int nearbyEntity : scanMapper.get(activePlayerEntity).nearbyEntities) {
 				if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity) && knownMapper.get(nearbyEntity).knownEntities.contains(activePlayerEntity)) {
 					VastPeer peer = peers.get(playerMapper.get(nearbyEntity).name);
