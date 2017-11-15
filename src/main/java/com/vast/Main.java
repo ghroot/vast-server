@@ -21,7 +21,7 @@ public class Main {
 		try {
 			Options options = new Options();
 			options.addOption("log", true, "Logging level");
-			options.addOption("snapshotFormat", true, "Snapshot format (json or bin)");
+			options.addOption("format", true, "Snapshot format (json or bin)");
 			options.addOption("monitor","Show monitor");
 			CommandLineParser parser = new DefaultParser();
 			CommandLine cmd = parser.parse(options, args);
@@ -31,7 +31,7 @@ public class Main {
 			} else {
 				System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
 			}
-			snapshotFormat = cmd.getOptionValue("snapshotFormat", "json");
+			snapshotFormat = cmd.getOptionValue("format", "json");
 			showMonitor = cmd.hasOption("monitor");
 		} catch (Exception ignored) {
 			snapshotFormat = "json";
