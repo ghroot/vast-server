@@ -8,6 +8,7 @@ import com.artemis.io.SaveFileFormat;
 import com.artemis.managers.WorldSerializationManager;
 import com.artemis.systems.IntervalSystem;
 import com.artemis.utils.IntBag;
+import com.vast.Metrics;
 import com.vast.Profiler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,22 +17,23 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.concurrent.TimeUnit;
 
 @Profile(enabled = true, using = Profiler.class)
 public class WorldSerializationSystem extends IntervalSystem {
 	private static final Logger logger = LoggerFactory.getLogger(WorldSerializationSystem.class);
 
 	private String format;
+	private Metrics metrics;
 
-	public WorldSerializationSystem(String format) {
-		super(Aspect.all(), 10.0f);
+	public WorldSerializationSystem(String format, Metrics metrics) {
+		super(Aspect.all(), TimeUnit.MINUTES.toSeconds(5));
 		this.format = format;
+		this.metrics = metrics;
 	}
 
 	@Override
 	protected void initialize() {
-		WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
-
 		loadWorld();
 	}
 
@@ -40,6 +42,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 		saveWorld(format);
 	}
 
+	// TODO: Can this be done in a thread?
 	private void saveWorld(final String format) {
 		final String snapshotFileName;
 		switch (format) {
@@ -77,6 +80,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 		} catch (Exception exception) {
 			logger.error("Error saving world", exception);
 		}
+		metrics.setLastSerializeTime(System.currentTimeMillis());
 	}
 
 	private void loadWorld() {
@@ -97,6 +101,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 			logger.info("Loading world from snapshot file {}, size: {} bytes", snapshotFileName, fileInputStream.getChannel().size());
 			fileInputStream.close();
 			logger.debug("Loaded {} entities", saveFileFormat.entities.size());
+			metrics.setLastSerializeTime(System.currentTimeMillis());
 		} catch (Exception exception) {
 			if (exception instanceof FileNotFoundException) {
 				logger.info("No snapshot file found, creating a new world");

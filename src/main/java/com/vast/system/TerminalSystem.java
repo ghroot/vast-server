@@ -175,15 +175,17 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.putString(screen.getTerminalSize().getColumns() - roundTripString.length(), 3, roundTripString);
 			String sendMessagesString = "Sent messages: " + metrics.getNumberOfSentMessages();
 			textGraphics.putString(screen.getTerminalSize().getColumns() - sendMessagesString.length(), 4, sendMessagesString);
+			String timeSinceSave = "Time since save: " + (metrics.getTimeSinceLastSerialization() / 1000) + " s";
+			textGraphics.putString(screen.getTerminalSize().getColumns() - timeSinceSave.length(), 5, timeSinceSave);
 			String collisionsString = "Collision checks: " + metrics.getNumberOfCollisionChecks();
-			textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 5, collisionsString);
+			textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 6, collisionsString);
 
 			if (metrics.getSystemProcessingTimes().size() > 0) {
 				int longestLength = 0;
 				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
 					longestLength = Math.max(systemName.length(), longestLength);
 				}
-				int row = 7;
+				int row = 8;
 				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
 					int processingDuration = metrics.getSystemProcessingTimes().get(systemName);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestLength - 1, row, systemName);

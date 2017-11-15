@@ -56,7 +56,7 @@ public class VastWorld implements Runnable {
 			)), worldDimensions, spatialHashes, metrics),
 			new DeleteSystem(peers),
 			new SyncTransformSystem(peers),
-			new WorldSerializationSystem(snapshotFormat)
+			new WorldSerializationSystem(snapshotFormat, metrics)
 		);
 		if (showMonitor) {
 			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(peers, metrics, worldDimensions, spatialHashes));

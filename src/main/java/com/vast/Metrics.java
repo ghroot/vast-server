@@ -12,6 +12,7 @@ public class Metrics {
 	private double meanOfRoundTripTime;
 	private double meanOfRoundTripTimeDeviation;
 	private int numberOfSentMessages;
+	private long lastSerializeTime;
 
 	public int getTimePerFrameMs() {
 		return timePerFrameMs;
@@ -61,5 +62,13 @@ public class Metrics {
 
 	public void incrementNumberOfSentMessages() {
 		this.numberOfSentMessages++;
+	}
+
+	public int getTimeSinceLastSerialization() {
+		return (int) (System.currentTimeMillis() - lastSerializeTime);
+	}
+
+	public void setLastSerializeTime(long lastSerializeTime) {
+		this.lastSerializeTime = lastSerializeTime;
 	}
 }
