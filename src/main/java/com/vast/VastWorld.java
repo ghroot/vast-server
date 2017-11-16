@@ -7,6 +7,10 @@ import com.vast.collision.CollisionHandler;
 import com.vast.collision.PlayerWithPickupCollisionHandler;
 import com.vast.interact.HarvestableInteractionHandler;
 import com.vast.interact.InteractionHandler;
+import com.vast.order.BuildOrderHandler;
+import com.vast.order.InteractOrderHandler;
+import com.vast.order.MoveOrderHandler;
+import com.vast.order.OrderHandler;
 import com.vast.system.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +46,11 @@ public class VastWorld implements Runnable {
 			new ScanSystem(worldDimensions, spatialHashes),
 			new CreateSystem(peers),
 			new CullingSystem(peers),
-			new MoveOrderSystem(incomingRequests),
-			new InteractOrderSystem(incomingRequests),
-			new BuildOrderSystem(incomingRequests),
+			new OrderSystem(incomingRequests, new HashSet<OrderHandler>(Arrays.asList(
+				new MoveOrderHandler(),
+				new InteractOrderHandler(),
+				new BuildOrderHandler()
+			))),
 			new AISystem(),
 			new PathMoveSystem(),
 			new InteractSystem(new HashSet<InteractionHandler>(Arrays.asList(
