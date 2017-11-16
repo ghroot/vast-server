@@ -107,6 +107,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 				logger.info("No snapshot file found, creating a new world");
 				CreationManager creationManager = world.getSystem(CreationManager.class);
 				creationManager.createWorld();
+				metrics.setLastSerializeTime(System.currentTimeMillis());
 			} else {
 				logger.error("Error loading world", exception);
 			}
