@@ -213,7 +213,8 @@ public class TerminalSystem extends IntervalSystem {
 			}
 
 			screen.refresh();
-		} catch (Exception ignored) {
+		} catch (Exception exception) {
+			logger.error("Error displaying metrics", exception);
 		}
 	}
 
