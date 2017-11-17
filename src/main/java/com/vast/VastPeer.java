@@ -13,7 +13,10 @@ import org.slf4j.LoggerFactory;
 public class VastPeer extends ClientPeer {
 	private static final Logger logger = LoggerFactory.getLogger(VastPeer.class);
 
+	private static long nextId = 1;
+
 	private VastServerApplication serverApplication;
+	private long id;
 	private String name;
 	private Metrics metrics;
 
@@ -22,6 +25,12 @@ public class VastPeer extends ClientPeer {
 		this.serverApplication = serverApplication;
 		this.name = name;
 		this.metrics = metrics;
+
+		id = nextId++;
+	}
+
+	public long getId() {
+		return id;
 	}
 
 	public String getName() {

@@ -76,7 +76,7 @@ public class VastServerApplication extends ServerApplication {
 		synchronized (peers) {
 			peers.add(peer);
 		}
-		logger.info("Added peer: {}", name);
+		logger.info("Added peer: {} ({})", peer.getName(), peer.getId());
 		return peer;
 	}
 
@@ -84,13 +84,13 @@ public class VastServerApplication extends ServerApplication {
 		synchronized (peers) {
 			peers.remove(peer);
 		}
-		logger.info("Removed peer: {} (reason: {}, detail: {})", peer.getName(), disconnectReason, detail);
+		logger.info("Removed peer: {} ({}) (reason: {}, detail: {})", peer.getName(), peer.getId(), disconnectReason, detail);
 	}
 
 	public void onPeerReceived(VastPeer peer, RequestMessage requestMessage) {
 		synchronized (incomingRequests) {
 			incomingRequests.add(new IncomingRequest(peer, requestMessage));
 		}
-		logger.debug("Got request message from peer: {} from {}", requestMessage, peer.getName());
+		logger.debug("Got request message from peer: {} from {} ({})", requestMessage, peer.getName(), peer.getId());
 	}
 }

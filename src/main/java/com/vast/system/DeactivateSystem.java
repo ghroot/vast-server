@@ -50,8 +50,9 @@ public class DeactivateSystem extends IteratingSystem {
 	@Override
 	protected void process(int activePlayerEntity) {
 		Player player = playerMapper.get(activePlayerEntity);
-		if (!peers.containsKey(player.name)) {
-			logger.info("Deactivating peer entity: {} for {}", activePlayerEntity, player.name);
+		if (!peers.containsKey(player.name) || peers.get(player.name).getId() != player.id) {
+			logger.info("Deactivating peer entity: {} for {} ({})", activePlayerEntity, player.name, player.id);
+			player.id = 0;
 			activeMapper.remove(activePlayerEntity);
 			knownMapper.get(activePlayerEntity).knownEntities.clear();
 			for (int nearbyEntity : scanMapper.get(activePlayerEntity).nearbyEntities) {
