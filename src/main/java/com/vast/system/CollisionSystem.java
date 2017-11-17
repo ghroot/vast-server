@@ -11,6 +11,7 @@ import com.vast.SpatialHash;
 import com.vast.WorldConfiguration;
 import com.vast.collision.CollisionHandler;
 import com.vast.component.Collision;
+import com.vast.component.Delete;
 import com.vast.component.Spatial;
 import com.vast.component.Transform;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ public class CollisionSystem extends IteratingSystem {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Spatial> spatialMapper;
 	private ComponentMapper<Collision> collisionMapper;
+	private ComponentMapper<Delete> deleteMapper;
 
 	private Set<CollisionHandler> collisionHandlers;
 	private WorldConfiguration worldConfiguration;
@@ -80,6 +82,10 @@ public class CollisionSystem extends IteratingSystem {
 
 	@Override
 	protected void process(int entity) {
+		if (deleteMapper.has(entity)) {
+			return;
+		}
+
 		Transform transform = transformMapper.get(entity);
 		Collision collision = collisionMapper.get(entity);
 
@@ -91,6 +97,10 @@ public class CollisionSystem extends IteratingSystem {
 			}
 			for (int adjacentEntity : getAdjacentEntities(entity)) {
 				if (adjacentEntity != entity) {
+					if (deleteMapper.has(entity) || deleteMapper.has(adjacentEntity)) {
+						continue;
+					}
+
 					Transform adjacentTransform = transformMapper.get(adjacentEntity);
 					Collision adjacentCollision = collisionMapper.get(adjacentEntity);
 					reusableVector.set(adjacentTransform.position.x - transform.position.x, adjacentTransform.position.y - transform.position.y);
