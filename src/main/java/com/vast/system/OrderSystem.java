@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class OrderSystem extends ProfiledBaseSystem {
@@ -20,12 +21,14 @@ public class OrderSystem extends ProfiledBaseSystem {
 	private ComponentMapper<Order> orderMapper;
 	private ComponentMapper<Player> playerMapper;
 
-	private List<IncomingRequest> incomingRequests;
 	private Set<OrderHandler> orderHandlers;
+	private List<IncomingRequest> incomingRequests;
+	private Map<String, Integer> entitiesByPeer;
 
-	public OrderSystem(List<IncomingRequest> incomingRequests, Set<OrderHandler> orderHandlers) {
-		this.incomingRequests = incomingRequests;
+	public OrderSystem(Set<OrderHandler> orderHandlers, List<IncomingRequest> incomingRequests, Map<String, Integer> entitiesByPeer) {
 		this.orderHandlers = orderHandlers;
+		this.incomingRequests = incomingRequests;
+		this.entitiesByPeer = entitiesByPeer;
 	}
 
 	@Override
@@ -44,7 +47,7 @@ public class OrderSystem extends ProfiledBaseSystem {
 
 		for (Iterator<IncomingRequest> iterator = incomingRequests.iterator(); iterator.hasNext();) {
 			IncomingRequest request = iterator.next();
-			int playerEntity = getEntityWithPeerName(request.getPeer().getName());
+			int playerEntity = entitiesByPeer.get(request.getPeer().getName());
 
 			if (orderMapper.has(playerEntity)) {
 				Order order = orderMapper.get(playerEntity);
@@ -104,18 +107,5 @@ public class OrderSystem extends ProfiledBaseSystem {
 			}
 		}
 		return null;
-	}
-
-	private int getEntityWithPeerName(String name) {
-		IntBag playerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class)).getEntities();
-		for (int i = 0; i < playerEntities.size(); i++) {
-			int playerEntity = playerEntities.get(i);
-			if (playerMapper.has(playerEntity)) {
-				if (playerMapper.get(playerEntity).name.equals(name)) {
-					return playerEntity;
-				}
-			}
-		}
-		return -1;
 	}
 }

@@ -32,6 +32,7 @@ public class VastWorld implements Runnable {
 		WorldConfiguration worldConfiguration = new WorldConfiguration(worldProperties);
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
+		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
@@ -42,17 +43,17 @@ public class VastWorld implements Runnable {
 			new WorldSerializationSystem(snapshotFormat, metrics),
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
-			new PeerEntitySystem(peers, worldConfiguration),
+			new PeerEntitySystem(peers, entitiesByPeer, worldConfiguration),
 			new DeactivateSystem(peers),
 			new ActivateSystem(peers),
 			new ScanSystem(worldConfiguration, spatialHashes),
 			new CreateSystem(peers),
 			new CullingSystem(peers),
-			new OrderSystem(incomingRequests, new HashSet<OrderHandler>(Arrays.asList(
+			new OrderSystem(new HashSet<OrderHandler>(Arrays.asList(
 				new MoveOrderHandler(),
 				new InteractOrderHandler(),
 				new BuildOrderHandler()
-			))),
+			)), incomingRequests, entitiesByPeer),
 			new AISystem(),
 			new PathMoveSystem(),
 			new InteractSystem(new HashSet<InteractionHandler>(Arrays.asList(

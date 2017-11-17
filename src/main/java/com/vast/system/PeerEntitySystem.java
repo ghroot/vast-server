@@ -1,6 +1,9 @@
 package com.vast.system;
 
-import com.artemis.*;
+import com.artemis.Archetype;
+import com.artemis.ArchetypeBuilder;
+import com.artemis.Aspect;
+import com.artemis.ComponentMapper;
 import com.artemis.utils.IntBag;
 import com.vast.FakePeer;
 import com.vast.VastPeer;
@@ -9,7 +12,6 @@ import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -28,11 +30,11 @@ public class PeerEntitySystem extends ProfiledBaseSystem {
 	private Set<VastPeer> peersLastUpdate;
 	private Archetype playerEntityArchetype;
 
-	public PeerEntitySystem(Map<String, VastPeer> peers, WorldConfiguration worldConfiguration) {
+	public PeerEntitySystem(Map<String, VastPeer> peers, Map<String, Integer> entitiesByPeer, WorldConfiguration worldConfiguration) {
 		this.peers = peers;
+		this.entitiesByPeer = entitiesByPeer;
 		this.worldConfiguration = worldConfiguration;
 
-		entitiesByPeer = new HashMap<String, Integer>();
 		peersLastUpdate = new HashSet<VastPeer>();
 	}
 
