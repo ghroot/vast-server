@@ -1,7 +1,6 @@
 package com.vast.system;
 
 import com.artemis.Aspect;
-import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.artemis.utils.IntBag;
 import com.vast.IncomingRequest;
@@ -15,7 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class OrderSystem extends BaseSystem {
+public class OrderSystem extends ProfiledBaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(OrderSystem.class);
 
 	private ComponentMapper<Order> orderMapper;
@@ -31,6 +30,8 @@ public class OrderSystem extends BaseSystem {
 
 	@Override
 	protected void initialize() {
+		super.initialize();
+
 		for (OrderHandler orderHandler : orderHandlers) {
 			world.inject(orderHandler);
 			orderHandler.initialize();

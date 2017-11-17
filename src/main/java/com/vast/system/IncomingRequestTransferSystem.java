@@ -1,12 +1,11 @@
 package com.vast.system;
 
-import com.artemis.BaseSystem;
 import com.vast.IncomingRequest;
 import com.vast.VastServerApplication;
 
 import java.util.List;
 
-public class IncomingRequestTransferSystem extends BaseSystem {
+public class IncomingRequestTransferSystem extends ProfiledBaseSystem {
 	private VastServerApplication serverApplication;
 	private List<IncomingRequest> incomingRequests;
 

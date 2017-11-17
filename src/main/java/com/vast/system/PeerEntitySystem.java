@@ -16,8 +16,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@Profile(enabled = true, using = Profiler.class)
-public class PeerEntitySystem extends BaseSystem {
+public class PeerEntitySystem extends ProfiledBaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(PeerEntitySystem.class);
 
 	private ComponentMapper<Player> playerMapper;
@@ -41,6 +40,8 @@ public class PeerEntitySystem extends BaseSystem {
 
 	@Override
 	protected void initialize() {
+		super.initialize();
+
 		playerEntityArchetype = new ArchetypeBuilder()
 				.add(Player.class)
 				.add(Inventory.class)

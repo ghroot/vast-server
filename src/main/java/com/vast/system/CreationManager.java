@@ -9,7 +9,7 @@ import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CreationManager extends BaseSystem {
+public class CreationManager extends ProfiledBaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CreationManager.class);
 
 	private ComponentMapper<Transform> transformMapper;
@@ -30,6 +30,8 @@ public class CreationManager extends BaseSystem {
 
 	@Override
 	protected void initialize() {
+		super.initialize();
+
 		treeArchetype = new ArchetypeBuilder()
 				.add(Type.class)
 				.add(Transform.class)

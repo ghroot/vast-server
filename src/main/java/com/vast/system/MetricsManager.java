@@ -3,7 +3,7 @@ package com.vast.system;
 import com.artemis.BaseSystem;
 import com.vast.Metrics;
 
-public class MetricsManager extends BaseSystem {
+public class MetricsManager extends ProfiledBaseSystem {
 	private Metrics metrics;
 
 	private long lastTime;
@@ -14,6 +14,8 @@ public class MetricsManager extends BaseSystem {
 
 	@Override
 	protected void initialize() {
+		super.initialize();
+
 		lastTime = System.currentTimeMillis();
 	}
 

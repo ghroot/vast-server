@@ -24,8 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Profile(enabled = true, using = Profiler.class)
 public class TerminalSystem extends IntervalSystem {
@@ -185,9 +185,18 @@ public class TerminalSystem extends IntervalSystem {
 				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
 					longestLength = Math.max(systemName.length(), longestLength);
 				}
+				Map<String, Integer> sortedSystemProcessingTimes = metrics.getSystemProcessingTimes().entrySet()
+						.stream()
+						.sorted(Map.Entry.comparingByValue(Collections.reverseOrder()))
+						.collect(Collectors.toMap(
+								Map.Entry::getKey,
+								Map.Entry::getValue,
+								(e1, e2) -> e1,
+								LinkedHashMap::new
+						));
 				int row = 8;
-				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
-					int processingDuration = metrics.getSystemProcessingTimes().get(systemName);
+				for (String systemName : sortedSystemProcessingTimes.keySet()) {
+					int processingDuration = sortedSystemProcessingTimes.get(systemName);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestLength - 1, row, systemName);
 					String processDurationString = Integer.toString(processingDuration);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 + (3 - processDurationString.length()), row, processDurationString);
