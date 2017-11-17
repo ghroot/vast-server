@@ -24,7 +24,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Profile(enabled = true, using = Profiler.class)
@@ -280,16 +283,16 @@ public class TerminalSystem extends IntervalSystem {
 						showSystemTimes = !showSystemTimes;
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
-					cameraPosition.add(new Point2f(0.0f, (1 / scale)));
+					cameraPosition.add(new Point2f(0.0f, ((keyStroke.isShiftDown() ? 5 : 1) / scale)));
 					focusedEntity = -1;
 				} else if (keyStroke.getKeyType() == KeyType.ArrowUp) {
-					cameraPosition.add(new Point2f(0.0f, -(1 / scale)));
+					cameraPosition.add(new Point2f(0.0f, -((keyStroke.isShiftDown() ? 5 : 1) / scale)));
 					focusedEntity = -1;
 				} else if (keyStroke.getKeyType() == KeyType.ArrowLeft) {
-					cameraPosition.add(new Point2f(-(1 / scale), 0.0f));
+					cameraPosition.add(new Point2f(-((keyStroke.isShiftDown() ? 5 : 1) / scale), 0.0f));
 					focusedEntity = -1;
 				} else if (keyStroke.getKeyType() == KeyType.ArrowRight) {
-					cameraPosition.add(new Point2f((1 / scale), 0.0f));
+					cameraPosition.add(new Point2f(((keyStroke.isShiftDown() ? 5 : 1) / scale), 0.0f));
 					focusedEntity = -1;
 				}
 			}
