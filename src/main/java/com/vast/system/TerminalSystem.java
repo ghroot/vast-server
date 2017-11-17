@@ -48,6 +48,7 @@ public class TerminalSystem extends IntervalSystem {
 	private Point2f cameraPosition = new Point2f();
 	private boolean showPathTargetPosition = false;
 	private boolean showPlayerNames = false;
+	private boolean showSystemTimes = false;
 	private int focusedEntity = -1;
 
 	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes) {
@@ -180,7 +181,7 @@ public class TerminalSystem extends IntervalSystem {
 			String collisionsString = "Collision checks: " + metrics.getNumberOfCollisionChecks();
 			textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 6, collisionsString);
 
-			if (metrics.getSystemProcessingTimes().size() > 0) {
+			if (showSystemTimes && metrics.getSystemProcessingTimes().size() > 0) {
 				int longestLength = 0;
 				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
 					longestLength = Math.max(systemName.length(), longestLength);
@@ -274,6 +275,8 @@ public class TerminalSystem extends IntervalSystem {
 						focusedEntity = -1;
 					} else if (keyStroke.getCharacter().toString().equals("n")) {
 						showPlayerNames = !showPlayerNames;
+					} else if (keyStroke.getCharacter().toString().equals("s")) {
+						showSystemTimes = !showSystemTimes;
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
 					cameraPosition.add(new Point2f(0.0f, (1 / scale)));
