@@ -1,12 +1,10 @@
 package com.vast.system;
 
 import com.artemis.*;
-import com.artemis.annotations.Profile;
 import com.artemis.utils.IntBag;
 import com.vast.FakePeer;
-import com.vast.Profiler;
 import com.vast.VastPeer;
-import com.vast.WorldDimensions;
+import com.vast.WorldConfiguration;
 import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,15 +22,15 @@ public class PeerEntitySystem extends ProfiledBaseSystem {
 	private ComponentMapper<AI> aiMapper;
 
 	private Map<String, VastPeer> peers;
-	private WorldDimensions worldDimensions;
+	private WorldConfiguration worldConfiguration;
 
 	private Map<String, Integer> entitiesByPeer;
 	private Set<VastPeer> peersLastUpdate;
 	private Archetype playerEntityArchetype;
 
-	public PeerEntitySystem(Map<String, VastPeer> peers, WorldDimensions worldDimensions) {
+	public PeerEntitySystem(Map<String, VastPeer> peers, WorldConfiguration worldConfiguration) {
 		this.peers = peers;
-		this.worldDimensions = worldDimensions;
+		this.worldConfiguration = worldConfiguration;
 
 		entitiesByPeer = new HashMap<String, Integer>();
 		peersLastUpdate = new HashSet<VastPeer>();
@@ -93,7 +91,7 @@ public class PeerEntitySystem extends ProfiledBaseSystem {
 	private void createPeerEntity(VastPeer peer) {
 		int playerEntity = world.create(playerEntityArchetype);
 		playerMapper.get(playerEntity).name = peer.getName();
-		transformMapper.get(playerEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
+		transformMapper.get(playerEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
 		if (peer instanceof FakePeer) {
 			aiMapper.create(playerEntity);
 		}

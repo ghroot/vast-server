@@ -18,7 +18,7 @@ import com.googlecode.lanterna.terminal.Terminal;
 import com.vast.Metrics;
 import com.vast.Profiler;
 import com.vast.VastPeer;
-import com.vast.WorldDimensions;
+import com.vast.WorldConfiguration;
 import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ public class TerminalSystem extends IntervalSystem {
 
 	private Map<String, VastPeer> peers;
 	private Metrics metrics;
-	private WorldDimensions worldDimensions;
+	private WorldConfiguration worldConfiguration;
 	private Map<Integer, Set<Integer>> spatialHashes;
 
 	private Screen screen;
@@ -51,11 +51,11 @@ public class TerminalSystem extends IntervalSystem {
 	private boolean showSystemTimes = false;
 	private int focusedEntity = -1;
 
-	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes) {
+	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes) {
 		super(Aspect.all(), 0.1f);
 		this.peers = peers;
 		this.metrics = metrics;
-		this.worldDimensions = worldDimensions;
+		this.worldConfiguration = worldConfiguration;
 		this.spatialHashes = spatialHashes;
 	}
 
@@ -150,10 +150,10 @@ public class TerminalSystem extends IntervalSystem {
 			TextGraphics textGraphics = screen.newTextGraphics();
 
 			textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
-			textGraphics.putString(0, 0, "World size: " + worldDimensions.width + " x " + worldDimensions.height);
+			textGraphics.putString(0, 0, "World size: " + worldConfiguration.width + " x " + worldConfiguration.height);
 			textGraphics.putString(0, 1, "Scale: x" + (Math.round(scale * 100.0f) / 100.0f));
 			textGraphics.putString(0, 2, "Camera position: " + (Math.round(cameraPosition.x * 100.0f) / 100.0f) + ", " + (Math.round(cameraPosition.y * 100.0f) / 100.0f));
-			textGraphics.putString(0, 3, "Spatial hash size: " + worldDimensions.sectionSize);
+			textGraphics.putString(0, 3, "Spatial hash size: " + worldConfiguration.sectionSize);
 			int numberOfSpatialHashes = 0;
 			int numberOfActiveSpatialHashes = 0;
 			for (Set<Integer> entitiesInSpatialHash : spatialHashes.values()) {

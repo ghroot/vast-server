@@ -28,22 +28,23 @@ public class VastWorld implements Runnable {
 	private long lastFrameStartTime;
 
 	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, boolean showMonitor, Metrics metrics) {
+		Properties worldProperties = loadWorldProperties();
+		WorldConfiguration worldConfiguration = new WorldConfiguration(worldProperties);
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
-		WorldDimensions worldDimensions = new WorldDimensions(5000, 5000, 4);
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
-			new CreationManager(worldDimensions),
+			new CreationManager(worldConfiguration),
 			new WorldSerializationManager(),
 			new MetricsManager(metrics),
 
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
-			new PeerEntitySystem(peers, worldDimensions),
+			new PeerEntitySystem(peers, worldConfiguration),
 			new DeactivateSystem(peers),
 			new ActivateSystem(peers),
-			new ScanSystem(worldDimensions, spatialHashes),
+			new ScanSystem(worldConfiguration, spatialHashes),
 			new CreateSystem(peers),
 			new CullingSystem(peers),
 			new OrderSystem(incomingRequests, new HashSet<OrderHandler>(Arrays.asList(
@@ -56,20 +57,31 @@ public class VastWorld implements Runnable {
 			new InteractSystem(new HashSet<InteractionHandler>(Arrays.asList(
 				new HarvestableInteractionHandler()
 			))),
-			new SpatialSystem(worldDimensions, spatialHashes),
+			new SpatialSystem(worldConfiguration, spatialHashes),
 			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(
 				new PlayerWithPickupCollisionHandler()
-			)), worldDimensions, spatialHashes, metrics),
+			)), worldConfiguration, spatialHashes, metrics),
 			new DeleteSystem(peers),
 			new SyncTransformSystem(peers),
 			new WorldSerializationSystem(snapshotFormat, metrics)
 		);
 		if (showMonitor) {
-			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(peers, metrics, worldDimensions, spatialHashes));
+			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOW, new TerminalSystem(peers, metrics, worldConfiguration, spatialHashes));
 		}
 		world = new World(worldConfigurationBuilder.build());
 
 		alive = true;
+	}
+
+	private Properties loadWorldProperties() {
+		Properties worldProperties = null;
+		try {
+			worldProperties = new Properties();
+			worldProperties.load(getClass().getResourceAsStream("world.properties"));
+		} catch (Exception exception) {
+			logger.error("Unable to load world properties file", exception);
+		}
+		return worldProperties;
 	}
 
 	@Override

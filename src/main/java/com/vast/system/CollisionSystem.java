@@ -8,7 +8,7 @@ import com.artemis.utils.IntBag;
 import com.vast.Metrics;
 import com.vast.Profiler;
 import com.vast.SpatialHash;
-import com.vast.WorldDimensions;
+import com.vast.WorldConfiguration;
 import com.vast.collision.CollisionHandler;
 import com.vast.component.Collision;
 import com.vast.component.Spatial;
@@ -31,7 +31,7 @@ public class CollisionSystem extends IteratingSystem {
 	private ComponentMapper<Collision> collisionMapper;
 
 	private Set<CollisionHandler> collisionHandlers;
-	private WorldDimensions worldDimensions;
+	private WorldConfiguration worldConfiguration;
 	private Map<Integer, Set<Integer>> spatialHashes;
 	private Metrics metrics;
 
@@ -40,10 +40,10 @@ public class CollisionSystem extends IteratingSystem {
 	private Vector2f reusableVector;
 	private int numberOfCollisionChecks;
 
-	public CollisionSystem(Set<CollisionHandler> collisionHandlers, WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes, Metrics metrics) {
+	public CollisionSystem(Set<CollisionHandler> collisionHandlers, WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes, Metrics metrics) {
 		super(Aspect.all(Transform.class, Spatial.class, Collision.class));
 		this.collisionHandlers = collisionHandlers;
-		this.worldDimensions = worldDimensions;
+		this.worldConfiguration = worldConfiguration;
 		this.spatialHashes = spatialHashes;
 		this.metrics = metrics;
 
@@ -141,8 +141,8 @@ public class CollisionSystem extends IteratingSystem {
 		reusableAdjacentEntities.clear();
 		Spatial spatial = spatialMapper.get(entity);
 		if (spatial.memberOfSpatialHash != null) {
-			for (int x = spatial.memberOfSpatialHash.x - worldDimensions.sectionSize; x <= spatial.memberOfSpatialHash.x + worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
-				for (int y = spatial.memberOfSpatialHash.y - worldDimensions.sectionSize; y <= spatial.memberOfSpatialHash.y + worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
+			for (int x = spatial.memberOfSpatialHash.x - worldConfiguration.sectionSize; x <= spatial.memberOfSpatialHash.x + worldConfiguration.sectionSize; x += worldConfiguration.sectionSize) {
+				for (int y = spatial.memberOfSpatialHash.y - worldConfiguration.sectionSize; y <= spatial.memberOfSpatialHash.y + worldConfiguration.sectionSize; y += worldConfiguration.sectionSize) {
 					reusableHash.set(x, y);
 					Set<Integer> entitiesInHash = spatialHashes.get(reusableHash.uniqueKey());
 					if (entitiesInHash != null) {

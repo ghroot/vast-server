@@ -2,9 +2,8 @@ package com.vast.system;
 
 import com.artemis.Archetype;
 import com.artemis.ArchetypeBuilder;
-import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
-import com.vast.WorldDimensions;
+import com.vast.WorldConfiguration;
 import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +17,14 @@ public class CreationManager extends ProfiledBaseSystem {
 	private ComponentMapper<Pickup> pickupMapper;
 	private ComponentMapper<Harvestable> harvestableMapper;
 
-	private WorldDimensions worldDimensions;
+	private WorldConfiguration worldConfiguration;
 
 	private Archetype treeArchetype;
 	private Archetype pickupArchetype;
 	private Archetype aiArchetype;
 
-	public CreationManager(WorldDimensions worldDimensions) {
-		this.worldDimensions = worldDimensions;
+	public CreationManager(WorldConfiguration worldConfiguration) {
+		this.worldConfiguration = worldConfiguration;
 	}
 
 	@Override
@@ -65,29 +64,29 @@ public class CreationManager extends ProfiledBaseSystem {
 	}
 
 	public void createWorld() {
-		for (int i = 0; i < 100000; i++) {
+		for (int i = 0; i < worldConfiguration.numberOfTrees; i++) {
 			int treeEntity = world.create(treeArchetype);
 			typeMapper.get(treeEntity).type = "tree";
-			transformMapper.get(treeEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
+			transformMapper.get(treeEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
 			collisionMapper.get(treeEntity).isStatic = true;
 			collisionMapper.get(treeEntity).radius = 0.1f;
 			harvestableMapper.get(treeEntity).itemType = 2;
 			harvestableMapper.get(treeEntity).itemCount = 4;
 		}
 
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < worldConfiguration.numberOfPickups; i++) {
 			int pickupEntity = world.create(pickupArchetype);
 			typeMapper.get(pickupEntity).type = "pickup";
-			transformMapper.get(pickupEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
+			transformMapper.get(pickupEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
 			collisionMapper.get(pickupEntity).isStatic = true;
 			collisionMapper.get(pickupEntity).radius = 0.1f;
 			pickupMapper.create(pickupEntity).type = 3;
 		}
 
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < worldConfiguration.numberOfAIs; i++) {
 			int aiEntity = world.create(aiArchetype);
 			typeMapper.get(aiEntity).type = "ai";
-			transformMapper.get(aiEntity).position.set(-worldDimensions.width / 2 + (float) Math.random() * worldDimensions.width, -worldDimensions.height / 2 + (float) Math.random() * worldDimensions.height);
+			transformMapper.get(aiEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
 		}
 	}
 }

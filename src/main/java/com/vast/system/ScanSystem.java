@@ -7,7 +7,7 @@ import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.Profiler;
 import com.vast.SpatialHash;
-import com.vast.WorldDimensions;
+import com.vast.WorldConfiguration;
 import com.vast.component.Scan;
 import com.vast.component.Spatial;
 import org.slf4j.Logger;
@@ -23,14 +23,14 @@ public class ScanSystem extends IteratingSystem {
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Spatial> spatialMapper;
 
-	private WorldDimensions worldDimensions;
+	private WorldConfiguration worldConfiguration;
 	private Map<Integer, Set<Integer>> spatialHashes;
 
 	private SpatialHash reusableHash;
 
-	public ScanSystem(WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes) {
+	public ScanSystem(WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes) {
 		super(Aspect.all(Scan.class, Spatial.class));
-		this.worldDimensions = worldDimensions;
+		this.worldConfiguration = worldConfiguration;
 		this.spatialHashes = spatialHashes;
 
 		reusableHash = new SpatialHash();
@@ -51,11 +51,11 @@ public class ScanSystem extends IteratingSystem {
 
 		scan.nearbyEntities.clear();
 
-		int sectionsInEachDirection = (int) Math.ceil((float) scan.distance / worldDimensions.sectionSize);
+		int sectionsInEachDirection = (int) Math.ceil((float) scan.distance / worldConfiguration.sectionSize);
 
 		if (spatial.memberOfSpatialHash != null) {
-			for (int x = spatial.memberOfSpatialHash.x - sectionsInEachDirection * worldDimensions.sectionSize; x <= spatial.memberOfSpatialHash.x + sectionsInEachDirection * worldDimensions.sectionSize; x += worldDimensions.sectionSize) {
-				for (int y = spatial.memberOfSpatialHash.y - sectionsInEachDirection * worldDimensions.sectionSize; y <= spatial.memberOfSpatialHash.y + sectionsInEachDirection * worldDimensions.sectionSize; y += worldDimensions.sectionSize) {
+			for (int x = spatial.memberOfSpatialHash.x - sectionsInEachDirection * worldConfiguration.sectionSize; x <= spatial.memberOfSpatialHash.x + sectionsInEachDirection * worldConfiguration.sectionSize; x += worldConfiguration.sectionSize) {
+				for (int y = spatial.memberOfSpatialHash.y - sectionsInEachDirection * worldConfiguration.sectionSize; y <= spatial.memberOfSpatialHash.y + sectionsInEachDirection * worldConfiguration.sectionSize; y += worldConfiguration.sectionSize) {
 					reusableHash.set(x, y);
 					Set<Integer> entitiesInHash = spatialHashes.get(reusableHash.uniqueKey());
 					if (entitiesInHash != null) {

@@ -6,7 +6,7 @@ import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.vast.Profiler;
 import com.vast.SpatialHash;
-import com.vast.WorldDimensions;
+import com.vast.WorldConfiguration;
 import com.vast.component.Spatial;
 import com.vast.component.Transform;
 import org.slf4j.Logger;
@@ -24,12 +24,12 @@ public class SpatialSystem extends IteratingSystem {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Spatial> spatialMapper;
 
-	private WorldDimensions worldDimensions;
+	private WorldConfiguration worldConfiguration;
 	private Map<Integer, Set<Integer>> spatialHashes;
 
-	public SpatialSystem(WorldDimensions worldDimensions, Map<Integer, Set<Integer>> spatialHashes) {
+	public SpatialSystem(WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes) {
 		super(Aspect.all(Transform.class, Spatial.class));
-		this.worldDimensions = worldDimensions;
+		this.worldConfiguration = worldConfiguration;
 		this.spatialHashes = spatialHashes;
 	}
 
@@ -62,8 +62,8 @@ public class SpatialSystem extends IteratingSystem {
 				spatial.memberOfSpatialHash = new SpatialHash();
 			}
 
-			spatial.memberOfSpatialHash.x = Math.round(transform.position.x / worldDimensions.sectionSize) * worldDimensions.sectionSize;
-			spatial.memberOfSpatialHash.y = Math.round(transform.position.y / worldDimensions.sectionSize) * worldDimensions.sectionSize;
+			spatial.memberOfSpatialHash.x = Math.round(transform.position.x / worldConfiguration.sectionSize) * worldConfiguration.sectionSize;
+			spatial.memberOfSpatialHash.y = Math.round(transform.position.y / worldConfiguration.sectionSize) * worldConfiguration.sectionSize;
 
 			Set<Integer> entitiesInHash = spatialHashes.get(spatial.memberOfSpatialHash.uniqueKey());
 			if (entitiesInHash == null) {
