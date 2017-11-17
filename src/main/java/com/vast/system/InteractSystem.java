@@ -61,7 +61,7 @@ public class InteractSystem  extends IteratingSystem {
 		Transform otherTransform = transformMapper.get(interact.entity);
 
 		reusableVector.set(otherTransform.position.x - transform.position.x, otherTransform.position.y - transform.position.y);
-		if (reusableVector.length() > 0.5f) {
+		if (reusableVector.length() > 1.0f) {
 			if (interact.phase != Interact.Phase.APPROACHING) {
 				if (!pathMapper.has(entity)) {
 					pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);

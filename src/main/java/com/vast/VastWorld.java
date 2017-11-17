@@ -5,6 +5,7 @@ import com.artemis.WorldConfigurationBuilder;
 import com.artemis.managers.WorldSerializationManager;
 import com.vast.collision.CollisionHandler;
 import com.vast.collision.PlayerWithPickupCollisionHandler;
+import com.vast.interact.BuildingInteractionHandler;
 import com.vast.interact.HarvestableInteractionHandler;
 import com.vast.interact.InteractionHandler;
 import com.vast.order.BuildOrderHandler;
@@ -57,7 +58,8 @@ public class VastWorld implements Runnable {
 			new AISystem(),
 			new PathMoveSystem(),
 			new InteractSystem(new HashSet<InteractionHandler>(Arrays.asList(
-				new HarvestableInteractionHandler()
+				new HarvestableInteractionHandler(),
+				new BuildingInteractionHandler()
 			))),
 			new SpatialSystem(worldConfiguration, spatialHashes),
 			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(

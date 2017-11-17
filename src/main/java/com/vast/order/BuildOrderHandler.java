@@ -18,6 +18,8 @@ public class BuildOrderHandler implements OrderHandler {
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Building> buildingMapper;
 	private ComponentMapper<Create> createMapper;
+	private ComponentMapper<Interact> interactMapper;
+	private ComponentMapper<Path> pathMapper;
 
 	private Archetype buildingArcheType;
 
@@ -29,6 +31,7 @@ public class BuildOrderHandler implements OrderHandler {
 				.add(Spatial.class)
 				.add(Collision.class)
 				.add(Building.class)
+				.add(Interactable.class)
 				.build(world);
 	}
 
@@ -44,11 +47,13 @@ public class BuildOrderHandler implements OrderHandler {
 
 	@Override
 	public boolean isOrderComplete(int orderEntity) {
-		return true;
+		return !interactMapper.has(orderEntity);
 	}
 
 	@Override
 	public void cancelOrder(int orderEntity) {
+		interactMapper.remove(orderEntity);
+		pathMapper.remove(orderEntity);
 	}
 
 	@Override
@@ -63,6 +68,9 @@ public class BuildOrderHandler implements OrderHandler {
 		collisionMapper.get(buildingEntity).radius = 0.5f;
 		buildingMapper.get(buildingEntity).type = type;
 		createMapper.create(buildingEntity).reason = "built";
+
+		interactMapper.create(orderEntity).entity = buildingEntity;
+
 		return true;
 	}
 }

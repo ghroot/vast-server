@@ -6,4 +6,5 @@ import com.artemis.annotations.PooledWeaver;
 @PooledWeaver
 public class Building extends Component {
 	public String type = "unspecified";
+	public int progress = 0;
 }
