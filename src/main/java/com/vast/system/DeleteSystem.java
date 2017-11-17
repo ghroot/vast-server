@@ -50,11 +50,13 @@ public class DeleteSystem extends IteratingSystem {
 		IntBag activePlayerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class, Active.class, Known.class)).getEntities();
 		for (int i = 0; i < activePlayerEntities.size(); i++) {
 			int activePlayerEntity = activePlayerEntities.get(i);
-			Set<Integer> knownEntities = knownMapper.get(activePlayerEntity).knownEntities;
-			if (knownEntities.contains(deleteEntity)) {
-				VastPeer peer = peers.get(playerMapper.get(activePlayerEntity).name);
-				notifyAboutRemovedEntity(peer, deleteEntity, reason);
-				knownEntities.remove(deleteEntity);
+			if (playerMapper.has(activePlayerEntity) && activeMapper.has(activePlayerEntity) && knownMapper.has(activePlayerEntity)) {
+				Set<Integer> knownEntities = knownMapper.get(activePlayerEntity).knownEntities;
+				if (knownEntities.contains(deleteEntity)) {
+					VastPeer peer = peers.get(playerMapper.get(activePlayerEntity).name);
+					notifyAboutRemovedEntity(peer, deleteEntity, reason);
+					knownEntities.remove(deleteEntity);
+				}
 			}
 		}
 		world.delete(deleteEntity);

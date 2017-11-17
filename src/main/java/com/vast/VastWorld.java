@@ -39,6 +39,7 @@ public class VastWorld implements Runnable {
 			new WorldSerializationManager(),
 			new MetricsManager(metrics),
 
+			new WorldSerializationSystem(snapshotFormat, metrics),
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
 			new PeerEntitySystem(peers, worldConfiguration),
@@ -62,8 +63,7 @@ public class VastWorld implements Runnable {
 				new PlayerWithPickupCollisionHandler()
 			)), worldConfiguration, spatialHashes, metrics),
 			new DeleteSystem(peers),
-			new SyncTransformSystem(peers),
-			new WorldSerializationSystem(snapshotFormat, metrics)
+			new SyncTransformSystem(peers)
 		);
 		if (showMonitor) {
 			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, spatialHashes));

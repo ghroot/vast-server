@@ -25,6 +25,7 @@ public class CreateSystem extends IteratingSystem {
 	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<Transform> transformMapper;
@@ -48,22 +49,24 @@ public class CreateSystem extends IteratingSystem {
 		IntBag activePlayerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class, Active.class, Known.class)).getEntities();
 		for (int i = 0; i < activePlayerEntities.size(); i++) {
 			int activePlayerEntity = activePlayerEntities.get(i);
-			Set<Integer> knownEntities = knownMapper.get(activePlayerEntity).knownEntities;
-			if (!knownEntities.contains(createEntity)) {
-				VastPeer peer = peers.get(playerMapper.get(activePlayerEntity).name);
-				String reason = createMapper.get(createEntity).reason;
-				logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);
-				Type type = typeMapper.get(createEntity);
-				Transform transform = transformMapper.get(createEntity);
-				reusablePosition[0] = transform.position.x;
-				reusablePosition[1] = transform.position.y;
-				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, createEntity);
-				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, type.type);
-				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_POSITION, reusablePosition);
-				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, reason);
-				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_INTERACTABLE, interactableMapper.has(createEntity));
-				peer.send(reusableEventMessage, SendOptions.ReliableSend);
-				knownEntities.add(createEntity);
+			if (playerMapper.has(activePlayerEntity) && activeMapper.has(activePlayerEntity) && knownMapper.has(activePlayerEntity)) {
+				Set<Integer> knownEntities = knownMapper.get(activePlayerEntity).knownEntities;
+				if (!knownEntities.contains(createEntity)) {
+					VastPeer peer = peers.get(playerMapper.get(activePlayerEntity).name);
+					String reason = createMapper.get(createEntity).reason;
+					logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);
+					Type type = typeMapper.get(createEntity);
+					Transform transform = transformMapper.get(createEntity);
+					reusablePosition[0] = transform.position.x;
+					reusablePosition[1] = transform.position.y;
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, createEntity);
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, type.type);
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_POSITION, reusablePosition);
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, reason);
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_INTERACTABLE, interactableMapper.has(createEntity));
+					peer.send(reusableEventMessage, SendOptions.ReliableSend);
+					knownEntities.add(createEntity);
+				}
 			}
 		}
 		createMapper.remove(createEntity);

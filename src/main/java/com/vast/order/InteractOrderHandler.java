@@ -67,7 +67,7 @@ public class InteractOrderHandler implements OrderHandler {
 		IntBag interactionEntities = world.getAspectSubscriptionManager().get(Aspect.one(Interact.class)).getEntities();
 		for (int i = 0; i < interactionEntities.size(); i++) {
 			int interactionEntity = interactionEntities.get(i);
-			if (interactMapper.get(interactionEntity).entity == interactableEntity) {
+			if (interactMapper.has(interactionEntity) && interactMapper.get(interactionEntity).entity == interactableEntity) {
 				return true;
 			}
 		}

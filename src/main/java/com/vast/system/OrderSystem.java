@@ -73,15 +73,17 @@ public class OrderSystem extends ProfiledBaseSystem {
 		IntBag orderEntities = world.getAspectSubscriptionManager().get(Aspect.all(Order.class)).getEntities();
 		for (int i = orderEntities.size() - 1; i >= 0; i--) {
 			int orderEntity = orderEntities.get(i);
-			Order order = orderMapper.get(orderEntity);
-			OrderHandler orderHandler = getOrderHandler(order.type);
-			if (orderHandler != null) {
-				if (orderHandler.isOrderComplete(orderEntity)) {
-					logger.debug("{} order completed for entity {}", order.type, orderEntity);
-					orderMapper.remove(orderEntity);
+			if (orderMapper.has(orderEntity)) {
+				Order order = orderMapper.get(orderEntity);
+				OrderHandler orderHandler = getOrderHandler(order.type);
+				if (orderHandler != null) {
+					if (orderHandler.isOrderComplete(orderEntity)) {
+						logger.debug("{} order completed for entity {}", order.type, orderEntity);
+						orderMapper.remove(orderEntity);
+					}
+				} else {
+					logger.warn("No order handler found for type {}", order.type);
 				}
-			} else {
-				logger.warn("No order handler found for type {}", order.type);
 			}
 		}
 	}
@@ -105,11 +107,13 @@ public class OrderSystem extends ProfiledBaseSystem {
 	}
 
 	private int getEntityWithPeerName(String name) {
-		IntBag entities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class)).getEntities();
-		for (int i = 0; i < entities.size(); i++) {
-			int entity = entities.get(i);
-			if (playerMapper.get(entity).name.equals(name)) {
-				return entity;
+		IntBag playerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class)).getEntities();
+		for (int i = 0; i < playerEntities.size(); i++) {
+			int playerEntity = playerEntities.get(i);
+			if (playerMapper.has(playerEntity)) {
+				if (playerMapper.get(playerEntity).name.equals(name)) {
+					return playerEntity;
+				}
 			}
 		}
 		return -1;

@@ -49,7 +49,6 @@ public class TerminalSystem extends IntervalSystem {
 	private Screen screen;
 	private float scale = 3.0f;
 	private Point2f cameraPosition = new Point2f();
-	private boolean showPathTargetPosition = false;
 	private boolean showPlayerNames = false;
 	private boolean showSystemTimes = false;
 	private int focusedEntity = -1;
@@ -92,20 +91,6 @@ public class TerminalSystem extends IntervalSystem {
 			IntBag entities = world.getAspectSubscriptionManager().get(Aspect.one(Transform.class)).getEntities();
 			IntBag playerEntities = world.getAspectSubscriptionManager().get(Aspect.one(Player.class)).getEntities();
 			IntBag activePlayerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class, Active.class)).getEntities();
-
-			if (showPathTargetPosition) {
-				IntBag pathEntities = world.getAspectSubscriptionManager().get(Aspect.all(Transform.class, Path.class)).getEntities();
-				for (int i = 0; i < pathEntities.size(); i++) {
-					int pathEntity = pathEntities.get(i);
-
-					Path path = pathMapper.get(pathEntity);
-					TerminalPosition targetTerminalPosition = getTerminalPositionFromWorldPosition(path.targetPosition);
-					if (targetTerminalPosition.getColumn() >= 0 && targetTerminalPosition.getColumn() < screen.getTerminalSize().getColumns() &&
-							targetTerminalPosition.getRow() >= 0 && targetTerminalPosition.getRow() < screen.getTerminalSize().getRows()) {
-						screen.setCharacter(targetTerminalPosition, new TextCharacter('x', TextColor.ANSI.RED, TextColor.ANSI.DEFAULT));
-					}
-				}
-			}
 
 			int numberOfEntitiesOnScreen = 0;
 			for (int i = 0; i < entities.size(); i++) {
@@ -244,8 +229,6 @@ public class TerminalSystem extends IntervalSystem {
 					} else if (keyStroke.getCharacter().toString().equals("_")) {
 						scale -= 1.0f;
 						scale = Math.max(scale, 0.01f);
-					} else if (keyStroke.getCharacter().toString().equals("x")) {
-						showPathTargetPosition = !showPathTargetPosition;
 					} else if (keyStroke.getCharacter().toString().equals("p") || keyStroke.getCharacter().toString().equals("a")) {
 						IntBag playerEntities;
 						if (keyStroke.getCharacter().toString().equals("p")) {
@@ -270,9 +253,11 @@ public class TerminalSystem extends IntervalSystem {
 									playerEntity = playerEntities.get(0);
 								}
 							}
-							Point2f position = transformMapper.get(playerEntity).position;
-							cameraPosition.set(position.x, -position.y);
-							focusedEntity = playerEntity;
+							if (playerMapper.has(playerEntity) && transformMapper.has(playerEntity)) {
+								Point2f position = transformMapper.get(playerEntity).position;
+								cameraPosition.set(position.x, -position.y);
+								focusedEntity = playerEntity;
+							}
 						}
 					} else if (keyStroke.getCharacter().toString().equals("r")) {
 						cameraPosition.set(0.0f, 0.0f);

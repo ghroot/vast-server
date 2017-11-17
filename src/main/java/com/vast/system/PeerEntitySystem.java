@@ -71,9 +71,11 @@ public class PeerEntitySystem extends ProfiledBaseSystem {
 		IntBag playerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class)).getEntities();
 		for (int i = 0; i < playerEntities.size(); i++) {
 			int playerEntity = playerEntities.get(i);
-			String name = playerMapper.get(playerEntity).name;
-			if (!entitiesByPeer.containsKey(name)) {
-				entitiesByPeer.put(name, playerEntity);
+			if (playerMapper.has(playerEntity)) {
+				String name = playerMapper.get(playerEntity).name;
+				if (!entitiesByPeer.containsKey(name)) {
+					entitiesByPeer.put(name, playerEntity);
+				}
 			}
 		}
 	}
