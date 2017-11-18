@@ -23,7 +23,11 @@ public class Metrics {
 	}
 
 	public int getFps() {
-		return 1000 / timePerFrameMs;
+		if (timePerFrameMs > 0){
+			return 1000 / timePerFrameMs;
+		} else {
+			return 0;
+		}
 	}
 
 	public void setSystemProcessingTime(BaseSystem system, int processingTime) {
