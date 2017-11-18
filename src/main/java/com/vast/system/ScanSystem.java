@@ -50,9 +50,7 @@ public class ScanSystem extends IteratingSystem {
 		Spatial spatial = spatialMapper.get(scanEntity);
 
 		scan.nearbyEntities.clear();
-
-		int sectionsInEachDirection = (int) Math.ceil((float) scan.distance / worldConfiguration.sectionSize);
-
+		int sectionsInEachDirection = (int) Math.ceil(scan.distance / worldConfiguration.sectionSize);
 		if (spatial.memberOfSpatialHash != null) {
 			for (int x = spatial.memberOfSpatialHash.x - sectionsInEachDirection * worldConfiguration.sectionSize; x <= spatial.memberOfSpatialHash.x + sectionsInEachDirection * worldConfiguration.sectionSize; x += worldConfiguration.sectionSize) {
 				for (int y = spatial.memberOfSpatialHash.y - sectionsInEachDirection * worldConfiguration.sectionSize; y <= spatial.memberOfSpatialHash.y + sectionsInEachDirection * worldConfiguration.sectionSize; y += worldConfiguration.sectionSize) {
