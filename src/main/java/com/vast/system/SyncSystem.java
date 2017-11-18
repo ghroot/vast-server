@@ -1,5 +1,6 @@
 package com.vast.system;
 
+import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.EntitySubscription;
 import com.artemis.utils.IntBag;
@@ -59,18 +60,22 @@ public class SyncSystem extends ProfiledBaseSystem {
 
 	@Override
 	protected void processSystem() {
+		IntBag activePlayerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class, Active.class)).getEntities();
 		for (SyncHandler syncHandler : syncHandlers) {
-			IntBag syncEntities = world.getAspectSubscriptionManager().get(syncHandler.getAspectBuilder().all(Scan.class)).getEntities();
+			IntBag syncEntities = world.getAspectSubscriptionManager().get(syncHandler.getAspectBuilder()).getEntities();
 			for (int i = 0; i < syncEntities.size(); i++) {
 				int syncEntity = syncEntities.get(i);
-				if (scanMapper.has(syncEntity) && syncHandler.needsSync(syncEntity)) {
-					Scan scan = scanMapper.get(syncEntity);
+				if (syncHandler.needsSync(syncEntity)) {
 					reusableNearbyPeers.clear();
-					for (int nearbyEntity : scan.nearbyEntities) {
-						if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
-							VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyEntity).name);
-							if (nearbyPeer != null) {
-								reusableNearbyPeers.add(nearbyPeer);
+					for (int j = 0; j < activePlayerEntities.size(); j++) {
+						int activePlayerEntity = activePlayerEntities.get(j);
+						if (playerMapper.has(activePlayerEntity) && activeMapper.has(activePlayerEntity)) {
+							Scan scan = scanMapper.get(activePlayerEntity);
+							if (scan.nearbyEntities.contains(syncEntity)) {
+								VastPeer nearbyPeer = peers.get(playerMapper.get(activePlayerEntity).name);
+								if (nearbyPeer != null) {
+									reusableNearbyPeers.add(nearbyPeer);
+								}
 							}
 						}
 					}

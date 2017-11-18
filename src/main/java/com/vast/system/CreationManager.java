@@ -38,7 +38,6 @@ public class CreationManager extends ProfiledBaseSystem {
 				.add(Collision.class)
 				.add(Interactable.class)
 				.add(Harvestable.class)
-				.add(Scan.class)
 				.build(world);
 
 		pickupArchetype = new ArchetypeBuilder()
