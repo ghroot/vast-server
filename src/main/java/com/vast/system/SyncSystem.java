@@ -63,9 +63,9 @@ public class SyncSystem extends ProfiledBaseSystem {
 			IntBag syncEntities = world.getAspectSubscriptionManager().get(syncHandler.getAspectBuilder().all(Scan.class)).getEntities();
 			for (int i = 0; i < syncEntities.size(); i++) {
 				int syncEntity = syncEntities.get(i);
-				reusableNearbyPeers.clear();
-				if (scanMapper.has(syncEntity)) {
+				if (scanMapper.has(syncEntity) && syncHandler.needsSync(syncEntity)) {
 					Scan scan = scanMapper.get(syncEntity);
+					reusableNearbyPeers.clear();
 					for (int nearbyEntity : scan.nearbyEntities) {
 						if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
 							VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyEntity).name);

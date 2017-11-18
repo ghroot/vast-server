@@ -1,9 +1,6 @@
 package com.vast.sync;
 
 import com.artemis.Aspect;
-import com.vast.VastPeer;
-
-import java.util.Set;
 
 public abstract class AbstractSyncHandler implements SyncHandler {
 	private Aspect.Builder aspectBuilder;
@@ -24,7 +21,4 @@ public abstract class AbstractSyncHandler implements SyncHandler {
 	@Override
 	public void removed(int entity) {
 	}
-
-	@Override
-	public abstract void sync(int entity, Set<VastPeer> nearbyPeers);
 }

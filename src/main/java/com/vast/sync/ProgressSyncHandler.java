@@ -38,18 +38,24 @@ public class ProgressSyncHandler extends AbstractSyncHandler {
 	}
 
 	@Override
-	public void sync(int entity, Set<VastPeer> nearbyPeers) {
+	public boolean needsSync(int entity) {
 		if (buildingMapper.has(entity)) {
-			int lastSyncedProgress = lastSyncedProgresses.get(entity);
 			int progress = buildingMapper.get(entity).progress;
-			if (progress != lastSyncedProgress) {
-				reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, entity);
-				reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_PROGRESS, progress);
-				for (VastPeer nearbyPeer : nearbyPeers) {
-					nearbyPeer.send(reusableEventMessage, SendOptions.ReliableSend);
-				}
-				lastSyncedProgresses.put(entity, progress);
-			}
+			int lastSyncedProgress = lastSyncedProgresses.get(entity);
+			return progress != lastSyncedProgress;
+		} else {
+			return false;
 		}
+	}
+
+	@Override
+	public void sync(int entity, Set<VastPeer> nearbyPeers) {
+		int progress = buildingMapper.get(entity).progress;
+		reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, entity);
+		reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_PROGRESS, progress);
+		for (VastPeer nearbyPeer : nearbyPeers) {
+			nearbyPeer.send(reusableEventMessage, SendOptions.ReliableSend);
+		}
+		lastSyncedProgresses.put(entity, progress);
 	}
 }

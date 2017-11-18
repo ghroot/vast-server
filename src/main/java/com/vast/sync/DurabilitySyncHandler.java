@@ -38,18 +38,24 @@ public class DurabilitySyncHandler extends AbstractSyncHandler {
 	}
 
 	@Override
-	public void sync(int entity, Set<VastPeer> nearbyPeers) {
+	public boolean needsSync(int entity) {
 		if (harvestableMapper.has(entity)) {
 			int lastSyncedDurability = lastSyncedDurabilities.get(entity);
 			int durability = harvestableMapper.get(entity).durability;
-			if (durability != lastSyncedDurability) {
-				reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, entity);
-				reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_DURABILITY, durability);
-				for (VastPeer nearbyPeer : nearbyPeers) {
-					nearbyPeer.send(reusableEventMessage, SendOptions.ReliableSend);
-				}
-				lastSyncedDurabilities.put(entity, durability);
-			}
+			return durability != lastSyncedDurability;
+		} else {
+			return false;
 		}
+	}
+
+	@Override
+	public void sync(int entity, Set<VastPeer> nearbyPeers) {
+		int durability = harvestableMapper.get(entity).durability;
+		reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, entity);
+		reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_DURABILITY, durability);
+		for (VastPeer nearbyPeer : nearbyPeers) {
+			nearbyPeer.send(reusableEventMessage, SendOptions.ReliableSend);
+		}
+		lastSyncedDurabilities.put(entity, durability);
 	}
 }

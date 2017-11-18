@@ -40,18 +40,24 @@ public class ActiveSyncHandler extends AbstractSyncHandler {
 	}
 
 	@Override
-	public void sync(int entity, Set<VastPeer> nearbyPeers) {
+	public boolean needsSync(int entity) {
 		if (playerMapper.has(entity)) {
-			boolean lastSyncedActive = lastSyncedActives.get(entity);
 			boolean active = activeMapper.has(entity);
-			if (active != lastSyncedActive) {
-				reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, entity);
-				reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_ACTIVE, active);
-				for (VastPeer nearbyPeer : nearbyPeers) {
-					nearbyPeer.send(reusableEventMessage, SendOptions.ReliableSend);
-				}
-				lastSyncedActives.put(entity, active);
-			}
+			boolean lastSyncedActive = lastSyncedActives.get(entity);
+			return active != lastSyncedActive;
+		} else {
+			return false;
 		}
+	}
+
+	@Override
+	public void sync(int entity, Set<VastPeer> nearbyPeers) {
+		boolean active = activeMapper.has(entity);
+		reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, entity);
+		reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_ACTIVE, active);
+		for (VastPeer nearbyPeer : nearbyPeers) {
+			nearbyPeer.send(reusableEventMessage, SendOptions.ReliableSend);
+		}
+		lastSyncedActives.put(entity, active);
 	}
 }

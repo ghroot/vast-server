@@ -48,20 +48,26 @@ public class PositionSyncHandler extends AbstractSyncHandler {
 	}
 
 	@Override
-	public void sync(int entity, Set<VastPeer> nearbyPeers) {
+	public boolean needsSync(int entity) {
 		if (transformMapper.has(entity)) {
 			Transform transform = transformMapper.get(entity);
 			Point2f lastSyncedPosition = lastSyncedPositions.get(entity);
-			if (transform.position.distanceSquared(lastSyncedPosition) >= SYNC_THRESHOLD_SQUARED) {
-				reusablePosition[0] = transform.position.x;
-				reusablePosition[1] = transform.position.y;
-				reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, entity);
-				reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_POSITION, reusablePosition);
-				for (VastPeer nearbyPeer : nearbyPeers) {
-					nearbyPeer.send(reusableEventMessage, SendOptions.ReliableSend);
-				}
-				lastSyncedPosition.set(transform.position);
-			}
+			return transform.position.distanceSquared(lastSyncedPosition) >= SYNC_THRESHOLD_SQUARED;
+		} else {
+			return false;
 		}
+	}
+
+	@Override
+	public void sync(int entity, Set<VastPeer> nearbyPeers) {
+		Transform transform = transformMapper.get(entity);
+		reusablePosition[0] = transform.position.x;
+		reusablePosition[1] = transform.position.y;
+		reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, entity);
+		reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_POSITION, reusablePosition);
+		for (VastPeer nearbyPeer : nearbyPeers) {
+			nearbyPeer.send(reusableEventMessage, SendOptions.ReliableSend);
+		}
+		lastSyncedPositions.get(entity).set(transform.position);
 	}
 }

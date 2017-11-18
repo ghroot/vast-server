@@ -9,5 +9,6 @@ public interface SyncHandler {
 	Aspect.Builder getAspectBuilder();
 	void inserted(int entity);
 	void removed(int entity);
+	boolean needsSync(int entity);
 	void sync(int entity, Set<VastPeer> nearbyPeers);
 }
