@@ -91,6 +91,7 @@ public class TerminalSystem extends IntervalSystem {
 			IntBag entities = world.getAspectSubscriptionManager().get(Aspect.one(Transform.class)).getEntities();
 			IntBag playerEntities = world.getAspectSubscriptionManager().get(Aspect.one(Player.class)).getEntities();
 			IntBag activePlayerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class, Active.class)).getEntities();
+			IntBag scanEntities = world.getAspectSubscriptionManager().get(Aspect.all(Scan.class)).getEntities();
 
 			int numberOfEntitiesOnScreen = 0;
 			for (int i = 0; i < entities.size(); i++) {
@@ -153,6 +154,7 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.putString(0, 4, "Active spatial hashes: " + numberOfActiveSpatialHashes + " (of " + numberOfSpatialHashes + " total)");
 			textGraphics.putString(0, 5, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
 			textGraphics.putString(0, 6, "Player entities: " + playerEntities.size() + " (" + activePlayerEntities.size() + " active)");
+			textGraphics.putString(0, 7, "Scanning entities: " + scanEntities.size());
 
 			String fpsString = "FPS: " + metrics.getFps();
 			textGraphics.putString(screen.getTerminalSize().getColumns() - fpsString.length(), 0, fpsString);
