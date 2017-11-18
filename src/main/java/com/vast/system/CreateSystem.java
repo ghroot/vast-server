@@ -30,6 +30,7 @@ public class CreateSystem extends IteratingSystem {
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Interactable> interactableMapper;
+	private ComponentMapper<Building> buildingMapper;
 
 	private Map<String, VastPeer> peers;
 
@@ -60,10 +61,14 @@ public class CreateSystem extends IteratingSystem {
 					reusablePosition[0] = transform.position.x;
 					reusablePosition[1] = transform.position.y;
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, createEntity);
-					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, type.type);
-					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_POSITION, reusablePosition);
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, reason);
-					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_INTERACTABLE, interactableMapper.has(createEntity));
+					// TODO: These properties should be handled by separate handlers (maybe the sync handlers?)
+					reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_TYPE, type.type);
+					reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_POSITION, reusablePosition);
+					reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_INTERACTABLE, interactableMapper.has(createEntity));
+					if (buildingMapper.has(createEntity)) {
+						reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_PROGRESS, buildingMapper.get(createEntity).progress);
+					}
 					peer.send(reusableEventMessage, SendOptions.ReliableSend);
 					knownEntities.add(createEntity);
 				}

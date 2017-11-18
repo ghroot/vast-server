@@ -30,6 +30,7 @@ public class CullingSystem extends IteratingSystem {
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Interactable> interactableMapper;
+	private ComponentMapper<Building> buildingMapper;
 
 	private Map<String, VastPeer> peers;
 
@@ -37,7 +38,6 @@ public class CullingSystem extends IteratingSystem {
 	private List<Integer> reusableRemovedEntities;
 	private EventMessage reusableDestroyedEventMessage;
 	private EventMessage reusableCreatedEventMessage;
-	private EventMessage reusablePeerCreatedEventMessage;
 
 	public CullingSystem(Map<String, VastPeer> peers) {
 		super(Aspect.all(Player.class, Active.class, Scan.class, Known.class));
@@ -47,7 +47,6 @@ public class CullingSystem extends IteratingSystem {
 		reusableRemovedEntities = new ArrayList<Integer>();
 		reusableDestroyedEventMessage = new EventMessage(MessageCodes.ENTITY_DESTROYED);
 		reusableCreatedEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
-		reusablePeerCreatedEventMessage = new EventMessage(MessageCodes.PEER_ENTITY_CREATED);
 	}
 
 	@Override
@@ -100,28 +99,25 @@ public class CullingSystem extends IteratingSystem {
 
 	private void notifyAboutNewEntity(VastPeer peer, int newEntity) {
 		logger.debug("Notifying peer {} about new entity {} (culling)", peer.getName(), newEntity);
-		Transform transform = transformMapper.get(newEntity);
+		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, newEntity);
+		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, "culling");
+		// TODO: These properties should be handled by separate handlers (maybe the sync handlers?)
+		reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_TYPE, typeMapper.get(newEntity).type);
+		reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_POSITION, getDataObjectPosition(transformMapper.get(newEntity)));
+		reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_INTERACTABLE, interactableMapper.has(newEntity));
+		if (playerMapper.has(newEntity)) {
+			reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_OWNER, peer.getName().equals(playerMapper.get(newEntity).name));
+			reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_ACTIVE, activeMapper.has(newEntity));
+		}
+		if (buildingMapper.has(newEntity)) {
+			reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_PROGRESS, buildingMapper.get(newEntity).progress);
+		}
+		peer.send(reusableCreatedEventMessage, SendOptions.ReliableSend);
+	}
+
+	private float[] getDataObjectPosition(Transform transform) {
 		reusablePosition[0] = transform.position.x;
 		reusablePosition[1] = transform.position.y;
-		if (playerMapper.has(newEntity)) {
-			Player player = playerMapper.get(newEntity);
-			boolean owner = peer.getName().equals(player.name);
-			boolean active = activeMapper.has(newEntity);
-			reusablePeerCreatedEventMessage.getDataObject().set(MessageCodes.PEER_ENTITY_CREATED_ENTITY_ID, newEntity);
-			reusablePeerCreatedEventMessage.getDataObject().set(MessageCodes.PEER_ENTITY_CREATED_OWNER, owner);
-			reusablePeerCreatedEventMessage.getDataObject().set(MessageCodes.PEER_ENTITY_CREATED_ACTIVE, active);
-			reusablePeerCreatedEventMessage.getDataObject().set(MessageCodes.PEER_ENTITY_CREATED_POSITION, reusablePosition);
-			reusablePeerCreatedEventMessage.getDataObject().set(MessageCodes.PEER_ENTITY_CREATED_REASON, "culling");
-			peer.send(reusablePeerCreatedEventMessage, SendOptions.ReliableSend);
-		} else {
-			Type type = typeMapper.get(newEntity);
-			boolean interactable = interactableMapper.has(newEntity);
-			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, newEntity);
-			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, type.type);
-			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_POSITION, reusablePosition);
-			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, "culling");
-			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_INTERACTABLE, interactable);
-			peer.send(reusableCreatedEventMessage, SendOptions.ReliableSend);
-		}
+		return reusablePosition;
 	}
 }

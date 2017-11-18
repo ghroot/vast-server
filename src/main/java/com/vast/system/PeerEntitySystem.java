@@ -21,6 +21,7 @@ public class PeerEntitySystem extends ProfiledBaseSystem {
 
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Transform> transformMapper;
+	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<AI> aiMapper;
 
 	private Map<String, VastPeer> peers;
@@ -44,6 +45,7 @@ public class PeerEntitySystem extends ProfiledBaseSystem {
 
 		playerEntityArchetype = new ArchetypeBuilder()
 				.add(Player.class)
+				.add(Type.class)
 				.add(Inventory.class)
 				.add(Transform.class)
 				.add(Spatial.class)
@@ -95,6 +97,7 @@ public class PeerEntitySystem extends ProfiledBaseSystem {
 	private void createPeerEntity(VastPeer peer) {
 		int playerEntity = world.create(playerEntityArchetype);
 		playerMapper.get(playerEntity).name = peer.getName();
+		typeMapper.get(playerEntity).type = "player";
 		transformMapper.get(playerEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
 		if (peer instanceof FakePeer) {
 			aiMapper.create(playerEntity);

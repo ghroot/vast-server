@@ -12,6 +12,7 @@ import com.vast.order.BuildOrderHandler;
 import com.vast.order.InteractOrderHandler;
 import com.vast.order.MoveOrderHandler;
 import com.vast.order.OrderHandler;
+import com.vast.sync.*;
 import com.vast.system.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,12 @@ public class VastWorld implements Runnable {
 			new WorldSerializationManager(),
 			new MetricsManager(metrics),
 
+			new SyncSystem(new HashSet<SyncHandler>(Arrays.asList(
+				new PositionSyncHandler(),
+				new ActiveSyncHandler(),
+				new DurabilitySyncHandler(),
+				new ProgressSyncHandler()
+			)), peers),
 			new WorldSerializationSystem(snapshotFormat, metrics),
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
@@ -65,8 +72,7 @@ public class VastWorld implements Runnable {
 			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(
 				new PlayerWithPickupCollisionHandler()
 			)), worldConfiguration, spatialHashes, metrics),
-			new DeleteSystem(peers),
-			new SyncTransformSystem(peers)
+			new DeleteSystem(peers)
 		);
 		if (showMonitor) {
 			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, spatialHashes));

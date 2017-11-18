@@ -32,6 +32,7 @@ public class BuildOrderHandler implements OrderHandler {
 				.add(Collision.class)
 				.add(Building.class)
 				.add(Interactable.class)
+				.add(Scan.class)
 				.build(world);
 	}
 
