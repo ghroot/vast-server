@@ -35,4 +35,6 @@ public class MessageCodes {
 	public static byte PROPERTY_ACTIVE = 101;
 	public static byte PROPERTY_DURABILITY = 103;
 	public static byte PROPERTY_PROGRESS = 104;
+	public static byte PROPERTY_HEALTH = 105;
+	public static byte PROPERTY_MAX_HEALTH = 106;
 }

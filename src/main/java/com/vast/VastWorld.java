@@ -40,7 +40,9 @@ public class VastWorld implements Runnable {
 				new PositionPropertyHandler(),
 				new ActivePropertyHandler(),
 				new DurabilityPropertyHandler(),
-				new ProgressPropertyHandler()
+				new ProgressPropertyHandler(),
+				new HealthPropertyHandler(),
+				new MaxHealthPropertyHandler()
 		));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
