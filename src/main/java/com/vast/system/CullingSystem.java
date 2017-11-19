@@ -30,6 +30,7 @@ public class CullingSystem extends IteratingSystem {
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Interactable> interactableMapper;
+	private ComponentMapper<Harvestable> harvestableMapper;
 	private ComponentMapper<Building> buildingMapper;
 
 	private Map<String, VastPeer> peers;
@@ -108,6 +109,9 @@ public class CullingSystem extends IteratingSystem {
 		if (playerMapper.has(newEntity)) {
 			reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_OWNER, peer.getName().equals(playerMapper.get(newEntity).name));
 			reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_ACTIVE, activeMapper.has(newEntity));
+		}
+		if (harvestableMapper.has(newEntity)) {
+			reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_DURABILITY, harvestableMapper.get(newEntity).durability);
 		}
 		if (buildingMapper.has(newEntity)) {
 			reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_PROGRESS, buildingMapper.get(newEntity).progress);
