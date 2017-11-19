@@ -50,7 +50,6 @@ public class PeerEntitySystem extends ProfiledBaseSystem {
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)
-				.add(SyncTransform.class)
 				.add(Scan.class)
 				.add(Known.class)
 				.build(world);

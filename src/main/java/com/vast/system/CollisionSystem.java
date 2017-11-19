@@ -5,15 +5,10 @@ import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.Metrics;
-import com.vast.Profiler;
-import com.vast.SpatialHash;
-import com.vast.WorldConfiguration;
+import com.vast.*;
 import com.vast.collision.CollisionHandler;
-import com.vast.component.Collision;
-import com.vast.component.Delete;
-import com.vast.component.Spatial;
-import com.vast.component.Transform;
+import com.vast.component.*;
+import com.vast.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +26,7 @@ public class CollisionSystem extends IteratingSystem {
 	private ComponentMapper<Spatial> spatialMapper;
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Delete> deleteMapper;
+	private ComponentMapper<Sync> syncMapper;
 
 	private Set<CollisionHandler> collisionHandlers;
 	private WorldConfiguration worldConfiguration;
@@ -126,18 +122,22 @@ public class CollisionSystem extends IteratingSystem {
 								reusableVector.normalize();
 								reusableVector.scale(overlap);
 								adjacentTransform.position.add(reusableVector);
+								syncMapper.create(adjacentEntity).markPropertyAsDirty(Properties.POSITION);
 							} else if (!collision.isStatic && adjacentCollision.isStatic) {
 								reusableVector.normalize();
 								reusableVector.scale(-overlap);
 								transform.position.add(reusableVector);
+								syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
 							} else if (!collision.isStatic && !adjacentCollision.isStatic) {
 								reusableVector.normalize();
 								reusableVector.scale(-overlap * 0.5f);
 								transform.position.add(reusableVector);
+								syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
 
 								reusableVector.normalize();
 								reusableVector.scale(-overlap * 0.5f);
 								adjacentTransform.position.add(reusableVector);
+								syncMapper.create(adjacentEntity).markPropertyAsDirty(Properties.POSITION);
 							}
 						}
 						numberOfCollisionChecks++;

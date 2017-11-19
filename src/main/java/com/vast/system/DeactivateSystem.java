@@ -6,11 +6,9 @@ import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.Profiler;
+import com.vast.Properties;
 import com.vast.VastPeer;
-import com.vast.component.Active;
-import com.vast.component.Known;
-import com.vast.component.Player;
-import com.vast.component.Scan;
+import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +20,8 @@ public class DeactivateSystem extends IteratingSystem {
 
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
-	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Known> knownMapper;
+	private ComponentMapper<Sync> syncMapper;
 
 	private Map<String, VastPeer> peers;
 
@@ -48,6 +46,7 @@ public class DeactivateSystem extends IteratingSystem {
 			player.id = 0;
 			activeMapper.remove(activePlayerEntity);
 			knownMapper.get(activePlayerEntity).knownEntities.clear();
+			syncMapper.create(activePlayerEntity).markPropertyAsDirty(Properties.ACTIVE);
 		}
 	}
 }

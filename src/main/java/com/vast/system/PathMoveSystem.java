@@ -5,8 +5,10 @@ import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
+import com.vast.Properties;
 import com.vast.Profiler;
 import com.vast.component.Path;
+import com.vast.component.Sync;
 import com.vast.component.Transform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,7 @@ public class PathMoveSystem extends IteratingSystem {
 
     private ComponentMapper<Transform> transformMapper;
     private ComponentMapper<Path> pathMapper;
+	private ComponentMapper<Sync> syncMapper;
 
     private final float WALK_SPEED = 0.8f;
     private final float RUN_SPEED = 2.5f;
@@ -63,6 +66,7 @@ public class PathMoveSystem extends IteratingSystem {
                 reusableDirection.scale(speed * world.delta);
                 transform.position.add(reusableDirection);
             }
+			syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
         }
     }
 }

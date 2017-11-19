@@ -12,12 +12,13 @@ import com.vast.order.BuildOrderHandler;
 import com.vast.order.InteractOrderHandler;
 import com.vast.order.MoveOrderHandler;
 import com.vast.order.OrderHandler;
-import com.vast.sync.*;
+import com.vast.property.*;
 import com.vast.system.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.Properties;
 
 public class VastWorld implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(VastWorld.class);
@@ -30,24 +31,23 @@ public class VastWorld implements Runnable {
 	private long lastFrameStartTime;
 
 	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, boolean showMonitor, Metrics metrics) {
-		Properties worldProperties = loadWorldProperties();
-		WorldConfiguration worldConfiguration = new WorldConfiguration(worldProperties);
+		WorldConfiguration worldConfiguration = new WorldConfiguration(loadWorldProperties());
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
 		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
+		Set<PropertyHandler> propertyHandlers = new HashSet<PropertyHandler>(Arrays.asList(
+				new PositionPropertyHandler(),
+				new ActivePropertyHandler(),
+				new DurabilityPropertyHandler(),
+				new ProgressPropertyHandler()
+		));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldConfiguration),
 			new WorldSerializationManager(),
 			new MetricsManager(metrics),
 
-			new SyncSystem(new HashSet<SyncHandler>(Arrays.asList(
-				new PositionSyncHandler(),
-				new ActiveSyncHandler(),
-				new DurabilitySyncHandler(),
-				new ProgressSyncHandler()
-			)), peers),
 			new WorldSerializationSystem(snapshotFormat, metrics),
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
@@ -55,8 +55,8 @@ public class VastWorld implements Runnable {
 			new DeactivateSystem(peers),
 			new ActivateSystem(peers),
 			new ScanSystem(worldConfiguration, spatialHashes),
-			new CreateSystem(peers),
-			new CullingSystem(peers),
+			new CreateSystem(peers, propertyHandlers),
+			new CullingSystem(peers, propertyHandlers),
 			new OrderSystem(new HashSet<OrderHandler>(Arrays.asList(
 				new MoveOrderHandler(),
 				new InteractOrderHandler(),
@@ -72,7 +72,8 @@ public class VastWorld implements Runnable {
 			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(
 				new PlayerWithPickupCollisionHandler()
 			)), worldConfiguration, spatialHashes, metrics),
-			new DeleteSystem(peers)
+			new DeleteSystem(peers),
+			new SyncSystem(propertyHandlers, peers)
 		);
 		if (showMonitor) {
 			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, spatialHashes));

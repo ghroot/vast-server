@@ -11,6 +11,7 @@ import com.vast.MessageCodes;
 import com.vast.Profiler;
 import com.vast.VastPeer;
 import com.vast.component.*;
+import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,24 +28,19 @@ public class CullingSystem extends IteratingSystem {
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Type> typeMapper;
-	private ComponentMapper<Active> activeMapper;
-	private ComponentMapper<Transform> transformMapper;
-	private ComponentMapper<Interactable> interactableMapper;
-	private ComponentMapper<Harvestable> harvestableMapper;
-	private ComponentMapper<Building> buildingMapper;
 
 	private Map<String, VastPeer> peers;
+	private Set<PropertyHandler> propertyHandlers;
 
-	private float[] reusablePosition;
 	private List<Integer> reusableRemovedEntities;
 	private EventMessage reusableDestroyedEventMessage;
 	private EventMessage reusableCreatedEventMessage;
 
-	public CullingSystem(Map<String, VastPeer> peers) {
+	public CullingSystem(Map<String, VastPeer> peers, Set<PropertyHandler> propertyHandlers) {
 		super(Aspect.all(Player.class, Active.class, Scan.class, Known.class));
 		this.peers = peers;
+		this.propertyHandlers = propertyHandlers;
 
-		reusablePosition = new float[2];
 		reusableRemovedEntities = new ArrayList<Integer>();
 		reusableDestroyedEventMessage = new EventMessage(MessageCodes.ENTITY_DESTROYED);
 		reusableCreatedEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
@@ -102,26 +98,13 @@ public class CullingSystem extends IteratingSystem {
 		logger.debug("Notifying peer {} about new entity {} (culling)", peer.getName(), newEntity);
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, newEntity);
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, "culling");
-		// TODO: These properties should be handled by separate handlers (maybe the sync handlers?)
-		reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_TYPE, typeMapper.get(newEntity).type);
-		reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_POSITION, getDataObjectPosition(transformMapper.get(newEntity)));
-		reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_INTERACTABLE, interactableMapper.has(newEntity));
+		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(newEntity).type);
 		if (playerMapper.has(newEntity)) {
-			reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_OWNER, peer.getName().equals(playerMapper.get(newEntity).name));
-			reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_ACTIVE, activeMapper.has(newEntity));
+			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(newEntity).name));
 		}
-		if (harvestableMapper.has(newEntity)) {
-			reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_DURABILITY, harvestableMapper.get(newEntity).durability);
-		}
-		if (buildingMapper.has(newEntity)) {
-			reusableCreatedEventMessage.getDataObject().set(MessageCodes.PROPERTY_PROGRESS, buildingMapper.get(newEntity).progress);
+		for (PropertyHandler propertyHandler : propertyHandlers) {
+			propertyHandler.decorateDataObject(newEntity, reusableCreatedEventMessage.getDataObject());
 		}
 		peer.send(reusableCreatedEventMessage, SendOptions.ReliableSend);
-	}
-
-	private float[] getDataObjectPosition(Transform transform) {
-		reusablePosition[0] = transform.position.x;
-		reusablePosition[1] = transform.position.y;
-		return reusablePosition;
 	}
 }

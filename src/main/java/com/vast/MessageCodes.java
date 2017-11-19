@@ -4,7 +4,9 @@ public class MessageCodes {
 	// Server -> Client
 	public static short ENTITY_CREATED = 0;
 	public static byte ENTITY_CREATED_ENTITY_ID = 0;
-	public static byte ENTITY_CREATED_REASON = 1;
+	public static byte ENTITY_CREATED_TYPE = 1;
+	public static byte ENTITY_CREATED_OWNER = 2;
+	public static byte ENTITY_CREATED_REASON = 3;
 
 	// Server -> Client
 	public static short ENTITY_DESTROYED = 1;
@@ -28,12 +30,9 @@ public class MessageCodes {
 	public static byte BUILD_TYPE = 0;
 	public static byte BUILD_POSITION = 1;
 
-	// Properties (TODO: should maybe be moved to own enum?)
-	public static byte PROPERTY_TYPE = 100;
-	public static byte PROPERTY_POSITION = 101;
-	public static byte PROPERTY_OWNER = 102;
-	public static byte PROPERTY_ACTIVE = 103;
-	public static byte PROPERTY_DURABILITY = 104;
-	public static byte PROPERTY_PROGRESS = 105;
-	public static byte PROPERTY_INTERACTABLE = 106;
+	// Properties
+	public static byte PROPERTY_POSITION = 100;
+	public static byte PROPERTY_ACTIVE = 101;
+	public static byte PROPERTY_DURABILITY = 103;
+	public static byte PROPERTY_PROGRESS = 104;
 }

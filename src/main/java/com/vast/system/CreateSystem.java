@@ -12,6 +12,7 @@ import com.vast.MessageCodes;
 import com.vast.Profiler;
 import com.vast.VastPeer;
 import com.vast.component.*;
+import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,26 +24,21 @@ public class CreateSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CreateSystem.class);
 
 	private ComponentMapper<Create> createMapper;
-	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Type> typeMapper;
-	private ComponentMapper<Transform> transformMapper;
-	private ComponentMapper<Interactable> interactableMapper;
-	private ComponentMapper<Harvestable> harvestableMapper;
-	private ComponentMapper<Building> buildingMapper;
 
 	private Map<String, VastPeer> peers;
+	private Set<PropertyHandler> propertyHandlers;
 
-	private float[] reusablePosition;
 	private EventMessage reusableEventMessage;
 
-	public CreateSystem(Map<String, VastPeer> peers) {
-		super(Aspect.all(Create.class, Transform.class, Type.class));
+	public CreateSystem(Map<String, VastPeer> peers, Set<PropertyHandler> propertyHandlers) {
+		super(Aspect.all(Create.class, Type.class));
 		this.peers = peers;
+		this.propertyHandlers = propertyHandlers;
 
-		reusablePosition = new float[2];
 		reusableEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED, new DataObject());
 	}
 
@@ -57,21 +53,11 @@ public class CreateSystem extends IteratingSystem {
 					VastPeer peer = peers.get(playerMapper.get(activePlayerEntity).name);
 					String reason = createMapper.get(createEntity).reason;
 					logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);
-					Type type = typeMapper.get(createEntity);
-					Transform transform = transformMapper.get(createEntity);
-					reusablePosition[0] = transform.position.x;
-					reusablePosition[1] = transform.position.y;
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, createEntity);
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(createEntity).type);
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, reason);
-					// TODO: These properties should be handled by separate handlers (maybe the sync handlers?)
-					reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_TYPE, type.type);
-					reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_POSITION, reusablePosition);
-					reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_INTERACTABLE, interactableMapper.has(createEntity));
-					if (harvestableMapper.has(createEntity)) {
-						reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_DURABILITY, harvestableMapper.get(createEntity).durability);
-					}
-					if (buildingMapper.has(createEntity)) {
-						reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_PROGRESS, buildingMapper.get(createEntity).progress);
+					for (PropertyHandler propertyHandler : propertyHandlers) {
+						propertyHandler.decorateDataObject(createEntity, reusableEventMessage.getDataObject());
 					}
 					peer.send(reusableEventMessage, SendOptions.ReliableSend);
 					knownEntities.add(createEntity);

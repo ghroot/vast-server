@@ -1,0 +1,21 @@
+package com.vast.component;
+
+import com.artemis.Component;
+import com.artemis.annotations.PooledWeaver;
+
+@PooledWeaver
+public class Sync extends Component {
+	public transient int dirtyProperties;
+
+	public void markPropertyAsDirty(int property) {
+		dirtyProperties |= property;
+	}
+
+	public void markPropertyAsNotDirty(int property) {
+		dirtyProperties = dirtyProperties & ~property;
+	}
+
+	public boolean isPropertyDirty(int property) {
+		return (dirtyProperties & property) > 0;
+	}
+}
