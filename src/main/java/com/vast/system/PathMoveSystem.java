@@ -5,8 +5,8 @@ import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.Properties;
 import com.vast.Profiler;
+import com.vast.Properties;
 import com.vast.component.Path;
 import com.vast.component.Sync;
 import com.vast.component.Transform;
@@ -68,5 +68,5 @@ public class PathMoveSystem extends IteratingSystem {
             }
 			syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
         }
-    }
+	}
 }

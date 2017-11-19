@@ -9,10 +9,10 @@ import com.vast.component.Transform;
 public class PositionPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Transform> transformMapper;
 
-	private float[] reusablePosition;
+	private double[] reusablePosition;
 
 	public PositionPropertyHandler() {
-		reusablePosition = new float[2];
+		reusablePosition = new double[2];
 	}
 
 	@Override
