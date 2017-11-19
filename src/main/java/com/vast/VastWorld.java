@@ -71,7 +71,7 @@ public class VastWorld implements Runnable {
 			new SpatialSystem(worldConfiguration, spatialHashes),
 			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(
 				new PlayerWithPickupCollisionHandler()
-			)), worldConfiguration, spatialHashes, metrics),
+			)), metrics),
 			new DeleteSystem(peers),
 			new SyncSystem(propertyHandlers, peers)
 		);
