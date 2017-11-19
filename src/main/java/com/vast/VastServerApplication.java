@@ -48,7 +48,7 @@ public class VastServerApplication extends ServerApplication {
 
 		// TODO: Add fake peer for testing
 		synchronized (peers) {
-			for (int i = 0; i < 2000; i++) {
+			for (int i = 0; i < 500; i++) {
 				String name = "fakePeer" + (i + 1);
 				peers.add(new FakePeer(this, name, metrics));
 				logger.info("Added fake peer: {}", name);
