@@ -30,6 +30,7 @@ public class CreateSystem extends IteratingSystem {
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Interactable> interactableMapper;
+	private ComponentMapper<Harvestable> harvestableMapper;
 	private ComponentMapper<Building> buildingMapper;
 
 	private Map<String, VastPeer> peers;
@@ -66,6 +67,9 @@ public class CreateSystem extends IteratingSystem {
 					reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_TYPE, type.type);
 					reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_POSITION, reusablePosition);
 					reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_INTERACTABLE, interactableMapper.has(createEntity));
+					if (harvestableMapper.has(createEntity)) {
+						reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_DURABILITY, harvestableMapper.get(createEntity).durability);
+					}
 					if (buildingMapper.has(createEntity)) {
 						reusableEventMessage.getDataObject().set(MessageCodes.PROPERTY_PROGRESS, buildingMapper.get(createEntity).progress);
 					}
