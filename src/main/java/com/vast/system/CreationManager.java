@@ -16,6 +16,7 @@ public class CreationManager extends ProfiledBaseSystem {
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Pickup> pickupMapper;
 	private ComponentMapper<Harvestable> harvestableMapper;
+	private ComponentMapper<Health> healthMapper;
 
 	private WorldConfiguration worldConfiguration;
 
@@ -51,10 +52,14 @@ public class CreationManager extends ProfiledBaseSystem {
 		aiArchetype = new ArchetypeBuilder()
 				.add(AI.class)
 				.add(Type.class)
+				.add(Inventory.class)
+				.add(Health.class)
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)
 				.add(Scan.class)
+				.add(Interactable.class)
+				.add(Attack.class)
 				.build(world);
 	}
 
@@ -86,6 +91,9 @@ public class CreationManager extends ProfiledBaseSystem {
 			int aiEntity = world.create(aiArchetype);
 			typeMapper.get(aiEntity).type = "ai";
 			transformMapper.get(aiEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
+			collisionMapper.get(aiEntity).radius = 0.1f;
+			healthMapper.get(aiEntity).maxHealth = 3;
+			healthMapper.get(aiEntity).health = 3;
 		}
 	}
 }

@@ -3,7 +3,10 @@ package com.vast.interact;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
-import com.vast.component.*;
+import com.vast.component.Delete;
+import com.vast.component.Harvestable;
+import com.vast.component.Inventory;
+import com.vast.component.Sync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +19,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Sync> syncMapper;
 
 	public HarvestableInteractionHandler() {
-		super(Aspect.all(Inventory.class), Aspect.all(Interactable.class, Harvestable.class));
+		super(Aspect.all(Inventory.class), Aspect.all(Harvestable.class));
 	}
 
 	@Override

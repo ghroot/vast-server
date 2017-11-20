@@ -2,9 +2,11 @@ package com.vast;
 
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
+import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
 import com.vast.collision.CollisionHandler;
 import com.vast.collision.PlayerWithPickupCollisionHandler;
+import com.vast.interact.AttackInteractionHandler;
 import com.vast.interact.BuildingInteractionHandler;
 import com.vast.interact.HarvestableInteractionHandler;
 import com.vast.interact.InteractionHandler;
@@ -42,13 +44,16 @@ public class VastWorld implements Runnable {
 				new DurabilityPropertyHandler(),
 				new ProgressPropertyHandler(),
 				new HealthPropertyHandler(),
-				new MaxHealthPropertyHandler()
+				new MaxHealthPropertyHandler(),
+				new InteractablePropertyHandler()
 		));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldConfiguration),
 			new WorldSerializationManager(),
+			new EntityLinkManager(),
 			new MetricsManager(metrics),
+			new TimeManager(),
 
 			new WorldSerializationSystem(snapshotFormat, metrics),
 			new PeerTransferSystem(serverApplication, peers),
@@ -68,7 +73,8 @@ public class VastWorld implements Runnable {
 			new PathMoveSystem(),
 			new InteractSystem(new HashSet<InteractionHandler>(Arrays.asList(
 				new HarvestableInteractionHandler(),
-				new BuildingInteractionHandler()
+				new BuildingInteractionHandler(),
+				new AttackInteractionHandler()
 			))),
 			new SpatialSystem(worldConfiguration, spatialHashes),
 			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(

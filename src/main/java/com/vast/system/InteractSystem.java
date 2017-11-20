@@ -45,8 +45,7 @@ public class InteractSystem  extends IteratingSystem {
 	}
 
 	@Override
-	protected void inserted(int entity) {
-		logger.debug("Started interaction with entity {}", interactMapper.get(entity).entity);
+	public void inserted(IntBag entities) {
 	}
 
 	@Override
@@ -56,35 +55,40 @@ public class InteractSystem  extends IteratingSystem {
 	@Override
 	protected void process(int entity) {
 		Interact interact = interactMapper.get(entity);
-		Transform transform = transformMapper.get(entity);
 
-		Transform otherTransform = transformMapper.get(interact.entity);
-
-		reusableVector.set(otherTransform.position.x - transform.position.x, otherTransform.position.y - transform.position.y);
-		if (reusableVector.length() > 1.0f) {
-			if (interact.phase != Interact.Phase.APPROACHING) {
-				if (!pathMapper.has(entity)) {
-					pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);
-				}
-				interact.phase = Interact.Phase.APPROACHING;
-			}
+		if (interact.entity == -1) {
+			logger.debug("Entity {} canceled interaction because the interactable entity has been deleted", entity);
+			interactMapper.remove(entity);
 		} else {
-			if (interact.phase == Interact.Phase.INTERACTING) {
-				for (InteractionHandler interactionHandler : interactionHandlers) {
-					if (interactionHandler.getAspect1().isInterested(world.getEntity(entity)) &&
-							interactionHandler.getAspect2().isInterested(world.getEntity(interact.entity))) {
-						if (interactionHandler.process(entity, interact.entity)) {
-							logger.debug("Completed interaction with entity {}", interact.entity);
-							interactMapper.remove(entity);
-						}
-						break;
-					}
+			Transform transform = transformMapper.get(entity);
+			Transform otherTransform = transformMapper.get(interact.entity);
+
+			reusableVector.set(otherTransform.position.x - transform.position.x, otherTransform.position.y - transform.position.y);
+			if (reusableVector.length() > 0.3f) {
+				if ("approaching".equals(interact.phase)) {
+					pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);
+				} else {
+					logger.debug("Entity {} started approaching entity {}", entity, interact.entity);
+					pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);
+					interact.phase = "approaching";
 				}
 			} else {
-				if (pathMapper.has(entity)) {
+				if ("interacting".equals(interact.phase)) {
+					for (InteractionHandler interactionHandler : interactionHandlers) {
+						if (interactionHandler.getAspect1().isInterested(world.getEntity(entity)) &&
+								interactionHandler.getAspect2().isInterested(world.getEntity(interact.entity))) {
+							if (interactionHandler.process(entity, interact.entity)) {
+								logger.debug("Entity {} completed interaction with entity {}", entity, interact.entity);
+								interactMapper.remove(entity);
+							}
+							break;
+						}
+					}
+				} else {
 					pathMapper.remove(entity);
+					logger.debug("Entity {} started interacting with entity {}", entity, interact.entity);
+					interact.phase = "interacting";
 				}
-				interact.phase = Interact.Phase.INTERACTING;
 			}
 		}
 	}

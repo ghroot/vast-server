@@ -6,13 +6,13 @@ import com.artemis.annotations.Profile;
 import com.artemis.systems.IntervalIteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.Profiler;
-import com.vast.component.AI;
-import com.vast.component.Path;
-import com.vast.component.Transform;
+import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
+import java.util.ArrayList;
+import java.util.List;
 
 @Profile(enabled = true, using = Profiler.class)
 public class AISystem extends IntervalIteratingSystem {
@@ -20,9 +20,16 @@ public class AISystem extends IntervalIteratingSystem {
 
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Transform> transformMapper;
+	private ComponentMapper<Scan> scanMapper;
+	private ComponentMapper<Interact> interactMapper;
+	private ComponentMapper<Interactable> interactableMapper;
+
+	private List<Integer> reusableNearbyInteractableEntities;
 
 	public AISystem() {
-		super(Aspect.one(AI.class).exclude(Path.class), 1.0f);
+		super(Aspect.one(AI.class).exclude(Path.class, Interact.class), 2.0f);
+
+		reusableNearbyInteractableEntities = new ArrayList<Integer>();
 	}
 
 	@Override
@@ -34,8 +41,21 @@ public class AISystem extends IntervalIteratingSystem {
 	}
 
 	@Override
-	protected void process(int entity) {
-		pathMapper.create(entity).targetPosition = new Point2f(transformMapper.get(entity).position);
-		pathMapper.create(entity).targetPosition.add(new Point2f((float) (-2.0f + Math.random() * 4.0f), (float) (-2.0f + Math.random() * 4.0f)));
+	protected void process(int aiEntity) {
+		Scan scan = scanMapper.get(aiEntity);
+		reusableNearbyInteractableEntities.clear();
+		for (int nearbyEntity : scan.nearbyEntities) {
+			if (nearbyEntity != aiEntity && interactableMapper.has(nearbyEntity)) {
+				reusableNearbyInteractableEntities.add(nearbyEntity);
+			}
+		}
+		if (reusableNearbyInteractableEntities.size() > 0) {
+			int randomIndex = (int) (Math.random() * reusableNearbyInteractableEntities.size());
+			int randomNearbyInteractableEntity = reusableNearbyInteractableEntities.get(randomIndex);
+			interactMapper.create(aiEntity).entity = randomNearbyInteractableEntity;
+		} else {
+			pathMapper.create(aiEntity).targetPosition = new Point2f(transformMapper.get(aiEntity).position);
+			pathMapper.create(aiEntity).targetPosition.add(new Point2f((float) (-2.0f + Math.random() * 4.0f), (float) (-2.0f + Math.random() * 4.0f)));
+		}
 	}
 }

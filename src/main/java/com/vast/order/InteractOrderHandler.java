@@ -51,10 +51,7 @@ public class InteractOrderHandler implements OrderHandler {
 			if (isInteractableEntityBeingInteractedWith(otherEntity)) {
 				logger.debug("Player entity {} tried to interact with busy entity {}", orderEntity, otherEntity);
 			} else {
-				if (!interactMapper.has(orderEntity)) {
-					interactMapper.create(orderEntity);
-				}
-				interactMapper.get(orderEntity).entity = otherEntity;
+				interactMapper.create(orderEntity).entity = otherEntity;
 				return true;
 			}
 		} else {

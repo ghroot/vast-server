@@ -2,6 +2,7 @@ package com.vast.interact;
 
 import com.artemis.Aspect;
 import com.artemis.World;
+import com.vast.component.Interactable;
 
 public abstract class AbstractInteractionHandler implements InteractionHandler {
 	protected World world;
@@ -14,7 +15,7 @@ public abstract class AbstractInteractionHandler implements InteractionHandler {
 
 	public AbstractInteractionHandler(Aspect.Builder aspectBuilder1, Aspect.Builder aspectBuilder2) {
 		this.aspectBuilder1 = aspectBuilder1;
-		this.aspectBuilder2 = aspectBuilder2;
+		this.aspectBuilder2 = aspectBuilder2.all(Interactable.class);
 	}
 
 	public void initialize() {

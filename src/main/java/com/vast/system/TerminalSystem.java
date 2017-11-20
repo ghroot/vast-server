@@ -50,6 +50,7 @@ public class TerminalSystem extends IntervalSystem {
 	private float scale = 3.0f;
 	private Point2f cameraPosition = new Point2f();
 	private boolean showPlayerNames = false;
+	private boolean showIds = false;
 	private boolean showSystemTimes = false;
 	private int focusedEntity = -1;
 
@@ -118,18 +119,29 @@ public class TerminalSystem extends IntervalSystem {
 						}
 						if (showPlayerNames) {
 							textGraphics.putString(terminalPosition.getColumn() + 2, terminalPosition.getRow(), playerMapper.get(entity).name);
+						} else if (showIds) {
+							textGraphics.putString(terminalPosition.getColumn() + 2, terminalPosition.getRow(), "" + entity);
 						}
 					} else {
+						TextGraphics textGraphics = screen.newTextGraphics();
 						if (typeMapper.get(entity).type.equals("ai")) {
 							screen.setCharacter(terminalPosition, new TextCharacter('o', colored ? TextColor.ANSI.CYAN : gray, TextColor.ANSI.DEFAULT));
+							textGraphics.setForegroundColor(TextColor.ANSI.CYAN);
 						} else if (typeMapper.get(entity).type.equals("tree")) {
 							screen.setCharacter(terminalPosition, new TextCharacter('+', colored ? TextColor.ANSI.GREEN : gray, TextColor.ANSI.DEFAULT));
+							textGraphics.setForegroundColor(TextColor.ANSI.GREEN);
 						} else if (typeMapper.get(entity).type.equals("pickup")) {
 							screen.setCharacter(terminalPosition, new TextCharacter('.', colored ? TextColor.ANSI.RED : gray, TextColor.ANSI.DEFAULT));
+							textGraphics.setForegroundColor(TextColor.ANSI.RED);
 						} else if (typeMapper.get(entity).type.equals("building")) {
 							screen.setCharacter(terminalPosition, new TextCharacter('#', colored ? TextColor.ANSI.WHITE : gray, TextColor.ANSI.DEFAULT));
+							textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
 						} else {
 							screen.setCharacter(terminalPosition, new TextCharacter('?', colored ? TextColor.ANSI.MAGENTA : gray, TextColor.ANSI.DEFAULT));
+							textGraphics.setForegroundColor(TextColor.ANSI.MAGENTA);
+						}
+						if (showIds) {
+							textGraphics.putString(terminalPosition.getColumn() + 2, terminalPosition.getRow(), "" + entity);
 						}
 					}
 					numberOfEntitiesOnScreen++;
@@ -266,6 +278,14 @@ public class TerminalSystem extends IntervalSystem {
 						focusedEntity = -1;
 					} else if (keyStroke.getCharacter().toString().equals("n")) {
 						showPlayerNames = !showPlayerNames;
+						if (showPlayerNames) {
+							showIds = false;
+						}
+					} else if (keyStroke.getCharacter().toString().equals("i")) {
+						showIds = !showIds;
+						if (showIds) {
+							showPlayerNames = false;
+						}
 					} else if (keyStroke.getCharacter().toString().equals("s")) {
 						showSystemTimes = !showSystemTimes;
 					}

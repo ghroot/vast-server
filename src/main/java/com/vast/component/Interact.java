@@ -9,11 +9,7 @@ import com.artemis.annotations.Transient;
 @PooledWeaver
 public class Interact extends Component {
 	@EntityId
-	public int entity;
+	public int entity = -1;
 
-	public enum Phase {
-		APPROACHING,
-		INTERACTING
-	}
-	public Phase phase;
+	public String phase = null;
 }

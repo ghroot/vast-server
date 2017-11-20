@@ -54,6 +54,8 @@ public class PeerEntitySystem extends ProfiledBaseSystem {
 				.add(Collision.class)
 				.add(Scan.class)
 				.add(Known.class)
+				.add(Interactable.class)
+				.add(Attack.class)
 				.build(world);
 	}
 
