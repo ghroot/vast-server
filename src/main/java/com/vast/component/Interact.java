@@ -8,8 +8,6 @@ import com.artemis.annotations.Transient;
 @Transient
 @PooledWeaver
 public class Interact extends Component {
-	@EntityId
-	public int entity = -1;
-
+	@EntityId public int entity = -1;
 	public String phase = null;
 }

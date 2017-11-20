@@ -1,12 +1,13 @@
 package com.vast.order;
 
-import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.World;
-import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.MessageCodes;
-import com.vast.component.*;
+import com.vast.component.Interact;
+import com.vast.component.Interactable;
+import com.vast.component.Order;
+import com.vast.component.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,25 +49,10 @@ public class InteractOrderHandler implements OrderHandler {
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
 		int otherEntity = (int) dataObject.get(MessageCodes.INTERACT_ENTITY_ID).value;
 		if (interactableMapper.has(otherEntity)) {
-			if (isInteractableEntityBeingInteractedWith(otherEntity)) {
-				logger.debug("Player entity {} tried to interact with busy entity {}", orderEntity, otherEntity);
-			} else {
-				interactMapper.create(orderEntity).entity = otherEntity;
-				return true;
-			}
+			interactMapper.create(orderEntity).entity = otherEntity;
+			return true;
 		} else {
 			logger.debug("Player entity {} tried to interact with non-interactable entity {}", orderEntity, otherEntity);
-		}
-		return false;
-	}
-
-	private boolean isInteractableEntityBeingInteractedWith(int interactableEntity) {
-		IntBag interactionEntities = world.getAspectSubscriptionManager().get(Aspect.one(Interact.class)).getEntities();
-		for (int i = 0; i < interactionEntities.size(); i++) {
-			int interactionEntity = interactionEntities.get(i);
-			if (interactMapper.has(interactionEntity) && interactMapper.get(interactionEntity).entity == interactableEntity) {
-				return true;
-			}
 		}
 		return false;
 	}

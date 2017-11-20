@@ -6,6 +6,7 @@ import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.Profiler;
+import com.vast.component.Collision;
 import com.vast.component.Interact;
 import com.vast.component.Path;
 import com.vast.component.Transform;
@@ -24,6 +25,7 @@ public class InteractSystem  extends IteratingSystem {
 	private ComponentMapper<Interact> interactMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Path> pathMapper;
+	private ComponentMapper<Collision> collisionMapper;
 
 	private Set<InteractionHandler> interactionHandlers;
 
@@ -63,8 +65,11 @@ public class InteractSystem  extends IteratingSystem {
 			Transform transform = transformMapper.get(entity);
 			Transform otherTransform = transformMapper.get(interact.entity);
 
+			// TODO: Not optimized
+			float interactDistance = collisionMapper.get(entity).radius + 0.3f + collisionMapper.get(interact.entity).radius;
+
 			reusableVector.set(otherTransform.position.x - transform.position.x, otherTransform.position.y - transform.position.y);
-			if (reusableVector.length() > 0.3f) {
+			if (reusableVector.length() > interactDistance) {
 				if ("approaching".equals(interact.phase)) {
 					pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);
 				} else {

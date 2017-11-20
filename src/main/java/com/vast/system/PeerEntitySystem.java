@@ -22,6 +22,7 @@ public class PeerEntitySystem extends ProfiledBaseSystem {
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Type> typeMapper;
+	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Health> healthMapper;
 	private ComponentMapper<AI> aiMapper;
 
@@ -102,6 +103,7 @@ public class PeerEntitySystem extends ProfiledBaseSystem {
 		playerMapper.get(playerEntity).name = peer.getName();
 		typeMapper.get(playerEntity).type = "player";
 		transformMapper.get(playerEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
+		collisionMapper.get(playerEntity).radius = 0.3f;
 		healthMapper.get(playerEntity).maxHealth = 3;
 		healthMapper.get(playerEntity).health = 3;
 		if (peer instanceof FakePeer) {

@@ -5,7 +5,7 @@ import com.artemis.annotations.PooledWeaver;
 
 @PooledWeaver
 public class Sync extends Component {
-	public transient int dirtyProperties;
+	public transient int dirtyProperties = 0;
 
 	public void markPropertyAsDirty(int property) {
 		dirtyProperties |= property;

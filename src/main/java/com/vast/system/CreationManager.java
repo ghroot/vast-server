@@ -91,7 +91,7 @@ public class CreationManager extends ProfiledBaseSystem {
 			int aiEntity = world.create(aiArchetype);
 			typeMapper.get(aiEntity).type = "ai";
 			transformMapper.get(aiEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
-			collisionMapper.get(aiEntity).radius = 0.1f;
+			collisionMapper.get(aiEntity).radius = 0.3f;
 			healthMapper.get(aiEntity).maxHealth = 3;
 			healthMapper.get(aiEntity).health = 3;
 		}
