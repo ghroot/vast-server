@@ -22,13 +22,17 @@ public class AttackInteractionHandler extends AbstractInteractionHandler {
 	}
 
 	@Override
+	public void start(int attackEntity, int healthEntity) {
+	}
+
+	@Override
 	public boolean process(int attackEntity, int healthEntity) {
 		Attack attack = attackMapper.get(attackEntity);
 		float time = world.getSystem(TimeManager.class).getTime();
 		if (time - attack.lastAttackTime >= attack.cooldown) {
 			Health health = healthMapper.get(healthEntity);
 			health.takeDamage(1);
-			eventMapper.create(attackEntity).event = "attacked";
+			eventMapper.create(attackEntity).name = "attacked";
 			logger.debug("Entity {} is attacking entity {}, health left: {}", attackEntity, healthEntity, health.health);
 			if (health.isDead()) {
 				logger.debug("Entity {} was killed by entity {}", healthEntity, attackEntity);
@@ -40,5 +44,9 @@ public class AttackInteractionHandler extends AbstractInteractionHandler {
 			attack.lastAttackTime = time;
 		}
 		return false;
+	}
+
+	@Override
+	public void stop(int attackEntity, int healthEntity) {
 	}
 }

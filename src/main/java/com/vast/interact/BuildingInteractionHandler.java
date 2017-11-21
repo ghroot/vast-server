@@ -4,6 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
 import com.vast.component.Building;
+import com.vast.component.Event;
 import com.vast.component.Player;
 import com.vast.component.Sync;
 import org.slf4j.Logger;
@@ -14,9 +15,15 @@ public class BuildingInteractionHandler extends AbstractInteractionHandler {
 
 	private ComponentMapper<Building> buildingMapper;
 	private ComponentMapper<Sync> syncMapper;
+	private ComponentMapper<Event> eventMapper;
 
 	public BuildingInteractionHandler() {
 		super(Aspect.all(Player.class), Aspect.all(Building.class));
+	}
+
+	@Override
+	public void start(int playerEntity, int buildingEntity) {
+		eventMapper.create(playerEntity).name = "startedBuilding";
 	}
 
 	@Override
@@ -32,5 +39,10 @@ public class BuildingInteractionHandler extends AbstractInteractionHandler {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public void stop(int playerEntity, int buildingEntity) {
+		eventMapper.create(playerEntity).name = "stoppedBuilding";
 	}
 }

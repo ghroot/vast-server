@@ -20,7 +20,7 @@ public class MessageCodes {
 	// Server -> Client
 	public static short EVENT = 3;
 	public static byte EVENT_ENTITY_ID = 0;
-	public static byte EVENT_EVENT = 1;
+	public static byte EVENT_NAME = 1;
 
 	// Client -> Server
 	public static short MOVE = 50;

@@ -7,5 +7,5 @@ import com.artemis.annotations.Transient;
 @Transient
 @PooledWeaver
 public class Event extends Component {
-	public String event = null;
+	public String name = null;
 }
