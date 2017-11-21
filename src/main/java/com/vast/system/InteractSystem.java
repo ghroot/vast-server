@@ -22,6 +22,8 @@ import java.util.Set;
 public class InteractSystem  extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(InteractSystem.class);
 
+	private final float INTERACTION_SPACING = 0.3f;
+
 	private ComponentMapper<Interact> interactMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Path> pathMapper;
@@ -65,9 +67,7 @@ public class InteractSystem  extends IteratingSystem {
 			Transform transform = transformMapper.get(entity);
 			Transform otherTransform = transformMapper.get(interact.entity);
 
-			// TODO: Not optimized
-			float interactDistance = collisionMapper.get(entity).radius + 0.3f + collisionMapper.get(interact.entity).radius;
-
+			float interactDistance = collisionMapper.get(entity).radius + INTERACTION_SPACING + collisionMapper.get(interact.entity).radius;
 			reusableVector.set(otherTransform.position.x - transform.position.x, otherTransform.position.y - transform.position.y);
 			if (reusableVector.length() > interactDistance) {
 				if ("approaching".equals(interact.phase)) {
