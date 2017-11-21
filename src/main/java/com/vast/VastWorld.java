@@ -83,7 +83,7 @@ public class VastWorld implements Runnable {
 			new DeathSystem(entitiesByPeer, worldConfiguration),
 			new EventSystem(peers),
 			new DeleteSystem(peers),
-			new SyncSystem(propertyHandlers, peers)
+			new SyncSystem(propertyHandlers, peers, metrics)
 		);
 		if (showMonitor) {
 			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, spatialHashes));

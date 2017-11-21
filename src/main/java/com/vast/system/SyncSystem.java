@@ -6,6 +6,7 @@ import com.artemis.annotations.Profile;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
+import com.vast.Metrics;
 import com.vast.Profiler;
 import com.vast.VastPeer;
 import com.vast.component.Active;
@@ -28,12 +29,14 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 
 	private Set<PropertyHandler> propertyHandlers;
 	private Map<String, VastPeer> peers;
+	private Metrics metrics;
 	private EventMessage reusableEventMessage;
 
-	public SyncSystem(Set<PropertyHandler> propertyHandlers, Map<String, VastPeer> peers) {
+	public SyncSystem(Set<PropertyHandler> propertyHandlers, Map<String, VastPeer> peers, Metrics metrics) {
 		super(Aspect.all(Sync.class));
 		this.propertyHandlers = propertyHandlers;
 		this.peers = peers;
+		this.metrics = metrics;
 
 		reusableEventMessage = new EventMessage(MessageCodes.UPDATE_PROPERTIES);
 	}
@@ -64,6 +67,7 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 		for (PropertyHandler syncHandler : propertyHandlers) {
 			if (sync.isPropertyDirty(syncHandler.getProperty())) {
 				syncHandler.decorateDataObject(syncEntity, reusableEventMessage.getDataObject());
+				metrics.incrementSyncedProperty(syncHandler.getProperty());
 			}
 		}
 

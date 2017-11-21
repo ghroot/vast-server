@@ -17,6 +17,7 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.vast.Metrics;
 import com.vast.Profiler;
+import com.vast.Properties;
 import com.vast.VastPeer;
 import com.vast.WorldConfiguration;
 import com.vast.component.*;
@@ -24,10 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Profile(enabled = true, using = Profiler.class)
@@ -52,7 +50,10 @@ public class TerminalSystem extends IntervalSystem {
 	private boolean showPlayerNames = false;
 	private boolean showIds = false;
 	private boolean showSystemTimes = false;
+	private boolean showSyncedProperties = false;
+	private Map<Integer, String> propertyNames = new HashMap<Integer, String>();
 	private int focusedEntity = -1;
+	private int processDuration = 0;
 
 	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes) {
 		super(Aspect.all(), 0.1f);
@@ -60,6 +61,14 @@ public class TerminalSystem extends IntervalSystem {
 		this.metrics = metrics;
 		this.worldConfiguration = worldConfiguration;
 		this.spatialHashes = spatialHashes;
+
+		propertyNames.put(Properties.POSITION, "Position");
+		propertyNames.put(Properties.ACTIVE, "Active");
+		propertyNames.put(Properties.DURABILITY, "Durability");
+		propertyNames.put(Properties.HEALTH, "Health");
+		propertyNames.put(Properties.MAX_HEALTH, "MaxHealth");
+		propertyNames.put(Properties.PROGRESS, "Progress");
+		propertyNames.put(Properties.INTERACTABLE, "Interactable");
 	}
 
 	@Override
@@ -83,6 +92,7 @@ public class TerminalSystem extends IntervalSystem {
 
 	@Override
 	protected void processSystem() {
+		long startTime = System.currentTimeMillis();
 		try {
 			handleInput();
 
@@ -176,16 +186,18 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.putString(screen.getTerminalSize().getColumns() - fpsString.length(), 0, fpsString);
 			String frameTimeString = "Frame time: " + metrics.getTimePerFrameMs() + " ms";
 			textGraphics.putString(screen.getTerminalSize().getColumns() - frameTimeString.length(), 1, frameTimeString);
+			String monitorProcessDurationString = "Monitor overhead: " + (int) (processDuration / 5.8f) + " ms";
+			textGraphics.putString(screen.getTerminalSize().getColumns() - monitorProcessDurationString.length(), 2, monitorProcessDurationString);
 			String peersString = "Peers: " + peers.size();
-			textGraphics.putString(screen.getTerminalSize().getColumns() - peersString.length(), 2, peersString);
+			textGraphics.putString(screen.getTerminalSize().getColumns() - peersString.length(), 3, peersString);
 			String roundTripString = "Roundtrip: " + (int) metrics.getMeanOfRoundTripTime();
-			textGraphics.putString(screen.getTerminalSize().getColumns() - roundTripString.length(), 3, roundTripString);
+			textGraphics.putString(screen.getTerminalSize().getColumns() - roundTripString.length(), 4, roundTripString);
 			String sendMessagesString = "Sent messages: " + metrics.getNumberOfSentMessages();
-			textGraphics.putString(screen.getTerminalSize().getColumns() - sendMessagesString.length(), 4, sendMessagesString);
+			textGraphics.putString(screen.getTerminalSize().getColumns() - sendMessagesString.length(), 5, sendMessagesString);
 			String timeSinceSave = "Time since save: " + (metrics.getTimeSinceLastSerialization() / 1000) + " s";
-			textGraphics.putString(screen.getTerminalSize().getColumns() - timeSinceSave.length(), 5, timeSinceSave);
+			textGraphics.putString(screen.getTerminalSize().getColumns() - timeSinceSave.length(), 6, timeSinceSave);
 			String collisionsString = "Collision checks: " + metrics.getNumberOfCollisionChecks();
-			textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 6, collisionsString);
+			textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 7, collisionsString);
 
 			if (showSystemTimes && metrics.getSystemProcessingTimes().size() > 0) {
 				int longestLength = 0;
@@ -201,13 +213,29 @@ public class TerminalSystem extends IntervalSystem {
 								(e1, e2) -> e1,
 								LinkedHashMap::new
 						));
-				int row = 8;
+				int row = 9;
 				for (String systemName : sortedSystemProcessingTimes.keySet()) {
 					int processingDuration = sortedSystemProcessingTimes.get(systemName);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestLength - 1, row, systemName);
 					String processDurationString = Integer.toString(processingDuration);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 + (3 - processDurationString.length()), row, processDurationString);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 2, row, "ms");
+					row++;
+				}
+			}
+
+			if (showSyncedProperties) {
+				int longestLength = 0;
+				for (int property : metrics.getSyncedProperties().keySet()) {
+					String propertyName = propertyNames.get(property);
+					longestLength = Math.max(propertyName.length(), longestLength);
+				}
+				int row = 10;
+				for (int property : metrics.getSyncedProperties().keySet()) {
+					int count = metrics.getSyncedProperties().get(property);
+					String propertyName = propertyNames.get(property);
+					textGraphics.putString(0, row, propertyName);
+					textGraphics.putString(longestLength + 1, row, "" + count);
 					row++;
 				}
 			}
@@ -222,6 +250,8 @@ public class TerminalSystem extends IntervalSystem {
 		} catch (Exception exception) {
 			logger.error("Error displaying metrics", exception);
 		}
+		long endTime = System.currentTimeMillis();
+		processDuration = (int) (endTime - startTime);
 	}
 
 	private void handleInput() {
@@ -292,6 +322,8 @@ public class TerminalSystem extends IntervalSystem {
 						}
 					} else if (keyStroke.getCharacter().toString().equals("s")) {
 						showSystemTimes = !showSystemTimes;
+					} else if (keyStroke.getCharacter().toString().equals("y")) {
+						showSyncedProperties = !showSyncedProperties;
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
 					cameraPosition.add(new Point2f(0.0f, ((keyStroke.isShiftDown() ? 5 : 1) / scale)));

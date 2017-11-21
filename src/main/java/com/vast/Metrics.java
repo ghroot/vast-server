@@ -13,6 +13,7 @@ public class Metrics {
 	private double meanOfRoundTripTimeDeviation;
 	private int numberOfSentMessages;
 	private long lastSerializeTime;
+	private Map<Integer, Integer> syncedProperties = new HashMap<Integer, Integer>();
 
 	public int getTimePerFrameMs() {
 		return timePerFrameMs;
@@ -74,5 +75,17 @@ public class Metrics {
 
 	public void setLastSerializeTime(long lastSerializeTime) {
 		this.lastSerializeTime = lastSerializeTime;
+	}
+
+	public void incrementSyncedProperty(int property) {
+		if (syncedProperties.containsKey(property)) {
+			syncedProperties.put(property, syncedProperties.get(property) + 1);
+		} else {
+			syncedProperties.put(property, 1);
+		}
+	}
+
+	public Map<Integer, Integer> getSyncedProperties() {
+		return syncedProperties;
 	}
 }
