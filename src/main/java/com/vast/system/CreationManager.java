@@ -92,8 +92,8 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 			typeMapper.get(aiEntity).type = "ai";
 			transformMapper.get(aiEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
 			collisionMapper.get(aiEntity).radius = 0.3f;
-			healthMapper.get(aiEntity).maxHealth = 3;
-			healthMapper.get(aiEntity).health = 3;
+			healthMapper.get(aiEntity).maxHealth = 2;
+			healthMapper.get(aiEntity).health = 2;
 		}
 	}
 }

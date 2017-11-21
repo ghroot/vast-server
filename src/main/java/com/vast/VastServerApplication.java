@@ -1,16 +1,11 @@
 package com.vast;
 
 import com.nhnent.haste.framework.ClientPeer;
-import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.framework.ServerApplication;
-import com.nhnent.haste.protocol.messages.*;
-import com.nhnent.haste.security.BigInteger;
-import com.nhnent.haste.security.SHA256;
-import com.nhnent.haste.transport.ApplicationPeer;
+import com.nhnent.haste.protocol.messages.InitialRequest;
+import com.nhnent.haste.protocol.messages.RequestMessage;
 import com.nhnent.haste.transport.DisconnectReason;
 import com.nhnent.haste.transport.NetworkPeer;
-import com.nhnent.haste.transport.QoS;
-import com.nhnent.haste.transport.state.ConnectionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

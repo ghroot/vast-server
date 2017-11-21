@@ -14,7 +14,7 @@ public class AttackInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Attack> attackMapper;
 	private ComponentMapper<Health> healthMapper;
 	private ComponentMapper<Event> eventMapper;
-	private ComponentMapper<Delete> deleteMapper;
+	private ComponentMapper<Death> deathMapper;
 	private ComponentMapper<Sync> syncMapper;
 
 	public AttackInteractionHandler() {
@@ -36,7 +36,7 @@ public class AttackInteractionHandler extends AbstractInteractionHandler {
 			logger.debug("Entity {} is attacking entity {}, health left: {}", attackEntity, healthEntity, health.health);
 			if (health.isDead()) {
 				logger.debug("Entity {} was killed by entity {}", healthEntity, attackEntity);
-				deleteMapper.create(healthEntity).reason = "killed";
+				deathMapper.create(healthEntity);
 				return true;
 			} else {
 				syncMapper.create(healthEntity).markPropertyAsDirty(Properties.HEALTH);

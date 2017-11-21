@@ -51,6 +51,9 @@ public class CreateSystem extends AbstractNearbyEntityIteratingSystem {
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, createEntity);
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(createEntity).type);
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, reason);
+					if (playerMapper.has(createEntity)) {
+						reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(createEntity).name));
+					}
 					for (PropertyHandler propertyHandler : propertyHandlers) {
 						propertyHandler.decorateDataObject(createEntity, reusableEventMessage.getDataObject());
 					}

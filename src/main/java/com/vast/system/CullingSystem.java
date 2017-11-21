@@ -95,8 +95,8 @@ public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
 	private void notifyAboutNewEntity(VastPeer peer, int newEntity) {
 		logger.debug("Notifying peer {} about new entity {} (culling)", peer.getName(), newEntity);
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, newEntity);
-		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, "culling");
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(newEntity).type);
+		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, "culling");
 		if (playerMapper.has(newEntity)) {
 			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(newEntity).name));
 		}

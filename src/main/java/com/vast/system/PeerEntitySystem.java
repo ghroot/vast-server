@@ -104,8 +104,8 @@ public class PeerEntitySystem extends AbstractProfiledBaseSystem {
 		typeMapper.get(playerEntity).type = "player";
 		transformMapper.get(playerEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
 		collisionMapper.get(playerEntity).radius = 0.3f;
-		healthMapper.get(playerEntity).maxHealth = 3;
-		healthMapper.get(playerEntity).health = 3;
+		healthMapper.get(playerEntity).maxHealth = 5;
+		healthMapper.get(playerEntity).health = 5;
 		if (peer instanceof FakePeer) {
 			aiMapper.create(playerEntity);
 		}

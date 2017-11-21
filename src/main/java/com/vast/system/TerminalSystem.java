@@ -94,6 +94,10 @@ public class TerminalSystem extends IntervalSystem {
 			IntBag activePlayerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class, Active.class)).getEntities();
 			IntBag scanEntities = world.getAspectSubscriptionManager().get(Aspect.all(Scan.class)).getEntities();
 
+			if (focusedEntity >= 0 && (world.getEntity(focusedEntity) == null || !transformMapper.has(focusedEntity))) {
+				focusedEntity = -1;
+			}
+
 			int numberOfEntitiesOnScreen = 0;
 			for (int i = 0; i < entities.size(); i++) {
 				int entity = entities.get(i);
