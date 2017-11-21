@@ -3,7 +3,7 @@ package com.vast.system;
 import com.artemis.BaseSystem;
 import com.vast.Metrics;
 
-public class MetricsManager extends ProfiledBaseSystem {
+public class MetricsManager extends AbstractProfiledBaseSystem {
 	private Metrics metrics;
 
 	private long lastTime;

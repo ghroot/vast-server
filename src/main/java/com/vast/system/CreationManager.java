@@ -8,7 +8,7 @@ import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CreationManager extends ProfiledBaseSystem {
+public class CreationManager extends AbstractProfiledBaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CreationManager.class);
 
 	private ComponentMapper<Transform> transformMapper;

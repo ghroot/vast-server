@@ -5,7 +5,7 @@ import com.vast.VastServerApplication;
 
 import java.util.List;
 
-public class IncomingRequestTransferSystem extends ProfiledBaseSystem {
+public class IncomingRequestTransferSystem extends AbstractProfiledBaseSystem {
 	private VastServerApplication serverApplication;
 	private List<IncomingRequest> incomingRequests;
 

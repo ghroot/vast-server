@@ -5,7 +5,6 @@ import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
 import com.vast.Profiler;
@@ -82,7 +81,7 @@ public class CullingSystem extends IteratingSystem {
 		logger.debug("Notifying peer {} about removed entity {} (culling)", peer.getName(), deletedEntity);
 		reusableDestroyedEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, deletedEntity);
 		reusableDestroyedEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_REASON, "culling");
-		peer.send(reusableDestroyedEventMessage, SendOptions.ReliableSend);
+		peer.send(reusableDestroyedEventMessage);
 	}
 
 	private void notifyAboutNewEntities(VastPeer peer, Set<Integer> nearbyEntities, Set<Integer> knownEntities) {
@@ -105,6 +104,6 @@ public class CullingSystem extends IteratingSystem {
 		for (PropertyHandler propertyHandler : propertyHandlers) {
 			propertyHandler.decorateDataObject(newEntity, reusableCreatedEventMessage.getDataObject());
 		}
-		peer.send(reusableCreatedEventMessage, SendOptions.ReliableSend);
+		peer.send(reusableCreatedEventMessage);
 	}
 }

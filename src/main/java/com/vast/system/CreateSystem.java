@@ -5,7 +5,6 @@ import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
@@ -59,7 +58,7 @@ public class CreateSystem extends IteratingSystem {
 					for (PropertyHandler propertyHandler : propertyHandlers) {
 						propertyHandler.decorateDataObject(createEntity, reusableEventMessage.getDataObject());
 					}
-					peer.send(reusableEventMessage, SendOptions.ReliableSend);
+					peer.send(reusableEventMessage);
 					knownEntities.add(createEntity);
 				}
 			}

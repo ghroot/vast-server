@@ -4,7 +4,6 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
 import com.vast.VastPeer;
@@ -66,6 +65,6 @@ public class DeleteSystem extends IteratingSystem {
 		logger.debug("Notifying peer {} about removed entity {} ({})", peer.getName(), deleteEntity, reason);
 		reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, deleteEntity);
 		reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_REASON, reason);
-		peer.send(reusableEventMessage, SendOptions.ReliableSend);
+		peer.send(reusableEventMessage);
 	}
 }

@@ -17,6 +17,11 @@ public class MessageCodes {
 	public static short UPDATE_PROPERTIES = 2;
 	public static byte UPDATE_PROPERTIES_ENTITY_ID = 0;
 
+	// Server -> Client
+	public static short EVENT = 3;
+	public static byte EVENT_ENTITY_ID = 0;
+	public static byte EVENT_EVENT = 1;
+
 	// Client -> Server
 	public static short MOVE = 50;
 	public static byte MOVE_POSITION = 0;

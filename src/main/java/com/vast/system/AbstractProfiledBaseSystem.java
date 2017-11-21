@@ -3,7 +3,7 @@ package com.vast.system;
 import com.artemis.BaseSystem;
 import com.vast.Profiler;
 
-public abstract class ProfiledBaseSystem extends BaseSystem {
+public abstract class AbstractProfiledBaseSystem extends BaseSystem {
 	private Profiler profiler;
 
 	@Override

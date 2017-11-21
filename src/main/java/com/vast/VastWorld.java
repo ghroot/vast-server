@@ -80,6 +80,7 @@ public class VastWorld implements Runnable {
 			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(
 				new PlayerWithPickupCollisionHandler()
 			)), metrics),
+			new EventSystem(peers),
 			new DeleteSystem(peers),
 			new SyncSystem(propertyHandlers, peers)
 		);

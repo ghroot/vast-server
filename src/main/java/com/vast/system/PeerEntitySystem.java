@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class PeerEntitySystem extends ProfiledBaseSystem {
+public class PeerEntitySystem extends AbstractProfiledBaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(PeerEntitySystem.class);
 
 	private ComponentMapper<Player> playerMapper;

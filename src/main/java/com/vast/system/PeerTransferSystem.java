@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class PeerTransferSystem extends ProfiledBaseSystem {
+public class PeerTransferSystem extends AbstractProfiledBaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(PeerTransferSystem.class);
 
 	private VastServerApplication serverApplication;

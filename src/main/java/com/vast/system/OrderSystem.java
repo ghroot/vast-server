@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class OrderSystem extends ProfiledBaseSystem {
+public class OrderSystem extends AbstractProfiledBaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(OrderSystem.class);
 
 	private ComponentMapper<Order> orderMapper;

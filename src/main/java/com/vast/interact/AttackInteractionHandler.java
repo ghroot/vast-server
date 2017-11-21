@@ -3,10 +3,7 @@ package com.vast.interact;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
-import com.vast.component.Attack;
-import com.vast.component.Delete;
-import com.vast.component.Health;
-import com.vast.component.Sync;
+import com.vast.component.*;
 import com.vast.system.TimeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +13,7 @@ public class AttackInteractionHandler extends AbstractInteractionHandler {
 
 	private ComponentMapper<Attack> attackMapper;
 	private ComponentMapper<Health> healthMapper;
+	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Sync> syncMapper;
 
@@ -30,6 +28,7 @@ public class AttackInteractionHandler extends AbstractInteractionHandler {
 		if (time - attack.lastAttackTime >= attack.cooldown) {
 			Health health = healthMapper.get(healthEntity);
 			health.takeDamage(1);
+			eventMapper.create(attackEntity).event = "attacked";
 			logger.debug("Entity {} is attacking entity {}, health left: {}", attackEntity, healthEntity, health.health);
 			if (health.isDead()) {
 				logger.debug("Entity {} was killed by entity {}", healthEntity, attackEntity);

@@ -3,6 +3,7 @@ package com.vast;
 import com.nhnent.haste.framework.ClientPeer;
 import com.nhnent.haste.framework.SendOptions;
 import com.nhnent.haste.protocol.messages.InitialRequest;
+import com.nhnent.haste.protocol.messages.Message;
 import com.nhnent.haste.protocol.messages.RequestMessage;
 import com.nhnent.haste.transport.DisconnectReason;
 import com.nhnent.haste.transport.NetworkPeer;
@@ -45,6 +46,10 @@ public class VastPeer extends ClientPeer {
 	@Override
 	protected void onDisconnect(DisconnectReason disconnectReason, String detail) {
 		serverApplication.onPeerDisconnected(this, disconnectReason, detail);
+	}
+
+	public boolean send(Message message) {
+		return send(message, SendOptions.ReliableSend);
 	}
 
 	@Override
