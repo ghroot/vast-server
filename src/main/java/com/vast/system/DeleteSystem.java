@@ -6,7 +6,10 @@ import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
 import com.vast.VastPeer;
-import com.vast.component.*;
+import com.vast.component.Active;
+import com.vast.component.Delete;
+import com.vast.component.Known;
+import com.vast.component.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +20,7 @@ public class DeleteSystem extends AbstractNearbyEntityIteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(DeleteSystem.class);
 
 	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Known> knownMapper;
 
@@ -25,7 +29,7 @@ public class DeleteSystem extends AbstractNearbyEntityIteratingSystem {
 	private EventMessage reusableEventMessage;
 
 	public DeleteSystem(Map<String, VastPeer> peers) {
-		super(Aspect.one(Delete.class), Aspect.all(Player.class, Active.class, Known.class));
+		super(Aspect.one(Delete.class));
 		this.peers = peers;
 
 		reusableEventMessage = new EventMessage(MessageCodes.ENTITY_DESTROYED);
@@ -43,12 +47,14 @@ public class DeleteSystem extends AbstractNearbyEntityIteratingSystem {
 	protected void process(int deleteEntity, Set<Integer> nearbyEntities) {
 		String reason = deleteMapper.get(deleteEntity).reason;
 		logger.debug("Deleting entity {} ({})", deleteEntity, reason);
-		for (int nearbyActivePlayerEntity : nearbyEntities) {
-			Set<Integer> knownEntities = knownMapper.get(nearbyActivePlayerEntity).knownEntities;
-			if (knownEntities.contains(deleteEntity)) {
-				VastPeer peer = peers.get(playerMapper.get(nearbyActivePlayerEntity).name);
-				notifyAboutRemovedEntity(peer, deleteEntity, reason);
-				knownEntities.remove(deleteEntity);
+		for (int nearbyEntity : nearbyEntities) {
+			if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity) && knownMapper.has(nearbyEntity)) {
+				Set<Integer> knownEntities = knownMapper.get(nearbyEntity).knownEntities;
+				if (knownEntities.contains(deleteEntity)) {
+					VastPeer peer = peers.get(playerMapper.get(nearbyEntity).name);
+					notifyAboutRemovedEntity(peer, deleteEntity, reason);
+					knownEntities.remove(deleteEntity);
+				}
 			}
 		}
 		world.delete(deleteEntity);

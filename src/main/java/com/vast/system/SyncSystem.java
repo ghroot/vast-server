@@ -24,13 +24,14 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
 
 	private Set<PropertyHandler> propertyHandlers;
 	private Map<String, VastPeer> peers;
 	private EventMessage reusableEventMessage;
 
 	public SyncSystem(Set<PropertyHandler> propertyHandlers, Map<String, VastPeer> peers) {
-		super(Aspect.all(Sync.class), Aspect.all(Player.class, Active.class));
+		super(Aspect.all(Sync.class));
 		this.propertyHandlers = propertyHandlers;
 		this.peers = peers;
 
@@ -66,9 +67,11 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 			}
 		}
 
-		for (int nearbyActivePlayerEntity : nearbyEntities) {
-			VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyActivePlayerEntity).name);
-			nearbyPeer.send(reusableEventMessage);
+		for (int nearbyEntity : nearbyEntities) {
+			if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
+				VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyEntity).name);
+				nearbyPeer.send(reusableEventMessage);
+			}
 		}
 
 		syncMapper.remove(syncEntity);

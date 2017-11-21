@@ -22,36 +22,24 @@ public abstract class AbstractNearbyEntityIteratingSystem extends IteratingSyste
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
 
-	private Aspect.Builder nearbyBuilder;
-	private Aspect nearbyAspect;
 	private Set<Integer> reusableNearbyEntities;
 
-	public AbstractNearbyEntityIteratingSystem(Aspect.Builder builder, Aspect.Builder nearbyBuilder) {
+	public AbstractNearbyEntityIteratingSystem(Aspect.Builder builder) {
 		super(builder);
-		this.nearbyBuilder = nearbyBuilder;
 
 		reusableNearbyEntities = new HashSet<Integer>();
-	}
-
-	@Override
-	protected void initialize() {
-		nearbyAspect = nearbyBuilder.build(world);
 	}
 
 	@Override
 	protected void process(int entity) {
 		reusableNearbyEntities.clear();
 		if (scanMapper.has(entity)) {
-			for (int nearbyEntity : scanMapper.get(entity).nearbyEntities) {
-				if (nearbyAspect.isInterested(world.getEntity(nearbyEntity))) {
-					reusableNearbyEntities.add(nearbyEntity);
-				}
-			}
+			reusableNearbyEntities.addAll(scanMapper.get(entity).nearbyEntities);
 		} else {
-			IntBag nearbyEntities = world.getAspectSubscriptionManager().get(nearbyBuilder).getEntities();
+			IntBag nearbyEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class, Active.class, Scan.class)).getEntities();
 			for (int i = 0; i < nearbyEntities.size(); i++) {
 				int nearbyEntity = nearbyEntities.get(i);
-				if (scanMapper.has(nearbyEntity)) {
+				if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity) && scanMapper.has(nearbyEntity)) {
 					Scan scan = scanMapper.get(nearbyEntity);
 					if (scan.nearbyEntities.contains(entity)) {
 						reusableNearbyEntities.add(nearbyEntity);

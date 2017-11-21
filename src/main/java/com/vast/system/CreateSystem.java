@@ -22,6 +22,7 @@ public class CreateSystem extends AbstractNearbyEntityIteratingSystem {
 
 	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Type> typeMapper;
 
@@ -31,7 +32,7 @@ public class CreateSystem extends AbstractNearbyEntityIteratingSystem {
 	private EventMessage reusableEventMessage;
 
 	public CreateSystem(Map<String, VastPeer> peers, Set<PropertyHandler> propertyHandlers) {
-		super(Aspect.all(Create.class, Type.class), Aspect.all(Player.class, Active.class, Known.class));
+		super(Aspect.all(Create.class, Type.class));
 		this.peers = peers;
 		this.propertyHandlers = propertyHandlers;
 
@@ -40,20 +41,22 @@ public class CreateSystem extends AbstractNearbyEntityIteratingSystem {
 
 	@Override
 	protected void process(int createEntity, Set<Integer> nearbyEntities) {
-		for (int nearbyActivePlayerEntity : nearbyEntities) {
-			Set<Integer> knownEntities = knownMapper.get(nearbyActivePlayerEntity).knownEntities;
-			if (!knownEntities.contains(createEntity)) {
-				VastPeer peer = peers.get(playerMapper.get(nearbyActivePlayerEntity).name);
-				String reason = createMapper.get(createEntity).reason;
-				logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);
-				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, createEntity);
-				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(createEntity).type);
-				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, reason);
-				for (PropertyHandler propertyHandler : propertyHandlers) {
-					propertyHandler.decorateDataObject(createEntity, reusableEventMessage.getDataObject());
+		for (int nearbyEntity : nearbyEntities) {
+			if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity) && knownMapper.has(nearbyEntity)) {
+				Set<Integer> knownEntities = knownMapper.get(nearbyEntity).knownEntities;
+				if (!knownEntities.contains(createEntity)) {
+					VastPeer peer = peers.get(playerMapper.get(nearbyEntity).name);
+					String reason = createMapper.get(createEntity).reason;
+					logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, createEntity);
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(createEntity).type);
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, reason);
+					for (PropertyHandler propertyHandler : propertyHandlers) {
+						propertyHandler.decorateDataObject(createEntity, reusableEventMessage.getDataObject());
+					}
+					peer.send(reusableEventMessage);
+					knownEntities.add(createEntity);
 				}
-				peer.send(reusableEventMessage);
-				knownEntities.add(createEntity);
 			}
 		}
 		createMapper.remove(createEntity);

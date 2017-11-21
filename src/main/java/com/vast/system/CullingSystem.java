@@ -8,7 +8,10 @@ import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
 import com.vast.Profiler;
 import com.vast.VastPeer;
-import com.vast.component.*;
+import com.vast.component.Active;
+import com.vast.component.Known;
+import com.vast.component.Player;
+import com.vast.component.Type;
 import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +37,7 @@ public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
 	private EventMessage reusableCreatedEventMessage;
 
 	public CullingSystem(Map<String, VastPeer> peers, Set<PropertyHandler> propertyHandlers) {
-		super(Aspect.all(Player.class, Active.class, Known.class), Aspect.all(Transform.class, Type.class));
+		super(Aspect.all(Player.class, Active.class, Known.class));
 		this.peers = peers;
 		this.propertyHandlers = propertyHandlers;
 

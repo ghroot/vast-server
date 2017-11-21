@@ -23,12 +23,13 @@ public class EventSystem extends AbstractNearbyEntityIteratingSystem {
 
 	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
 
 	private Map<String, VastPeer> peers;
 	private EventMessage reusableEventMessage;
 
 	public EventSystem(Map<String, VastPeer> peers) {
-		super(Aspect.all(Event.class), Aspect.all(Player.class, Active.class));
+		super(Aspect.all(Event.class));
 		this.peers = peers;
 
 		reusableEventMessage = new EventMessage(MessageCodes.EVENT);
@@ -50,9 +51,11 @@ public class EventSystem extends AbstractNearbyEntityIteratingSystem {
 		reusableEventMessage.getDataObject().set(MessageCodes.EVENT_ENTITY_ID, eventEntity);
 		reusableEventMessage.getDataObject().set(MessageCodes.EVENT_EVENT, event.event);
 
-		for (int nearbyActivePlayerEntity : nearbyEntities) {
-			VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyActivePlayerEntity).name);
-			nearbyPeer.send(reusableEventMessage);
+		for (int nearbyEntity : nearbyEntities) {
+			if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
+				VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyEntity).name);
+				nearbyPeer.send(reusableEventMessage);
+			}
 		}
 
 		eventMapper.remove(eventEntity);
