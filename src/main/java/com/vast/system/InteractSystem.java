@@ -55,10 +55,9 @@ public class InteractSystem  extends IteratingSystem {
 	@Override
 	public void removed(int entity) {
 		Interact interact = interactMapper.get(entity);
-		if (interact.entity >= 0 && "interacting".equals(interact.phase)) {
-			InteractionHandler interactionHandler = getInteractionHandler(entity, interact.entity);
-			if (interactionHandler != null) {
-				interactionHandler.stop(entity, interact.entity);
+		if ("interacting".equals(interact.phase)) {
+			if (interact.handler != null) {
+				interact.handler.stop(entity, interact.entity);
 			}
 		}
 	}
@@ -81,9 +80,8 @@ public class InteractSystem  extends IteratingSystem {
 					pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);
 				} else {
 					if ("interacting".equals(interact.phase)) {
-						InteractionHandler interactionHandler = getInteractionHandler(entity, interact.entity);
-						if (interactionHandler != null) {
-							interactionHandler.stop(entity, interact.entity);
+						if (interact.handler != null) {
+							interact.handler.stop(entity, interact.entity);
 						}
 					}
 					logger.debug("Entity {} started approaching entity {}", entity, interact.entity);
@@ -92,33 +90,28 @@ public class InteractSystem  extends IteratingSystem {
 				}
 			} else {
 				if ("interacting".equals(interact.phase)) {
-					InteractionHandler interactionHandler = getInteractionHandler(entity, interact.entity);
-					if (interactionHandler != null) {
-						if (interactionHandler.process(entity, interact.entity)) {
+					if (interact.handler != null) {
+						if (interact.handler.process(entity, interact.entity)) {
 							logger.debug("Entity {} completed interaction with entity {}", entity, interact.entity);
 							interactMapper.remove(entity);
 						}
 					}
 				} else {
 					pathMapper.remove(entity);
-					InteractionHandler interactionHandler = getInteractionHandler(entity, interact.entity);
-					if (interactionHandler != null) {
-						interactionHandler.start(entity, interact.entity);
+					for (InteractionHandler interactionHandler : interactionHandlers) {
+						if (interactionHandler.getAspect1().isInterested(world.getEntity(entity)) &&
+								interactionHandler.getAspect2().isInterested(world.getEntity(interact.entity))) {
+							interact.handler = interactionHandler;
+							break;
+						}
+					}
+					if (interact.handler != null) {
+						interact.handler.start(entity, interact.entity);
 					}
 					logger.debug("Entity {} started interacting with entity {}", entity, interact.entity);
 					interact.phase = "interacting";
 				}
 			}
 		}
-	}
-
-	private InteractionHandler getInteractionHandler(int entity, int otherEntity) {
-		for (InteractionHandler interactionHandler : interactionHandlers) {
-			if (interactionHandler.getAspect1().isInterested(world.getEntity(entity)) &&
-					interactionHandler.getAspect2().isInterested(world.getEntity(otherEntity))) {
-				return interactionHandler;
-			}
-		}
-		return null;
 	}
 }
