@@ -81,6 +81,7 @@ public class VastWorld implements Runnable {
 				new PlayerWithPickupCollisionHandler()
 			)), metrics),
 			new DeathSystem(entitiesByPeer, worldConfiguration),
+			new LifetimeSystem(),
 			new EventSystem(peers),
 			new DeleteSystem(peers),
 			new SyncSystem(propertyHandlers, peers, metrics)
