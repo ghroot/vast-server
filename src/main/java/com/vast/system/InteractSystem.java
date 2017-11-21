@@ -54,16 +54,13 @@ public class InteractSystem  extends IteratingSystem {
 
 	@Override
 	public void removed(int entity) {
-		// TODO: Does not work since component is null
-//		if (interactMapper.has(entity)) {
-//			Interact interact = interactMapper.get(entity);
-//			if ("interacting".equals(interact.phase)) {
-//				InteractionHandler interactionHandler = getInteractionHandler(entity, interact.entity);
-//				if (interactionHandler != null) {
-//					interactionHandler.stop(entity, interact.entity);
-//				}
-//			}
-//		}
+		Interact interact = interactMapper.get(entity);
+		if (interact.entity >= 0 && "interacting".equals(interact.phase)) {
+			InteractionHandler interactionHandler = getInteractionHandler(entity, interact.entity);
+			if (interactionHandler != null) {
+				interactionHandler.stop(entity, interact.entity);
+			}
+		}
 	}
 
 	@Override
@@ -99,7 +96,6 @@ public class InteractSystem  extends IteratingSystem {
 					if (interactionHandler != null) {
 						if (interactionHandler.process(entity, interact.entity)) {
 							logger.debug("Entity {} completed interaction with entity {}", entity, interact.entity);
-							interactionHandler.stop(entity, interact.entity);
 							interactMapper.remove(entity);
 						}
 					}

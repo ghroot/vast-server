@@ -39,7 +39,6 @@ public class InteractOrderHandler implements OrderHandler {
 		return !interactMapper.has(orderEntity);
 	}
 
-	// TODO: Interaction handlers are not correctly stopped when removing the interact component
 	@Override
 	public void cancelOrder(int orderEntity) {
 		interactMapper.remove(orderEntity);
