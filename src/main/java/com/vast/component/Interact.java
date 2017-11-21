@@ -12,13 +12,20 @@ import com.vast.interact.InteractionHandler;
 @DelayedComponentRemoval
 public class Interact extends PooledComponent {
 	@EntityId public int entity = -1;
-	public String phase = null;
+
+	public enum Phase {
+		NONE,
+		APPROACHING,
+		INTERACTING
+	}
+	public Phase phase = Phase.NONE;
+
 	public InteractionHandler handler = null;
 
 	@Override
 	protected void reset() {
 		entity = -1;
-		phase = null;
+		phase = Phase.NONE;
 		handler = null;
 	}
 }

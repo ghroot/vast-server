@@ -55,7 +55,7 @@ public class InteractSystem  extends IteratingSystem {
 	@Override
 	public void removed(int entity) {
 		Interact interact = interactMapper.get(entity);
-		if ("interacting".equals(interact.phase)) {
+		if (interact.phase == Interact.Phase.INTERACTING) {
 			if (interact.handler != null) {
 				interact.handler.stop(entity, interact.entity);
 			}
@@ -76,20 +76,20 @@ public class InteractSystem  extends IteratingSystem {
 			float interactDistance = collisionMapper.get(entity).radius + INTERACTION_SPACING + collisionMapper.get(interact.entity).radius;
 			reusableVector.set(otherTransform.position.x - transform.position.x, otherTransform.position.y - transform.position.y);
 			if (reusableVector.length() > interactDistance) {
-				if ("approaching".equals(interact.phase)) {
+				if (interact.phase == Interact.Phase.APPROACHING) {
 					pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);
 				} else {
-					if ("interacting".equals(interact.phase)) {
+					if (interact.phase == Interact.Phase.INTERACTING) {
 						if (interact.handler != null) {
 							interact.handler.stop(entity, interact.entity);
 						}
 					}
 					logger.debug("Entity {} started approaching entity {}", entity, interact.entity);
 					pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);
-					interact.phase = "approaching";
+					interact.phase = Interact.Phase.APPROACHING;
 				}
 			} else {
-				if ("interacting".equals(interact.phase)) {
+				if (interact.phase == Interact.Phase.INTERACTING) {
 					if (interact.handler != null) {
 						if (interact.handler.process(entity, interact.entity)) {
 							logger.debug("Entity {} completed interaction with entity {}", entity, interact.entity);
@@ -109,7 +109,7 @@ public class InteractSystem  extends IteratingSystem {
 						interact.handler.start(entity, interact.entity);
 					}
 					logger.debug("Entity {} started interacting with entity {}", entity, interact.entity);
-					interact.phase = "interacting";
+					interact.phase = Interact.Phase.INTERACTING;
 				}
 			}
 		}
