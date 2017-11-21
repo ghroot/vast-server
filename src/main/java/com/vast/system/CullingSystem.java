@@ -3,7 +3,6 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.annotations.Profile;
-import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
@@ -20,11 +19,10 @@ import java.util.Map;
 import java.util.Set;
 
 @Profile(enabled = true, using = Profiler.class)
-public class CullingSystem extends IteratingSystem {
+public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CullingSystem.class);
 
 	private ComponentMapper<Player> playerMapper;
-	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Type> typeMapper;
 
@@ -36,7 +34,7 @@ public class CullingSystem extends IteratingSystem {
 	private EventMessage reusableCreatedEventMessage;
 
 	public CullingSystem(Map<String, VastPeer> peers, Set<PropertyHandler> propertyHandlers) {
-		super(Aspect.all(Player.class, Active.class, Scan.class, Known.class));
+		super(Aspect.all(Player.class, Active.class, Known.class), Aspect.all(Transform.class, Type.class));
 		this.peers = peers;
 		this.propertyHandlers = propertyHandlers;
 
@@ -54,15 +52,13 @@ public class CullingSystem extends IteratingSystem {
 	}
 
 	@Override
-	protected void process(int activePlayerEntity) {
+	protected void process(int activePlayerEntity, Set<Integer> nearbyEntities) {
 		Player player = playerMapper.get(activePlayerEntity);
-		Scan scan = scanMapper.get(activePlayerEntity);
 		Known known = knownMapper.get(activePlayerEntity);
-
 		if (peers.containsKey(player.name)) {
 			VastPeer peer = peers.get(player.name);
-			notifyAboutRemovedEntities(peer, scan.nearbyEntities, known.knownEntities);
-			notifyAboutNewEntities(peer, scan.nearbyEntities, known.knownEntities);
+			notifyAboutRemovedEntities(peer, nearbyEntities, known.knownEntities);
+			notifyAboutNewEntities(peer, nearbyEntities, known.knownEntities);
 		}
 	}
 
