@@ -58,7 +58,7 @@ public class VastWorld implements Runnable {
 			new WorldSerializationSystem(snapshotFormat, metrics),
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequests),
-			new PeerEntitySystem(peers, entitiesByPeer, worldConfiguration),
+			new PeerEntitySystem(peers, entitiesByPeer),
 			new DeactivateSystem(peers),
 			new ActivateSystem(peers),
 			new ScanSystem(worldConfiguration, spatialHashes),
@@ -80,7 +80,7 @@ public class VastWorld implements Runnable {
 			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(
 				new PlayerWithPickupCollisionHandler()
 			)), metrics),
-			new DeathSystem(entitiesByPeer, worldConfiguration),
+			new DeathSystem(entitiesByPeer),
 			new LifetimeSystem(),
 			new EventSystem(peers),
 			new DeleteSystem(peers),

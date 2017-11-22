@@ -1,14 +1,12 @@
 package com.vast.system;
 
-import com.artemis.Archetype;
-import com.artemis.ArchetypeBuilder;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.utils.IntBag;
 import com.vast.FakePeer;
 import com.vast.VastPeer;
-import com.vast.WorldConfiguration;
-import com.vast.component.*;
+import com.vast.component.Player;
+import com.vast.component.Transform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,22 +19,16 @@ public class PeerEntitySystem extends AbstractProfiledBaseSystem {
 
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Transform> transformMapper;
-	private ComponentMapper<Type> typeMapper;
-	private ComponentMapper<Collision> collisionMapper;
-	private ComponentMapper<Health> healthMapper;
-	private ComponentMapper<AI> aiMapper;
 
 	private Map<String, VastPeer> peers;
-	private WorldConfiguration worldConfiguration;
 
 	private Map<String, Integer> entitiesByPeer;
 	private Set<VastPeer> peersLastUpdate;
-	private Archetype playerEntityArchetype;
+	private CreationManager creationManager;
 
-	public PeerEntitySystem(Map<String, VastPeer> peers, Map<String, Integer> entitiesByPeer, WorldConfiguration worldConfiguration) {
+	public PeerEntitySystem(Map<String, VastPeer> peers, Map<String, Integer> entitiesByPeer) {
 		this.peers = peers;
 		this.entitiesByPeer = entitiesByPeer;
-		this.worldConfiguration = worldConfiguration;
 
 		peersLastUpdate = new HashSet<VastPeer>();
 	}
@@ -45,19 +37,7 @@ public class PeerEntitySystem extends AbstractProfiledBaseSystem {
 	protected void initialize() {
 		super.initialize();
 
-		playerEntityArchetype = new ArchetypeBuilder()
-				.add(Player.class)
-				.add(Type.class)
-				.add(Inventory.class)
-				.add(Health.class)
-				.add(Transform.class)
-				.add(Spatial.class)
-				.add(Collision.class)
-				.add(Scan.class)
-				.add(Known.class)
-				.add(Interactable.class)
-				.add(Attack.class)
-				.build(world);
+		creationManager = world.getSystem(CreationManager.class);
 	}
 
 	@Override
@@ -99,16 +79,7 @@ public class PeerEntitySystem extends AbstractProfiledBaseSystem {
 	}
 
 	private void createPeerEntity(VastPeer peer) {
-		int playerEntity = world.create(playerEntityArchetype);
-		playerMapper.get(playerEntity).name = peer.getName();
-		typeMapper.get(playerEntity).type = "player";
-		transformMapper.get(playerEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
-		collisionMapper.get(playerEntity).radius = 0.3f;
-		healthMapper.get(playerEntity).maxHealth = 5;
-		healthMapper.get(playerEntity).health = 5;
-		if (peer instanceof FakePeer) {
-			aiMapper.create(playerEntity);
-		}
+		int playerEntity = creationManager.createPlayer(peer.getName(), peer instanceof FakePeer);
 		entitiesByPeer.put(peer.getName(), playerEntity);
 		logger.info("Creating peer entity: {} for {} at {}", playerEntity, peer.getName(), transformMapper.get(playerEntity).position);
 	}

@@ -30,7 +30,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 		harvestable.durability--;
 		if (harvestable.durability % 50 == 0) {
-			logger.debug("Player entity {} is harvesting entity {}, durability left: {}", playerEntity, harvestableEntity, harvestable.durability);
+			logger.debug("Entity {} is harvesting entity {}, durability left: {}", playerEntity, harvestableEntity, harvestable.durability);
 		}
 		syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.DURABILITY);
 		if (harvestable.durability <= 0) {
