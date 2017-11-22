@@ -12,6 +12,7 @@ import com.vast.VastPeer;
 import com.vast.component.Active;
 import com.vast.component.Player;
 import com.vast.component.Sync;
+import com.vast.component.SyncPropagation;
 import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(SyncSystem.class);
 
 	private ComponentMapper<Sync> syncMapper;
+	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
 
@@ -33,7 +35,7 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 	private EventMessage reusableEventMessage;
 
 	public SyncSystem(Set<PropertyHandler> propertyHandlers, Map<String, VastPeer> peers, Metrics metrics) {
-		super(Aspect.all(Sync.class));
+		super(Aspect.all(Sync.class, SyncPropagation.class));
 		this.propertyHandlers = propertyHandlers;
 		this.peers = peers;
 		this.metrics = metrics;
@@ -66,16 +68,32 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 		reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
 		for (PropertyHandler syncHandler : propertyHandlers) {
 			if (sync.isPropertyDirty(syncHandler.getProperty())) {
-				syncHandler.decorateDataObject(syncEntity, reusableEventMessage.getDataObject());
-				metrics.incrementSyncedProperty(syncHandler.getProperty());
+				if (syncPropagationMapper.get(syncEntity).getPropagation(syncHandler.getProperty()) == SyncPropagation.Propagation.NEARBY) {
+					syncHandler.decorateDataObject(syncEntity, reusableEventMessage.getDataObject());
+					metrics.incrementSyncedProperty(syncHandler.getProperty());
+				}
 			}
 		}
-
 		for (int nearbyEntity : nearbyEntities) {
 			if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
 				VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyEntity).name);
 				nearbyPeer.send(reusableEventMessage);
 			}
+		}
+
+		reusableEventMessage.getDataObject().clear();
+		reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
+		for (PropertyHandler syncHandler : propertyHandlers) {
+			if (sync.isPropertyDirty(syncHandler.getProperty())) {
+				if (syncPropagationMapper.get(syncEntity).getPropagation(syncHandler.getProperty()) == SyncPropagation.Propagation.OWNER) {
+					syncHandler.decorateDataObject(syncEntity, reusableEventMessage.getDataObject());
+					metrics.incrementSyncedProperty(syncHandler.getProperty());
+				}
+			}
+		}
+		if (playerMapper.has(syncEntity) && activeMapper.has(syncEntity)) {
+			VastPeer nearbyPeer = peers.get(playerMapper.get(syncEntity).name);
+			nearbyPeer.send(reusableEventMessage);
 		}
 
 		syncMapper.remove(syncEntity);

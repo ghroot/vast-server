@@ -69,6 +69,7 @@ public class TerminalSystem extends IntervalSystem {
 		propertyNames.put(Properties.MAX_HEALTH, "MaxHealth");
 		propertyNames.put(Properties.PROGRESS, "Progress");
 		propertyNames.put(Properties.INTERACTABLE, "Interactable");
+		propertyNames.put(Properties.INVENTORY, "Inventory");
 	}
 
 	@Override

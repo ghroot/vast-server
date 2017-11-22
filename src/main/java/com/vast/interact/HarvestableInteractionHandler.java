@@ -35,6 +35,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.DURABILITY);
 		if (harvestable.durability <= 0) {
 			inventoryMapper.get(playerEntity).add(inventoryMapper.get(harvestableEntity).items);
+			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
 			deleteMapper.create(harvestableEntity).reason = "harvested";
 			return true;
 		} else {

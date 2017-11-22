@@ -55,6 +55,7 @@ public class BuildOrderHandler implements OrderHandler {
 		String type = (String) dataObject.get((MessageCodes.BUILD_TYPE)).value;
 		if (inventory.has(ItemTypes.WOOD, 10)) {
 			inventory.remove(ItemTypes.WOOD, 10);
+			syncMapper.create(orderEntity).markPropertyAsDirty(Properties.INVENTORY);
 			float[] position = (float[]) dataObject.get(MessageCodes.BUILD_POSITION).value;
 			Point2f buildPosition = new Point2f(position[0], position[1]);
 			int buildingEntity = creationManager.createBuilding(type, buildPosition);

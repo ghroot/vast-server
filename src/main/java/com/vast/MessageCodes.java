@@ -43,4 +43,5 @@ public class MessageCodes {
 	public static byte PROPERTY_HEALTH = 104;
 	public static byte PROPERTY_MAX_HEALTH = 105;
 	public static byte PROPERTY_INTERACTABLE = 106;
+	public static byte PROPERTY_INVENTORY = 107;
 }

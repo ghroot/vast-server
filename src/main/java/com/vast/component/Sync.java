@@ -2,10 +2,12 @@ package com.vast.component;
 
 import com.artemis.Component;
 import com.artemis.annotations.PooledWeaver;
+import com.artemis.annotations.Transient;
 
+@Transient
 @PooledWeaver
 public class Sync extends Component {
-	public transient int dirtyProperties = 0;
+	public int dirtyProperties = 0;
 
 	public void markPropertyAsDirty(int property) {
 		dirtyProperties |= property;

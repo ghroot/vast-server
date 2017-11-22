@@ -4,6 +4,7 @@ import com.artemis.Archetype;
 import com.artemis.ArchetypeBuilder;
 import com.artemis.ComponentMapper;
 import com.vast.ItemTypes;
+import com.vast.Properties;
 import com.vast.WorldConfiguration;
 import com.vast.component.*;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 	private ComponentMapper<Health> healthMapper;
 	private ComponentMapper<AI> aiMapper;
 	private ComponentMapper<Building> buildingMapper;
+	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 
 	private WorldConfiguration worldConfiguration;
 
@@ -52,6 +54,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 				.add(Known.class)
 				.add(Interactable.class)
 				.add(Attack.class)
+				.add(SyncPropagation.class)
 				.build(world);
 
 		treeArchetype = new ArchetypeBuilder()
@@ -62,6 +65,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 				.add(Interactable.class)
 				.add(Harvestable.class)
 				.add(Inventory.class)
+				.add(SyncPropagation.class)
 				.build(world);
 
 		aiArchetype = new ArchetypeBuilder()
@@ -75,6 +79,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 				.add(Scan.class)
 				.add(Interactable.class)
 				.add(Attack.class)
+				.add(SyncPropagation.class)
 				.build(world);
 
 		buildingArchetype = new ArchetypeBuilder()
@@ -83,6 +88,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 				.add(Spatial.class)
 				.add(Collision.class)
 				.add(Building.class)
+				.add(SyncPropagation.class)
 				.build(world);
 
 		crateArchetype = new ArchetypeBuilder()
@@ -93,6 +99,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 				.add(Inventory.class)
 				.add(Interactable.class)
 				.add(Container.class)
+				.add(SyncPropagation.class)
 				.build(world);
 	}
 
@@ -137,6 +144,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		collisionMapper.get(playerEntity).radius = 0.3f;
 		healthMapper.get(playerEntity).maxHealth = 5;
 		healthMapper.get(playerEntity).health = 5;
+		syncPropagationMapper.get(playerEntity).setPropagation(Properties.INVENTORY, SyncPropagation.Propagation.OWNER);
 		if (ai) {
 			aiMapper.create(playerEntity);
 		}

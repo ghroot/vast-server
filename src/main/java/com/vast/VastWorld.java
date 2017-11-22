@@ -35,13 +35,14 @@ public class VastWorld implements Runnable {
 		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
 		Set<PropertyHandler> propertyHandlers = new HashSet<PropertyHandler>(Arrays.asList(
-				new PositionPropertyHandler(),
-				new ActivePropertyHandler(),
-				new DurabilityPropertyHandler(),
-				new ProgressPropertyHandler(),
-				new HealthPropertyHandler(),
-				new MaxHealthPropertyHandler(),
-				new InteractablePropertyHandler()
+			new PositionPropertyHandler(),
+			new ActivePropertyHandler(),
+			new DurabilityPropertyHandler(),
+			new ProgressPropertyHandler(),
+			new HealthPropertyHandler(),
+			new MaxHealthPropertyHandler(),
+			new InteractablePropertyHandler(),
+			new InventoryPropertyHandler()
 		));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(

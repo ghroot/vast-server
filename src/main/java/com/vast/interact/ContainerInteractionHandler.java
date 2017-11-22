@@ -2,10 +2,8 @@ package com.vast.interact;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.vast.component.Container;
-import com.vast.component.Delete;
-import com.vast.component.Inventory;
-import com.vast.component.Player;
+import com.vast.Properties;
+import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +12,7 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Delete> deleteMapper;
+	private ComponentMapper<Sync> syncMapper;
 
 	public ContainerInteractionHandler() {
 		super(Aspect.all(Player.class, Inventory.class), Aspect.all(Container.class, Inventory.class));
@@ -26,6 +25,7 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 	@Override
 	public boolean process(int playerEntity, int containerEntity) {
 		inventoryMapper.get(playerEntity).add(inventoryMapper.get(containerEntity).items);
+		syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
 		deleteMapper.create(containerEntity).reason = "collected";
 		return true;
 	}
