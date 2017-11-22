@@ -17,7 +17,7 @@ public class DurabilityPropertyHandler implements PropertyHandler {
 	@Override
 	public void decorateDataObject(int entity, DataObject dataObject) {
 		if (harvestableMapper.has(entity)) {
-			dataObject.set(MessageCodes.PROPERTY_DURABILITY, harvestableMapper.get(entity).durability);
+			dataObject.set(MessageCodes.PROPERTY_DURABILITY, (int) harvestableMapper.get(entity).durability);
 		}
 	}
 }

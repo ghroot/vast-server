@@ -17,7 +17,7 @@ public class ProgressPropertyHandler implements PropertyHandler {
 	@Override
 	public void decorateDataObject(int entity, DataObject dataObject) {
 		if (buildingMapper.has(entity)) {
-			dataObject.set(MessageCodes.PROPERTY_PROGRESS, buildingMapper.get(entity).progress);
+			dataObject.set(MessageCodes.PROPERTY_PROGRESS, (int) buildingMapper.get(entity).progress);
 		}
 	}
 }

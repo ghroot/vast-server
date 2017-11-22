@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 public class BuildingInteractionHandler extends AbstractInteractionHandler {
 	private static final Logger logger = LoggerFactory.getLogger(BuildingInteractionHandler.class);
 
+	private final float BUILD_SPEED = 50.0f;
+
 	private ComponentMapper<Building> buildingMapper;
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Interactable> interactableMapper;
@@ -27,12 +29,9 @@ public class BuildingInteractionHandler extends AbstractInteractionHandler {
 	@Override
 	public boolean process(int playerEntity, int buildingEntity) {
 		Building building = buildingMapper.get(buildingEntity);
-		building.progress++;
-		if (building.progress % 25 == 0) {
-			logger.debug("Player entity {} is building entity {}, progress: {}", playerEntity, buildingEntity, building.progress);
-		}
+		building.progress += world.getDelta() * BUILD_SPEED;
 		syncMapper.create(buildingEntity).markPropertyAsDirty(Properties.PROGRESS);
-		if (building.progress >= 100) {
+		if (building.progress >= 100.0f) {
 			interactableMapper.remove(buildingEntity);
 			syncMapper.create(buildingEntity).markPropertyAsDirty(Properties.INTERACTABLE);
 			return true;
