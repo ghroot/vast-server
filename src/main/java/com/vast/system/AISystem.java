@@ -27,7 +27,7 @@ public class AISystem extends IntervalIteratingSystem {
 	private List<Integer> reusableNearbyInteractableEntities;
 
 	public AISystem() {
-		super(Aspect.one(AI.class).exclude(Path.class, Interact.class), 2.0f);
+		super(Aspect.all(AI.class).exclude(Path.class, Interact.class), 2.0f);
 
 		reusableNearbyInteractableEntities = new ArrayList<Integer>();
 	}
@@ -42,20 +42,25 @@ public class AISystem extends IntervalIteratingSystem {
 
 	@Override
 	protected void process(int aiEntity) {
-		Scan scan = scanMapper.get(aiEntity);
-		reusableNearbyInteractableEntities.clear();
-		for (int nearbyEntity : scan.nearbyEntities) {
-			if (nearbyEntity != aiEntity && interactableMapper.has(nearbyEntity)) {
-				reusableNearbyInteractableEntities.add(nearbyEntity);
+		if (scanMapper.has(aiEntity)) {
+			Scan scan = scanMapper.get(aiEntity);
+			reusableNearbyInteractableEntities.clear();
+			for (int nearbyEntity : scan.nearbyEntities) {
+				if (nearbyEntity != aiEntity && interactableMapper.has(nearbyEntity)) {
+					reusableNearbyInteractableEntities.add(nearbyEntity);
+				}
 			}
-		}
-		if (reusableNearbyInteractableEntities.size() > 0) {
-			int randomIndex = (int) (Math.random() * reusableNearbyInteractableEntities.size());
-			int randomNearbyInteractableEntity = reusableNearbyInteractableEntities.get(randomIndex);
-			interactMapper.create(aiEntity).entity = randomNearbyInteractableEntity;
+			if (reusableNearbyInteractableEntities.size() > 0) {
+				int randomIndex = (int) (Math.random() * reusableNearbyInteractableEntities.size());
+				int randomNearbyInteractableEntity = reusableNearbyInteractableEntities.get(randomIndex);
+				interactMapper.create(aiEntity).entity = randomNearbyInteractableEntity;
+			} else {
+				pathMapper.create(aiEntity).targetPosition = new Point2f(transformMapper.get(aiEntity).position);
+				pathMapper.create(aiEntity).targetPosition.add(new Point2f((float) (-2.0f + Math.random() * 4.0f), (float) (-2.0f + Math.random() * 4.0f)));
+			}
+			scanMapper.remove(aiEntity);
 		} else {
-			pathMapper.create(aiEntity).targetPosition = new Point2f(transformMapper.get(aiEntity).position);
-			pathMapper.create(aiEntity).targetPosition.add(new Point2f((float) (-2.0f + Math.random() * 4.0f), (float) (-2.0f + Math.random() * 4.0f)));
+			scanMapper.create(aiEntity);
 		}
 	}
 }
