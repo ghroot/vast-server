@@ -3,6 +3,7 @@ package com.vast.system;
 import com.artemis.Archetype;
 import com.artemis.ArchetypeBuilder;
 import com.artemis.ComponentMapper;
+import com.vast.ItemTypes;
 import com.vast.WorldConfiguration;
 import com.vast.component.*;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<Collision> collisionMapper;
-	private ComponentMapper<Pickup> pickupMapper;
+	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Harvestable> harvestableMapper;
 	private ComponentMapper<Health> healthMapper;
 	private ComponentMapper<AI> aiMapper;
@@ -27,7 +28,6 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 
 	private Archetype playerArchetype;
 	private Archetype treeArchetype;
-	private Archetype pickupArchetype;
 	private Archetype aiArchetype;
 	private Archetype buildingArchetype;
 	private Archetype crateArchetype;
@@ -61,14 +61,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 				.add(Collision.class)
 				.add(Interactable.class)
 				.add(Harvestable.class)
-				.build(world);
-
-		pickupArchetype = new ArchetypeBuilder()
-				.add(Type.class)
-				.add(Transform.class)
-				.add(Spatial.class)
-				.add(Collision.class)
-				.add(Pickup.class)
+				.add(Inventory.class)
 				.build(world);
 
 		aiArchetype = new ArchetypeBuilder()
@@ -90,7 +83,6 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 				.add(Spatial.class)
 				.add(Collision.class)
 				.add(Building.class)
-				.add(Interactable.class)
 				.build(world);
 
 		crateArchetype = new ArchetypeBuilder()
@@ -98,7 +90,9 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)
-				.add(Pickup.class)
+				.add(Inventory.class)
+				.add(Interactable.class)
+				.add(Container.class)
 				.build(world);
 	}
 
@@ -108,32 +102,31 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 
 	public void createWorld() {
 		for (int i = 0; i < worldConfiguration.numberOfTrees; i++) {
-			int treeEntity = world.create(treeArchetype);
-			typeMapper.get(treeEntity).type = "tree";
-			transformMapper.get(treeEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
-			collisionMapper.get(treeEntity).isStatic = true;
-			collisionMapper.get(treeEntity).radius = 0.1f;
-			harvestableMapper.get(treeEntity).itemType = 2;
-			harvestableMapper.get(treeEntity).itemCount = 4;
+			createTree(new Point2f(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height));
 		}
-
-		for (int i = 0; i < worldConfiguration.numberOfPickups; i++) {
-			int pickupEntity = world.create(pickupArchetype);
-			typeMapper.get(pickupEntity).type = "pickup";
-			transformMapper.get(pickupEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
-			collisionMapper.get(pickupEntity).isStatic = true;
-			collisionMapper.get(pickupEntity).radius = 0.1f;
-			pickupMapper.create(pickupEntity).type = 3;
-		}
-
 		for (int i = 0; i < worldConfiguration.numberOfAIs; i++) {
-			int aiEntity = world.create(aiArchetype);
-			typeMapper.get(aiEntity).type = "ai";
-			transformMapper.get(aiEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
-			collisionMapper.get(aiEntity).radius = 0.3f;
-			healthMapper.get(aiEntity).maxHealth = 2;
-			healthMapper.get(aiEntity).health = 2;
+			createAI(new Point2f(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height));
 		}
+	}
+
+	private int createTree(Point2f position) {
+		int treeEntity = world.create(treeArchetype);
+		typeMapper.get(treeEntity).type = "tree";
+		transformMapper.get(treeEntity).position.set(position);
+		collisionMapper.get(treeEntity).isStatic = true;
+		collisionMapper.get(treeEntity).radius = 0.1f;
+		inventoryMapper.get(treeEntity).add(ItemTypes.WOOD, 3);
+		return treeEntity;
+	}
+
+	private int createAI(Point2f position) {
+		int aiEntity = world.create(aiArchetype);
+		typeMapper.get(aiEntity).type = "ai";
+		transformMapper.get(aiEntity).position.set(position);
+		collisionMapper.get(aiEntity).radius = 0.3f;
+		healthMapper.get(aiEntity).maxHealth = 2;
+		healthMapper.get(aiEntity).health = 2;
+		return aiEntity;
 	}
 
 	public int createPlayer(String name, boolean ai) {
@@ -160,13 +153,13 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		return buildingEntity;
 	}
 
-	public int createCrate(Point2f position) {
+	public int createCrate(Point2f position, short[] items) {
 		int crateEntity = world.create(crateArchetype);
-		typeMapper.get(crateEntity).type = "pickup";
+		typeMapper.get(crateEntity).type = "crate";
 		transformMapper.get(crateEntity).position.set(position);
 		collisionMapper.get(crateEntity).isStatic = true;
 		collisionMapper.get(crateEntity).radius = 0.1f;
-		pickupMapper.create(crateEntity).type = 2;
+		inventoryMapper.get(crateEntity).add(items);
 		return crateEntity;
 	}
 }

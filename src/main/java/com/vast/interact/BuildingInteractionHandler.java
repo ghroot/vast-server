@@ -3,10 +3,7 @@ package com.vast.interact;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
-import com.vast.component.Building;
-import com.vast.component.Event;
-import com.vast.component.Player;
-import com.vast.component.Sync;
+import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +12,7 @@ public class BuildingInteractionHandler extends AbstractInteractionHandler {
 
 	private ComponentMapper<Building> buildingMapper;
 	private ComponentMapper<Sync> syncMapper;
+	private ComponentMapper<Interactable> interactableMapper;
 	private ComponentMapper<Event> eventMapper;
 
 	public BuildingInteractionHandler() {
@@ -35,6 +33,8 @@ public class BuildingInteractionHandler extends AbstractInteractionHandler {
 		}
 		syncMapper.create(buildingEntity).markPropertyAsDirty(Properties.PROGRESS);
 		if (building.progress >= 100) {
+			interactableMapper.remove(buildingEntity);
+			syncMapper.create(buildingEntity).markPropertyAsDirty(Properties.INTERACTABLE);
 			return true;
 		} else {
 			return false;

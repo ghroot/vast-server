@@ -1,7 +1,6 @@
 package com.vast.component;
 
 import com.artemis.PooledComponent;
-import com.vast.system.CreationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +24,24 @@ public class Inventory extends PooledComponent {
 		items[type] += amount;
 	}
 
+	public void add(short[] otherItems) {
+		for (int type = 0; type < otherItems.length; type++) {
+			if (otherItems[type] > 0) {
+				add(type, otherItems[type]);
+			}
+		}
+	}
+
 	public void remove(int type, int amount) {
 		logger.debug("Removing {} item(s) of type {} from inventory", amount, type);
 		items[type] -= amount;
+	}
+
+	public boolean has(int type, int amount) {
+		return type < items.length && items[type] >= amount;
+	}
+
+	public void clear() {
+		items = new short[0];
 	}
 }

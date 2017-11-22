@@ -17,7 +17,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Event> eventMapper;
 
 	public HarvestableInteractionHandler() {
-		super(Aspect.all(Inventory.class), Aspect.all(Harvestable.class));
+		super(Aspect.all(Inventory.class), Aspect.all(Harvestable.class, Inventory.class));
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		}
 		syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.DURABILITY);
 		if (harvestable.durability <= 0) {
-			inventoryMapper.get(playerEntity).add(harvestable.itemType, harvestable.itemCount);
+			inventoryMapper.get(playerEntity).add(inventoryMapper.get(harvestableEntity).items);
 			deleteMapper.create(harvestableEntity).reason = "harvested";
 			return true;
 		} else {

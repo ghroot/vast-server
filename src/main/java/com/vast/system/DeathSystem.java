@@ -21,6 +21,7 @@ public class DeathSystem extends IteratingSystem {
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<AI> aiMapper;
 	private ComponentMapper<Create> createMapper;
+	private ComponentMapper<Inventory> inventoryMapper;
 
 	private Map<String, Integer> entitiesByPeer;
 	private CreationManager creationManager;
@@ -39,7 +40,7 @@ public class DeathSystem extends IteratingSystem {
 	protected void process(int deathEntity) {
 		logger.debug("Entity {} died", deathEntity);
 		if (playerMapper.has(deathEntity)) {
-			creationManager.createCrate(transformMapper.get(deathEntity).position);
+			creationManager.createCrate(transformMapper.get(deathEntity).position, inventoryMapper.get(deathEntity).items);
 
 			String name = playerMapper.get(deathEntity).name;
 			int playerEntity = creationManager.createPlayer(name, aiMapper.has(deathEntity));
@@ -48,6 +49,7 @@ public class DeathSystem extends IteratingSystem {
 			createMapper.create(playerEntity).reason = "resurrected";
 
 			activeMapper.remove(deathEntity);
+			inventoryMapper.get(deathEntity).clear();
 		}
 		deleteMapper.create(deathEntity).reason = "killed";
 	}

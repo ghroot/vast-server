@@ -5,11 +5,7 @@ import com.artemis.WorldConfigurationBuilder;
 import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
 import com.vast.collision.CollisionHandler;
-import com.vast.collision.PlayerWithPickupCollisionHandler;
-import com.vast.interact.AttackInteractionHandler;
-import com.vast.interact.BuildingInteractionHandler;
-import com.vast.interact.HarvestableInteractionHandler;
-import com.vast.interact.InteractionHandler;
+import com.vast.interact.*;
 import com.vast.order.BuildOrderHandler;
 import com.vast.order.InteractOrderHandler;
 import com.vast.order.MoveOrderHandler;
@@ -74,12 +70,11 @@ public class VastWorld implements Runnable {
 			new InteractSystem(new HashSet<InteractionHandler>(Arrays.asList(
 				new HarvestableInteractionHandler(),
 				new BuildingInteractionHandler(),
-				new AttackInteractionHandler()
+				new AttackInteractionHandler(),
+				new ContainerInteractionHandler()
 			))),
 			new SpatialSystem(worldConfiguration, spatialHashes),
-			new CollisionSystem(new HashSet<CollisionHandler>(Arrays.asList(
-				new PlayerWithPickupCollisionHandler()
-			)), metrics),
+			new CollisionSystem(new HashSet<CollisionHandler>(), metrics),
 			new DeathSystem(entitiesByPeer),
 			new LifetimeSystem(),
 			new EventSystem(peers),

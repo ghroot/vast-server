@@ -3,11 +3,10 @@ package com.vast.order;
 import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.nhnent.haste.protocol.data.DataObject;
+import com.vast.ItemTypes;
 import com.vast.MessageCodes;
-import com.vast.component.Create;
-import com.vast.component.Interact;
-import com.vast.component.Order;
-import com.vast.component.Path;
+import com.vast.Properties;
+import com.vast.component.*;
 import com.vast.system.CreationManager;
 
 import javax.vecmath.Point2f;
@@ -18,6 +17,9 @@ public class BuildOrderHandler implements OrderHandler {
 	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Interact> interactMapper;
 	private ComponentMapper<Path> pathMapper;
+	private ComponentMapper<Inventory> inventoryMapper;
+	private ComponentMapper<Interactable> interactableMapper;
+	private ComponentMapper<Sync> syncMapper;
 
 	private CreationManager creationManager;
 
@@ -49,14 +51,22 @@ public class BuildOrderHandler implements OrderHandler {
 
 	@Override
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
+		Inventory inventory = inventoryMapper.get(orderEntity);
 		String type = (String) dataObject.get((MessageCodes.BUILD_TYPE)).value;
-		float[] position = (float[]) dataObject.get(MessageCodes.BUILD_POSITION).value;
-		Point2f buildPosition = new Point2f(position[0], position[1]);
-		int buildingEntity = creationManager.createBuilding(type, buildPosition);
-		createMapper.create(buildingEntity).reason = "built";
+		if (inventory.has(ItemTypes.WOOD, 10)) {
+			inventory.remove(ItemTypes.WOOD, 10);
+			float[] position = (float[]) dataObject.get(MessageCodes.BUILD_POSITION).value;
+			Point2f buildPosition = new Point2f(position[0], position[1]);
+			int buildingEntity = creationManager.createBuilding(type, buildPosition);
+			interactableMapper.create(buildingEntity);
+			syncMapper.create(buildingEntity).markPropertyAsDirty(Properties.INTERACTABLE);
+			createMapper.create(buildingEntity).reason = "built";
 
-		interactMapper.create(orderEntity).entity = buildingEntity;
+			interactMapper.create(orderEntity).entity = buildingEntity;
 
-		return true;
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
