@@ -145,7 +145,10 @@ public class TerminalSystem extends IntervalSystem {
 						} else if (typeMapper.get(entity).type.equals("tree")) {
 							screen.setCharacter(terminalPosition, new TextCharacter('+', colored ? TextColor.ANSI.GREEN : gray, TextColor.ANSI.DEFAULT));
 							textGraphics.setForegroundColor(TextColor.ANSI.GREEN);
-						} else if (typeMapper.get(entity).type.equals("pickup")) {
+						} else if (typeMapper.get(entity).type.equals("rock")) {
+							screen.setCharacter(terminalPosition, new TextCharacter('^', colored ? TextColor.ANSI.Indexed.fromRGB(100, 100, 100) : gray, TextColor.ANSI.DEFAULT));
+							textGraphics.setForegroundColor(TextColor.ANSI.GREEN);
+						} else if (typeMapper.get(entity).type.equals("crate")) {
 							screen.setCharacter(terminalPosition, new TextCharacter('.', colored ? TextColor.ANSI.RED : gray, TextColor.ANSI.DEFAULT));
 							textGraphics.setForegroundColor(TextColor.ANSI.RED);
 						} else if (typeMapper.get(entity).type.equals("building")) {

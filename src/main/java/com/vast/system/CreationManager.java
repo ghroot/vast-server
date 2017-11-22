@@ -30,6 +30,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 
 	private Archetype playerArchetype;
 	private Archetype treeArchetype;
+	private Archetype rockArchetype;
 	private Archetype aiArchetype;
 	private Archetype buildingArchetype;
 	private Archetype crateArchetype;
@@ -68,6 +69,14 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 				.add(SyncPropagation.class)
 				.build(world);
 
+		rockArchetype = new ArchetypeBuilder()
+				.add(Type.class)
+				.add(Transform.class)
+				.add(Spatial.class)
+				.add(Collision.class)
+				.add(SyncPropagation.class)
+				.build(world);
+
 		aiArchetype = new ArchetypeBuilder()
 				.add(AI.class)
 				.add(Type.class)
@@ -76,7 +85,6 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)
-				.add(Scan.class)
 				.add(Interactable.class)
 				.add(Attack.class)
 				.add(SyncPropagation.class)
@@ -111,6 +119,9 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		for (int i = 0; i < worldConfiguration.numberOfTrees; i++) {
 			createTree(new Point2f(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height));
 		}
+		for (int i = 0; i < worldConfiguration.numberOfRocks; i++) {
+			createRock(new Point2f(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height));
+		}
 		for (int i = 0; i < worldConfiguration.numberOfAIs; i++) {
 			createAI(new Point2f(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height));
 		}
@@ -124,6 +135,15 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		collisionMapper.get(treeEntity).radius = 0.1f;
 		inventoryMapper.get(treeEntity).add(ItemTypes.WOOD, 3);
 		return treeEntity;
+	}
+
+	private int createRock(Point2f position) {
+		int rockEntity = world.create(rockArchetype);
+		typeMapper.get(rockEntity).type = "rock";
+		transformMapper.get(rockEntity).position.set(position);
+		collisionMapper.get(rockEntity).isStatic = true;
+		collisionMapper.get(rockEntity).radius = 0.2f;
+		return rockEntity;
 	}
 
 	private int createAI(Point2f position) {
