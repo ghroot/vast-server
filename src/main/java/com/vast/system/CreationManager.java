@@ -138,7 +138,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		collisionMapper.get(treeEntity).isStatic = true;
 		collisionMapper.get(treeEntity).radius = 0.1f;
 		inventoryMapper.get(treeEntity).add(ItemTypes.WOOD, 3);
-		syncPropagationMapper.get(treeEntity).setReliable(Properties.DURABILITY, false);
+		syncPropagationMapper.get(treeEntity).setUnreliable(Properties.DURABILITY);
 		return treeEntity;
 	}
 
@@ -158,7 +158,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		collisionMapper.get(aiEntity).radius = 0.3f;
 		healthMapper.get(aiEntity).maxHealth = 2;
 		healthMapper.get(aiEntity).health = 2;
-		syncPropagationMapper.get(aiEntity).setReliable(Properties.POSITION, false);
+		syncPropagationMapper.get(aiEntity).setUnreliable(Properties.POSITION);
 		return aiEntity;
 	}
 
@@ -170,8 +170,8 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		collisionMapper.get(playerEntity).radius = 0.3f;
 		healthMapper.get(playerEntity).maxHealth = 5;
 		healthMapper.get(playerEntity).health = 5;
-		syncPropagationMapper.get(playerEntity).setReliable(Properties.POSITION, false);
-		syncPropagationMapper.get(playerEntity).setPropagation(Properties.INVENTORY, SyncPropagation.Propagation.OWNER);
+		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.POSITION);
+		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.INVENTORY);
 		if (ai) {
 			aiMapper.create(playerEntity);
 		}

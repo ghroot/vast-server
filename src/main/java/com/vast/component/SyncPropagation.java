@@ -1,48 +1,34 @@
 package com.vast.component;
 
-import com.artemis.PooledComponent;
+import com.artemis.Component;
+import com.artemis.annotations.PooledWeaver;
 
-import java.util.HashMap;
-import java.util.Map;
+@PooledWeaver
+public class SyncPropagation extends Component {
+	public int unreliableProperties = 0;
+	public int ownerPropagationProperties = 0;
 
-public class SyncPropagation extends PooledComponent {
-	public static final boolean DEFAULT_RELIABLE = true;
-	public Map<Integer, Boolean> reliableByProperty = new HashMap<Integer, Boolean>();
-
-	public enum Propagation {
-		NEARBY,
-		OWNER;
-	}
-	public static final Propagation DEFAULT_PROPAGATION = Propagation.NEARBY;
-	public Map<Integer, Propagation> propagationByProperty = new HashMap<Integer, Propagation>();
-
-	@Override
-	protected void reset() {
-		reliableByProperty = new HashMap<Integer, Boolean>();
-		propagationByProperty = new HashMap<Integer, Propagation>();
+	public void setUnreliable(int property) {
+		unreliableProperties |= property;
 	}
 
-	public void setReliable(int property, boolean reliable) {
-		reliableByProperty.put(property, reliable);
+	public boolean isUnreliable(int property) {
+		return (unreliableProperties & property) > 0;
 	}
 
-	public boolean getReliable(int property) {
-		if (reliableByProperty.containsKey(property)) {
-			return reliableByProperty.get(property);
-		} else {
-			return DEFAULT_RELIABLE;
-		}
+	public boolean isReliable(int property) {
+		return !isUnreliable(property);
 	}
 
-	public void setPropagation(int property, Propagation propagation) {
-		propagationByProperty.put(property, propagation);
+	public void setOwnerPropagation(int property) {
+		ownerPropagationProperties |= property;
 	}
 
-	public Propagation getPropagation(int property) {
-		if (propagationByProperty.containsKey(property)) {
-			return propagationByProperty.get(property);
-		} else {
-			return DEFAULT_PROPAGATION;
-		}
+	public boolean isOwnerPropagation(int property) {
+		return (ownerPropagationProperties & property) > 0;
+	}
+
+	public boolean isNearbyPropagation(int property) {
+		return !isOwnerPropagation(property);
 	}
 }

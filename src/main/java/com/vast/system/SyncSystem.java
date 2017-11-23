@@ -71,11 +71,11 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 			int property = syncHandler.getProperty();
 			if (sync.isPropertyDirty(property)) {
 				SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
-				if (syncPropagation.getPropagation(property) == SyncPropagation.Propagation.NEARBY) {
+				if (syncPropagation.isNearbyPropagation(property)) {
 					syncHandler.decorateDataObject(syncEntity, reusableEventMessage.getDataObject());
 					metrics.incrementSyncedProperty(property);
 				}
-				if (!reliable && syncPropagation.getReliable(property)) {
+				if (!reliable && syncPropagation.isReliable(property)) {
 					reliable = true;
 				}
 			}
@@ -98,11 +98,11 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 			int property = syncHandler.getProperty();
 			if (sync.isPropertyDirty(property)) {
 				SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
-				if (syncPropagation.getPropagation(property) == SyncPropagation.Propagation.OWNER) {
+				if (syncPropagation.isOwnerPropagation(property)) {
 					syncHandler.decorateDataObject(syncEntity, reusableEventMessage.getDataObject());
 					metrics.incrementSyncedProperty(property);
 				}
-				if (!reliable && syncPropagation.getReliable(property)) {
+				if (!reliable && syncPropagation.isReliable(property)) {
 					reliable = true;
 				}
 			}
