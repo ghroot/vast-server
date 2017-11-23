@@ -4,10 +4,10 @@ import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.MessageCodes;
 import com.vast.Properties;
-import com.vast.component.Building;
+import com.vast.component.Constructable;
 
 public class ProgressPropertyHandler implements PropertyHandler {
-	private ComponentMapper<Building> buildingMapper;
+	private ComponentMapper<Constructable> constructableMapper;
 
 	@Override
 	public int getProperty() {
@@ -16,8 +16,10 @@ public class ProgressPropertyHandler implements PropertyHandler {
 
 	@Override
 	public void decorateDataObject(int entity, DataObject dataObject) {
-		if (buildingMapper.has(entity)) {
-			dataObject.set(MessageCodes.PROPERTY_PROGRESS, (int) buildingMapper.get(entity).progress);
+		if (constructableMapper.has(entity)) {
+			Constructable constructable = constructableMapper.get(entity);
+			int progress = (int) Math.floor(100.0f * constructable.buildTime / constructable.buildDuration);
+			dataObject.set(MessageCodes.PROPERTY_PROGRESS, progress);
 		}
 	}
 }

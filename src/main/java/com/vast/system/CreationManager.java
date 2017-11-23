@@ -3,10 +3,10 @@ package com.vast.system;
 import com.artemis.Archetype;
 import com.artemis.ArchetypeBuilder;
 import com.artemis.ComponentMapper;
-import com.vast.ItemTypes;
 import com.vast.Properties;
 import com.vast.WorldConfiguration;
 import com.vast.component.*;
+import com.vast.data.Items;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +23,11 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 	private ComponentMapper<Harvestable> harvestableMapper;
 	private ComponentMapper<Health> healthMapper;
 	private ComponentMapper<AI> aiMapper;
-	private ComponentMapper<Building> buildingMapper;
+	private ComponentMapper<Constructable> constructableMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 
 	private WorldConfiguration worldConfiguration;
+	private Items items;
 
 	private Archetype playerArchetype;
 	private Archetype treeArchetype;
@@ -35,8 +36,9 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 	private Archetype buildingArchetype;
 	private Archetype crateArchetype;
 
-	public CreationManager(WorldConfiguration worldConfiguration) {
+	public CreationManager(WorldConfiguration worldConfiguration, Items items) {
 		this.worldConfiguration = worldConfiguration;
+		this.items = items;
 	}
 
 	@Override
@@ -95,7 +97,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)
-				.add(Building.class)
+				.add(Constructable.class)
 				.add(SyncPropagation.class)
 				.build(world);
 
@@ -136,7 +138,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		typeMapper.get(treeEntity).type = "tree";
 		transformMapper.get(treeEntity).position.set(position);
 		collisionMapper.get(treeEntity).radius = 0.1f;
-		inventoryMapper.get(treeEntity).add(ItemTypes.WOOD, 3);
+		inventoryMapper.get(treeEntity).add(items.getItem("wood").getType(), 3);
 		syncPropagationMapper.get(treeEntity).setUnreliable(Properties.DURABILITY);
 		return treeEntity;
 	}
@@ -178,12 +180,12 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		return playerEntity;
 	}
 
-	public int createBuilding(String type, Point2f position) {
+	public int createBuilding(Point2f position, float buildDuration) {
 		int buildingEntity = world.create(buildingArchetype);
 		typeMapper.get(buildingEntity).type = "building";
 		transformMapper.get(buildingEntity).position.set(position);
 		collisionMapper.get(buildingEntity).radius = 0.5f;
-		buildingMapper.get(buildingEntity).type = type;
+		constructableMapper.get(buildingEntity).buildDuration = buildDuration;
 		return buildingEntity;
 	}
 

@@ -5,6 +5,8 @@ import com.artemis.WorldConfigurationBuilder;
 import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
 import com.vast.collision.CollisionHandler;
+import com.vast.data.Buildings;
+import com.vast.data.Items;
 import com.vast.interact.*;
 import com.vast.order.BuildOrderHandler;
 import com.vast.order.InteractOrderHandler;
@@ -30,6 +32,8 @@ public class VastWorld implements Runnable {
 
 	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, boolean showMonitor, Metrics metrics) {
 		WorldConfiguration worldConfiguration = new WorldConfiguration(loadWorldProperties());
+		Items items = new Items();
+		Buildings buildings = new Buildings(items);
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		List<IncomingRequest> incomingRequests = new ArrayList<IncomingRequest>();
 		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
@@ -46,7 +50,7 @@ public class VastWorld implements Runnable {
 		));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
-			new CreationManager(worldConfiguration),
+			new CreationManager(worldConfiguration, items),
 			new WorldSerializationManager(),
 			new EntityLinkManager(),
 			new MetricsManager(metrics),
@@ -64,13 +68,13 @@ public class VastWorld implements Runnable {
 			new OrderSystem(new HashSet<OrderHandler>(Arrays.asList(
 				new MoveOrderHandler(),
 				new InteractOrderHandler(),
-				new BuildOrderHandler()
+				new BuildOrderHandler(buildings)
 			)), incomingRequests, entitiesByPeer),
 			new AISystem(),
 			new PathMoveSystem(),
 			new InteractSystem(new HashSet<InteractionHandler>(Arrays.asList(
 				new HarvestableInteractionHandler(),
-				new BuildingInteractionHandler(),
+				new ConstructableInteractionHandler(),
 				new AttackInteractionHandler(),
 				new ContainerInteractionHandler()
 			))),
