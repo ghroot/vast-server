@@ -98,9 +98,9 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 			int property = syncHandler.getProperty();
 			if (sync.isPropertyDirty(property)) {
 				SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
-				if (syncPropagation.getPropagation(syncHandler.getProperty()) == SyncPropagation.Propagation.OWNER) {
+				if (syncPropagation.getPropagation(property) == SyncPropagation.Propagation.OWNER) {
 					syncHandler.decorateDataObject(syncEntity, reusableEventMessage.getDataObject());
-					metrics.incrementSyncedProperty(syncHandler.getProperty());
+					metrics.incrementSyncedProperty(property);
 				}
 				if (!reliable && syncPropagation.getReliable(property)) {
 					reliable = true;
