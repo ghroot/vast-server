@@ -181,7 +181,6 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		collisionMapper.get(buildingEntity).isStatic = true;
 		collisionMapper.get(buildingEntity).radius = 0.5f;
 		buildingMapper.get(buildingEntity).type = type;
-		syncPropagationMapper.get(buildingEntity).setReliable(Properties.DURABILITY, false);
 		return buildingEntity;
 	}
 
