@@ -52,6 +52,10 @@ public class VastPeer extends ClientPeer {
 		return send(message, SendOptions.ReliableSend);
 	}
 
+	public boolean sendUnreliable(Message message) {
+		return send(message, SendOptions.take((byte) 0, false, QoS.UNRELIABLE_SEQUENCED));
+	}
+
 	@Override
 	protected boolean send(byte[] payload, int payloadLength, byte channel, boolean encrypt, QoS qos) {
 		metrics.incrementNumberOfSentMessages();
