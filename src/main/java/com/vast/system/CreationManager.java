@@ -135,7 +135,6 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		int treeEntity = world.create(treeArchetype);
 		typeMapper.get(treeEntity).type = "tree";
 		transformMapper.get(treeEntity).position.set(position);
-		collisionMapper.get(treeEntity).isStatic = true;
 		collisionMapper.get(treeEntity).radius = 0.1f;
 		inventoryMapper.get(treeEntity).add(ItemTypes.WOOD, 3);
 		syncPropagationMapper.get(treeEntity).setUnreliable(Properties.DURABILITY);
@@ -146,7 +145,6 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		int rockEntity = world.create(rockArchetype);
 		typeMapper.get(rockEntity).type = "rock";
 		transformMapper.get(rockEntity).position.set(position);
-		collisionMapper.get(rockEntity).isStatic = true;
 		collisionMapper.get(rockEntity).radius = 0.2f;
 		return rockEntity;
 	}
@@ -155,6 +153,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		int aiEntity = world.create(aiArchetype);
 		typeMapper.get(aiEntity).type = "ai";
 		transformMapper.get(aiEntity).position.set(position);
+		collisionMapper.get(aiEntity).isStatic = false;
 		collisionMapper.get(aiEntity).radius = 0.3f;
 		healthMapper.get(aiEntity).maxHealth = 2;
 		healthMapper.get(aiEntity).health = 2;
@@ -167,6 +166,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		playerMapper.get(playerEntity).name = name;
 		typeMapper.get(playerEntity).type = "player";
 		transformMapper.get(playerEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
+		collisionMapper.get(playerEntity).isStatic = false;
 		collisionMapper.get(playerEntity).radius = 0.3f;
 		healthMapper.get(playerEntity).maxHealth = 5;
 		healthMapper.get(playerEntity).health = 5;
@@ -182,7 +182,6 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		int buildingEntity = world.create(buildingArchetype);
 		typeMapper.get(buildingEntity).type = "building";
 		transformMapper.get(buildingEntity).position.set(position);
-		collisionMapper.get(buildingEntity).isStatic = true;
 		collisionMapper.get(buildingEntity).radius = 0.5f;
 		buildingMapper.get(buildingEntity).type = type;
 		return buildingEntity;
@@ -192,7 +191,6 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		int crateEntity = world.create(crateArchetype);
 		typeMapper.get(crateEntity).type = "crate";
 		transformMapper.get(crateEntity).position.set(position);
-		collisionMapper.get(crateEntity).isStatic = true;
 		collisionMapper.get(crateEntity).radius = 0.1f;
 		inventoryMapper.get(crateEntity).add(items);
 		return crateEntity;
