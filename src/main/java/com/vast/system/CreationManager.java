@@ -117,14 +117,18 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 
 	public void createWorld() {
 		for (int i = 0; i < worldConfiguration.numberOfTrees; i++) {
-			createTree(new Point2f(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height));
+			createTree(getRandomPositionInWorld());
 		}
 		for (int i = 0; i < worldConfiguration.numberOfRocks; i++) {
-			createRock(new Point2f(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height));
+			createRock(getRandomPositionInWorld());
 		}
 		for (int i = 0; i < worldConfiguration.numberOfAIs; i++) {
-			createAI(new Point2f(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height));
+			createAI(getRandomPositionInWorld());
 		}
+	}
+
+	private Point2f getRandomPositionInWorld() {
+		return new Point2f(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
 	}
 
 	private int createTree(Point2f position) {
