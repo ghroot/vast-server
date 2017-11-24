@@ -58,7 +58,9 @@ public class DeathSystem extends IteratingSystem {
 			playerMapper.get(playerEntity).id = playerMapper.get(deathEntity).id;
 			scanMapper.get(playerEntity).nearbyEntities.addAll(scanMapper.get(deathEntity).nearbyEntities);
 			knownMapper.get(playerEntity).knownEntities.addAll(knownMapper.get(deathEntity).knownEntities);
-			activeMapper.create(playerEntity);
+			if (activeMapper.has(deathEntity)) {
+				activeMapper.create(playerEntity);
+			}
 			entitiesByPeer.put(name, playerEntity);
 			createMapper.create(playerEntity).reason = "resurrected";
 		}
