@@ -5,8 +5,9 @@ public class MessageCodes {
 	public static short ENTITY_CREATED = 0;
 	public static byte ENTITY_CREATED_ENTITY_ID = 0;
 	public static byte ENTITY_CREATED_TYPE = 1;
-	public static byte ENTITY_CREATED_OWNER = 2;
-	public static byte ENTITY_CREATED_REASON = 3;
+	public static byte ENTITY_CREATED_SUB_TYPE = 2;
+	public static byte ENTITY_CREATED_OWNER = 3;
+	public static byte ENTITY_CREATED_REASON = 4;
 
 	// Server -> Client
 	public static short ENTITY_DESTROYED = 1;

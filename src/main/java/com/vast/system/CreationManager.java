@@ -6,6 +6,7 @@ import com.artemis.ComponentMapper;
 import com.vast.Properties;
 import com.vast.WorldConfiguration;
 import com.vast.component.*;
+import com.vast.data.Buildings;
 import com.vast.data.Items;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,16 +19,18 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Type> typeMapper;
+	private ComponentMapper<SubType> subTypeMapper;
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
-	private ComponentMapper<Harvestable> harvestableMapper;
 	private ComponentMapper<Health> healthMapper;
 	private ComponentMapper<AI> aiMapper;
+	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Constructable> constructableMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 
 	private WorldConfiguration worldConfiguration;
 	private Items items;
+	private Buildings buildings;
 
 	private Archetype playerArchetype;
 	private Archetype treeArchetype;
@@ -36,9 +39,10 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 	private Archetype buildingArchetype;
 	private Archetype crateArchetype;
 
-	public CreationManager(WorldConfiguration worldConfiguration, Items items) {
+	public CreationManager(WorldConfiguration worldConfiguration, Items items, Buildings buildings) {
 		this.worldConfiguration = worldConfiguration;
 		this.items = items;
+		this.buildings = buildings;
 	}
 
 	@Override
@@ -48,6 +52,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		playerArchetype = new ArchetypeBuilder()
 				.add(Player.class)
 				.add(Type.class)
+				.add(SubType.class)
 				.add(Inventory.class)
 				.add(Health.class)
 				.add(Transform.class)
@@ -82,6 +87,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		aiArchetype = new ArchetypeBuilder()
 				.add(AI.class)
 				.add(Type.class)
+				.add(SubType.class)
 				.add(Inventory.class)
 				.add(Health.class)
 				.add(Transform.class)
@@ -94,6 +100,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 
 		buildingArchetype = new ArchetypeBuilder()
 				.add(Type.class)
+				.add(SubType.class)
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)
@@ -154,19 +161,22 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 	private int createAI(Point2f position) {
 		int aiEntity = world.create(aiArchetype);
 		typeMapper.get(aiEntity).type = "ai";
+		subTypeMapper.get(aiEntity).subType = aiEntity % 4;
 		transformMapper.get(aiEntity).position.set(position);
 		collisionMapper.get(aiEntity).isStatic = false;
 		collisionMapper.get(aiEntity).radius = 0.3f;
 		healthMapper.get(aiEntity).maxHealth = 2;
 		healthMapper.get(aiEntity).health = 2;
+		activeMapper.create(aiEntity);
 		syncPropagationMapper.get(aiEntity).setUnreliable(Properties.POSITION);
 		return aiEntity;
 	}
 
-	public int createPlayer(String name, boolean ai) {
+	public int createPlayer(String name, int subType, boolean ai) {
 		int playerEntity = world.create(playerArchetype);
 		playerMapper.get(playerEntity).name = name;
 		typeMapper.get(playerEntity).type = "player";
+		subTypeMapper.get(playerEntity).subType = subType;
 		transformMapper.get(playerEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
 		collisionMapper.get(playerEntity).isStatic = false;
 		collisionMapper.get(playerEntity).radius = 0.3f;
@@ -180,12 +190,13 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		return playerEntity;
 	}
 
-	public int createBuilding(Point2f position, float buildDuration) {
+	public int createBuilding(Point2f position, int buildingType) {
 		int buildingEntity = world.create(buildingArchetype);
 		typeMapper.get(buildingEntity).type = "building";
+		subTypeMapper.get(buildingEntity).subType = buildingType;
 		transformMapper.get(buildingEntity).position.set(position);
 		collisionMapper.get(buildingEntity).radius = 0.5f;
-		constructableMapper.get(buildingEntity).buildDuration = buildDuration;
+		constructableMapper.get(buildingEntity).buildDuration = buildings.getBuilding(buildingType).getBuildDuration();
 		return buildingEntity;
 	}
 

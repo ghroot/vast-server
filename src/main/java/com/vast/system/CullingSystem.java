@@ -8,10 +8,7 @@ import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
 import com.vast.Profiler;
 import com.vast.VastPeer;
-import com.vast.component.Active;
-import com.vast.component.Known;
-import com.vast.component.Player;
-import com.vast.component.Type;
+import com.vast.component.*;
 import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +25,7 @@ public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Type> typeMapper;
+	private ComponentMapper<SubType> subTypeMapper;
 
 	private Map<String, VastPeer> peers;
 	private Set<PropertyHandler> propertyHandlers;
@@ -96,6 +94,9 @@ public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
 		logger.debug("Notifying peer {} about new entity {} (culling)", peer.getName(), newEntity);
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, newEntity);
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(newEntity).type);
+		if (subTypeMapper.has(newEntity)) {
+			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_SUB_TYPE, subTypeMapper.get(newEntity).subType);
+		}
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, "culling");
 		if (playerMapper.has(newEntity)) {
 			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(newEntity).name));

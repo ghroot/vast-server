@@ -66,7 +66,7 @@ public class BuildOrderHandler implements OrderHandler {
 			syncMapper.create(orderEntity).markPropertyAsDirty(Properties.INVENTORY);
 			float[] position = (float[]) dataObject.get(MessageCodes.BUILD_POSITION).value;
 			Point2f buildPosition = new Point2f(position[0], position[1]);
-			int buildingEntity = creationManager.createBuilding(buildPosition, building.getBuildDuration());
+			int buildingEntity = creationManager.createBuilding(buildPosition, building.getType());
 			interactableMapper.create(buildingEntity);
 			syncMapper.create(buildingEntity).markPropertyAsDirty(Properties.INTERACTABLE);
 			createMapper.create(buildingEntity).reason = "built";

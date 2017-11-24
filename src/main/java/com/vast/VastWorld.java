@@ -50,7 +50,7 @@ public class VastWorld implements Runnable {
 		));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
-			new CreationManager(worldConfiguration, items),
+			new CreationManager(worldConfiguration, items, buildings),
 			new WorldSerializationManager(),
 			new EntityLinkManager(),
 			new MetricsManager(metrics),

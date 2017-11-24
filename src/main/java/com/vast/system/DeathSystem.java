@@ -22,6 +22,7 @@ public class DeathSystem extends IteratingSystem {
 	private ComponentMapper<AI> aiMapper;
 	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
+	private ComponentMapper<SubType> subTypeMapper;
 
 	private Map<String, Integer> entitiesByPeer;
 	private CreationManager creationManager;
@@ -39,17 +40,21 @@ public class DeathSystem extends IteratingSystem {
 	@Override
 	protected void process(int deathEntity) {
 		logger.debug("Entity {} died", deathEntity);
+		if (inventoryMapper.has(deathEntity)) {
+			Inventory inventory = inventoryMapper.get(deathEntity);
+			if (!inventory.isEmpty()) {
+				creationManager.createCrate(transformMapper.get(deathEntity).position, inventory.items);
+				inventory.clear();
+			}
+		}
 		if (playerMapper.has(deathEntity)) {
-			creationManager.createCrate(transformMapper.get(deathEntity).position, inventoryMapper.get(deathEntity).items);
+			activeMapper.remove(deathEntity);
 
 			String name = playerMapper.get(deathEntity).name;
-			int playerEntity = creationManager.createPlayer(name, aiMapper.has(deathEntity));
+			int playerEntity = creationManager.createPlayer(name, subTypeMapper.get(deathEntity).subType, aiMapper.has(deathEntity));
 			activeMapper.create(playerEntity);
 			entitiesByPeer.put(name, playerEntity);
 			createMapper.create(playerEntity).reason = "resurrected";
-
-			activeMapper.remove(deathEntity);
-			inventoryMapper.get(deathEntity).clear();
 		}
 		deleteMapper.create(deathEntity).reason = "killed";
 	}

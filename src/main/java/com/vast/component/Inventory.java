@@ -61,4 +61,13 @@ public class Inventory extends PooledComponent {
 	public void clear() {
 		items = new short[0];
 	}
+
+	public boolean isEmpty() {
+		for (int type = 0; type < items.length; type++) {
+			if (items[type] > 0) {
+				return false;
+			}
+		}
+		return true;
+	}
 }

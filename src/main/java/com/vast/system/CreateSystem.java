@@ -25,6 +25,7 @@ public class CreateSystem extends AbstractNearbyEntityIteratingSystem {
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Type> typeMapper;
+	private ComponentMapper<SubType> subTypeMapper;
 
 	private Map<String, VastPeer> peers;
 	private Set<PropertyHandler> propertyHandlers;
@@ -50,6 +51,9 @@ public class CreateSystem extends AbstractNearbyEntityIteratingSystem {
 					logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, createEntity);
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(createEntity).type);
+					if (subTypeMapper.has(createEntity)) {
+						reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_SUB_TYPE, subTypeMapper.get(createEntity).subType);
+					}
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, reason);
 					if (playerMapper.has(createEntity)) {
 						reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(createEntity).name));
