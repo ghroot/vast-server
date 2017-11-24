@@ -32,10 +32,10 @@ public abstract class AbstractNearbyEntityIteratingSystem extends IteratingSyste
 
 	@Override
 	protected void process(int entity) {
-		reusableNearbyEntities.clear();
-		if (scanMapper.has(entity)) {
-			reusableNearbyEntities.addAll(scanMapper.get(entity).nearbyEntities);
+§		if (scanMapper.has(entity)) {
+			process(entity, scanMapper.get(entity).nearbyEntities);
 		} else {
+			reusableNearbyEntities.clear();
 			IntBag nearbyEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class, Active.class, Scan.class)).getEntities();
 			for (int i = 0; i < nearbyEntities.size(); i++) {
 				int nearbyEntity = nearbyEntities.get(i);
@@ -46,8 +46,8 @@ public abstract class AbstractNearbyEntityIteratingSystem extends IteratingSyste
 					}
 				}
 			}
+			process(entity, reusableNearbyEntities);
 		}
-		process(entity, reusableNearbyEntities);
 	}
 
 	protected abstract void process(int entity, Set<Integer> nearbyEntities);
