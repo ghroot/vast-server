@@ -51,8 +51,6 @@ public class DeathSystem extends IteratingSystem {
 			}
 		}
 		if (playerMapper.has(deathEntity)) {
-			activeMapper.remove(deathEntity);
-
 			String name = playerMapper.get(deathEntity).name;
 			int playerEntity = creationManager.createPlayer(name, subTypeMapper.get(deathEntity).subType, aiMapper.has(deathEntity));
 			playerMapper.get(playerEntity).id = playerMapper.get(deathEntity).id;
@@ -63,6 +61,8 @@ public class DeathSystem extends IteratingSystem {
 			}
 			entitiesByPeer.put(name, playerEntity);
 			createMapper.create(playerEntity).reason = "resurrected";
+
+			activeMapper.remove(deathEntity);
 		}
 		deleteMapper.create(deathEntity).reason = "killed";
 	}
