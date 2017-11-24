@@ -19,6 +19,8 @@ public class DeathSystem extends IteratingSystem {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Known> knownMapper;
+	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<AI> aiMapper;
 	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
@@ -37,6 +39,7 @@ public class DeathSystem extends IteratingSystem {
 		creationManager = world.getSystem(CreationManager.class);
 	}
 
+	// TODO: I don't think cloning the player entity is a maintainable solution
 	@Override
 	protected void process(int deathEntity) {
 		logger.debug("Entity {} died", deathEntity);
@@ -52,6 +55,9 @@ public class DeathSystem extends IteratingSystem {
 
 			String name = playerMapper.get(deathEntity).name;
 			int playerEntity = creationManager.createPlayer(name, subTypeMapper.get(deathEntity).subType, aiMapper.has(deathEntity));
+			playerMapper.get(playerEntity).id = playerMapper.get(deathEntity).id;
+			scanMapper.get(playerEntity).nearbyEntities.addAll(scanMapper.get(deathEntity).nearbyEntities);
+			knownMapper.get(playerEntity).knownEntities.addAll(knownMapper.get(deathEntity).knownEntities);
 			activeMapper.create(playerEntity);
 			entitiesByPeer.put(name, playerEntity);
 			createMapper.create(playerEntity).reason = "resurrected";
