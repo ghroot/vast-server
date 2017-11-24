@@ -32,7 +32,7 @@ public abstract class AbstractNearbyEntityIteratingSystem extends IteratingSyste
 
 	@Override
 	protected void process(int entity) {
-§		if (scanMapper.has(entity)) {
+		if (scanMapper.has(entity)) {
 			process(entity, scanMapper.get(entity).nearbyEntities);
 		} else {
 			reusableNearbyEntities.clear();
