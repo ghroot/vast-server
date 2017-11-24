@@ -161,7 +161,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 	private int createAI(Point2f position) {
 		int aiEntity = world.create(aiArchetype);
 		typeMapper.get(aiEntity).type = "ai";
-		subTypeMapper.get(aiEntity).subType = aiEntity % 4;
+		subTypeMapper.get(aiEntity).subType = aiEntity % 3;
 		transformMapper.get(aiEntity).position.set(position);
 		collisionMapper.get(aiEntity).isStatic = false;
 		collisionMapper.get(aiEntity).radius = 0.3f;
