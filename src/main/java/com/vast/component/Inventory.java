@@ -39,8 +39,10 @@ public class Inventory extends PooledComponent {
 	}
 
 	public void remove(int itemType, int amount) {
-		logger.debug("Removing {} item(s) of type {} from inventory", amount, itemType);
-		items[itemType] -= amount;
+		if (amount > 0) {
+			logger.debug("Removing {} item(s) of type {} from inventory", amount, itemType);
+			items[itemType] -= amount;
+		}
 	}
 
 	public void remove(Set<Cost> costs) {
@@ -50,7 +52,11 @@ public class Inventory extends PooledComponent {
 	}
 
 	public boolean has(int itemType, int amount) {
-		return itemType < items.length && items[itemType] >= amount;
+		if (amount > 0) {
+			return itemType < items.length && items[itemType] >= amount;
+		} else {
+			return true;
+		}
 	}
 
 	public boolean has(Set<Cost> costs) {
