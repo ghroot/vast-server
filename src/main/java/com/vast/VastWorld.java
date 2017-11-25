@@ -60,7 +60,8 @@ public class VastWorld implements Runnable {
 			new PeerEntitySystem(peers, entitiesByPeer),
 			new DeactivateSystem(peers),
 			new ActivateSystem(peers),
-			new SpatialSystem(worldConfiguration, spatialHashes),
+			new SpatialShiftSystem(worldConfiguration, spatialHashes),
+			new SpatialUpdateSystem(worldConfiguration, spatialHashes),
 			new ScanSystem(worldConfiguration, spatialHashes),
 			new CullingSystem(peers, propertyHandlers),
 			new OrderSystem(new HashSet<OrderHandler>(Arrays.asList(

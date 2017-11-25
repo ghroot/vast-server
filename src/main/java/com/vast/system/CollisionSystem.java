@@ -20,6 +20,7 @@ public class CollisionSystem extends IteratingSystem {
 
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Collision> collisionMapper;
+	private ComponentMapper<Static> staticMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Sync> syncMapper;
@@ -31,7 +32,7 @@ public class CollisionSystem extends IteratingSystem {
 	private int numberOfCollisionChecks;
 
 	public CollisionSystem(Set<CollisionHandler> collisionHandlers, Metrics metrics) {
-		super(Aspect.all(Transform.class, Collision.class, Scan.class));
+		super(Aspect.all(Transform.class, Collision.class, Scan.class).exclude(Static.class));
 		this.collisionHandlers = collisionHandlers;
 		this.metrics = metrics;
 
@@ -107,17 +108,12 @@ public class CollisionSystem extends IteratingSystem {
 							if (reusableVector.lengthSquared() == 0.0f) {
 								reusableVector.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
 							}
-							if (collision.isStatic && !nearbyCollision.isStatic) {
-								reusableVector.normalize();
-								reusableVector.scale(overlap);
-								nearbyTransform.position.add(reusableVector);
-								syncMapper.create(nearbyEntity).markPropertyAsDirty(Properties.POSITION);
-							} else if (!collision.isStatic && nearbyCollision.isStatic) {
+							if (staticMapper.has(nearbyEntity)) {
 								reusableVector.normalize();
 								reusableVector.scale(-overlap);
 								transform.position.add(reusableVector);
 								syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
-							} else if (!collision.isStatic && !nearbyCollision.isStatic) {
+							} else {
 								reusableVector.normalize();
 								reusableVector.scale(-overlap * 0.5f);
 								transform.position.add(reusableVector);

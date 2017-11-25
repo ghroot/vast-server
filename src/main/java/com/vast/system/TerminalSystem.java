@@ -98,8 +98,9 @@ public class TerminalSystem extends IntervalSystem {
 			screen.doResizeIfNecessary();
 			screen.clear();
 
-			IntBag entities = world.getAspectSubscriptionManager().get(Aspect.one(Transform.class)).getEntities();
-			IntBag playerEntities = world.getAspectSubscriptionManager().get(Aspect.one(Player.class)).getEntities();
+			IntBag entities = world.getAspectSubscriptionManager().get(Aspect.all(Transform.class)).getEntities();
+			IntBag staticEntities = world.getAspectSubscriptionManager().get(Aspect.all(Static.class)).getEntities();
+			IntBag playerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class)).getEntities();
 			IntBag activePlayerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class, Active.class)).getEntities();
 			IntBag scanEntities = world.getAspectSubscriptionManager().get(Aspect.all(Scan.class)).getEntities();
 
@@ -181,8 +182,9 @@ public class TerminalSystem extends IntervalSystem {
 			}
 			textGraphics.putString(0, 4, "Active spatial hashes: " + numberOfActiveSpatialHashes + " (of " + numberOfSpatialHashes + " total)");
 			textGraphics.putString(0, 5, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
-			textGraphics.putString(0, 6, "Player entities: " + playerEntities.size() + " (" + activePlayerEntities.size() + " active)");
-			textGraphics.putString(0, 7, "Scanning entities: " + scanEntities.size());
+			textGraphics.putString(0, 6, "Moving / static entities: " + (entities.size() - staticEntities.size()) + " / " + staticEntities.size());
+			textGraphics.putString(0, 7, "Player entities: " + playerEntities.size() + " (" + activePlayerEntities.size() + " active)");
+			textGraphics.putString(0, 8, "Scanning entities: " + scanEntities.size());
 
 			String fpsString = "FPS: " + metrics.getFps();
 			textGraphics.putString(screen.getTerminalSize().getColumns() - fpsString.length(), 0, fpsString);
@@ -232,7 +234,7 @@ public class TerminalSystem extends IntervalSystem {
 					String propertyName = propertyNames.get(property);
 					longestLength = Math.max(propertyName.length(), longestLength);
 				}
-				int row = 10;
+				int row = 11;
 				for (int property : metrics.getSyncedProperties().keySet()) {
 					int count = metrics.getSyncedProperties().get(property);
 					String propertyName = propertyNames.get(property);
@@ -245,7 +247,7 @@ public class TerminalSystem extends IntervalSystem {
 			if (focusedEntity >= 0) {
 				Point2f position = transformMapper.get(focusedEntity).position;
 				cameraPosition.set(position.x, -position.y);
-				textGraphics.putString(0, 8, "Following peer entity: " + focusedEntity + " (" + playerMapper.get(focusedEntity).name + ")");
+				textGraphics.putString(0, 9, "Following peer entity: " + focusedEntity + " (" + playerMapper.get(focusedEntity).name + ")");
 			}
 
 			screen.refresh();

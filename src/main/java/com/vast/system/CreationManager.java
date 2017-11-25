@@ -71,6 +71,7 @@ public class CreationManager extends BaseSystem {
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)
+				.add(Static.class)
 				.add(Interactable.class)
 				.add(Harvestable.class)
 				.add(Inventory.class)
@@ -82,6 +83,7 @@ public class CreationManager extends BaseSystem {
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)
+				.add(Static.class)
 				.build(world);
 
 		aiArchetype = new ArchetypeBuilder()
@@ -104,6 +106,7 @@ public class CreationManager extends BaseSystem {
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)
+				.add(Static.class)
 				.add(Constructable.class)
 				.add(SyncPropagation.class)
 				.build(world);
@@ -113,6 +116,7 @@ public class CreationManager extends BaseSystem {
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)
+				.add(Static.class)
 				.add(Inventory.class)
 				.add(Interactable.class)
 				.add(Container.class)
@@ -163,7 +167,6 @@ public class CreationManager extends BaseSystem {
 		typeMapper.get(aiEntity).type = "ai";
 		subTypeMapper.get(aiEntity).subType = aiEntity % 3;
 		transformMapper.get(aiEntity).position.set(position);
-		collisionMapper.get(aiEntity).isStatic = false;
 		collisionMapper.get(aiEntity).radius = 0.3f;
 		healthMapper.get(aiEntity).maxHealth = 2;
 		healthMapper.get(aiEntity).health = 2;
@@ -179,7 +182,6 @@ public class CreationManager extends BaseSystem {
 		typeMapper.get(playerEntity).type = "player";
 		subTypeMapper.get(playerEntity).subType = subType;
 		transformMapper.get(playerEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
-		collisionMapper.get(playerEntity).isStatic = false;
 		collisionMapper.get(playerEntity).radius = 0.3f;
 		healthMapper.get(playerEntity).maxHealth = 5;
 		healthMapper.get(playerEntity).health = 5;
