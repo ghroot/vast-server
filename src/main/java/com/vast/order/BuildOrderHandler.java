@@ -59,7 +59,7 @@ public class BuildOrderHandler implements OrderHandler {
 	@Override
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
 		Inventory inventory = inventoryMapper.get(orderEntity);
-		int buildingType = (byte) dataObject.get((MessageCodes.BUILD_TYPE)).value;
+		int buildingType = (byte) dataObject.get(MessageCodes.BUILD_TYPE).value;
 		Building building = buildings.getBuilding(buildingType);
 		if (inventory.has(building.getCosts())) {
 			inventory.remove(building.getCosts());
