@@ -8,10 +8,7 @@ import com.vast.collision.CollisionHandler;
 import com.vast.data.Buildings;
 import com.vast.data.Items;
 import com.vast.interact.*;
-import com.vast.order.BuildOrderHandler;
-import com.vast.order.InteractOrderHandler;
-import com.vast.order.MoveOrderHandler;
-import com.vast.order.OrderHandler;
+import com.vast.order.*;
 import com.vast.property.*;
 import com.vast.system.*;
 import org.slf4j.Logger;
@@ -69,7 +66,8 @@ public class VastWorld implements Runnable {
 			new OrderSystem(new HashSet<OrderHandler>(Arrays.asList(
 				new MoveOrderHandler(),
 				new InteractOrderHandler(),
-				new BuildOrderHandler(buildings)
+				new BuildOrderHandler(buildings),
+				new EmoteOrderHandler()
 			)), incomingRequests, entitiesByPeer),
 			new AISystem(),
 			new PathMoveSystem(),

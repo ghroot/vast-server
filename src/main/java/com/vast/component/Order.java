@@ -10,7 +10,8 @@ public class Order extends Component {
 	public enum Type {
 		MOVE,
 		INTERACT,
-		BUILD
+		BUILD,
+		EMOTE
 	}
 	public Type type;
 }

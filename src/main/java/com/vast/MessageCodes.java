@@ -36,6 +36,10 @@ public class MessageCodes {
 	public static byte BUILD_TYPE = 0;
 	public static byte BUILD_POSITION = 1;
 
+	// Client -> Server
+	public static short EMOTE = 53;
+	public static byte EMOTE_TYPE = 0;
+
 	// Properties
 	public static byte PROPERTY_POSITION = 100;
 	public static byte PROPERTY_ROTATION = 101;
