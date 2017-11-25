@@ -38,11 +38,12 @@ public class MessageCodes {
 
 	// Properties
 	public static byte PROPERTY_POSITION = 100;
-	public static byte PROPERTY_ACTIVE = 101;
-	public static byte PROPERTY_DURABILITY = 102;
-	public static byte PROPERTY_PROGRESS = 103;
-	public static byte PROPERTY_HEALTH = 104;
-	public static byte PROPERTY_MAX_HEALTH = 105;
-	public static byte PROPERTY_INTERACTABLE = 106;
-	public static byte PROPERTY_INVENTORY = 107;
+	public static byte PROPERTY_ROTATION = 101;
+	public static byte PROPERTY_ACTIVE = 102;
+	public static byte PROPERTY_DURABILITY = 103;
+	public static byte PROPERTY_PROGRESS = 104;
+	public static byte PROPERTY_HEALTH = 105;
+	public static byte PROPERTY_MAX_HEALTH = 106;
+	public static byte PROPERTY_INTERACTABLE = 107;
+	public static byte PROPERTY_INVENTORY = 108;
 }

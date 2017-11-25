@@ -10,9 +10,7 @@ import com.vast.component.Transform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class PeerEntitySystem extends AbstractProfiledBaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(PeerEntitySystem.class);
@@ -23,14 +21,11 @@ public class PeerEntitySystem extends AbstractProfiledBaseSystem {
 	private Map<String, VastPeer> peers;
 
 	private Map<String, Integer> entitiesByPeer;
-	private Set<VastPeer> peersLastUpdate;
 	private CreationManager creationManager;
 
 	public PeerEntitySystem(Map<String, VastPeer> peers, Map<String, Integer> entitiesByPeer) {
 		this.peers = peers;
 		this.entitiesByPeer = entitiesByPeer;
-
-		peersLastUpdate = new HashSet<VastPeer>();
 	}
 
 	@Override
@@ -43,15 +38,7 @@ public class PeerEntitySystem extends AbstractProfiledBaseSystem {
 	@Override
 	protected void processSystem() {
 		updateEntitiesByPeer();
-
-		for (VastPeer peer : peers.values()) {
-			if (isPeerNew(peer)) {
-				peerJoined(peer);
-			}
-		}
-
-		peersLastUpdate.clear();
-		peersLastUpdate.addAll(peers.values());
+		createPeerEntitiesIfNeeded();
 	}
 
 	private void updateEntitiesByPeer() {
@@ -68,13 +55,11 @@ public class PeerEntitySystem extends AbstractProfiledBaseSystem {
 		}
 	}
 
-	private boolean isPeerNew(VastPeer peer) {
-		return !peersLastUpdate.contains(peer);
-	}
-
-	private void peerJoined(VastPeer peer) {
-		if (!entitiesByPeer.containsKey(peer.getName())) {
-			createPeerEntity(peer);
+	private void createPeerEntitiesIfNeeded() {
+		for (VastPeer peer : peers.values()) {
+			if (!entitiesByPeer.containsKey(peer.getName())) {
+				createPeerEntity(peer);
+			}
 		}
 	}
 

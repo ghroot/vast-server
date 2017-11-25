@@ -85,7 +85,7 @@ public class CollisionSystem extends IteratingSystem {
 			Scan scan = scanMapper.get(entity);
 			for (int nearbyEntity : scan.nearbyEntities) {
 				if (nearbyEntity != entity) {
-					if (deleteMapper.has(entity) || deleteMapper.has(nearbyEntity)) {
+					if (!collisionMapper.has(nearbyEntity) || deleteMapper.has(entity) || deleteMapper.has(nearbyEntity)) {
 						continue;
 					}
 

@@ -49,6 +49,9 @@ public class PathMoveSystem extends IteratingSystem {
 
         reusableDirection.set(path.targetPosition.x - transform.position.x, path.targetPosition.y - transform.position.y);
         if (reusableDirection.length() > 0) {
+			transform.rotation = getAngle(reusableDirection);
+			syncMapper.create(entity).markPropertyAsDirty(Properties.ROTATION);
+
             float distance = reusableDirection.length();
             float speed;
             if (distance > 2.0f) {
@@ -68,5 +71,13 @@ public class PathMoveSystem extends IteratingSystem {
             }
 			syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
         }
+	}
+
+	public float getAngle(Vector2f direction) {
+		float angle = (float) Math.toDegrees(Math.atan2(direction.y, direction.x));
+		if (angle < 0){
+			angle += 360;
+		}
+		return angle;
 	}
 }

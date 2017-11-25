@@ -40,6 +40,7 @@ public class VastWorld implements Runnable {
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
 		Set<PropertyHandler> propertyHandlers = new HashSet<PropertyHandler>(Arrays.asList(
 			new PositionPropertyHandler(),
+			new RotationPropertyHandler(),
 			new ActivePropertyHandler(),
 			new DurabilityPropertyHandler(),
 			new ProgressPropertyHandler(),
@@ -80,9 +81,9 @@ public class VastWorld implements Runnable {
 			))),
 			new SpatialSystem(worldConfiguration, spatialHashes),
 			new CollisionSystem(new HashSet<CollisionHandler>(), metrics),
-			new DeathSystem(entitiesByPeer),
 			new LifetimeSystem(),
 			new EventSystem(peers),
+			new DeathSystem(worldConfiguration),
 			new DeleteSystem(peers),
 			new SyncSystem(propertyHandlers, peers, metrics)
 		);

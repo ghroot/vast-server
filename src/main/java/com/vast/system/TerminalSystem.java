@@ -63,6 +63,7 @@ public class TerminalSystem extends IntervalSystem {
 		this.spatialHashes = spatialHashes;
 
 		propertyNames.put(Properties.POSITION, "Position");
+		propertyNames.put(Properties.ROTATION, "Rotation");
 		propertyNames.put(Properties.ACTIVE, "Active");
 		propertyNames.put(Properties.DURABILITY, "Durability");
 		propertyNames.put(Properties.HEALTH, "Health");

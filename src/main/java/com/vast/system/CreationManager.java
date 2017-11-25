@@ -81,7 +81,6 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)
-				.add(SyncPropagation.class)
 				.build(world);
 
 		aiArchetype = new ArchetypeBuilder()
@@ -169,6 +168,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		healthMapper.get(aiEntity).health = 2;
 		activeMapper.create(aiEntity);
 		syncPropagationMapper.get(aiEntity).setUnreliable(Properties.POSITION);
+		syncPropagationMapper.get(aiEntity).setUnreliable(Properties.ROTATION);
 		return aiEntity;
 	}
 
@@ -183,6 +183,7 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		healthMapper.get(playerEntity).maxHealth = 5;
 		healthMapper.get(playerEntity).health = 5;
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.POSITION);
+		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.ROTATION);
 		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.INVENTORY);
 		if (ai) {
 			aiMapper.create(playerEntity);
@@ -200,12 +201,12 @@ public class CreationManager extends AbstractProfiledBaseSystem {
 		return buildingEntity;
 	}
 
-	public int createCrate(Point2f position, short[] items) {
+	public int createCrate(Point2f position, Inventory inventory) {
 		int crateEntity = world.create(crateArchetype);
 		typeMapper.get(crateEntity).type = "crate";
 		transformMapper.get(crateEntity).position.set(position);
 		collisionMapper.get(crateEntity).radius = 0.1f;
-		inventoryMapper.get(crateEntity).add(items);
+		inventoryMapper.get(crateEntity).add(inventory);
 		return crateEntity;
 	}
 }
