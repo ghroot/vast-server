@@ -2,10 +2,8 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.Profiler;
 import com.vast.component.Collision;
 import com.vast.component.Interact;
 import com.vast.component.Path;
@@ -18,7 +16,6 @@ import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
 import java.util.Set;
 
-@Profile(enabled = true, using = Profiler.class)
 public class InteractSystem  extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(InteractSystem.class);
 

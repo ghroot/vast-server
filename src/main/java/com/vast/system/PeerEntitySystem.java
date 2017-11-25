@@ -1,6 +1,7 @@
 package com.vast.system;
 
 import com.artemis.Aspect;
+import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.artemis.utils.IntBag;
 import com.vast.FakePeer;
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class PeerEntitySystem extends AbstractProfiledBaseSystem {
+public class PeerEntitySystem extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(PeerEntitySystem.class);
 
 	private ComponentMapper<Player> playerMapper;

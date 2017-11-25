@@ -2,7 +2,6 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.annotations.Profile;
 import com.artemis.systems.IntervalSystem;
 import com.artemis.utils.IntBag;
 import com.googlecode.lanterna.TerminalPosition;
@@ -16,7 +15,6 @@ import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.vast.Metrics;
-import com.vast.Profiler;
 import com.vast.Properties;
 import com.vast.VastPeer;
 import com.vast.WorldConfiguration;
@@ -28,7 +26,6 @@ import javax.vecmath.Point2f;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Profile(enabled = true, using = Profiler.class)
 public class TerminalSystem extends IntervalSystem {
 	private static final Logger logger = LoggerFactory.getLogger(TerminalSystem.class);
 

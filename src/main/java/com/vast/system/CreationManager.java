@@ -2,6 +2,7 @@ package com.vast.system;
 
 import com.artemis.Archetype;
 import com.artemis.ArchetypeBuilder;
+import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
 import com.vast.WorldConfiguration;
@@ -13,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
 
-public class CreationManager extends AbstractProfiledBaseSystem {
+public class CreationManager extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CreationManager.class);
 
 	private ComponentMapper<Player> playerMapper;

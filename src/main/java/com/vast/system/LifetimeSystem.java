@@ -2,15 +2,12 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
-import com.vast.Profiler;
 import com.vast.component.Delete;
 import com.vast.component.Lifetime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Profile(enabled = true, using = Profiler.class)
 public class LifetimeSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(LifetimeSystem.class);
 

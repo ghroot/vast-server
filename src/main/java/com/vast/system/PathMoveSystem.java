@@ -2,10 +2,8 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.Profiler;
 import com.vast.Properties;
 import com.vast.component.Path;
 import com.vast.component.Sync;
@@ -15,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Vector2f;
 
-@Profile(enabled = true, using = Profiler.class)
 public class PathMoveSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(PathMoveSystem.class);
 

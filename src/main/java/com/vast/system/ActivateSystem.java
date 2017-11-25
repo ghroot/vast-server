@@ -2,10 +2,8 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.Profiler;
 import com.vast.Properties;
 import com.vast.VastPeer;
 import com.vast.component.*;
@@ -14,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-@Profile(enabled = true, using = Profiler.class)
 public class ActivateSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(ActivateSystem.class);
 

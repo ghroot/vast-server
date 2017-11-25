@@ -2,11 +2,9 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.annotations.Profile;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
-import com.vast.Profiler;
 import com.vast.VastPeer;
 import com.vast.component.*;
 import com.vast.property.PropertyHandler;
@@ -16,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Set;
 
-@Profile(enabled = true, using = Profiler.class)
 public class CreateSystem extends AbstractNearbyEntityIteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CreateSystem.class);
 

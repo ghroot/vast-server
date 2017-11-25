@@ -2,12 +2,10 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.annotations.Profile;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.MessageCodes;
 import com.vast.Metrics;
-import com.vast.Profiler;
 import com.vast.VastPeer;
 import com.vast.component.Active;
 import com.vast.component.Player;
@@ -20,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Set;
 
-@Profile(enabled = true, using = Profiler.class)
 public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(SyncSystem.class);
 

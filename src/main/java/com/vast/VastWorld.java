@@ -26,8 +26,11 @@ public class VastWorld implements Runnable {
 	private World world;
 	private boolean alive;
 	private long lastFrameStartTime;
+	private Metrics metrics;
 
 	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, boolean showMonitor, Metrics metrics) {
+		this.metrics = metrics;
+
 		WorldConfiguration worldConfiguration = new WorldConfiguration(loadWorldProperties());
 		Items items = new Items();
 		Buildings buildings = new Buildings(items);
@@ -49,9 +52,6 @@ public class VastWorld implements Runnable {
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldConfiguration, items, buildings),
-			new WorldSerializationManager(),
-			new EntityLinkManager(),
-			new MetricsManager(metrics),
 			new TimeManager(),
 
 			new WorldSerializationSystem(snapshotFormat, metrics),
@@ -84,7 +84,10 @@ public class VastWorld implements Runnable {
 			new DeathSystem(worldConfiguration),
 			new DeleteSystem(peers),
 			new SyncSystem(propertyHandlers, peers, metrics)
-		);
+		).with(
+			new WorldSerializationManager(),
+			new EntityLinkManager()
+		).register(new ProfiledInvocationStrategy(metrics));
 		if (showMonitor) {
 			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, spatialHashes));
 		}
@@ -110,6 +113,7 @@ public class VastWorld implements Runnable {
 		while (alive) {
 			long frameStartTime = System.currentTimeMillis();
 			int timeSinceLastFrame = (int) (frameStartTime - lastFrameStartTime);
+			metrics.setTimePerFrameMs(timeSinceLastFrame);
 			float delta = (float) timeSinceLastFrame / 1000;
 			world.setDelta(delta);
 			long processStartTime = System.currentTimeMillis();

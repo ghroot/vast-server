@@ -1,5 +1,6 @@
 package com.vast.system;
 
+import com.artemis.BaseSystem;
 import com.vast.VastPeer;
 import com.vast.VastServerApplication;
 import org.slf4j.Logger;
@@ -7,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class PeerTransferSystem extends AbstractProfiledBaseSystem {
+public class PeerTransferSystem extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(PeerTransferSystem.class);
 
 	private VastServerApplication serverApplication;

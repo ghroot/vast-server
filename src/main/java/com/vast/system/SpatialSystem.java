@@ -2,9 +2,7 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.annotations.Profile;
 import com.artemis.systems.IteratingSystem;
-import com.vast.Profiler;
 import com.vast.SpatialHash;
 import com.vast.WorldConfiguration;
 import com.vast.component.Spatial;
@@ -17,7 +15,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@Profile(enabled = true, using = Profiler.class)
 public class SpatialSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(SpatialSystem.class);
 
