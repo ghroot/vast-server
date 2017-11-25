@@ -34,6 +34,10 @@ public class Inventory extends PooledComponent {
 		}
 	}
 
+	public void add(Inventory otherInventory) {
+		add(otherInventory.items);
+	}
+
 	public void remove(int itemType, int amount) {
 		logger.debug("Removing {} item(s) of type {} from inventory", amount, itemType);
 		items[itemType] -= amount;

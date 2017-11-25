@@ -24,7 +24,7 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public boolean process(int playerEntity, int containerEntity) {
-		inventoryMapper.get(playerEntity).add(inventoryMapper.get(containerEntity).items);
+		inventoryMapper.get(playerEntity).add(inventoryMapper.get(containerEntity));
 		syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
 		deleteMapper.create(containerEntity).reason = "collected";
 		return true;

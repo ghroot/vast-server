@@ -33,7 +33,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		harvestable.durability -= world.getDelta() * HARVEST_SPEED;
 		syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.DURABILITY);
 		if (harvestable.durability <= 0.0f) {
-			inventoryMapper.get(playerEntity).add(inventoryMapper.get(harvestableEntity).items);
+			inventoryMapper.get(playerEntity).add(inventoryMapper.get(harvestableEntity));
 			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
 			deleteMapper.create(harvestableEntity).reason = "harvested";
 			return true;
