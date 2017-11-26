@@ -72,7 +72,7 @@ public class VastWorld implements Runnable {
 			)), incomingRequests, entitiesByPeer),
 			new AISystem(),
 			new PathMoveSystem(),
-			new InteractSystem(new HashSet<InteractionHandler>(Arrays.asList(
+			new InteractSystem(new ArrayList<InteractionHandler>(Arrays.asList(
 				new HarvestableInteractionHandler(),
 				new ConstructableInteractionHandler(),
 				new AttackInteractionHandler(),

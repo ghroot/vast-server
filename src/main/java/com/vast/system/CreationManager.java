@@ -27,6 +27,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<AI> aiMapper;
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Constructable> constructableMapper;
+	private ComponentMapper<Container> containerMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 
 	private WorldConfiguration worldConfiguration;
@@ -108,6 +109,7 @@ public class CreationManager extends BaseSystem {
 				.add(Collision.class)
 				.add(Static.class)
 				.add(Constructable.class)
+				.add(Interactable.class)
 				.add(SyncPropagation.class)
 				.build(world);
 
@@ -199,8 +201,18 @@ public class CreationManager extends BaseSystem {
 		typeMapper.get(buildingEntity).type = "building";
 		subTypeMapper.get(buildingEntity).subType = buildingType;
 		transformMapper.get(buildingEntity).position.set(position);
-		collisionMapper.get(buildingEntity).radius = 0.5f;
 		constructableMapper.get(buildingEntity).buildDuration = buildings.getBuilding(buildingType).getBuildDuration();
+		if (buildingType == 0) {
+			collisionMapper.get(buildingEntity).radius = 0.8f;
+		} else if (buildingType == 1) {
+			collisionMapper.get(buildingEntity).radius = 0.5f;
+			inventoryMapper.create(buildingEntity);
+			containerMapper.create(buildingEntity).persistent = true;
+		} else if (buildingType == 2) {
+			collisionMapper.get(buildingEntity).radius = 0.5f;
+			healthMapper.create(buildingEntity).maxHealth = 3;
+			healthMapper.create(buildingEntity).health = 3;
+		}
 		return buildingEntity;
 	}
 

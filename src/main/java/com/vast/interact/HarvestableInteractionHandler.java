@@ -23,6 +23,12 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	}
 
 	@Override
+	public boolean canInteract(int playerEntity, int harvestableEntity) {
+		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
+		return harvestable.durability > 0.0f;
+	}
+
+	@Override
 	public void start(int playerEntity, int harvestableEntity) {
 		eventMapper.create(playerEntity).name = "startedHarvesting";
 	}

@@ -3,7 +3,10 @@ package com.vast.interact;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
-import com.vast.component.*;
+import com.vast.component.Constructable;
+import com.vast.component.Event;
+import com.vast.component.Player;
+import com.vast.component.Sync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +15,6 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 
 	private ComponentMapper<Constructable> constructableMapper;
 	private ComponentMapper<Sync> syncMapper;
-	private ComponentMapper<Interactable> interactableMapper;
 	private ComponentMapper<Event> eventMapper;
 
 	public ConstructableInteractionHandler() {
@@ -20,18 +22,22 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 	}
 
 	@Override
-	public void start(int playerEntity, int buildingEntity) {
+	public boolean canInteract(int playerEntity, int constructableEntity) {
+		Constructable constructable = constructableMapper.get(constructableEntity);
+		return !constructable.isComplete();
+	}
+
+	@Override
+	public void start(int playerEntity, int constructableEntity) {
 		eventMapper.create(playerEntity).name = "startedBuilding";
 	}
 
 	@Override
-	public boolean process(int playerEntity, int buildingEntity) {
-		Constructable constructable = constructableMapper.get(buildingEntity);
+	public boolean process(int playerEntity, int constructableEntity) {
+		Constructable constructable = constructableMapper.get(constructableEntity);
 		constructable.buildTime += world.getDelta();
-		syncMapper.create(buildingEntity).markPropertyAsDirty(Properties.PROGRESS);
-		if (constructable.buildTime >= constructable.buildDuration) {
-			interactableMapper.remove(buildingEntity);
-			syncMapper.create(buildingEntity).markPropertyAsDirty(Properties.INTERACTABLE);
+		syncMapper.create(constructableEntity).markPropertyAsDirty(Properties.PROGRESS);
+		if (constructable.isComplete()) {
 			return true;
 		} else {
 			return false;

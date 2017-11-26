@@ -20,6 +20,9 @@ public class InteractOrderHandler implements OrderHandler {
 	private ComponentMapper<Interactable> interactableMapper;
 	private ComponentMapper<Path> pathMapper;
 
+	public InteractOrderHandler() {
+	}
+
 	@Override
 	public void initialize() {
 	}
@@ -48,12 +51,7 @@ public class InteractOrderHandler implements OrderHandler {
 	@Override
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
 		int otherEntity = (int) dataObject.get(MessageCodes.INTERACT_ENTITY_ID).value;
-		if (interactableMapper.has(otherEntity)) {
-			interactMapper.create(orderEntity).entity = otherEntity;
-			return true;
-		} else {
-			logger.debug("Player entity {} tried to interact with non-interactable entity {}", orderEntity, otherEntity);
-		}
-		return false;
+		interactMapper.create(orderEntity).entity = otherEntity;
+		return true;
 	}
 }

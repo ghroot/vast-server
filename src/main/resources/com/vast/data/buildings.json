@@ -1,26 +1,26 @@
 [
   {
     "type": 0,
-    "name": "building1",
-    "buildDuration": 10,
+    "name": "house",
+    "buildDuration": 30,
     "cost": {
       "wood": 10
     }
   },
   {
     "type": 1,
-    "name": "building2",
-    "buildDuration": 20,
+    "name": "chest",
+    "buildDuration": 10,
     "cost": {
-      "wood": 20
+      "wood": 5
     }
   },
   {
     "type": 2,
-    "name": "building3",
-    "buildDuration": 30,
+    "name": "wall",
+    "buildDuration": 5,
     "cost": {
-      "wood": 30
+      "wood": 1
     }
   }
 ]

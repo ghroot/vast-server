@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
-import java.util.Set;
+import java.util.List;
 
 public class InteractSystem  extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(InteractSystem.class);
@@ -26,11 +26,11 @@ public class InteractSystem  extends IteratingSystem {
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Collision> collisionMapper;
 
-	private Set<InteractionHandler> interactionHandlers;
+	private List<InteractionHandler> interactionHandlers;
 
 	private Vector2f reusableVector;
 
-	public InteractSystem(Set<InteractionHandler> interactionHandlers) {
+	public InteractSystem(List<InteractionHandler> interactionHandlers) {
 		super(Aspect.all(Interact.class));
 		this.interactionHandlers = interactionHandlers;
 
@@ -50,7 +50,7 @@ public class InteractSystem  extends IteratingSystem {
 	}
 
 	@Override
-	public void removed(int entity) {
+	protected void removed(int entity) {
 		Interact interact = interactMapper.get(entity);
 		if (interact.phase == Interact.Phase.INTERACTING) {
 			if (interact.handler != null) {
@@ -64,51 +64,72 @@ public class InteractSystem  extends IteratingSystem {
 		Interact interact = interactMapper.get(entity);
 
 		if (interact.entity == -1) {
-			logger.debug("Entity {} canceled interaction because the interactable entity has been deleted", entity);
+			logger.debug("Entity {} canceled interaction because the other entity no longer exists", entity);
 			interactMapper.remove(entity);
 		} else {
-			Transform transform = transformMapper.get(entity);
-			Transform otherTransform = transformMapper.get(interact.entity);
-
-			float interactDistance = collisionMapper.get(entity).radius + INTERACTION_SPACING + collisionMapper.get(interact.entity).radius;
-			reusableVector.set(otherTransform.position.x - transform.position.x, otherTransform.position.y - transform.position.y);
-			if (reusableVector.length() > interactDistance) {
-				if (interact.phase == Interact.Phase.APPROACHING) {
-					pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);
+			if (interact.handler != null && !interact.handler.canInteract(entity, interact.entity)) {
+				logger.debug("Entity {} can no longer interact with entity {}", entity, interact.entity);
+				interact.handler = null;
+			}
+			if (interact.handler == null) {
+				InteractionHandler handler = findInteractionHandler(entity, interact.entity);
+				if (handler != null) {
+					interact.handler = handler;
+					logger.debug("Entity {} assigned interaction handler {}", entity, interact.handler.getClass());
 				} else {
-					if (interact.phase == Interact.Phase.INTERACTING) {
-						if (interact.handler != null) {
-							interact.handler.stop(entity, interact.entity);
-						}
-					}
-					logger.debug("Entity {} started approaching entity {}", entity, interact.entity);
-					pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);
-					interact.phase = Interact.Phase.APPROACHING;
-				}
-			} else {
-				if (interact.phase == Interact.Phase.INTERACTING) {
-					if (interact.handler != null) {
-						if (interact.handler.process(entity, interact.entity)) {
-							logger.debug("Entity {} completed interaction with entity {}", entity, interact.entity);
-							interactMapper.remove(entity);
-						}
-					}
-				} else {
-					pathMapper.remove(entity);
-					for (InteractionHandler interactionHandler : interactionHandlers) {
-						if (interactionHandler.getAspect1().isInterested(world.getEntity(entity)) &&
-								interactionHandler.getAspect2().isInterested(world.getEntity(interact.entity))) {
-							interact.handler = interactionHandler;
-							break;
-						}
-					}
-					if (interact.handler != null) {
-						interact.handler.start(entity, interact.entity);
-					}
-					logger.debug("Entity {} started interacting with entity {}", entity, interact.entity);
-					interact.phase = Interact.Phase.INTERACTING;
+					logger.debug("Entity {} can not interact with entity {}", entity, interact.entity);
 				}
 			}
+			if (interact.handler != null) {
+				processInteraction(entity);
+			} else {
+				interactMapper.remove(entity);
+			}
 		}
+	}
+
+	private void processInteraction(int entity) {
+		Interact interact = interactMapper.get(entity);
+		Transform transform = transformMapper.get(entity);
+		Transform otherTransform = transformMapper.get(interact.entity);
+
+		float interactDistance = collisionMapper.get(entity).radius + INTERACTION_SPACING + collisionMapper.get(interact.entity).radius;
+		reusableVector.set(otherTransform.position.x - transform.position.x, otherTransform.position.y - transform.position.y);
+		if (reusableVector.length() > interactDistance) {
+			if (interact.phase == Interact.Phase.APPROACHING) {
+				pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);
+			} else {
+				if (interact.phase == Interact.Phase.INTERACTING) {
+					interact.handler.stop(entity, interact.entity);
+				}
+				logger.debug("Entity {} started approaching entity {}", entity, interact.entity);
+				pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);
+				interact.phase = Interact.Phase.APPROACHING;
+			}
+		} else {
+			if (interact.phase == Interact.Phase.INTERACTING) {
+				if (interact.handler.process(entity, interact.entity)) {
+					logger.debug("Entity {} completed interaction with entity {}", entity, interact.entity);
+					interactMapper.remove(entity);
+				}
+			} else {
+				pathMapper.remove(entity);
+
+				interact.handler.start(entity, interact.entity);
+				logger.debug("Entity {} started interacting with entity {}", entity, interact.entity);
+				interact.phase = Interact.Phase.INTERACTING;
+			}
+		}
+	}
+
+	private InteractionHandler findInteractionHandler(int entity, int otherEntity) {
+		for (InteractionHandler interactionHandler : interactionHandlers) {
+			if (interactionHandler.getAspect1().isInterested(world.getEntity(entity)) &&
+					interactionHandler.getAspect2().isInterested(world.getEntity(otherEntity)) &&
+					interactionHandler.canInteract(entity, otherEntity)) {
+				return interactionHandler;
+			}
+		}
+		return null;
 	}
 }

@@ -19,7 +19,6 @@ public class BuildOrderHandler implements OrderHandler {
 	private ComponentMapper<Interact> interactMapper;
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
-	private ComponentMapper<Interactable> interactableMapper;
 	private ComponentMapper<Sync> syncMapper;
 
 	private Buildings buildings;
@@ -67,8 +66,6 @@ public class BuildOrderHandler implements OrderHandler {
 			float[] position = (float[]) dataObject.get(MessageCodes.BUILD_POSITION).value;
 			Point2f buildPosition = new Point2f(position[0], position[1]);
 			int buildingEntity = creationManager.createBuilding(buildPosition, building.getType());
-			interactableMapper.create(buildingEntity);
-			syncMapper.create(buildingEntity).markPropertyAsDirty(Properties.INTERACTABLE);
 			createMapper.create(buildingEntity).reason = "built";
 
 			interactMapper.create(orderEntity).entity = buildingEntity;

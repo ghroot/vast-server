@@ -22,6 +22,12 @@ public class AttackInteractionHandler extends AbstractInteractionHandler {
 	}
 
 	@Override
+	public boolean canInteract(int attackEntity, int healthEntity) {
+		Health health = healthMapper.get(healthEntity);
+		return !health.isDead();
+	}
+
+	@Override
 	public void start(int attackEntity, int healthEntity) {
 	}
 
@@ -35,7 +41,7 @@ public class AttackInteractionHandler extends AbstractInteractionHandler {
 			eventMapper.create(attackEntity).name = "attacked";
 			logger.debug("Entity {} is attacking entity {}, health left: {}", attackEntity, healthEntity, health.health);
 			if (health.isDead()) {
-				logger.debug("Entity {} was killed by entity {}", healthEntity, attackEntity);
+				logger.debug("Entity {} killed entity {}", attackEntity, healthEntity);
 				deathMapper.create(healthEntity);
 				return true;
 			} else {
