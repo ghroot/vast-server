@@ -12,6 +12,8 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 
 	private ComponentMapper<Container> containerMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
+	private ComponentMapper<Owner> ownerMapper;
+	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Sync> syncMapper;
 
@@ -21,6 +23,10 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public boolean canInteract(int playerEntity, int containerEntity) {
+		if (ownerMapper.has(containerEntity) &&
+				!playerMapper.get(playerEntity).name.equals(ownerMapper.get(containerEntity).name)) {
+			return false;
+		}
 		return true;
 	}
 

@@ -16,6 +16,8 @@ public class BuildOrderHandler implements OrderHandler {
 	private World world;
 
 	private ComponentMapper<Create> createMapper;
+	private ComponentMapper<Owner> ownerMapper;
+	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Interact> interactMapper;
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
@@ -66,6 +68,7 @@ public class BuildOrderHandler implements OrderHandler {
 			float[] position = (float[]) dataObject.get(MessageCodes.BUILD_POSITION).value;
 			Point2f buildPosition = new Point2f(position[0], position[1]);
 			int buildingEntity = creationManager.createBuilding(buildPosition, building.getType());
+			ownerMapper.get(buildingEntity).name = playerMapper.get(orderEntity).name;
 			createMapper.create(buildingEntity).reason = "built";
 
 			interactMapper.create(orderEntity).entity = buildingEntity;

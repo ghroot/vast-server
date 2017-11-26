@@ -104,6 +104,7 @@ public class CreationManager extends BaseSystem {
 		buildingArchetype = new ArchetypeBuilder()
 				.add(Type.class)
 				.add(SubType.class)
+				.add(Owner.class)
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)

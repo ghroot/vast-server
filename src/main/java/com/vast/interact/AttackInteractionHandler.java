@@ -13,6 +13,8 @@ public class AttackInteractionHandler extends AbstractInteractionHandler {
 
 	private ComponentMapper<Attack> attackMapper;
 	private ComponentMapper<Health> healthMapper;
+	private ComponentMapper<Owner> ownerMapper;
+	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<Death> deathMapper;
 	private ComponentMapper<Sync> syncMapper;
@@ -23,8 +25,14 @@ public class AttackInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public boolean canInteract(int attackEntity, int healthEntity) {
-		Health health = healthMapper.get(healthEntity);
-		return !health.isDead();
+		if (healthMapper.get(healthEntity).isDead()) {
+			return false;
+		}
+		if (playerMapper.has(attackEntity) && ownerMapper.has(healthEntity) &&
+				playerMapper.get(attackEntity).name.equals(ownerMapper.get(healthEntity).name)) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
