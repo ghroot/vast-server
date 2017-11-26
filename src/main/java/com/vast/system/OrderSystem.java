@@ -60,15 +60,15 @@ public class OrderSystem extends BaseSystem {
 					logger.warn("No order handler found for type {}", order.type);
 				}
 				orderMapper.remove(playerEntity);
-			}
-
-			OrderHandler orderHandler = getOrderHandler(request.getMessage().getCode());
-			if (orderHandler != null) {
-				if (orderHandler.startOrder(playerEntity, request.getMessage().getDataObject())) {
-					orderMapper.create(playerEntity).type = orderHandler.getOrderType();
-					logger.debug("Starting {} order for entity {}", orderHandler.getOrderType(), playerEntity);
+			} else {
+				OrderHandler orderHandler = getOrderHandler(request.getMessage().getCode());
+				if (orderHandler != null) {
+					if (orderHandler.startOrder(playerEntity, request.getMessage().getDataObject())) {
+						orderMapper.create(playerEntity).type = orderHandler.getOrderType();
+						logger.debug("Starting {} order for entity {}", orderHandler.getOrderType(), playerEntity);
+					}
+					iterator.remove();
 				}
-				iterator.remove();
 			}
 		}
 	}
