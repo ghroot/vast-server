@@ -22,5 +22,14 @@
     "cost": {
       "wood": 1
     }
+  },
+  {
+    "type": 3,
+    "name": "fireplace",
+    "buildDuration": 10,
+    "cost": {
+      "wood": 3,
+      "stone": 1
+    }
   }
 ]

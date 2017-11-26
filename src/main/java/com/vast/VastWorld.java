@@ -47,7 +47,8 @@ public class VastWorld implements Runnable {
 			new HealthPropertyHandler(),
 			new MaxHealthPropertyHandler(),
 			new InteractablePropertyHandler(),
-			new InventoryPropertyHandler()
+			new InventoryPropertyHandler(),
+			new FueledPropertyHandler()
 		));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
@@ -76,9 +77,11 @@ public class VastWorld implements Runnable {
 				new HarvestableInteractionHandler(),
 				new ConstructableInteractionHandler(),
 				new AttackInteractionHandler(),
-				new ContainerInteractionHandler()
+				new ContainerInteractionHandler(),
+				new FueledInteractionHandler()
 			))),
 			new CollisionSystem(new HashSet<CollisionHandler>(), metrics),
+			new FuelSystem(),
 			new LifetimeSystem(),
 			new DeathSystem(worldConfiguration),
 			new DeleteSystem(peers),

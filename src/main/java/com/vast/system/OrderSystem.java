@@ -52,7 +52,7 @@ public class OrderSystem extends BaseSystem {
 
 			if (orderMapper.has(playerEntity)) {
 				Order order = orderMapper.get(playerEntity);
-				logger.debug("Canceling {} order for entity {}", playerEntity, order.type);
+				logger.debug("Canceling {} order for entity {}", order.type, playerEntity);
 				OrderHandler orderHandler = getOrderHandler(order.type);
 				if (orderHandler != null) {
 					orderHandler.cancelOrder(playerEntity);

@@ -5,10 +5,10 @@ import com.artemis.ArchetypeBuilder;
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
-import com.vast.data.WorldConfiguration;
 import com.vast.component.*;
 import com.vast.data.Buildings;
 import com.vast.data.Items;
+import com.vast.data.WorldConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +28,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Constructable> constructableMapper;
 	private ComponentMapper<Container> containerMapper;
+	private ComponentMapper<Fueled> fueledMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 
 	private WorldConfiguration worldConfiguration;
@@ -85,6 +86,10 @@ public class CreationManager extends BaseSystem {
 				.add(Spatial.class)
 				.add(Collision.class)
 				.add(Static.class)
+				.add(Interactable.class)
+				.add(Harvestable.class)
+				.add(Inventory.class)
+				.add(SyncPropagation.class)
 				.build(world);
 
 		aiArchetype = new ArchetypeBuilder()
@@ -162,6 +167,8 @@ public class CreationManager extends BaseSystem {
 		typeMapper.get(rockEntity).type = "rock";
 		transformMapper.get(rockEntity).position.set(position);
 		collisionMapper.get(rockEntity).radius = 0.2f;
+		inventoryMapper.get(rockEntity).add(items.getItem("stone").getType(), 2);
+		syncPropagationMapper.get(rockEntity).setUnreliable(Properties.DURABILITY);
 		return rockEntity;
 	}
 
@@ -213,6 +220,8 @@ public class CreationManager extends BaseSystem {
 			collisionMapper.get(buildingEntity).radius = 0.5f;
 			healthMapper.create(buildingEntity).maxHealth = 3;
 			healthMapper.create(buildingEntity).health = 3;
+		} else if (buildingType == 3) {
+			fueledMapper.create(buildingEntity);
 		}
 		return buildingEntity;
 	}

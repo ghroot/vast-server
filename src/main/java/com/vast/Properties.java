@@ -10,4 +10,5 @@ public class Properties {
 	public static int MAX_HEALTH = 1 << 6;
 	public static int INTERACTABLE = 1 << 7;
 	public static int INVENTORY = 1 << 8;
+	public static int FUELED = 1 << 9;
 }
