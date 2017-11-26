@@ -1,0 +1,8 @@
+{
+  "width": 10000,
+  "height": 10000,
+  "sectionSize": 8,
+  "numberOfTrees": 300000,
+  "numberOfRocks": 20000,
+  "numberOfAIs": 1000
+}

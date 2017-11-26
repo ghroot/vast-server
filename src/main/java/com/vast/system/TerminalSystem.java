@@ -17,7 +17,7 @@ import com.googlecode.lanterna.terminal.Terminal;
 import com.vast.Metrics;
 import com.vast.Properties;
 import com.vast.VastPeer;
-import com.vast.WorldConfiguration;
+import com.vast.data.WorldConfiguration;
 import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

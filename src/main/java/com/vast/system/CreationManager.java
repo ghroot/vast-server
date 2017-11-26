@@ -5,7 +5,7 @@ import com.artemis.ArchetypeBuilder;
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
-import com.vast.WorldConfiguration;
+import com.vast.data.WorldConfiguration;
 import com.vast.component.*;
 import com.vast.data.Buildings;
 import com.vast.data.Items;
@@ -132,11 +132,11 @@ public class CreationManager extends BaseSystem {
 	}
 
 	public void createWorld() {
-		for (int i = 0; i < worldConfiguration.numberOfTrees; i++) {
-			createTree(getRandomPositionInWorld());
-		}
 		for (int i = 0; i < worldConfiguration.numberOfRocks; i++) {
 			createRock(getRandomPositionInWorld());
+		}
+		for (int i = 0; i < worldConfiguration.numberOfTrees; i++) {
+			createTree(getRandomPositionInWorld());
 		}
 		for (int i = 0; i < worldConfiguration.numberOfAIs; i++) {
 			createAI(getRandomPositionInWorld());

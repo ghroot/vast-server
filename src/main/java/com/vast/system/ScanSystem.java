@@ -5,7 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.SpatialHash;
-import com.vast.WorldConfiguration;
+import com.vast.data.WorldConfiguration;
 import com.vast.component.Scan;
 import com.vast.component.Spatial;
 import org.slf4j.Logger;

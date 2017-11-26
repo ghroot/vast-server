@@ -22,8 +22,8 @@ public class Items {
 			JSONArray itemsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream("items.json"), Charset.defaultCharset()));
 			for (Iterator<Object> it = itemsData.iterator(); it.hasNext();) {
 				JSONObject itemData = (JSONObject) it.next();
-				int type = (int) itemData.get("type");
-				String name = (String) itemData.get("name");
+				int type = itemData.getInt("type");
+				String name = itemData.getString("name");
 				items.put(type, new Item(type, name));
 			}
 		} catch (Exception exception) {

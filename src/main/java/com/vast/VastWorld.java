@@ -7,6 +7,7 @@ import com.artemis.managers.WorldSerializationManager;
 import com.vast.collision.CollisionHandler;
 import com.vast.data.Buildings;
 import com.vast.data.Items;
+import com.vast.data.WorldConfiguration;
 import com.vast.interact.*;
 import com.vast.order.*;
 import com.vast.property.*;
@@ -15,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.Properties;
 
 public class VastWorld implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(VastWorld.class);
@@ -31,7 +31,7 @@ public class VastWorld implements Runnable {
 	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, boolean showMonitor, Metrics metrics) {
 		this.metrics = metrics;
 
-		WorldConfiguration worldConfiguration = new WorldConfiguration(loadWorldProperties());
+		WorldConfiguration worldConfiguration = new WorldConfiguration();
 		Items items = new Items();
 		Buildings buildings = new Buildings(items);
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
@@ -95,17 +95,6 @@ public class VastWorld implements Runnable {
 		world = new World(worldConfigurationBuilder.build());
 
 		alive = true;
-	}
-
-	private Properties loadWorldProperties() {
-		Properties worldProperties = null;
-		try {
-			worldProperties = new Properties();
-			worldProperties.load(getClass().getResourceAsStream("world.properties"));
-		} catch (Exception exception) {
-			logger.error("Unable to load world properties file", exception);
-		}
-		return worldProperties;
 	}
 
 	@Override

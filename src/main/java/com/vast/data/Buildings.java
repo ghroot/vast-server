@@ -22,13 +22,13 @@ public class Buildings {
 			JSONArray buildingsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream("buildings.json"), Charset.defaultCharset()));
 			for (Iterator<Object> it = buildingsData.iterator(); it.hasNext();) {
 				JSONObject buildingData = (JSONObject) it.next();
-				int type = (int) buildingData.get("type");
-				String name = (String) buildingData.get("name");
-				float buildDuration = (int) buildingData.get("buildDuration");
+				int type = buildingData.getInt("type");
+				String name = buildingData.getString("name");
+				float buildDuration = buildingData.getFloat("buildDuration");
 				Building building = new Building(type, name, buildDuration);
-				JSONObject costData = (JSONObject) buildingData.get("cost");
+				JSONObject costData = buildingData.getJSONObject("cost");
 				for (String itemName : costData.keySet()) {
-					int amount = (int) costData.get(itemName);
+					int amount = costData.getInt(itemName);
 					building.addCost(new Cost(items.getItem(itemName), amount));
 				}
 				buildings.put(type, building);
