@@ -46,7 +46,7 @@ public class TerminalSystem extends IntervalSystem {
 	private Point2f cameraPosition = new Point2f();
 	private boolean showPlayerNames = false;
 	private boolean showIds = false;
-	private boolean showSystemTimes = false;
+	private int showSystemTimesMode = 0;
 	private boolean showSyncedProperties = false;
 	private Map<Integer, String> propertyNames = new HashMap<Integer, String>();
 	private int focusedEntity = -1;
@@ -203,23 +203,36 @@ public class TerminalSystem extends IntervalSystem {
 			String collisionsString = "Collision checks: " + metrics.getNumberOfCollisionChecks();
 			textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 7, collisionsString);
 
-			if (showSystemTimes && metrics.getSystemProcessingTimes().size() > 0) {
+			if (showSystemTimesMode > 0 && metrics.getSystemProcessingTimes().size() > 0) {
 				int longestLength = 0;
 				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
 					longestLength = Math.max(systemName.length(), longestLength);
 				}
-				Map<String, Integer> sortedSystemProcessingTimes = metrics.getSystemProcessingTimes().entrySet()
-						.stream()
-						.sorted(Map.Entry.comparingByValue(Collections.reverseOrder()))
-						.collect(Collectors.toMap(
-								Map.Entry::getKey,
-								Map.Entry::getValue,
-								(e1, e2) -> e1,
-								LinkedHashMap::new
-						));
+				Map<String, Integer> systemProcessingTimesToShow;
+				if (showSystemTimesMode == 1) {
+					systemProcessingTimesToShow = metrics.getSystemProcessingTimes().entrySet()
+							.stream()
+							.sorted(Map.Entry.comparingByValue(Collections.reverseOrder()))
+							.collect(Collectors.toMap(
+									Map.Entry::getKey,
+									Map.Entry::getValue,
+									(e1, e2) -> e1,
+									LinkedHashMap::new
+							));
+				} else {
+					systemProcessingTimesToShow = metrics.getSystemProcessingTimes().entrySet()
+							.stream()
+							.sorted(Map.Entry.comparingByKey())
+							.collect(Collectors.toMap(
+									Map.Entry::getKey,
+									Map.Entry::getValue,
+									(e1, e2) -> e1,
+									LinkedHashMap::new
+							));
+				}
 				int row = 9;
-				for (String systemName : sortedSystemProcessingTimes.keySet()) {
-					int processingDuration = sortedSystemProcessingTimes.get(systemName);
+				for (String systemName : systemProcessingTimesToShow.keySet()) {
+					int processingDuration = systemProcessingTimesToShow.get(systemName);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestLength - 1, row, systemName);
 					String processDurationString = Integer.toString(processingDuration);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 + (3 - processDurationString.length()), row, processDurationString);
@@ -325,7 +338,11 @@ public class TerminalSystem extends IntervalSystem {
 							showPlayerNames = false;
 						}
 					} else if (keyStroke.getCharacter().toString().equals("s")) {
-						showSystemTimes = !showSystemTimes;
+						if (showSystemTimesMode >= 2) {
+							showSystemTimesMode = 0;
+						} else {
+							showSystemTimesMode++;
+						}
 					} else if (keyStroke.getCharacter().toString().equals("y")) {
 						showSyncedProperties = !showSyncedProperties;
 					}
