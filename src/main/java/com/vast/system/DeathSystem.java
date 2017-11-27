@@ -51,7 +51,7 @@ public class DeathSystem extends IteratingSystem {
 
 			playerMapper.remove(deathEntity);
 		}
-		deleteMapper.create(deathEntity).reason = "killed";
+		deleteMapper.create(deathEntity).reason = "died";
 		deathMapper.remove(deathEntity);
 	}
 }
