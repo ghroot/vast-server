@@ -42,8 +42,6 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 
 	@Override
 	protected void initialize() {
-		super.initialize();
-
 		for (PropertyHandler propertyHandler : propertyHandlers) {
 			world.inject(propertyHandler);
 		}

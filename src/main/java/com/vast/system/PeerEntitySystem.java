@@ -31,8 +31,6 @@ public class PeerEntitySystem extends BaseSystem {
 
 	@Override
 	protected void initialize() {
-		super.initialize();
-
 		creationManager = world.getSystem(CreationManager.class);
 	}
 

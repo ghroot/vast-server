@@ -35,6 +35,7 @@ public class TerminalSystem extends IntervalSystem {
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Scan> scanMapper;
+	private ComponentMapper<Constructable> constructableMapper;
 
 	private Map<String, VastPeer> peers;
 	private Metrics metrics;
@@ -151,7 +152,12 @@ public class TerminalSystem extends IntervalSystem {
 							screen.setCharacter(terminalPosition, new TextCharacter('.', colored ? TextColor.ANSI.RED : gray, TextColor.ANSI.DEFAULT));
 							textGraphics.setForegroundColor(TextColor.ANSI.RED);
 						} else if (typeMapper.get(entity).type.equals("building")) {
-							screen.setCharacter(terminalPosition, new TextCharacter('#', colored ? TextColor.ANSI.WHITE : gray, TextColor.ANSI.DEFAULT));
+							Constructable constructable = constructableMapper.get(entity);
+							if (constructable.isComplete()) {
+								screen.setCharacter(terminalPosition, new TextCharacter('#', colored ? TextColor.ANSI.WHITE : gray, TextColor.ANSI.DEFAULT));
+							} else {
+								screen.setCharacter(terminalPosition, new TextCharacter('#', colored ? TextColor.ANSI.Indexed.fromRGB(100, 100, 100) : gray, TextColor.ANSI.DEFAULT));
+							}
 							textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
 						} else {
 							screen.setCharacter(terminalPosition, new TextCharacter('?', colored ? TextColor.ANSI.MAGENTA : gray, TextColor.ANSI.DEFAULT));

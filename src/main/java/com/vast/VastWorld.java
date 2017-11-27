@@ -71,7 +71,7 @@ public class VastWorld implements Runnable {
 				new BuildOrderHandler(buildings),
 				new EmoteOrderHandler()
 			)), incomingRequests, entitiesByPeer),
-			new AISystem(),
+			new AISystem(peers, incomingRequests),
 			new PathMoveSystem(),
 			new InteractSystem(new ArrayList<InteractionHandler>(Arrays.asList(
 				new HarvestableInteractionHandler(),

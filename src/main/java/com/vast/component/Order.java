@@ -1,17 +1,27 @@
 package com.vast.component;
 
-import com.artemis.Component;
-import com.artemis.annotations.PooledWeaver;
+import com.artemis.PooledComponent;
 import com.artemis.annotations.Transient;
+import com.vast.order.OrderHandler;
+
+import static com.vast.component.Order.Type.NONE;
 
 @Transient
-@PooledWeaver
-public class Order extends Component {
+public class Order extends PooledComponent {
 	public enum Type {
+		NONE,
 		MOVE,
 		INTERACT,
 		BUILD,
 		EMOTE
 	}
 	public Type type;
+
+	public OrderHandler handler;
+
+	@Override
+	protected void reset() {
+		type = NONE;
+		handler = null;
+	}
 }

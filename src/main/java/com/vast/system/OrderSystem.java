@@ -4,9 +4,9 @@ import com.artemis.Aspect;
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.artemis.utils.IntBag;
+import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.IncomingRequest;
 import com.vast.component.Order;
-import com.vast.component.Player;
 import com.vast.order.OrderHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,6 @@ public class OrderSystem extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(OrderSystem.class);
 
 	private ComponentMapper<Order> orderMapper;
-	private ComponentMapper<Player> playerMapper;
 
 	private Set<OrderHandler> orderHandlers;
 	private List<IncomingRequest> incomingRequests;
@@ -34,8 +33,6 @@ public class OrderSystem extends BaseSystem {
 
 	@Override
 	protected void initialize() {
-		super.initialize();
-
 		for (OrderHandler orderHandler : orderHandlers) {
 			world.inject(orderHandler);
 			orderHandler.initialize();
@@ -44,61 +41,52 @@ public class OrderSystem extends BaseSystem {
 
 	@Override
 	protected void processSystem() {
-		checkCompleteOrders();
+		completeOrders();
 
 		for (Iterator<IncomingRequest> iterator = incomingRequests.iterator(); iterator.hasNext();) {
 			IncomingRequest request = iterator.next();
 			int playerEntity = entitiesByPeer.get(request.getPeer().getName());
-
 			if (orderMapper.has(playerEntity)) {
-				Order order = orderMapper.get(playerEntity);
-				logger.debug("Canceling {} order for entity {}", order.type, playerEntity);
-				OrderHandler orderHandler = getOrderHandler(order.type);
-				if (orderHandler != null) {
-					orderHandler.cancelOrder(playerEntity);
-				} else {
-					logger.warn("No order handler found for type {}", order.type);
-				}
-				orderMapper.remove(playerEntity);
+				cancelOrder(playerEntity);
 			} else {
-				OrderHandler orderHandler = getOrderHandler(request.getMessage().getCode());
-				if (orderHandler != null) {
-					if (orderHandler.startOrder(playerEntity, request.getMessage().getDataObject())) {
-						orderMapper.create(playerEntity).type = orderHandler.getOrderType();
-						logger.debug("Starting {} order for entity {}", orderHandler.getOrderType(), playerEntity);
-					}
-					iterator.remove();
+				OrderHandler handler = getOrderHandler(request.getMessage().getCode());
+				if (handler != null) {
+					startOrder(playerEntity, handler, request.getMessage().getDataObject());
+				} else {
+					logger.warn("Could not find order handler for message code {}", request.getMessage().getCode());
 				}
+				iterator.remove();
 			}
 		}
 	}
 
-	private void checkCompleteOrders() {
+	private void completeOrders() {
 		IntBag orderEntities = world.getAspectSubscriptionManager().get(Aspect.all(Order.class)).getEntities();
 		for (int i = orderEntities.size() - 1; i >= 0; i--) {
 			int orderEntity = orderEntities.get(i);
 			if (orderMapper.has(orderEntity)) {
 				Order order = orderMapper.get(orderEntity);
-				OrderHandler orderHandler = getOrderHandler(order.type);
-				if (orderHandler != null) {
-					if (orderHandler.isOrderComplete(orderEntity)) {
-						logger.debug("{} order completed for entity {}", order.type, orderEntity);
-						orderMapper.remove(orderEntity);
-					}
-				} else {
-					logger.warn("No order handler found for type {}", order.type);
+				if (order.handler.isOrderComplete(orderEntity)) {
+					logger.debug("{} order completed for entity {}", order.type, orderEntity);
+					orderMapper.remove(orderEntity);
 				}
 			}
 		}
 	}
 
-	private OrderHandler getOrderHandler(Order.Type type) {
-		for (OrderHandler orderHandler : orderHandlers) {
-			if (orderHandler.getOrderType() == type) {
-				return orderHandler;
-			}
+	private void cancelOrder(int orderEntity) {
+		Order order = orderMapper.get(orderEntity);
+		logger.debug("Canceling {} order for entity {}", order.type, orderEntity);
+		order.handler.cancelOrder(orderEntity);
+		orderMapper.remove(orderEntity);
+	}
+
+	private void startOrder(int orderEntity, OrderHandler handler, DataObject dataObject) {
+		if (handler.startOrder(orderEntity, dataObject)) {
+			orderMapper.create(orderEntity).type = handler.getOrderType();
+			orderMapper.get(orderEntity).handler = handler;
+			logger.debug("Starting {} order for entity {}", handler.getOrderType(), orderEntity);
 		}
-		return null;
 	}
 
 	private OrderHandler getOrderHandler(short messageCode) {

@@ -50,8 +50,6 @@ public class CreationManager extends BaseSystem {
 
 	@Override
 	protected void initialize() {
-		super.initialize();
-
 		playerArchetype = new ArchetypeBuilder()
 				.add(Player.class)
 				.add(Type.class)

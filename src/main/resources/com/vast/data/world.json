@@ -1,8 +1,8 @@
 {
-  "width": 10,
-  "height": 10,
+  "width": 3000,
+  "height": 3000,
   "sectionSize": 8,
-  "numberOfTrees": 20,
-  "numberOfRocks": 10,
+  "numberOfTrees": 10000,
+  "numberOfRocks": 5000,
   "numberOfAIs": 0
 }
