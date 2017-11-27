@@ -30,12 +30,12 @@ public class AISystem extends IntervalIteratingSystem {
 
 	private List<Integer> reusableNearbyInteractableEntities;
 	private Map<String, VastPeer> peers;
-	private List<IncomingRequest> incomingRequests;
+	private Map<String, List<IncomingRequest>> incomingRequestsByPeer;
 
-	public AISystem(Map<String, VastPeer> peers, List<IncomingRequest> incomingRequests) {
+	public AISystem(Map<String, VastPeer> peers, Map<String, List<IncomingRequest>> incomingRequestsByPeer) {
 		super(Aspect.all(AI.class),5.0f);
 		this.peers = peers;
-		this.incomingRequests = incomingRequests;
+		this.incomingRequestsByPeer = incomingRequestsByPeer;
 
 		reusableNearbyInteractableEntities = new ArrayList<Integer>();
 	}
@@ -55,25 +55,25 @@ public class AISystem extends IntervalIteratingSystem {
 			VastPeer peer = peers.get(player.name);
 			int roll = (int) (Math.random() * 100);
 			if (roll <= 5) {
-				incomingRequests.add(new IncomingRequest(peer, new RequestMessage(MessageCodes.EMOTE, new DataObject().set(MessageCodes.EMOTE_TYPE, (byte) 0))));
+				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.EMOTE, new DataObject().set(MessageCodes.EMOTE_TYPE, (byte) 0))));
 			} else if (roll <= 15) {
 				byte buildingType = (byte) (Math.random() * 4);
 				float x = transformMapper.get(aiEntity).position.x;
 				float y = transformMapper.get(aiEntity).position.y + 1.0f;
 				float[] buildPosition = new float[] {x, y};
-				incomingRequests.add(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD, new DataObject().set(MessageCodes.BUILD_TYPE, buildingType).set(MessageCodes.BUILD_POSITION, buildPosition))));
+				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD, new DataObject().set(MessageCodes.BUILD_TYPE, buildingType).set(MessageCodes.BUILD_POSITION, buildPosition))));
 			} else if (roll <= 50) {
 				List<Integer> nearbyInteractableEntities = getNearbyInteractableEntities(aiEntity);
 				if (nearbyInteractableEntities.size() > 0) {
 					int randomIndex = (int) (Math.random() * nearbyInteractableEntities.size());
 					int randomNearbyInteractableEntity = nearbyInteractableEntities.get(randomIndex);
-					incomingRequests.add(new IncomingRequest(peer, new RequestMessage(MessageCodes.INTERACT, new DataObject().set(MessageCodes.INTERACT_ENTITY_ID, randomNearbyInteractableEntity))));
+					addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.INTERACT, new DataObject().set(MessageCodes.INTERACT_ENTITY_ID, randomNearbyInteractableEntity))));
 				}
 			} else {
 				float x = transformMapper.get(aiEntity).position.x - 2.0f + (float) Math.random() * 4.0f;
 				float y = transformMapper.get(aiEntity).position.y - 2.0f + (float) Math.random() * 4.0f;
 				float[] position = new float[] {x, y};
-				incomingRequests.add(new IncomingRequest(peer, new RequestMessage(MessageCodes.MOVE, new DataObject().set(MessageCodes.MOVE_POSITION, position))));
+				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.MOVE, new DataObject().set(MessageCodes.MOVE_POSITION, position))));
 			}
 		} else if (scanMapper.has(aiEntity)) {
 			List<Integer> nearbyInteractableEntities = getNearbyInteractableEntities(aiEntity);
@@ -100,5 +100,14 @@ public class AISystem extends IntervalIteratingSystem {
 			}
 		}
 		return reusableNearbyInteractableEntities;
+	}
+
+	private void addIncomingRequest(IncomingRequest incomingRequest) {
+		List<IncomingRequest> incomingRequests = incomingRequestsByPeer.get(incomingRequest.getPeer().getName());
+		if (incomingRequests == null) {
+			incomingRequests = new ArrayList<IncomingRequest>();
+			incomingRequestsByPeer.put(incomingRequest.getPeer().getName(), incomingRequests);
+		}
+		incomingRequests.add(incomingRequest);
 	}
 }

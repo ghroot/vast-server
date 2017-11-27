@@ -1,10 +1,8 @@
 package com.vast.component;
 
-import com.artemis.Component;
 import com.artemis.PooledComponent;
 import com.artemis.annotations.DelayedComponentRemoval;
 import com.artemis.annotations.EntityId;
-import com.artemis.annotations.PooledWeaver;
 import com.artemis.annotations.Transient;
 import com.vast.interact.InteractionHandler;
 
