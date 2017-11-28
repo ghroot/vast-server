@@ -37,7 +37,6 @@ public class DeathSystem extends IteratingSystem {
 		Death death = deathMapper.get(deathEntity);
 
 		if (death.countdown > 0.0f) {
-			System.out.println(death.countdown);
 			death.countdown -= world.getDelta();
 			if (death.countdown <= 0.0f) {
 				int playerEntity = creationManager.createPlayer(playerMapper.get(deathEntity).name,
@@ -58,7 +57,7 @@ public class DeathSystem extends IteratingSystem {
 			if (playerMapper.has(deathEntity)) {
 				disabledMapper.create(deathEntity);
 				eventMapper.create(deathEntity).name = "died";
-				deathMapper.get(deathEntity).countdown = 30.0f;
+				deathMapper.get(deathEntity).countdown = 5.0f;
 			} else {
 				deleteMapper.create(deathEntity).reason = "died";
 				deathMapper.remove(deathEntity);
