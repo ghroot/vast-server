@@ -174,6 +174,7 @@ public class CreationManager extends BaseSystem {
 		typeMapper.get(aiEntity).type = "ai";
 		subTypeMapper.get(aiEntity).subType = aiEntity % 3;
 		transformMapper.get(aiEntity).position.set(position);
+		aiMapper.get(aiEntity).behaviourName = "basic";
 		collisionMapper.get(aiEntity).radius = 0.3f;
 		healthMapper.get(aiEntity).maxHealth = 2;
 		healthMapper.get(aiEntity).health = 2;
@@ -182,7 +183,7 @@ public class CreationManager extends BaseSystem {
 		return aiEntity;
 	}
 
-	public int createPlayer(String name, int subType, boolean ai) {
+	public int createPlayer(String name, int subType, boolean fakePlayer) {
 		int playerEntity = world.create(playerArchetype);
 		playerMapper.get(playerEntity).name = name;
 		typeMapper.get(playerEntity).type = "player";
@@ -194,8 +195,8 @@ public class CreationManager extends BaseSystem {
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.POSITION);
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.ROTATION);
 		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.INVENTORY);
-		if (ai) {
-			aiMapper.create(playerEntity);
+		if (fakePlayer) {
+			aiMapper.create(playerEntity).behaviourName = "fakeHuman";
 		}
 		return playerEntity;
 	}

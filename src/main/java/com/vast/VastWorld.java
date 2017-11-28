@@ -4,6 +4,9 @@ import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
+import com.vast.behaviour.BasicBehaviour;
+import com.vast.behaviour.Behaviour;
+import com.vast.behaviour.FakeHumanBehaviour;
 import com.vast.collision.CollisionHandler;
 import com.vast.data.Buildings;
 import com.vast.data.Items;
@@ -50,6 +53,9 @@ public class VastWorld implements Runnable {
 			new InventoryPropertyHandler(),
 			new FueledPropertyHandler()
 		));
+		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
+		behaviours.put("basic", new BasicBehaviour());
+		behaviours.put("fakeHuman", new FakeHumanBehaviour(peers, incomingRequestsByPeer));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldConfiguration, items, buildings),
@@ -71,7 +77,7 @@ public class VastWorld implements Runnable {
 				new BuildOrderHandler(buildings),
 				new EmoteOrderHandler()
 			)), incomingRequestsByPeer),
-			new AISystem(peers, incomingRequestsByPeer),
+			new AISystem(behaviours),
 			new PathMoveSystem(),
 			new InteractSystem(new ArrayList<InteractionHandler>(Arrays.asList(
 				new HarvestableInteractionHandler(),

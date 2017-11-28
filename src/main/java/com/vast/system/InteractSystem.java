@@ -51,10 +51,12 @@ public class InteractSystem  extends IteratingSystem {
 
 	@Override
 	protected void removed(int entity) {
-		Interact interact = interactMapper.get(entity);
-		if (interact.phase == Interact.Phase.INTERACTING) {
-			if (interact.handler != null) {
-				interact.handler.stop(entity, interact.entity);
+		if (interactMapper.has(entity)) {
+			Interact interact = interactMapper.get(entity);
+			if (interact.phase == Interact.Phase.INTERACTING) {
+				if (interact.handler != null) {
+					interact.handler.stop(entity, interact.entity);
+				}
 			}
 		}
 	}

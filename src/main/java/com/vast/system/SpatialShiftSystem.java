@@ -61,11 +61,12 @@ public class SpatialShiftSystem extends IteratingSystem {
 	}
 
 	private void removeSpatialHash(int entity) {
-		Spatial spatial = spatialMapper.get(entity);
-
-		if (spatial.memberOfSpatialHash != null) {
-			spatialHashes.get(spatial.memberOfSpatialHash.uniqueKey()).remove(entity);
-			spatial.memberOfSpatialHash = null;
+		if (spatialMapper.has(entity)) {
+			Spatial spatial = spatialMapper.get(entity);
+			if (spatial.memberOfSpatialHash != null) {
+				spatialHashes.get(spatial.memberOfSpatialHash.uniqueKey()).remove(entity);
+				spatial.memberOfSpatialHash = null;
+			}
 		}
 	}
 
