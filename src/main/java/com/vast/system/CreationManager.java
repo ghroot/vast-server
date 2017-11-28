@@ -25,7 +25,6 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Health> healthMapper;
 	private ComponentMapper<AI> aiMapper;
-	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Constructable> constructableMapper;
 	private ComponentMapper<Container> containerMapper;
 	private ComponentMapper<Fueled> fueledMapper;
@@ -178,7 +177,6 @@ public class CreationManager extends BaseSystem {
 		collisionMapper.get(aiEntity).radius = 0.3f;
 		healthMapper.get(aiEntity).maxHealth = 2;
 		healthMapper.get(aiEntity).health = 2;
-		activeMapper.create(aiEntity);
 		syncPropagationMapper.get(aiEntity).setUnreliable(Properties.POSITION);
 		syncPropagationMapper.get(aiEntity).setUnreliable(Properties.ROTATION);
 		return aiEntity;

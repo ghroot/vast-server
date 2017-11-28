@@ -3,10 +3,10 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
-import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.IncomingRequest;
 import com.vast.component.Active;
+import com.vast.component.Disabled;
 import com.vast.component.Order;
 import com.vast.component.Player;
 import com.vast.order.OrderHandler;
@@ -27,7 +27,7 @@ public class OrderSystem extends IteratingSystem {
 	private Map<String, List<IncomingRequest>> incomingRequestsByPeer;
 
 	public OrderSystem(Set<OrderHandler> orderHandlers, Map<String, List<IncomingRequest>> incomingRequestsByPeer) {
-		super(Aspect.all(Player.class, Active.class));
+		super(Aspect.all(Player.class, Active.class).exclude(Disabled.class));
 		this.orderHandlers = orderHandlers;
 		this.incomingRequestsByPeer = incomingRequestsByPeer;
 	}
@@ -41,12 +41,17 @@ public class OrderSystem extends IteratingSystem {
 	}
 
 	@Override
-	public void inserted(IntBag entities) {
+	protected void inserted(int playerEntity) {
+		Player player = playerMapper.get(playerEntity);
+
+		if (incomingRequestsByPeer.containsKey(player.name)) {
+			incomingRequestsByPeer.get(player.name).clear();
+		}
 	}
 
 	@Override
-	protected void removed(int orderEntity) {
-		cancelOrder(orderEntity);
+	protected void removed(int playerEntity) {
+		cancelOrder(playerEntity);
 	}
 
 	@Override
@@ -83,11 +88,11 @@ public class OrderSystem extends IteratingSystem {
 	private void cancelOrder(int playerEntity) {
 		if (orderMapper.has(playerEntity)) {
 			Order order = orderMapper.get(playerEntity);
+			logger.debug("Canceling {} order for entity {}", order.type, playerEntity);
 			if (order.handler != null) {
-				logger.debug("Canceling {} order for entity {}", order.type, playerEntity);
 				order.handler.cancelOrder(playerEntity);
-				orderMapper.remove(playerEntity);
 			}
+			orderMapper.remove(playerEntity);
 		}
 	}
 

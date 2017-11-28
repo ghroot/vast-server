@@ -3,7 +3,6 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
-import com.vast.data.WorldConfiguration;
 import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +18,13 @@ public class DeathSystem extends IteratingSystem {
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<SubType> subTypeMapper;
 	private ComponentMapper<Death> deathMapper;
+	private ComponentMapper<Event> eventMapper;
+	private ComponentMapper<Disabled> disabledMapper;
 
 	private CreationManager creationManager;
-	private WorldConfiguration worldConfiguration;
 
-	public DeathSystem(WorldConfiguration worldConfiguration) {
+	public DeathSystem() {
 		super(Aspect.all(Death.class));
-		this.worldConfiguration = worldConfiguration;
 	}
 
 	@Override
@@ -35,23 +34,35 @@ public class DeathSystem extends IteratingSystem {
 
 	@Override
 	protected void process(int deathEntity) {
-		logger.debug("Entity {} died", deathEntity);
-		if (inventoryMapper.has(deathEntity)) {
-			Inventory inventory = inventoryMapper.get(deathEntity);
-			if (!inventory.isEmpty()) {
-				creationManager.createCrate(transformMapper.get(deathEntity).position, inventory);
-				inventory.clear();
+		Death death = deathMapper.get(deathEntity);
+
+		if (death.countdown > 0.0f) {
+			System.out.println(death.countdown);
+			death.countdown -= world.getDelta();
+			if (death.countdown <= 0.0f) {
+				int playerEntity = creationManager.createPlayer(playerMapper.get(deathEntity).name,
+						subTypeMapper.get(deathEntity).subType,
+						aiMapper.has(deathEntity));
+				knownMapper.get(playerEntity).knownEntities.addAll(knownMapper.get(deathEntity).knownEntities);
+				world.delete(deathEntity);
+			}
+		} else {
+			logger.debug("Entity {} died", deathEntity);
+			if (inventoryMapper.has(deathEntity)) {
+				Inventory inventory = inventoryMapper.get(deathEntity);
+				if (!inventory.isEmpty()) {
+					creationManager.createCrate(transformMapper.get(deathEntity).position, inventory);
+					inventory.clear();
+				}
+			}
+			if (playerMapper.has(deathEntity)) {
+				disabledMapper.create(deathEntity);
+				eventMapper.create(deathEntity).name = "died";
+				deathMapper.get(deathEntity).countdown = 30.0f;
+			} else {
+				deleteMapper.create(deathEntity).reason = "died";
+				deathMapper.remove(deathEntity);
 			}
 		}
-		if (playerMapper.has(deathEntity)) {
-			int playerEntity = creationManager.createPlayer(playerMapper.get(deathEntity).name,
-					subTypeMapper.get(deathEntity).subType,
-					aiMapper.has(deathEntity));
-			knownMapper.get(playerEntity).knownEntities.addAll(knownMapper.get(deathEntity).knownEntities);
-
-			playerMapper.remove(deathEntity);
-		}
-		deleteMapper.create(deathEntity).reason = "died";
-		deathMapper.remove(deathEntity);
 	}
 }

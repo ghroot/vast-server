@@ -83,7 +83,7 @@ public class VastWorld implements Runnable {
 			new CollisionSystem(new HashSet<CollisionHandler>(), metrics),
 			new FuelSystem(),
 			new LifetimeSystem(),
-			new DeathSystem(worldConfiguration),
+			new DeathSystem(),
 			new DeleteSystem(peers),
 			new CreateSystem(peers, propertyHandlers),
 			new EventSystem(peers),

@@ -4,5 +4,5 @@
   "sectionSize": 8,
   "numberOfTrees": 10000,
   "numberOfRocks": 5000,
-  "numberOfAIs": 0
+  "numberOfAIs": 500
 }

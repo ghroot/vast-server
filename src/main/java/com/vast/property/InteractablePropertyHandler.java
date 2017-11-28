@@ -4,10 +4,12 @@ import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.MessageCodes;
 import com.vast.Properties;
+import com.vast.component.Disabled;
 import com.vast.component.Interactable;
 
 public class InteractablePropertyHandler implements PropertyHandler {
 	private ComponentMapper<Interactable> interactableMapper;
+	private ComponentMapper<Disabled> disabledMapper;
 
 	@Override
 	public int getProperty() {
@@ -16,6 +18,6 @@ public class InteractablePropertyHandler implements PropertyHandler {
 
 	@Override
 	public void decorateDataObject(int entity, DataObject dataObject) {
-		dataObject.set(MessageCodes.PROPERTY_INTERACTABLE, interactableMapper.has(entity));
+		dataObject.set(MessageCodes.PROPERTY_INTERACTABLE, interactableMapper.has(entity) && !disabledMapper.has(entity));
 	}
 }
