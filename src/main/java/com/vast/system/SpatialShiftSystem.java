@@ -4,9 +4,9 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.vast.SpatialHash;
-import com.vast.data.WorldConfiguration;
 import com.vast.component.Spatial;
 import com.vast.component.Transform;
+import com.vast.data.WorldConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,12 +61,10 @@ public class SpatialShiftSystem extends IteratingSystem {
 	}
 
 	private void removeSpatialHash(int entity) {
-		if (spatialMapper.has(entity)) {
-			Spatial spatial = spatialMapper.get(entity);
-			if (spatial.memberOfSpatialHash != null) {
-				spatialHashes.get(spatial.memberOfSpatialHash.uniqueKey()).remove(entity);
-				spatial.memberOfSpatialHash = null;
-			}
+		Spatial spatial = spatialMapper.get(entity);
+		if (spatial != null && spatial.memberOfSpatialHash != null) {
+			spatialHashes.get(spatial.memberOfSpatialHash.uniqueKey()).remove(entity);
+			spatial.memberOfSpatialHash = null;
 		}
 	}
 

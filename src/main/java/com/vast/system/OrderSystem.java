@@ -86,8 +86,8 @@ public class OrderSystem extends IteratingSystem {
 	}
 
 	private void cancelOrder(int playerEntity) {
-		if (orderMapper.has(playerEntity)) {
-			Order order = orderMapper.get(playerEntity);
+		Order order = orderMapper.get(playerEntity);
+		if (order != null) {
 			logger.debug("Canceling {} order for entity {}", order.type, playerEntity);
 			if (order.handler != null) {
 				order.handler.cancelOrder(playerEntity);
