@@ -308,6 +308,16 @@ public class TerminalSystem extends IntervalSystem {
 						detail = "" + (Math.round(((Transform) component).position.x * 100.0f) / 100.0f) + ", " + (Math.round(((Transform) component).position.y * 100.0f) / 100.0f);
 					} else if (component instanceof Path) {
 						detail = "" + (Math.round(((Path) component).targetPosition.x * 100.0f) / 100.0f) + ", " + (Math.round(((Path) component).targetPosition.y * 100.0f) / 100.0f);
+					} else if (component instanceof Inventory) {
+						Inventory inventory = (Inventory) component;
+						StringBuilder s = new StringBuilder();
+						for (int j = 0; j < inventory.items.length; j++) {
+							s.append(inventory.items[j]);
+							if (j < inventory.items.length - 1) {
+								s.append(", ");
+							}
+						}
+						detail = s.toString();
 					}
 					if (detail != null) {
 						textGraphics.putString(0, row, componentName + " (" + detail + ")");
