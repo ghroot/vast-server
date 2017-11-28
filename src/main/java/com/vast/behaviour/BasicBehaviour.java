@@ -4,6 +4,7 @@ import com.artemis.ComponentMapper;
 import com.vast.component.Interact;
 import com.vast.component.Path;
 import com.vast.component.Transform;
+import com.vast.interact.InteractionHandler;
 
 import javax.vecmath.Point2f;
 import java.util.List;
@@ -13,7 +14,8 @@ public class BasicBehaviour extends AbstractBehaviour {
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Transform> transformMapper;
 
-	public BasicBehaviour() {
+	public BasicBehaviour(List<InteractionHandler> interactionHandlers) {
+		super(interactionHandlers);
 	}
 
 	@Override

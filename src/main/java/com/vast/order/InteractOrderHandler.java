@@ -5,7 +5,6 @@ import com.artemis.World;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.MessageCodes;
 import com.vast.component.Interact;
-import com.vast.component.Interactable;
 import com.vast.component.Order;
 import com.vast.component.Path;
 import org.slf4j.Logger;
@@ -17,7 +16,6 @@ public class InteractOrderHandler implements OrderHandler {
 	private World world;
 
 	private ComponentMapper<Interact> interactMapper;
-	private ComponentMapper<Interactable> interactableMapper;
 	private ComponentMapper<Path> pathMapper;
 
 	public InteractOrderHandler() {

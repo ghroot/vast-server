@@ -1,8 +1,10 @@
 package com.vast.system;
 
 import com.artemis.Aspect;
+import com.artemis.Component;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IntervalSystem;
+import com.artemis.utils.Bag;
 import com.artemis.utils.IntBag;
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TextCharacter;
@@ -17,8 +19,8 @@ import com.googlecode.lanterna.terminal.Terminal;
 import com.vast.Metrics;
 import com.vast.Properties;
 import com.vast.VastPeer;
-import com.vast.data.WorldConfiguration;
 import com.vast.component.*;
+import com.vast.data.WorldConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,8 +69,8 @@ public class TerminalSystem extends IntervalSystem {
 		propertyNames.put(Properties.HEALTH, "Health");
 		propertyNames.put(Properties.MAX_HEALTH, "MaxHealth");
 		propertyNames.put(Properties.PROGRESS, "Progress");
-		propertyNames.put(Properties.INTERACTABLE, "Interactable");
 		propertyNames.put(Properties.INVENTORY, "Inventory");
+		propertyNames.put(Properties.FUELED, "Fueled");
 	}
 
 	@Override
@@ -126,10 +128,10 @@ public class TerminalSystem extends IntervalSystem {
 					if (playerMapper.has(entity)) {
 						TextGraphics textGraphics = screen.newTextGraphics();
 						if (activeMapper.has(entity)) {
-							screen.setCharacter(terminalPosition, new TextCharacter('O', TextColor.ANSI.BLUE, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('O', colored ? TextColor.ANSI.BLUE : gray, TextColor.ANSI.DEFAULT));
 							textGraphics.setForegroundColor(TextColor.ANSI.BLUE);
 						} else {
-							screen.setCharacter(terminalPosition, new TextCharacter('O', TextColor.ANSI.YELLOW, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('O', colored ? TextColor.ANSI.YELLOW : gray, TextColor.ANSI.DEFAULT));
 							textGraphics.setForegroundColor(TextColor.ANSI.YELLOW);
 						}
 						if (showPlayerNames) {
@@ -266,7 +268,54 @@ public class TerminalSystem extends IntervalSystem {
 			if (focusedEntity >= 0) {
 				Point2f position = transformMapper.get(focusedEntity).position;
 				cameraPosition.set(position.x, -position.y);
-				textGraphics.putString(0, 9, "Following peer entity: " + focusedEntity + " (" + playerMapper.get(focusedEntity).name + ")");
+				if (playerMapper.has(focusedEntity)) {
+					textGraphics.putString(0, 9, "Following entity: " + focusedEntity + " (" + playerMapper.get(focusedEntity).name + ")");
+				} else {
+					textGraphics.putString(0, 9, "Following entity: " + focusedEntity);
+				}
+
+				Bag<Component> components = new Bag<Component>();
+				world.getEntity(focusedEntity).getComponents(components);
+				int row = screen.getTerminalSize().getRows() - components.size();
+				for (int i = 0; i < components.size(); i++) {
+					Component component = components.get(i);
+					String componentName = component.getClass().toString();
+					componentName = componentName.substring(componentName.lastIndexOf(".") + 1);
+					String detail = null;
+					if (component instanceof Type) {
+						detail = ((Type) component).type;
+					} else if (component instanceof SubType) {
+						detail = "" + ((SubType) component).subType;
+					} else if (component instanceof Interact) {
+						detail = "" + ((Interact) component).entity;
+					} else if (component instanceof Scan) {
+						detail = "" + ((Scan) component).nearbyEntities.size();
+					} else if (component instanceof Known) {
+						detail = "" + ((Known) component).knownEntities.size();
+					} else if (component instanceof AI) {
+						detail = ((AI) component).behaviourName;
+					} else if (component instanceof Health) {
+						detail = "" + ((Health) component).health;
+					} else if (component instanceof Collision) {
+						detail = "" + (Math.round(((Collision) component).radius * 100.0f) / 100.0f);
+					} else if (component instanceof Owner) {
+						detail = ((Owner) component).name;
+					} else if (component instanceof Player) {
+						detail = ((Player) component).name;
+					} else if (component instanceof Spatial) {
+						detail = "" + ((Spatial) component).memberOfSpatialHash.x + ", " + ((Spatial) component).memberOfSpatialHash.y;
+					} else if (component instanceof Transform) {
+						detail = "" + (Math.round(((Transform) component).position.x * 100.0f) / 100.0f) + ", " + (Math.round(((Transform) component).position.y * 100.0f) / 100.0f);
+					} else if (component instanceof Path) {
+						detail = "" + (Math.round(((Path) component).targetPosition.x * 100.0f) / 100.0f) + ", " + (Math.round(((Path) component).targetPosition.y * 100.0f) / 100.0f);
+					}
+					if (detail != null) {
+						textGraphics.putString(0, row, componentName + " (" + detail + ")");
+					} else {
+						textGraphics.putString(0, row, componentName);
+					}
+					row++;
+				}
 			}
 
 			screen.refresh();
@@ -330,6 +379,22 @@ public class TerminalSystem extends IntervalSystem {
 								focusedEntity = playerEntity;
 							}
 						}
+					} else if (keyStroke.getCharacter().toString().equals("f")) {
+						IntBag transformEntities = world.getAspectSubscriptionManager().get(Aspect.all(Transform.class)).getEntities();
+						int closestEntity = -1;
+						float closestDistance = Float.MAX_VALUE;
+						Point2f cameraWorldPosition = new Point2f(cameraPosition.x, -cameraPosition.y);
+						for (int i = 0; i < transformEntities.size(); i++) {
+							int entity = transformEntities.get(i);
+							float distance = cameraWorldPosition.distance(transformMapper.get(entity).position);
+							if (distance < closestDistance) {
+								closestEntity = entity;
+								closestDistance = distance;
+							}
+						}
+						if (closestEntity >= 0) {
+							focusedEntity = closestEntity;
+						}
 					} else if (keyStroke.getCharacter().toString().equals("r")) {
 						cameraPosition.set(0.0f, 0.0f);
 						focusedEntity = -1;
@@ -353,16 +418,16 @@ public class TerminalSystem extends IntervalSystem {
 						showSyncedProperties = !showSyncedProperties;
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
-					cameraPosition.add(new Point2f(0.0f, ((keyStroke.isShiftDown() ? 5 : 1) / scale)));
+					cameraPosition.add(new Point2f(0.0f, ((keyStroke.isShiftDown() ? 5.0f : 1.0f) / scale)));
 					focusedEntity = -1;
 				} else if (keyStroke.getKeyType() == KeyType.ArrowUp) {
-					cameraPosition.add(new Point2f(0.0f, -((keyStroke.isShiftDown() ? 5 : 1) / scale)));
+					cameraPosition.add(new Point2f(0.0f, -((keyStroke.isShiftDown() ? 5.0f : 1.0f) / scale)));
 					focusedEntity = -1;
 				} else if (keyStroke.getKeyType() == KeyType.ArrowLeft) {
-					cameraPosition.add(new Point2f(-((keyStroke.isShiftDown() ? 5 : 1) / scale), 0.0f));
+					cameraPosition.add(new Point2f(-((keyStroke.isShiftDown() ? 5.0f : 1.0f) / scale), 0.0f));
 					focusedEntity = -1;
 				} else if (keyStroke.getKeyType() == KeyType.ArrowRight) {
-					cameraPosition.add(new Point2f(((keyStroke.isShiftDown() ? 5 : 1) / scale), 0.0f));
+					cameraPosition.add(new Point2f(((keyStroke.isShiftDown() ? 5.0f : 1.0f) / scale), 0.0f));
 					focusedEntity = -1;
 				}
 			}

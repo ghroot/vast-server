@@ -10,6 +10,7 @@ import com.vast.component.Interact;
 import com.vast.component.Path;
 import com.vast.component.Player;
 import com.vast.component.Transform;
+import com.vast.interact.InteractionHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,8 @@ public class FakeHumanBehaviour extends AbstractBehaviour {
 	private Map<String, VastPeer> peers;
 	private Map<String, List<IncomingRequest>> incomingRequestsByPeer;
 
-	public FakeHumanBehaviour(Map<String, VastPeer> peers, Map<String, List<IncomingRequest>> incomingRequestsByPeer) {
+	public FakeHumanBehaviour(List<InteractionHandler> interactionHandlers, Map<String, VastPeer> peers, Map<String, List<IncomingRequest>> incomingRequestsByPeer) {
+		super(interactionHandlers);
 		this.peers = peers;
 		this.incomingRequestsByPeer = incomingRequestsByPeer;
 	}

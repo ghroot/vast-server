@@ -60,7 +60,6 @@ public class CreationManager extends BaseSystem {
 				.add(Collision.class)
 				.add(Scan.class)
 				.add(Known.class)
-				.add(Interactable.class)
 				.add(Attack.class)
 				.add(SyncPropagation.class)
 				.build(world);
@@ -71,7 +70,6 @@ public class CreationManager extends BaseSystem {
 				.add(Spatial.class)
 				.add(Collision.class)
 				.add(Static.class)
-				.add(Interactable.class)
 				.add(Harvestable.class)
 				.add(Inventory.class)
 				.add(SyncPropagation.class)
@@ -83,7 +81,6 @@ public class CreationManager extends BaseSystem {
 				.add(Spatial.class)
 				.add(Collision.class)
 				.add(Static.class)
-				.add(Interactable.class)
 				.add(Harvestable.class)
 				.add(Inventory.class)
 				.add(SyncPropagation.class)
@@ -98,7 +95,6 @@ public class CreationManager extends BaseSystem {
 				.add(Transform.class)
 				.add(Spatial.class)
 				.add(Collision.class)
-				.add(Interactable.class)
 				.add(Attack.class)
 				.add(SyncPropagation.class)
 				.build(world);
@@ -112,7 +108,6 @@ public class CreationManager extends BaseSystem {
 				.add(Collision.class)
 				.add(Static.class)
 				.add(Constructable.class)
-				.add(Interactable.class)
 				.add(SyncPropagation.class)
 				.build(world);
 
@@ -123,7 +118,6 @@ public class CreationManager extends BaseSystem {
 				.add(Collision.class)
 				.add(Static.class)
 				.add(Inventory.class)
-				.add(Interactable.class)
 				.add(Container.class)
 				.add(SyncPropagation.class)
 				.build(world);

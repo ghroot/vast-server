@@ -41,6 +41,13 @@ public class VastWorld implements Runnable {
 		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<String, List<IncomingRequest>>();
 		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
+		List<InteractionHandler> interactionHandlers = new ArrayList<InteractionHandler>(Arrays.asList(
+			new HarvestableInteractionHandler(),
+			new ConstructableInteractionHandler(),
+			new AttackInteractionHandler(),
+			new ContainerInteractionHandler(),
+			new FueledInteractionHandler()
+		));
 		Set<PropertyHandler> propertyHandlers = new HashSet<PropertyHandler>(Arrays.asList(
 			new PositionPropertyHandler(),
 			new RotationPropertyHandler(),
@@ -49,13 +56,12 @@ public class VastWorld implements Runnable {
 			new ProgressPropertyHandler(),
 			new HealthPropertyHandler(),
 			new MaxHealthPropertyHandler(),
-			new InteractablePropertyHandler(),
 			new InventoryPropertyHandler(),
 			new FueledPropertyHandler()
 		));
 		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
-		behaviours.put("basic", new BasicBehaviour());
-		behaviours.put("fakeHuman", new FakeHumanBehaviour(peers, incomingRequestsByPeer));
+		behaviours.put("basic", new BasicBehaviour(interactionHandlers));
+		behaviours.put("fakeHuman", new FakeHumanBehaviour(interactionHandlers, peers, incomingRequestsByPeer));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldConfiguration, items, buildings),
@@ -79,13 +85,7 @@ public class VastWorld implements Runnable {
 			)), incomingRequestsByPeer),
 			new AISystem(behaviours),
 			new PathMoveSystem(),
-			new InteractSystem(new ArrayList<InteractionHandler>(Arrays.asList(
-				new HarvestableInteractionHandler(),
-				new ConstructableInteractionHandler(),
-				new AttackInteractionHandler(),
-				new ContainerInteractionHandler(),
-				new FueledInteractionHandler()
-			))),
+			new InteractSystem(interactionHandlers),
 			new CollisionSystem(new HashSet<CollisionHandler>(), metrics),
 			new FuelSystem(),
 			new LifetimeSystem(),

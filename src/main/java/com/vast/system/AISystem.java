@@ -5,7 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.behaviour.Behaviour;
-import com.vast.component.*;
+import com.vast.component.AI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,12 +14,6 @@ import java.util.Map;
 public class AISystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(AISystem.class);
 
-	private ComponentMapper<Path> pathMapper;
-	private ComponentMapper<Transform> transformMapper;
-	private ComponentMapper<Scan> scanMapper;
-	private ComponentMapper<Interact> interactMapper;
-	private ComponentMapper<Interactable> interactableMapper;
-	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<AI> aiMapper;
 
 	private Map<String, Behaviour> behaviours;

@@ -48,7 +48,6 @@ public class Metrics {
 	}
 
 	public void setRoundTripTime(double meanOfRoundTripTime, double meanOfRoundTripTimeDeviation) {
-
 		this.meanOfRoundTripTime = meanOfRoundTripTime;
 		this.meanOfRoundTripTimeDeviation = meanOfRoundTripTimeDeviation;
 	}
