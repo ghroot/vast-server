@@ -318,6 +318,8 @@ public class TerminalSystem extends IntervalSystem {
 							}
 						}
 						detail = s.toString();
+					} else if (component instanceof Lifetime) {
+						detail = "" + (Math.round(((Lifetime) component).timeLeft * 100.0f) / 100.0f);
 					}
 					if (detail != null) {
 						textGraphics.putString(0, row, componentName + " (" + detail + ")");
