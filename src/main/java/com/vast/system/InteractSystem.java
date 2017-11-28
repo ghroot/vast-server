@@ -4,10 +4,8 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.component.Collision;
-import com.vast.component.Interact;
-import com.vast.component.Path;
-import com.vast.component.Transform;
+import com.vast.Properties;
+import com.vast.component.*;
 import com.vast.interact.InteractionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +23,7 @@ public class InteractSystem  extends IteratingSystem {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Collision> collisionMapper;
+	private ComponentMapper<Sync> syncMapper;
 
 	private List<InteractionHandler> interactionHandlers;
 
@@ -107,6 +106,9 @@ public class InteractSystem  extends IteratingSystem {
 				interact.phase = Interact.Phase.APPROACHING;
 			}
 		} else {
+			transformMapper.get(entity).rotation = getAngle(reusableVector);
+			syncMapper.create(entity).markPropertyAsDirty(Properties.ROTATION);
+
 			if (interact.phase == Interact.Phase.INTERACTING) {
 				if (interact.handler.process(entity, interact.entity)) {
 					logger.debug("Entity {} completed interaction with entity {}", entity, interact.entity);
@@ -131,5 +133,13 @@ public class InteractSystem  extends IteratingSystem {
 			}
 		}
 		return null;
+	}
+
+	public float getAngle(Vector2f direction) {
+		float angle = (float) Math.toDegrees(Math.atan2(direction.y, direction.x));
+		if (angle < 0){
+			angle += 360;
+		}
+		return angle;
 	}
 }
