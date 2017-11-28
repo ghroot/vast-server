@@ -106,8 +106,11 @@ public class InteractSystem  extends IteratingSystem {
 				interact.phase = Interact.Phase.APPROACHING;
 			}
 		} else {
-			transformMapper.get(entity).rotation = getAngle(reusableVector);
-			syncMapper.create(entity).markPropertyAsDirty(Properties.ROTATION);
+			float targetRotation = getAngle(reusableVector);
+			if (getAngleDifference(transform.rotation, targetRotation) >= 1.0f) {
+				transform.rotation = targetRotation;
+				syncMapper.create(entity).markPropertyAsDirty(Properties.ROTATION);
+			}
 
 			if (interact.phase == Interact.Phase.INTERACTING) {
 				if (interact.handler.process(entity, interact.entity)) {
@@ -141,5 +144,10 @@ public class InteractSystem  extends IteratingSystem {
 			angle += 360;
 		}
 		return angle;
+	}
+
+	private float getAngleDifference(float alpha, float beta) {
+		float phi = Math.abs(beta - alpha) % 360;
+		return phi > 180.0f ? 360.0f - phi : phi;
 	}
 }
