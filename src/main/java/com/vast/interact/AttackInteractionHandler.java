@@ -46,14 +46,13 @@ public class AttackInteractionHandler extends AbstractInteractionHandler {
 		if (time - attack.lastAttackTime >= attack.cooldown) {
 			Health health = healthMapper.get(healthEntity);
 			health.takeDamage(1);
+			syncMapper.create(healthEntity).markPropertyAsDirty(Properties.HEALTH);
 			eventMapper.create(attackEntity).name = "attacked";
 			logger.debug("Entity {} is attacking entity {}, health left: {}", attackEntity, healthEntity, health.health);
 			if (health.isDead()) {
 				logger.debug("Entity {} killed entity {}", attackEntity, healthEntity);
 				deathMapper.create(healthEntity);
 				return true;
-			} else {
-				syncMapper.create(healthEntity).markPropertyAsDirty(Properties.HEALTH);
 			}
 			attack.lastAttackTime = time;
 		}
