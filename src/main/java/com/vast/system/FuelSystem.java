@@ -21,7 +21,9 @@ public class FuelSystem extends IteratingSystem {
 
 		if (fueled.timeLeft > 0.0f) {
 			fueled.timeLeft -= world.getDelta();
-			syncMapper.create(fueledEntity).markPropertyAsDirty(Properties.FUELED);
+			if (fueled.timeLeft <= 0.0f) {
+				syncMapper.create(fueledEntity).markPropertyAsDirty(Properties.FUELED);
+			}
 		}
 	}
 }
