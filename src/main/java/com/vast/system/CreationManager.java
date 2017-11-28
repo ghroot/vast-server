@@ -9,6 +9,7 @@ import com.vast.component.*;
 import com.vast.data.Buildings;
 import com.vast.data.Items;
 import com.vast.data.WorldConfiguration;
+import fastnoise.FastNoise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<SubType> subTypeMapper;
+	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Health> healthMapper;
@@ -128,19 +130,27 @@ public class CreationManager extends BaseSystem {
 	}
 
 	public void createWorld() {
-		for (int i = 0; i < worldConfiguration.numberOfRocks; i++) {
-			createRock(getRandomPositionInWorld());
-		}
-		for (int i = 0; i < worldConfiguration.numberOfTrees; i++) {
-			createTree(getRandomPositionInWorld());
-		}
-		for (int i = 0; i < worldConfiguration.numberOfAIs; i++) {
-			createAI(getRandomPositionInWorld());
-		}
-	}
+//		for (int i = 0; i < worldConfiguration.numberOfRocks; i++) {
+//			createRock(getRandomPositionInWorld());
+//		}
+//		for (int i = 0; i < worldConfiguration.numberOfTrees; i++) {
+//			createTree(getRandomPositionInWorld());
+//		}
+//		for (int i = 0; i < worldConfiguration.numberOfAIs; i++) {
+//			createAI(getRandomPositionInWorld());
+//		}
 
-	private Point2f getRandomPositionInWorld() {
-		return new Point2f(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
+		FastNoise noise = new FastNoise();
+		for (float x = -worldConfiguration.width / 2.0f; x < worldConfiguration.width / 2.0f; x += 3.0f) {
+			for (float y = -worldConfiguration.height / 2.0f; y < worldConfiguration.height / 2.0f; y += 3.0f) {
+				if (noise.GetSimplex(x, y) > 0.35f) {
+					createTree(new Point2f(x - 1.0f + (float) Math.random() * 2.0f, y - 1.0f + (float) Math.random() * 2.0f));
+				}
+				if (noise.GetWhiteNoise(x, y) > 0.8f) {
+					createRock(new Point2f(x, y));
+				}
+			}
+		}
 	}
 
 	private int createTree(Point2f position) {
@@ -182,7 +192,8 @@ public class CreationManager extends BaseSystem {
 		playerMapper.get(playerEntity).name = name;
 		typeMapper.get(playerEntity).type = "player";
 		subTypeMapper.get(playerEntity).subType = subType;
-		transformMapper.get(playerEntity).position.set(-worldConfiguration.width / 2 + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2 + (float) Math.random() * worldConfiguration.height);
+		transformMapper.get(playerEntity).position.set(getRandomPositionInWorld());
+		scanMapper.get(playerEntity).distance = 15.0f;
 		collisionMapper.get(playerEntity).radius = 0.3f;
 		healthMapper.get(playerEntity).maxHealth = 5;
 		healthMapper.get(playerEntity).health = 5;
@@ -224,5 +235,9 @@ public class CreationManager extends BaseSystem {
 		collisionMapper.get(crateEntity).radius = 0.1f;
 		inventoryMapper.get(crateEntity).add(inventory);
 		return crateEntity;
+	}
+
+	private Point2f getRandomPositionInWorld() {
+		return new Point2f(-worldConfiguration.width / 2.0f + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2.0f + (float) Math.random() * worldConfiguration.height);
 	}
 }

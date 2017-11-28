@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Scan extends PooledComponent {
-	public float distance = 8.0f;
+	public float distance = 10.0f;
 	public transient Set<Integer> nearbyEntities = new HashSet<Integer>();
 
 	@Override
