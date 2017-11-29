@@ -46,6 +46,7 @@ public class CreateSystem extends AbstractNearbyEntityIteratingSystem {
 					VastPeer peer = peers.get(playerMapper.get(nearbyEntity).name);
 					String reason = createMapper.get(createEntity).reason;
 					logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);
+					reusableEventMessage.getDataObject().clear();
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, createEntity);
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(createEntity).type);
 					if (subTypeMapper.has(createEntity)) {

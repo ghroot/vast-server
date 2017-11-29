@@ -12,13 +12,13 @@ public class HealEffect implements Effect {
 	private ComponentMapper<Sync> syncMapper;
 
 	@Override
-	public void process(int effectEntity, Set<Integer> nearbyEntities) {
-		for (int nearbyEntity : nearbyEntities) {
-			if (nearbyEntity != effectEntity && healthMapper.has(nearbyEntity)) {
-				Health health = healthMapper.get(nearbyEntity);
+	public void process(int effectEntity, Set<Integer> entitiesInRange) {
+		for (int entityInRange : entitiesInRange) {
+			if (healthMapper.has(entityInRange)) {
+				Health health = healthMapper.get(entityInRange);
 				if (!health.isFull()) {
 					health.heal(1);
-					syncMapper.create(nearbyEntity).markPropertyAsDirty(Properties.HEALTH);
+					syncMapper.create(entityInRange).markPropertyAsDirty(Properties.HEALTH);
 				}
 			}
 		}

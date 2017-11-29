@@ -202,6 +202,7 @@ public class CreationManager extends BaseSystem {
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.POSITION);
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.ROTATION);
 		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.INVENTORY);
+		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.HOME);
 		if (fakePlayer) {
 			aiMapper.create(playerEntity).behaviourName = "fakeHuman";
 		}
@@ -244,11 +245,12 @@ public class CreationManager extends BaseSystem {
 		return crateEntity;
 	}
 
-	public int createAura(Point2f position, String effectName, int parentEntity) {
+	public int createAura(Point2f position, String effectName, float range, int parentEntity) {
 		int auraEntity = world.create();
 		transformMapper.create(auraEntity).position.set(position);
 		spatialMapper.create(auraEntity);
-		auraMapper.create(auraEntity).effectName = effectName;
+		auraMapper.create(auraEntity).range = range;
+		auraMapper.get(auraEntity).effectName = effectName;
 		scanMapper.create(auraEntity);
 		if (parentEntity != -1) {
 			parentMapper.create(auraEntity).parentEntity = parentEntity;

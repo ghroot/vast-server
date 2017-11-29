@@ -73,6 +73,7 @@ public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
 
 	private void notifyAboutRemovedEntity(VastPeer peer, int deletedEntity) {
 		logger.debug("Notifying peer {} about removed entity {} (culling)", peer.getName(), deletedEntity);
+		reusableDestroyedEventMessage.getDataObject().clear();
 		reusableDestroyedEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, deletedEntity);
 		reusableDestroyedEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_REASON, "culling");
 		peer.send(reusableDestroyedEventMessage);
@@ -89,6 +90,7 @@ public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
 
 	private void notifyAboutNewEntity(VastPeer peer, int newEntity) {
 		logger.debug("Notifying peer {} about new entity {} (culling)", peer.getName(), newEntity);
+		reusableCreatedEventMessage.getDataObject().clear();
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, newEntity);
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(newEntity).type);
 		if (subTypeMapper.has(newEntity)) {

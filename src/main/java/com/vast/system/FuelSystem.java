@@ -30,6 +30,10 @@ public class FuelSystem extends IteratingSystem {
 	}
 
 	@Override
+	public void inserted(IntBag entities) {
+	}
+
+	@Override
 	public void removed(IntBag entities) {
 	}
 
@@ -47,7 +51,7 @@ public class FuelSystem extends IteratingSystem {
 				syncMapper.create(fueledEntity).markPropertyAsDirty(Properties.FUELED);
 			} else {
 				if (fueled.effectEntity == -1) {
-					fueled.effectEntity = creationManager.createAura(transformMapper.get(fueledEntity).position, fueled.fueledAuraEffectName, fueledEntity);
+					fueled.effectEntity = creationManager.createAura(transformMapper.get(fueledEntity).position, fueled.fueledAuraEffectName, 1.5f, fueledEntity);
 				}
 			}
 		}

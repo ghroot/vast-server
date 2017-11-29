@@ -62,6 +62,7 @@ public class DeleteSystem extends AbstractNearbyEntityIteratingSystem {
 
 	private void notifyAboutRemovedEntity(VastPeer peer, int deleteEntity, String reason) {
 		logger.debug("Notifying peer {} about removed entity {} ({})", peer.getName(), deleteEntity, reason);
+		reusableEventMessage.getDataObject().clear();
 		reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, deleteEntity);
 		reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_REASON, reason);
 		peer.send(reusableEventMessage);
