@@ -3,6 +3,7 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
+import com.vast.Properties;
 import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ public class DeathSystem extends IteratingSystem {
 	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<Disabled> disabledMapper;
 	private ComponentMapper<Home> homeMapper;
+	private ComponentMapper<Sync> syncMapper;
 
 	private CreationManager creationManager;
 
@@ -66,6 +68,7 @@ public class DeathSystem extends IteratingSystem {
 					int crateEntity = creationManager.createCrate(transformMapper.get(deathEntity).position, inventory);
 					lifetimeMapper.create(crateEntity).timeLeft = 180.0f;
 					inventory.clear();
+					syncMapper.create(deathEntity).markPropertyAsDirty(Properties.INVENTORY);
 				}
 			}
 			if (playerMapper.has(deathEntity)) {
