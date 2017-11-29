@@ -63,7 +63,7 @@ public class PeerEntitySystem extends BaseSystem {
 	}
 
 	private void createPeerEntity(VastPeer peer) {
-		int playerEntity = creationManager.createPlayer(peer.getName(), peer.getName().hashCode() % 3, peer instanceof FakePeer);
+		int playerEntity = creationManager.createPlayer(peer.getName(), Math.abs(peer.getName().hashCode()) % 3, peer instanceof FakePeer);
 		entitiesByPeer.put(peer.getName(), playerEntity);
 		logger.info("Creating peer entity: {} for {} at {}", playerEntity, peer.getName(), transformMapper.get(playerEntity).position);
 	}
