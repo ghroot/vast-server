@@ -11,6 +11,8 @@ import com.vast.collision.CollisionHandler;
 import com.vast.data.Buildings;
 import com.vast.data.Items;
 import com.vast.data.WorldConfiguration;
+import com.vast.effect.Effect;
+import com.vast.effect.HealEffect;
 import com.vast.interact.*;
 import com.vast.order.*;
 import com.vast.property.*;
@@ -62,6 +64,8 @@ public class VastWorld implements Runnable {
 		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
 		behaviours.put("basic", new BasicBehaviour(interactionHandlers));
 		behaviours.put("fakeHuman", new FakeHumanBehaviour(interactionHandlers, peers, incomingRequestsByPeer));
+		Map<String, Effect> effects = new HashMap<String, Effect>();
+		effects.put("heal", new HealEffect());
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldConfiguration, items, buildings),
@@ -88,8 +92,10 @@ public class VastWorld implements Runnable {
 			new InteractSystem(interactionHandlers),
 			new CollisionSystem(new HashSet<CollisionHandler>(), metrics),
 			new FuelSystem(),
+			new AuraSystem(effects),
 			new LifetimeSystem(),
 			new DeathSystem(),
+			new ParentSystem(),
 			new DeleteSystem(peers),
 			new CreateSystem(peers, propertyHandlers),
 			new EventSystem(peers),

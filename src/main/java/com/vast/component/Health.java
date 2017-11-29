@@ -12,6 +12,14 @@ public class Health extends Component {
 		health = Math.max(health - damage, 0);
 	}
 
+	public void heal(int amount) {
+		health = Math.min(health + amount, maxHealth);
+	}
+
+	public boolean isFull() {
+		return health == maxHealth;
+	}
+
 	public boolean isDead() {
 		return health == 0;
 	}

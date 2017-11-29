@@ -80,7 +80,7 @@ public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
 
 	private void notifyAboutNewEntities(VastPeer peer, Set<Integer> nearbyEntities, Set<Integer> knownEntities) {
 		for (int nearbyEntity : nearbyEntities) {
-			if (!knownEntities.contains(nearbyEntity)) {
+			if (!knownEntities.contains(nearbyEntity) && typeMapper.has(nearbyEntity)) {
 				notifyAboutNewEntity(peer, nearbyEntity);
 				knownEntities.add(nearbyEntity);
 			}

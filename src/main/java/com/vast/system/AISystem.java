@@ -34,11 +34,7 @@ public class AISystem extends IteratingSystem {
 	protected void inserted(int aiEntity) {
 		AI ai = aiMapper.get(aiEntity);
 
-		if (behaviours.containsKey(ai.behaviourName)) {
-			ai.behaviour = behaviours.get(ai.behaviourName);
-		} else {
-			logger.warn("Unable to find behaviour '{}' for entity {}", ai.behaviourName, aiEntity);
-		}
+		ai.behaviour = behaviours.get(ai.behaviourName);
 	}
 
 	@Override

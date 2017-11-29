@@ -223,7 +223,7 @@ public class CreationManager extends BaseSystem {
 			healthMapper.create(buildingEntity).maxHealth = 3;
 			healthMapper.create(buildingEntity).health = 3;
 		} else if (buildingType == 3) {
-			fueledMapper.create(buildingEntity);
+			fueledMapper.create(buildingEntity).fueledAuraEffectName = "heal";
 		}
 		return buildingEntity;
 	}

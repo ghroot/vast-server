@@ -2,15 +2,11 @@ package com.vast.component;
 
 import com.artemis.PooledComponent;
 import com.vast.data.Cost;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Set;
 
 public class Inventory extends PooledComponent {
-	private static final Logger logger = LoggerFactory.getLogger(Inventory.class);
-
 	public short[] items = new short[0];
 
 	@Override
@@ -19,7 +15,6 @@ public class Inventory extends PooledComponent {
 	}
 
 	public void add(int itemType, int amount) {
-		logger.debug("Adding {} item(s) of type {} to inventory", amount, itemType);
 		if (itemType >= items.length) {
 			items = Arrays.copyOf(items, itemType + 1);
 		}
@@ -40,7 +35,6 @@ public class Inventory extends PooledComponent {
 
 	public void remove(int itemType, int amount) {
 		if (amount > 0) {
-			logger.debug("Removing {} item(s) of type {} from inventory", amount, itemType);
 			items[itemType] -= amount;
 		}
 	}

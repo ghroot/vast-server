@@ -3,7 +3,6 @@ package com.vast.interact;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
-import com.vast.component.Event;
 import com.vast.component.Fueled;
 import com.vast.component.Player;
 import com.vast.component.Sync;
@@ -15,7 +14,6 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 
 	private ComponentMapper<Fueled> fueledMapper;
 	private ComponentMapper<Sync> syncMapper;
-	private ComponentMapper<Event> eventMapper;
 
 	public FueledInteractionHandler() {
 		super(Aspect.all(Player.class), Aspect.all(Fueled.class));
@@ -28,18 +26,19 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public void start(int playerEntity, int fueledEntity) {
-		eventMapper.create(playerEntity).name = "startedFueling";
 	}
 
 	@Override
 	public boolean process(int playerEntity, int fueledEntity) {
-		fueledMapper.get(fueledEntity).timeLeft = 60.0f;
+		Fueled fueled = fueledMapper.get(fueledEntity);
+
+		fueled.timeLeft = 60.0f;
 		syncMapper.create(fueledEntity).markPropertyAsDirty(Properties.FUELED);
+
 		return true;
 	}
 
 	@Override
 	public void stop(int playerEntity, int fueledEntity) {
-		eventMapper.create(playerEntity).name = "stoppedFueling";
 	}
 }
