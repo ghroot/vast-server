@@ -31,7 +31,6 @@ public class VastWorld implements Runnable {
 	private World world;
 	private boolean alive;
 	private long lastFrameStartTime;
-	public boolean fastForward = false;
 	private Metrics metrics;
 
 	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, boolean showMonitor, Metrics metrics) {
@@ -108,7 +107,7 @@ public class VastWorld implements Runnable {
 			new EntityLinkManager()
 		).register(new ProfiledInvocationStrategy(metrics));
 		if (showMonitor) {
-			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(this, peers, metrics, worldConfiguration, spatialHashes));
+			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, spatialHashes));
 		}
 		world = new World(worldConfigurationBuilder.build());
 
@@ -119,29 +118,24 @@ public class VastWorld implements Runnable {
 	public void run() {
 		lastFrameStartTime = System.currentTimeMillis();
 		while (alive) {
-			if (fastForward) {
-				world.setDelta(FRAME_DURATION_MILLIS / 1000.0f);
-				world.process();
-			} else {
-				long frameStartTime = System.currentTimeMillis();
-				int timeSinceLastFrame = (int) (frameStartTime - lastFrameStartTime);
-				metrics.setTimePerFrameMs(timeSinceLastFrame);
-				float delta = (float) timeSinceLastFrame / 1000;
-				world.setDelta(delta);
-				long processStartTime = System.currentTimeMillis();
-				world.process();
-				long processEndTime = System.currentTimeMillis();
-				int processDuration = (int) (processEndTime - processStartTime);
-				int sleepDuration = FRAME_DURATION_MILLIS - processDuration;
-				if (sleepDuration > 0) {
-					try {
-						Thread.sleep(sleepDuration);
-					} catch (InterruptedException exception) {
-						logger.error("Interrupted while sleeping after processing world", exception);
-					}
+			long frameStartTime = System.currentTimeMillis();
+			int timeSinceLastFrame = (int) (frameStartTime - lastFrameStartTime);
+			metrics.setTimePerFrameMs(timeSinceLastFrame);
+			float delta = (float) timeSinceLastFrame / 1000;
+			world.setDelta(delta);
+			long processStartTime = System.currentTimeMillis();
+			world.process();
+			long processEndTime = System.currentTimeMillis();
+			int processDuration = (int) (processEndTime - processStartTime);
+			int sleepDuration = FRAME_DURATION_MILLIS - processDuration;
+			if (sleepDuration > 0) {
+				try {
+					Thread.sleep(sleepDuration);
+				} catch (InterruptedException exception) {
+					logger.error("Interrupted while sleeping after processing world", exception);
 				}
-				lastFrameStartTime = frameStartTime;
 			}
+			lastFrameStartTime = frameStartTime;
 		}
 	}
 
