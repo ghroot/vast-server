@@ -66,7 +66,8 @@ public class VastWorld implements Runnable {
 			new HealthPropertyHandler(),
 			new MaxHealthPropertyHandler(),
 			new InventoryPropertyHandler(),
-			new FueledPropertyHandler()
+			new FueledPropertyHandler(),
+			new HomePropertyHandler()
 		));
 		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
 		behaviours.put("basic", new BasicBehaviour(interactionHandlers));
