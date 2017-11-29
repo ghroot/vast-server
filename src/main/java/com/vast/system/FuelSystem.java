@@ -14,14 +14,19 @@ public class FuelSystem extends IteratingSystem {
 
 	private ComponentMapper<Fueled> fueledMapper;
 	private ComponentMapper<Transform> transformMapper;
-	private ComponentMapper<Spatial> spatialMapper;
-	private ComponentMapper<Aura> auraMapper;
 	private ComponentMapper<Scan> scanMapper;
-	private ComponentMapper<Parent> parentMapper;
+
 	private ComponentMapper<Sync> syncMapper;
+
+	private CreationManager creationManager;
 
 	public FuelSystem() {
 		super(Aspect.all(Fueled.class));
+	}
+
+	@Override
+	protected void initialize() {
+		creationManager = world.getSystem(CreationManager.class);
 	}
 
 	@Override
@@ -42,13 +47,7 @@ public class FuelSystem extends IteratingSystem {
 				syncMapper.create(fueledEntity).markPropertyAsDirty(Properties.FUELED);
 			} else {
 				if (fueled.effectEntity == -1) {
-					int auraEntity = world.create();
-					transformMapper.create(auraEntity).position.set(transformMapper.get(fueledEntity).position);
-					spatialMapper.create(auraEntity);
-					auraMapper.create(auraEntity).effectName = fueled.fueledAuraEffectName;
-					scanMapper.create(auraEntity);
-					parentMapper.create(auraEntity).parentEntity = fueledEntity;
-					fueled.effectEntity = auraEntity;
+					fueled.effectEntity = creationManager.createAura(transformMapper.get(fueledEntity).position, fueled.fueledAuraEffectName, fueledEntity);
 				}
 			}
 		}

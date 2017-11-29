@@ -43,6 +43,13 @@ public class VastWorld implements Runnable {
 		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<String, List<IncomingRequest>>();
 		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
+		Set<OrderHandler> orderHandlers = new HashSet<OrderHandler>(Arrays.asList(
+			new MoveOrderHandler(),
+			new InteractOrderHandler(),
+			new BuildOrderHandler(buildings),
+			new EmoteOrderHandler(),
+			new SetHomeOrderHandler()
+		));
 		List<InteractionHandler> interactionHandlers = new ArrayList<InteractionHandler>(Arrays.asList(
 			new HarvestableInteractionHandler(),
 			new ConstructableInteractionHandler(),
@@ -81,12 +88,7 @@ public class VastWorld implements Runnable {
 			new SpatialUpdateSystem(worldConfiguration, spatialHashes),
 			new ScanSystem(worldConfiguration, spatialHashes),
 			new CullingSystem(peers, propertyHandlers),
-			new OrderSystem(new HashSet<OrderHandler>(Arrays.asList(
-				new MoveOrderHandler(),
-				new InteractOrderHandler(),
-				new BuildOrderHandler(buildings),
-				new EmoteOrderHandler()
-			)), incomingRequestsByPeer),
+			new OrderSystem(orderHandlers, incomingRequestsByPeer),
 			new AISystem(behaviours),
 			new PathMoveSystem(),
 			new InteractSystem(interactionHandlers),

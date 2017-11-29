@@ -24,6 +24,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<SubType> subTypeMapper;
 	private ComponentMapper<Scan> scanMapper;
+	private ComponentMapper<Spatial> spatialMapper;
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Health> healthMapper;
@@ -31,6 +32,9 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Constructable> constructableMapper;
 	private ComponentMapper<Container> containerMapper;
 	private ComponentMapper<Fueled> fueledMapper;
+	private ComponentMapper<Aura> auraMapper;
+	private ComponentMapper<Parent> parentMapper;
+	private ComponentMapper<Home> homeMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 
 	private WorldConfiguration worldConfiguration;
@@ -182,12 +186,16 @@ public class CreationManager extends BaseSystem {
 		return aiEntity;
 	}
 
-	public int createPlayer(String name, int subType, boolean fakePlayer) {
+	public int createPlayer(String name, int subType, Point2f position, boolean fakePlayer) {
 		int playerEntity = world.create(playerArchetype);
 		playerMapper.get(playerEntity).name = name;
 		typeMapper.get(playerEntity).type = "player";
 		subTypeMapper.get(playerEntity).subType = subType;
-		transformMapper.get(playerEntity).position.set(getRandomPositionInWorld());
+		if (position != null) {
+			transformMapper.get(playerEntity).position.set(position);
+		} else {
+			transformMapper.get(playerEntity).position.set(getRandomPositionInWorld());
+		}
 		scanMapper.get(playerEntity).distance = 15.0f;
 		collisionMapper.get(playerEntity).radius = 0.3f;
 		healthMapper.get(playerEntity).maxHealth = 5;
@@ -199,6 +207,10 @@ public class CreationManager extends BaseSystem {
 			aiMapper.create(playerEntity).behaviourName = "fakeHuman";
 		}
 		return playerEntity;
+	}
+
+	public int createPlayer(String name, int subType, boolean fakePlayer) {
+		return createPlayer(name, subType, null, fakePlayer);
 	}
 
 	public int createBuilding(Point2f position, int buildingType) {
@@ -231,6 +243,26 @@ public class CreationManager extends BaseSystem {
 		collisionMapper.get(crateEntity).radius = 0.1f;
 		inventoryMapper.get(crateEntity).add(inventory);
 		return crateEntity;
+	}
+
+	public int createAura(Point2f position, String effectName, int parentEntity) {
+		int auraEntity = world.create();
+		transformMapper.create(auraEntity).position.set(position);
+		spatialMapper.create(auraEntity);
+		auraMapper.create(auraEntity).effectName = effectName;
+		scanMapper.create(auraEntity);
+		if (parentEntity != -1) {
+			parentMapper.create(auraEntity).parentEntity = parentEntity;
+		}
+		return auraEntity;
+	}
+
+	public int createHome(Point2f position, String name) {
+		int homeEntity = world.create();
+		typeMapper.create(homeEntity).type = "home";
+		transformMapper.create(homeEntity).position.set(position);
+		homeMapper.create(homeEntity).name = name;
+		return homeEntity;
 	}
 
 	private Point2f getRandomPositionInWorld() {

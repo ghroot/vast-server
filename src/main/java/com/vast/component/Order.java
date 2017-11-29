@@ -15,7 +15,8 @@ public class Order extends PooledComponent {
 		MOVE,
 		INTERACT,
 		BUILD,
-		EMOTE
+		EMOTE,
+		SET_HOME
 	}
 	public Type type;
 

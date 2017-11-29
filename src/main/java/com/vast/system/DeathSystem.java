@@ -3,9 +3,12 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
+import com.artemis.utils.IntBag;
 import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.vecmath.Point2f;
 
 public class DeathSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(DeathSystem.class);
@@ -21,6 +24,7 @@ public class DeathSystem extends IteratingSystem {
 	private ComponentMapper<Death> deathMapper;
 	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<Disabled> disabledMapper;
+	private ComponentMapper<Home> homeMapper;
 
 	private CreationManager creationManager;
 
@@ -40,10 +44,26 @@ public class DeathSystem extends IteratingSystem {
 		if (death.countdown > 0.0f) {
 			death.countdown -= world.getDelta();
 			if (death.countdown <= 0.0f) {
-				int playerEntity = creationManager.createPlayer(playerMapper.get(deathEntity).name,
-						subTypeMapper.get(deathEntity).subType,
-						aiMapper.has(deathEntity));
+				Player player = playerMapper.get(deathEntity);
+
+				Point2f respawnPosition = null;
+				IntBag homeEntities = world.getAspectSubscriptionManager().get(Aspect.all(Home.class)).getEntities();
+				for (int i = 0; i < homeEntities.size(); i++) {
+					int homeEntity = homeEntities.get(i);
+					if (homeMapper.has(homeEntity)) {
+						if (homeMapper.get(homeEntity).name.equals(player.name)) {
+							respawnPosition = transformMapper.get(homeEntity).position;
+							break;
+						}
+					}
+				}
+
+				int playerEntity = creationManager.createPlayer(player.name,
+					subTypeMapper.get(deathEntity).subType,
+					respawnPosition,
+					aiMapper.has(deathEntity));
 				knownMapper.get(playerEntity).knownEntities.addAll(knownMapper.get(deathEntity).knownEntities);
+
 				world.delete(deathEntity);
 			}
 		} else {

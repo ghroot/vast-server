@@ -161,6 +161,9 @@ public class TerminalSystem extends IntervalSystem {
 								screen.setCharacter(terminalPosition, new TextCharacter('#', colored ? TextColor.ANSI.Indexed.fromRGB(100, 100, 100) : gray, TextColor.ANSI.DEFAULT));
 							}
 							textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
+						} else if (typeMapper.get(entity).type.equals("home")) {
+							screen.setCharacter(terminalPosition, new TextCharacter('X', colored ? TextColor.ANSI.RED : gray, TextColor.ANSI.DEFAULT));
+							textGraphics.setForegroundColor(TextColor.ANSI.RED);
 						} else {
 							screen.setCharacter(terminalPosition, new TextCharacter('?', colored ? TextColor.ANSI.MAGENTA : gray, TextColor.ANSI.DEFAULT));
 							textGraphics.setForegroundColor(TextColor.ANSI.MAGENTA);
