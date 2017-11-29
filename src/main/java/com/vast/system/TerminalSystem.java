@@ -19,6 +19,7 @@ import com.googlecode.lanterna.terminal.Terminal;
 import com.vast.Metrics;
 import com.vast.Properties;
 import com.vast.VastPeer;
+import com.vast.VastWorld;
 import com.vast.component.*;
 import com.vast.data.WorldConfiguration;
 import org.slf4j.Logger;
@@ -39,6 +40,7 @@ public class TerminalSystem extends IntervalSystem {
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Constructable> constructableMapper;
 
+	private VastWorld vastWorld;
 	private Map<String, VastPeer> peers;
 	private Metrics metrics;
 	private WorldConfiguration worldConfiguration;
@@ -55,8 +57,9 @@ public class TerminalSystem extends IntervalSystem {
 	private int focusedEntity = -1;
 	private int processDuration = 0;
 
-	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes) {
+	public TerminalSystem(VastWorld vastWorld, Map<String, VastPeer> peers, Metrics metrics, WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes) {
 		super(Aspect.all(), 0.1f);
+		this.vastWorld = vastWorld;
 		this.peers = peers;
 		this.metrics = metrics;
 		this.worldConfiguration = worldConfiguration;
@@ -197,9 +200,16 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.putString(0, 7, "Player entities: " + playerEntities.size() + " (" + activePlayerEntities.size() + " active)");
 			textGraphics.putString(0, 8, "Scanning entities: " + scanEntities.size());
 
-			String fpsString = "FPS: " + metrics.getFps();
+			String fpsString;
+			String frameTimeString;
+			if (vastWorld.fastForward) {
+				fpsString = "FPS: >>";
+				frameTimeString = "Frame time: >>";
+			} else {
+				fpsString = "FPS: " + metrics.getFps();
+				frameTimeString = "Frame time: " + metrics.getTimePerFrameMs() + " ms";
+			}
 			textGraphics.putString(screen.getTerminalSize().getColumns() - fpsString.length(), 0, fpsString);
-			String frameTimeString = "Frame time: " + metrics.getTimePerFrameMs() + " ms";
 			textGraphics.putString(screen.getTerminalSize().getColumns() - frameTimeString.length(), 1, frameTimeString);
 			String monitorProcessDurationString = "Monitor overhead: " + (int) (processDuration / 5.8f) + " ms";
 			textGraphics.putString(screen.getTerminalSize().getColumns() - monitorProcessDurationString.length(), 2, monitorProcessDurationString);
@@ -433,6 +443,8 @@ public class TerminalSystem extends IntervalSystem {
 						}
 					} else if (keyStroke.getCharacter().toString().equals("y")) {
 						showSyncedProperties = !showSyncedProperties;
+					} else if (keyStroke.getCharacter().toString().equals("z")) {
+						vastWorld.fastForward = !vastWorld.fastForward;
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
 					cameraPosition.add(new Point2f(0.0f, ((keyStroke.isShiftDown() ? 5.0f : 1.0f) / scale)));
