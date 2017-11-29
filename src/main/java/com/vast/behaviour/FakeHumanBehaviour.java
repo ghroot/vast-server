@@ -40,7 +40,9 @@ public class FakeHumanBehaviour extends AbstractBehaviour {
 		Player player = playerMapper.get(entity);
 		VastPeer peer = peers.get(player.name);
 		int roll = (int) (Math.random() * 100);
-		if (roll <= 5) {
+		if (roll <= 1) {
+			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.SET_HOME)));
+		} else if (roll <= 5) {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.EMOTE, new DataObject().set(MessageCodes.EMOTE_TYPE, (byte) 0))));
 		} else if (roll <= 15) {
 			byte buildingType = (byte) (Math.random() * 4);

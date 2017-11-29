@@ -42,7 +42,6 @@ public class MessageCodes {
 
 	// Client -> Server
 	public static short SET_HOME = 54;
-	public static byte SET_HOME_POSITION = 0;
 
 	// Properties
 	public static byte PROPERTY_POSITION = 100;

@@ -9,15 +9,15 @@ import com.vast.MessageCodes;
 import com.vast.component.Home;
 import com.vast.component.Order;
 import com.vast.component.Player;
+import com.vast.component.Transform;
 import com.vast.system.CreationManager;
-
-import javax.vecmath.Point2f;
 
 public class SetHomeOrderHandler implements OrderHandler {
 	private World world;
 
 	private ComponentMapper<Home> homeMapper;
 	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Transform> transformMapper;
 
 	private CreationManager creationManager;
 
@@ -63,8 +63,7 @@ public class SetHomeOrderHandler implements OrderHandler {
 			}
 		}
 
-		float[] position = (float[]) dataObject.get(MessageCodes.SET_HOME_POSITION).value;
-		creationManager.createHome(new Point2f(position[0], position[1]), player.name);
+		creationManager.createHome(transformMapper.get(orderEntity).position, player.name);
 
 		return true;
 	}

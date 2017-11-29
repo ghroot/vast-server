@@ -305,6 +305,8 @@ public class TerminalSystem extends IntervalSystem {
 						detail = ((Owner) component).name;
 					} else if (component instanceof Player) {
 						detail = ((Player) component).name;
+					} else if (component instanceof Home) {
+						detail = ((Home) component).name;
 					} else if (component instanceof Spatial) {
 						detail = "" + ((Spatial) component).memberOfSpatialHash.x + ", " + ((Spatial) component).memberOfSpatialHash.y;
 					} else if (component instanceof Transform) {
