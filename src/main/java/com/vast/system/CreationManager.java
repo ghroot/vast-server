@@ -34,7 +34,6 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Fueled> fueledMapper;
 	private ComponentMapper<Aura> auraMapper;
 	private ComponentMapper<Parent> parentMapper;
-	private ComponentMapper<Home> homeMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 
 	private WorldConfiguration worldConfiguration;
@@ -255,14 +254,6 @@ public class CreationManager extends BaseSystem {
 			parentMapper.create(auraEntity).parentEntity = parentEntity;
 		}
 		return auraEntity;
-	}
-
-	public int createHome(Point2f position, String name) {
-		int homeEntity = world.create();
-		typeMapper.create(homeEntity).type = "home";
-		transformMapper.create(homeEntity).position.set(position);
-		homeMapper.create(homeEntity).name = name;
-		return homeEntity;
 	}
 
 	private Point2f getRandomPositionInWorld() {

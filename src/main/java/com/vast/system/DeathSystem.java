@@ -3,7 +3,6 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
-import com.artemis.utils.IntBag;
 import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,15 +46,8 @@ public class DeathSystem extends IteratingSystem {
 				Player player = playerMapper.get(deathEntity);
 
 				Point2f respawnPosition = null;
-				IntBag homeEntities = world.getAspectSubscriptionManager().get(Aspect.all(Home.class)).getEntities();
-				for (int i = 0; i < homeEntities.size(); i++) {
-					int homeEntity = homeEntities.get(i);
-					if (homeMapper.has(homeEntity)) {
-						if (homeMapper.get(homeEntity).name.equals(player.name)) {
-							respawnPosition = transformMapper.get(homeEntity).position;
-							break;
-						}
-					}
+				if (homeMapper.has(deathEntity)) {
+					respawnPosition = homeMapper.get(deathEntity).position;
 				}
 
 				int playerEntity = creationManager.createPlayer(player.name,

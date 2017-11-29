@@ -1,9 +1,7 @@
 package com.vast.order;
 
-import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.World;
-import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.MessageCodes;
 import com.vast.component.Home;
@@ -50,21 +48,7 @@ public class SetHomeOrderHandler implements OrderHandler {
 
 	@Override
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
-		Player player = playerMapper.get(orderEntity);
-
-		IntBag homeEntities = world.getAspectSubscriptionManager().get(Aspect.all(Home.class)).getEntities();
-		for (int i = 0; i < homeEntities.size(); i++) {
-			int homeEntity = homeEntities.get(i);
-			if (homeMapper.has(homeEntity)) {
-				if (homeMapper.get(homeEntity).name.equals(player.name)) {
-					world.delete(homeEntity);
-					break;
-				}
-			}
-		}
-
-		creationManager.createHome(transformMapper.get(orderEntity).position, player.name);
-
+		homeMapper.create(orderEntity).position.set(transformMapper.get(orderEntity).position);
 		return true;
 	}
 }

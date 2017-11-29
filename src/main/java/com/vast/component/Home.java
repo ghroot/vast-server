@@ -1,9 +1,14 @@
 package com.vast.component;
 
-import com.artemis.Component;
-import com.artemis.annotations.PooledWeaver;
+import com.artemis.PooledComponent;
 
-@PooledWeaver
-public class Home extends Component {
-	public String name = null;
+import javax.vecmath.Point2f;
+
+public class Home extends PooledComponent {
+	public Point2f position = new Point2f();
+
+	@Override
+	protected void reset() {
+		position = new Point2f();
+	}
 }
