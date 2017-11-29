@@ -39,9 +39,13 @@ public class Inventory extends PooledComponent {
 		}
 	}
 
+	public void remove(Cost cost) {
+		remove(cost.getItemType(), cost.getCount());
+	}
+
 	public void remove(Set<Cost> costs) {
 		for (Cost cost : costs) {
-			remove(cost.getItem().getType(), cost.getCount());
+			remove(cost);
 		}
 	}
 
@@ -53,9 +57,13 @@ public class Inventory extends PooledComponent {
 		}
 	}
 
+	public boolean has(Cost cost) {
+		return has(cost.getItemType(), cost.getCount());
+	}
+
 	public boolean has(Set<Cost> costs) {
 		for (Cost cost : costs) {
-			if (!has(cost.getItem().getType(), cost.getCount())) {
+			if (!has(cost.getItemType(), cost.getCount())) {
 				return false;
 			}
 		}

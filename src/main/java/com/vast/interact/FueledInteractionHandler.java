@@ -4,6 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
 import com.vast.component.Fueled;
+import com.vast.component.Inventory;
 import com.vast.component.Player;
 import com.vast.component.Sync;
 import org.slf4j.Logger;
@@ -13,10 +14,11 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 	private static final Logger logger = LoggerFactory.getLogger(FueledInteractionHandler.class);
 
 	private ComponentMapper<Fueled> fueledMapper;
+	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Sync> syncMapper;
 
 	public FueledInteractionHandler() {
-		super(Aspect.all(Player.class), Aspect.all(Fueled.class));
+		super(Aspect.all(Player.class, Inventory.class), Aspect.all(Fueled.class));
 	}
 
 	@Override
@@ -30,10 +32,16 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public boolean process(int playerEntity, int fueledEntity) {
+		Inventory inventory = inventoryMapper.get(playerEntity);
 		Fueled fueled = fueledMapper.get(fueledEntity);
 
-		fueled.timeLeft = 60.0f;
-		syncMapper.create(fueledEntity).markPropertyAsDirty(Properties.FUELED);
+		if (inventory.has(fueled.cost)) {
+			inventory.remove(fueled.cost);
+			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
+
+			fueled.timeLeft = 60.0f;
+			syncMapper.create(fueledEntity).markPropertyAsDirty(Properties.FUELED);
+		}
 
 		return true;
 	}

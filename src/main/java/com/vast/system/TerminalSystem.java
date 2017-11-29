@@ -139,7 +139,7 @@ public class TerminalSystem extends IntervalSystem {
 						} else if (showIds) {
 							textGraphics.putString(terminalPosition.getColumn() + 2, terminalPosition.getRow(), "" + entity);
 						}
-					} else {
+					} else if (typeMapper.has(entity)) {
 						TextGraphics textGraphics = screen.newTextGraphics();
 						if (typeMapper.get(entity).type.equals("ai")) {
 							screen.setCharacter(terminalPosition, new TextCharacter('o', colored ? TextColor.ANSI.CYAN : gray, TextColor.ANSI.DEFAULT));

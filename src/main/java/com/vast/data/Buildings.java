@@ -29,7 +29,7 @@ public class Buildings {
 				JSONObject costData = buildingData.getJSONObject("cost");
 				for (String itemName : costData.keySet()) {
 					int amount = costData.getInt(itemName);
-					building.addCost(new Cost(items.getItem(itemName), amount));
+					building.addCost(new Cost(items.getItem(itemName).getType(), amount));
 				}
 				buildings.put(type, building);
 			}

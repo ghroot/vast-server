@@ -7,6 +7,7 @@ import com.artemis.ComponentMapper;
 import com.vast.Properties;
 import com.vast.component.*;
 import com.vast.data.Buildings;
+import com.vast.data.Cost;
 import com.vast.data.Items;
 import com.vast.data.WorldConfiguration;
 import fastnoise.FastNoise;
@@ -130,16 +131,6 @@ public class CreationManager extends BaseSystem {
 	}
 
 	public void createWorld() {
-//		for (int i = 0; i < worldConfiguration.numberOfRocks; i++) {
-//			createRock(getRandomPositionInWorld());
-//		}
-//		for (int i = 0; i < worldConfiguration.numberOfTrees; i++) {
-//			createTree(getRandomPositionInWorld());
-//		}
-//		for (int i = 0; i < worldConfiguration.numberOfAIs; i++) {
-//			createAI(getRandomPositionInWorld());
-//		}
-
 		FastNoise noise = new FastNoise();
 		for (float x = -worldConfiguration.width / 2.0f; x < worldConfiguration.width / 2.0f; x += 3.0f) {
 			for (float y = -worldConfiguration.height / 2.0f; y < worldConfiguration.height / 2.0f; y += 3.0f) {
@@ -150,6 +141,10 @@ public class CreationManager extends BaseSystem {
 					createRock(new Point2f(x, y));
 				}
 			}
+		}
+
+		for (int i = 0; i < worldConfiguration.numberOfAIs; i++) {
+			createAI(getRandomPositionInWorld());
 		}
 	}
 
@@ -223,7 +218,8 @@ public class CreationManager extends BaseSystem {
 			healthMapper.create(buildingEntity).maxHealth = 3;
 			healthMapper.create(buildingEntity).health = 3;
 		} else if (buildingType == 3) {
-			fueledMapper.create(buildingEntity).fueledAuraEffectName = "heal";
+			fueledMapper.create(buildingEntity).cost = new Cost(items.getItem("wood").getType(), 1);
+			fueledMapper.get(buildingEntity).fueledAuraEffectName = "heal";
 		}
 		return buildingEntity;
 	}
