@@ -19,7 +19,7 @@ public class DurabilityPropertyHandler implements PropertyHandler {
 	}
 
 	@Override
-	public void decorateDataObject(int entity, DataObject dataObject, boolean force) {
+	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
 		if (harvestableMapper.has(entity)) {
 			Harvestable harvestable = harvestableMapper.get(entity);
 			SyncHistory syncHistory = syncHistoryMapper.get(entity);
@@ -34,7 +34,9 @@ public class DurabilityPropertyHandler implements PropertyHandler {
 				if (syncHistory != null) {
 					syncHistory.syncedValues.put(Properties.DURABILITY, harvestable.durability);
 				}
+				return true;
 			}
 		}
+		return false;
 	}
 }

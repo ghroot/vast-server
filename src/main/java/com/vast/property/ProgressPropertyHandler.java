@@ -19,7 +19,7 @@ public class ProgressPropertyHandler implements PropertyHandler {
 	}
 
 	@Override
-	public void decorateDataObject(int entity, DataObject dataObject, boolean force) {
+	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
 		if (constructableMapper.has(entity)) {
 			Constructable constructable = constructableMapper.get(entity);
 			SyncHistory syncHistory = syncHistoryMapper.get(entity);
@@ -36,7 +36,9 @@ public class ProgressPropertyHandler implements PropertyHandler {
 				if (syncHistory != null) {
 					syncHistory.syncedValues.put(Properties.PROGRESS, progress);
 				}
+				return true;
 			}
 		}
+		return false;
 	}
 }

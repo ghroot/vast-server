@@ -15,9 +15,11 @@ public class InventoryPropertyHandler implements PropertyHandler {
 	}
 
 	@Override
-	public void decorateDataObject(int entity, DataObject dataObject, boolean force) {
+	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
 		if (inventoryMapper.has(entity)) {
 			dataObject.set(MessageCodes.PROPERTY_INVENTORY, inventoryMapper.get(entity).items);
+			return true;
 		}
+		return false;
 	}
 }

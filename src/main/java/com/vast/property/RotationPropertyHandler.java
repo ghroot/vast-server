@@ -22,7 +22,7 @@ public class RotationPropertyHandler implements PropertyHandler {
 	}
 
 	@Override
-	public void decorateDataObject(int entity, DataObject dataObject, boolean force) {
+	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
 		if (transformMapper.has(entity)) {
 			Transform transform = transformMapper.get(entity);
 			SyncHistory syncHistory = syncHistoryMapper.get(entity);
@@ -37,8 +37,10 @@ public class RotationPropertyHandler implements PropertyHandler {
 				if (syncHistory != null) {
 					syncHistory.syncedValues.put(Properties.ROTATION, transform.rotation);
 				}
+				return true;
 			}
 		}
+		return false;
 	}
 
 	private float getAngleDifference(float alpha, float beta) {

@@ -60,6 +60,7 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 		Sync sync = syncMapper.get(syncEntity);
 
 		boolean reliable = false;
+		boolean atLeastOnePropertySet = false;
 		reusableEventMessage.getDataObject().clear();
 		reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
 		for (PropertyHandler syncHandler : propertyHandlers) {
@@ -67,47 +68,56 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 			if (sync.isPropertyDirty(property)) {
 				SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
 				if (syncPropagation.isNearbyPropagation(property)) {
-					syncHandler.decorateDataObject(syncEntity, reusableEventMessage.getDataObject(), false);
-					metrics.incrementSyncedProperty(property);
+					if (syncHandler.decorateDataObject(syncEntity, reusableEventMessage.getDataObject(), false)) {
+						atLeastOnePropertySet = true;
+						metrics.incrementSyncedProperty(property);
+					}
 				}
 				if (!reliable && syncPropagation.isReliable(property)) {
 					reliable = true;
 				}
 			}
 		}
-		for (int nearbyEntity : nearbyEntities) {
-			if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
-				VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyEntity).name);
+		if (atLeastOnePropertySet) {
+			for (int nearbyEntity : nearbyEntities) {
+				if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
+					VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyEntity).name);
+					if (reliable) {
+						nearbyPeer.send(reusableEventMessage);
+					} else {
+						nearbyPeer.sendUnreliable(reusableEventMessage);
+					}
+				}
+			}
+		}
+
+		if (playerMapper.has(syncEntity) && activeMapper.has(syncEntity)) {
+			reliable = false;
+			atLeastOnePropertySet = false;
+			reusableEventMessage.getDataObject().clear();
+			reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
+			for (PropertyHandler syncHandler : propertyHandlers) {
+				int property = syncHandler.getProperty();
+				if (sync.isPropertyDirty(property)) {
+					SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
+					if (syncPropagation.isOwnerPropagation(property)) {
+						if (syncHandler.decorateDataObject(syncEntity, reusableEventMessage.getDataObject(), false)) {
+							atLeastOnePropertySet = true;
+							metrics.incrementSyncedProperty(property);
+						}
+					}
+					if (!reliable && syncPropagation.isReliable(property)) {
+						reliable = true;
+					}
+				}
+			}
+			if (atLeastOnePropertySet) {
+				VastPeer nearbyPeer = peers.get(playerMapper.get(syncEntity).name);
 				if (reliable) {
 					nearbyPeer.send(reusableEventMessage);
 				} else {
 					nearbyPeer.sendUnreliable(reusableEventMessage);
 				}
-			}
-		}
-
-		reliable = false;
-		reusableEventMessage.getDataObject().clear();
-		reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
-		for (PropertyHandler syncHandler : propertyHandlers) {
-			int property = syncHandler.getProperty();
-			if (sync.isPropertyDirty(property)) {
-				SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
-				if (syncPropagation.isOwnerPropagation(property)) {
-					syncHandler.decorateDataObject(syncEntity, reusableEventMessage.getDataObject(), false);
-					metrics.incrementSyncedProperty(property);
-				}
-				if (!reliable && syncPropagation.isReliable(property)) {
-					reliable = true;
-				}
-			}
-		}
-		if (playerMapper.has(syncEntity) && activeMapper.has(syncEntity)) {
-			VastPeer nearbyPeer = peers.get(playerMapper.get(syncEntity).name);
-			if (reliable) {
-				nearbyPeer.send(reusableEventMessage);
-			} else {
-				nearbyPeer.sendUnreliable(reusableEventMessage);
 			}
 		}
 
