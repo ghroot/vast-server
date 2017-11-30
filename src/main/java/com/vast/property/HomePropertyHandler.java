@@ -21,7 +21,7 @@ public class HomePropertyHandler implements PropertyHandler {
 	}
 
 	@Override
-	public void decorateDataObject(int entity, DataObject dataObject) {
+	public void decorateDataObject(int entity, DataObject dataObject, boolean force) {
 		if (homeMapper.has(entity)) {
 			Home home = homeMapper.get(entity);
 			reusablePosition[0] = home.position.x;

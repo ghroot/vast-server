@@ -11,8 +11,6 @@ import com.nhnent.haste.transport.QoS;
 import com.nhnent.haste.transport.state.ConnectionState;
 
 public class FakePeer extends VastPeer {
-	private Metrics metrics;
-
 	public FakePeer(VastServerApplication serverApplication, String name, Metrics metrics) {
 		super(new InitialRequest(), new NetworkPeer() {
 			@Override
@@ -58,42 +56,35 @@ public class FakePeer extends VastPeer {
 			public void disconnect(DisconnectReason disconnectReason, String s) {
 			}
 		}, serverApplication, name, metrics);
-		this.metrics = metrics;
 	}
 
 	@Override
 	protected boolean send(ResponseMessage response, SendOptions options) {
-		metrics.incrementNumberOfSentMessages();
 		return true;
 	}
 
 	@Override
 	protected boolean send(ResponseMessage response, byte channel, boolean encrypt, QoS qos) {
-		metrics.incrementNumberOfSentMessages();
 		return true;
 	}
 
 	@Override
 	public boolean send(Message message, SendOptions options) {
-		metrics.incrementNumberOfSentMessages();
 		return true;
 	}
 
 	@Override
 	protected boolean send(Message message, byte channel, boolean encrypt, QoS qos) {
-		metrics.incrementNumberOfSentMessages();
 		return true;
 	}
 
 	@Override
 	protected boolean send(InitialResponse initialResponse, byte channel, boolean encrypt, QoS qos) {
-		metrics.incrementNumberOfSentMessages();
 		return true;
 	}
 
 	@Override
 	protected boolean send(byte[] payload, int payloadLength, byte channel, boolean encrypt, QoS qos) {
-		metrics.incrementNumberOfSentMessages();
 		return true;
 	}
 

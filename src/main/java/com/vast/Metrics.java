@@ -1,6 +1,7 @@
 package com.vast;
 
 import com.artemis.BaseSystem;
+import com.nhnent.haste.transport.QoS;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,8 +11,7 @@ public class Metrics {
 	private Map<String, Integer> systemProcessingTimes = new HashMap<String, Integer>();
 	private int numberOfCollisionChecks;
 	private double meanOfRoundTripTime;
-	private double meanOfRoundTripTimeDeviation;
-	private int numberOfSentMessages;
+	private Map<Short, Map<QoS, Integer>> sentMessages = new HashMap<Short, Map<QoS, Integer>>();
 	private long lastSerializeTime;
 	private Map<Integer, Integer> syncedProperties = new HashMap<Integer, Integer>();
 
@@ -47,25 +47,29 @@ public class Metrics {
 		return numberOfCollisionChecks;
 	}
 
-	public void setRoundTripTime(double meanOfRoundTripTime, double meanOfRoundTripTimeDeviation) {
+	public void setRoundTripTime(double meanOfRoundTripTime) {
 		this.meanOfRoundTripTime = meanOfRoundTripTime;
-		this.meanOfRoundTripTimeDeviation = meanOfRoundTripTimeDeviation;
 	}
 
 	public double getMeanOfRoundTripTime() {
 		return meanOfRoundTripTime;
 	}
 
-	public double getMeanOfRoundTripTimeDeviation() {
-		return meanOfRoundTripTimeDeviation;
+	public void messageSent(short messageCode, QoS qos) {
+		Map<QoS, Integer> sentMessagesWithCode = sentMessages.get(messageCode);
+		if (sentMessagesWithCode == null) {
+			sentMessagesWithCode = new HashMap<QoS, Integer>();
+			sentMessages.put(messageCode, sentMessagesWithCode);
+		}
+		if (sentMessagesWithCode.containsKey(qos)) {
+			sentMessagesWithCode.put(qos, sentMessagesWithCode.get(qos) + 1);
+		} else {
+			sentMessagesWithCode.put(qos, 1);
+		}
 	}
 
-	public int getNumberOfSentMessages() {
-		return numberOfSentMessages;
-	}
-
-	public void incrementNumberOfSentMessages() {
-		this.numberOfSentMessages++;
+	public Map<Short, Map<QoS, Integer>> getSentMessages() {
+		return sentMessages;
 	}
 
 	public int getTimeSinceLastSerialization() {

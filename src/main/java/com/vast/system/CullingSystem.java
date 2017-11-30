@@ -101,7 +101,7 @@ public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
 			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(newEntity).name));
 		}
 		for (PropertyHandler propertyHandler : propertyHandlers) {
-			propertyHandler.decorateDataObject(newEntity, reusableCreatedEventMessage.getDataObject());
+			propertyHandler.decorateDataObject(newEntity, reusableCreatedEventMessage.getDataObject(), true);
 		}
 		peer.send(reusableCreatedEventMessage);
 	}

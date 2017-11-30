@@ -15,6 +15,7 @@ public class VastPeer extends ClientPeer {
 	private static final Logger logger = LoggerFactory.getLogger(VastPeer.class);
 
 	private static long nextId = 1;
+	private static final SendOptions UNRELIABLE = SendOptions.take((byte) 0, false, QoS.UNRELIABLE_SEQUENCED);
 
 	private VastServerApplication serverApplication;
 	private long id;
@@ -49,16 +50,17 @@ public class VastPeer extends ClientPeer {
 	}
 
 	public boolean send(Message message) {
+		metrics.messageSent(message.getCode(), QoS.RELIABLE_SEQUENCED);
 		return send(message, SendOptions.ReliableSend);
 	}
 
 	public boolean sendUnreliable(Message message) {
-		return send(message, SendOptions.take((byte) 0, false, QoS.UNRELIABLE_SEQUENCED));
+		metrics.messageSent(message.getCode(), QoS.UNRELIABLE_SEQUENCED);
+		return send(message, UNRELIABLE);
 	}
 
 	@Override
 	protected boolean send(byte[] payload, int payloadLength, byte channel, boolean encrypt, QoS qos) {
-		metrics.incrementNumberOfSentMessages();
 		return super.send(payload, payloadLength, channel, encrypt, qos);
 	}
 }

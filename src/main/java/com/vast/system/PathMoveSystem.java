@@ -20,9 +20,9 @@ public class PathMoveSystem extends IteratingSystem {
     private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Sync> syncMapper;
 
-    private final float WALK_SPEED = 0.8f;
-    private final float RUN_SPEED = 2.5f;
-	private final float RUN_FAST_SPEED = 5.0f;
+    private final float WALK_SPEED = 1.0f;
+    private final float RUN_SPEED = 4.0f;
+	private final float RUN_DISTANCE = 1.0f;
 
     private Vector2f reusableDirection;
 
@@ -51,9 +51,7 @@ public class PathMoveSystem extends IteratingSystem {
 
             float distance = reusableDirection.length();
             float speed;
-            if (distance > 2.0f) {
-				speed = RUN_FAST_SPEED;
-			} else if (distance > 1.0f) {
+            if (distance > RUN_DISTANCE) {
             	speed = RUN_SPEED;
 			} else {
             	speed = WALK_SPEED;

@@ -15,7 +15,7 @@ public class HealthPropertyHandler implements PropertyHandler {
 	}
 
 	@Override
-	public void decorateDataObject(int entity, DataObject dataObject) {
+	public void decorateDataObject(int entity, DataObject dataObject, boolean force) {
 		if (healthMapper.has(entity)) {
 			dataObject.set(MessageCodes.PROPERTY_HEALTH, healthMapper.get(entity).health);
 		}

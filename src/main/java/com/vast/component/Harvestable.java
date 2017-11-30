@@ -5,5 +5,5 @@ import com.artemis.annotations.PooledWeaver;
 
 @PooledWeaver
 public class Harvestable extends Component {
-	public float durability = 200.0f;
+	public float durability = 0.0f;
 }

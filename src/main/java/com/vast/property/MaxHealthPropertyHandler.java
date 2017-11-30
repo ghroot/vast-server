@@ -15,7 +15,7 @@ public class MaxHealthPropertyHandler implements PropertyHandler {
 	}
 
 	@Override
-	public void decorateDataObject(int entity, DataObject dataObject) {
+	public void decorateDataObject(int entity, DataObject dataObject, boolean force) {
 		if (healthMapper.has(entity)) {
 			dataObject.set(MessageCodes.PROPERTY_MAX_HEALTH, healthMapper.get(entity).maxHealth);
 		}

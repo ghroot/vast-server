@@ -15,7 +15,7 @@ public class FueledPropertyHandler implements PropertyHandler {
 	}
 
 	@Override
-	public void decorateDataObject(int entity, DataObject dataObject) {
+	public void decorateDataObject(int entity, DataObject dataObject, boolean force) {
 		if (fueledMapper.has(entity)) {
 			dataObject.set(MessageCodes.PROPERTY_FUELED, fueledMapper.get(entity).timeLeft > 0.0f);
 		}

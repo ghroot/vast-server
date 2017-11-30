@@ -16,6 +16,8 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
+import com.nhnent.haste.transport.QoS;
+import com.vast.MessageCodes;
 import com.vast.Metrics;
 import com.vast.Properties;
 import com.vast.VastPeer;
@@ -50,6 +52,8 @@ public class TerminalSystem extends IntervalSystem {
 	private boolean showPlayerNames = false;
 	private boolean showIds = false;
 	private int showSystemTimesMode = 0;
+	private boolean showSentMessages = false;
+	private Map<Short, String> messageNames = new HashMap<Short, String>();
 	private boolean showSyncedProperties = false;
 	private Map<Integer, String> propertyNames = new HashMap<Integer, String>();
 	private int focusedEntity = -1;
@@ -62,6 +66,11 @@ public class TerminalSystem extends IntervalSystem {
 		this.worldConfiguration = worldConfiguration;
 		this.spatialHashes = spatialHashes;
 
+		messageNames.put(MessageCodes.ENTITY_CREATED, "EntityCreated");
+		messageNames.put(MessageCodes.ENTITY_DESTROYED, "EntityDestroyed");
+		messageNames.put(MessageCodes.UPDATE_PROPERTIES, "UpdateProperties");
+		messageNames.put(MessageCodes.EVENT, "Event");
+
 		propertyNames.put(Properties.POSITION, "Position");
 		propertyNames.put(Properties.ROTATION, "Rotation");
 		propertyNames.put(Properties.ACTIVE, "Active");
@@ -71,6 +80,7 @@ public class TerminalSystem extends IntervalSystem {
 		propertyNames.put(Properties.PROGRESS, "Progress");
 		propertyNames.put(Properties.INVENTORY, "Inventory");
 		propertyNames.put(Properties.FUELED, "Fueled");
+		propertyNames.put(Properties.HOME, "Home");
 	}
 
 	@Override
@@ -207,12 +217,10 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.putString(screen.getTerminalSize().getColumns() - peersString.length(), 3, peersString);
 			String roundTripString = "Roundtrip: " + (int) metrics.getMeanOfRoundTripTime();
 			textGraphics.putString(screen.getTerminalSize().getColumns() - roundTripString.length(), 4, roundTripString);
-			String sendMessagesString = "Sent messages: " + metrics.getNumberOfSentMessages();
-			textGraphics.putString(screen.getTerminalSize().getColumns() - sendMessagesString.length(), 5, sendMessagesString);
 			String timeSinceSave = "Time since save: " + (metrics.getTimeSinceLastSerialization() / 1000) + " s";
-			textGraphics.putString(screen.getTerminalSize().getColumns() - timeSinceSave.length(), 6, timeSinceSave);
+			textGraphics.putString(screen.getTerminalSize().getColumns() - timeSinceSave.length(), 5, timeSinceSave);
 			String collisionsString = "Collision checks: " + metrics.getNumberOfCollisionChecks();
-			textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 7, collisionsString);
+			textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 6, collisionsString);
 
 			if (showSystemTimesMode > 0 && metrics.getSystemProcessingTimes().size() > 0) {
 				int longestLength = 0;
@@ -241,13 +249,32 @@ public class TerminalSystem extends IntervalSystem {
 									LinkedHashMap::new
 							));
 				}
-				int row = 9;
+				int row = 8;
 				for (String systemName : systemProcessingTimesToShow.keySet()) {
 					int processingDuration = systemProcessingTimesToShow.get(systemName);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestLength - 1, row, systemName);
 					String processDurationString = Integer.toString(processingDuration);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 + (3 - processDurationString.length()), row, processDurationString);
 					textGraphics.putString(screen.getTerminalSize().getColumns() - 2, row, "ms");
+					row++;
+				}
+			}
+
+			if (showSentMessages) {
+				int row = 11;
+				Map<Short, Map<QoS, Integer>> sentMessages = metrics.getSentMessages();
+				for (short messageCode : sentMessages.keySet()) {
+					String messageName = messageNames.get(messageCode);
+					Map<QoS, Integer> sentMessagesWithCode = sentMessages.get(messageCode);
+					int numberOfReliableMessages = 0;
+					if (sentMessagesWithCode.containsKey(QoS.RELIABLE_SEQUENCED)) {
+						numberOfReliableMessages = sentMessagesWithCode.get(QoS.RELIABLE_SEQUENCED);
+					}
+					int numberOfUnreliableMessages = 0;
+					if (sentMessagesWithCode.containsKey(QoS.UNRELIABLE_SEQUENCED)) {
+						numberOfUnreliableMessages = sentMessagesWithCode.get(QoS.UNRELIABLE_SEQUENCED);
+					}
+					textGraphics.putString(0, row, messageName + ": " + numberOfReliableMessages + "/" + numberOfUnreliableMessages);
 					row++;
 				}
 			}
@@ -299,6 +326,12 @@ public class TerminalSystem extends IntervalSystem {
 						detail = ((AI) component).behaviourName;
 					} else if (component instanceof Health) {
 						detail = "" + ((Health) component).health;
+					} else if (component instanceof Harvestable) {
+						detail = "" + (Math.round(((Harvestable) component).durability * 100.0f) / 100.0f);
+					} else if (component instanceof Constructable) {
+						Constructable constructable = (Constructable) component;
+						int progress = (int) Math.floor(100.0f * constructable.buildTime / constructable.buildDuration);
+						detail = "" + progress;
 					} else if (component instanceof Collision) {
 						detail = "" + (Math.round(((Collision) component).radius * 100.0f) / 100.0f);
 					} else if (component instanceof Owner) {
@@ -431,6 +464,10 @@ public class TerminalSystem extends IntervalSystem {
 						}
 					} else if (keyStroke.getCharacter().toString().equals("y")) {
 						showSyncedProperties = !showSyncedProperties;
+						showSentMessages = false;
+					} else if (keyStroke.getCharacter().toString().equals("m")) {
+						showSentMessages = !showSentMessages;
+						showSyncedProperties = false;
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
 					cameraPosition.add(new Point2f(0.0f, ((keyStroke.isShiftDown() ? 5.0f : 1.0f) / scale)));

@@ -27,6 +27,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Spatial> spatialMapper;
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
+	private ComponentMapper<Harvestable> harvestableMapper;
 	private ComponentMapper<Health> healthMapper;
 	private ComponentMapper<AI> aiMapper;
 	private ComponentMapper<Constructable> constructableMapper;
@@ -56,77 +57,82 @@ public class CreationManager extends BaseSystem {
 	@Override
 	protected void initialize() {
 		playerArchetype = new ArchetypeBuilder()
-				.add(Player.class)
-				.add(Type.class)
-				.add(SubType.class)
-				.add(Inventory.class)
-				.add(Health.class)
-				.add(Transform.class)
-				.add(Spatial.class)
-				.add(Collision.class)
-				.add(Scan.class)
-				.add(Known.class)
-				.add(Attack.class)
-				.add(SyncPropagation.class)
-				.build(world);
+			.add(Player.class)
+			.add(Type.class)
+			.add(SubType.class)
+			.add(Inventory.class)
+			.add(Health.class)
+			.add(Transform.class)
+			.add(Spatial.class)
+			.add(Collision.class)
+			.add(Scan.class)
+			.add(Known.class)
+			.add(Attack.class)
+			.add(SyncPropagation.class)
+			.add(SyncHistory.class)
+			.build(world);
 
 		treeArchetype = new ArchetypeBuilder()
-				.add(Type.class)
-				.add(Transform.class)
-				.add(Spatial.class)
-				.add(Collision.class)
-				.add(Static.class)
-				.add(Harvestable.class)
-				.add(Inventory.class)
-				.add(SyncPropagation.class)
-				.build(world);
+			.add(Type.class)
+			.add(Transform.class)
+			.add(Spatial.class)
+			.add(Collision.class)
+			.add(Static.class)
+			.add(Harvestable.class)
+			.add(Inventory.class)
+			.add(SyncPropagation.class)
+			.add(SyncHistory.class)
+			.build(world);
 
 		rockArchetype = new ArchetypeBuilder()
-				.add(Type.class)
-				.add(Transform.class)
-				.add(Spatial.class)
-				.add(Collision.class)
-				.add(Static.class)
-				.add(Harvestable.class)
-				.add(Inventory.class)
-				.add(SyncPropagation.class)
-				.build(world);
+			.add(Type.class)
+			.add(Transform.class)
+			.add(Spatial.class)
+			.add(Collision.class)
+			.add(Static.class)
+			.add(Harvestable.class)
+			.add(Inventory.class)
+			.add(SyncPropagation.class)
+			.add(SyncHistory.class)
+			.build(world);
 
 		aiArchetype = new ArchetypeBuilder()
-				.add(AI.class)
-				.add(Type.class)
-				.add(SubType.class)
-				.add(Inventory.class)
-				.add(Health.class)
-				.add(Transform.class)
-				.add(Spatial.class)
-				.add(Collision.class)
-				.add(Attack.class)
-				.add(SyncPropagation.class)
-				.build(world);
+			.add(AI.class)
+			.add(Type.class)
+			.add(SubType.class)
+			.add(Inventory.class)
+			.add(Health.class)
+			.add(Transform.class)
+			.add(Spatial.class)
+			.add(Collision.class)
+			.add(Attack.class)
+			.add(SyncPropagation.class)
+			.add(SyncHistory.class)
+			.build(world);
 
 		buildingArchetype = new ArchetypeBuilder()
-				.add(Type.class)
-				.add(SubType.class)
-				.add(Owner.class)
-				.add(Transform.class)
-				.add(Spatial.class)
-				.add(Collision.class)
-				.add(Static.class)
-				.add(Constructable.class)
-				.add(SyncPropagation.class)
-				.build(world);
+			.add(Type.class)
+			.add(SubType.class)
+			.add(Owner.class)
+			.add(Transform.class)
+			.add(Spatial.class)
+			.add(Collision.class)
+			.add(Static.class)
+			.add(Constructable.class)
+			.add(SyncPropagation.class)
+			.add(SyncHistory.class)
+			.build(world);
 
 		crateArchetype = new ArchetypeBuilder()
-				.add(Type.class)
-				.add(Transform.class)
-				.add(Spatial.class)
-				.add(Collision.class)
-				.add(Static.class)
-				.add(Inventory.class)
-				.add(Container.class)
-				.add(SyncPropagation.class)
-				.build(world);
+			.add(Type.class)
+			.add(Transform.class)
+			.add(Spatial.class)
+			.add(Collision.class)
+			.add(Static.class)
+			.add(Inventory.class)
+			.add(Container.class)
+			.add(SyncPropagation.class)
+			.build(world);
 	}
 
 	@Override
@@ -156,6 +162,7 @@ public class CreationManager extends BaseSystem {
 		typeMapper.get(treeEntity).type = "tree";
 		transformMapper.get(treeEntity).position.set(position);
 		collisionMapper.get(treeEntity).radius = 0.1f;
+		harvestableMapper.get(treeEntity).durability = 200.0f;
 		inventoryMapper.get(treeEntity).add(items.getItem("wood").getType(), 3);
 		syncPropagationMapper.get(treeEntity).setUnreliable(Properties.DURABILITY);
 		return treeEntity;
@@ -166,6 +173,7 @@ public class CreationManager extends BaseSystem {
 		typeMapper.get(rockEntity).type = "rock";
 		transformMapper.get(rockEntity).position.set(position);
 		collisionMapper.get(rockEntity).radius = 0.2f;
+		harvestableMapper.get(rockEntity).durability = 400.0f;
 		inventoryMapper.get(rockEntity).add(items.getItem("stone").getType(), 2);
 		syncPropagationMapper.get(rockEntity).setUnreliable(Properties.DURABILITY);
 		return rockEntity;
@@ -195,7 +203,6 @@ public class CreationManager extends BaseSystem {
 		} else {
 			transformMapper.get(playerEntity).position.set(getRandomPositionInWorld());
 		}
-		scanMapper.get(playerEntity).distance = 15.0f;
 		collisionMapper.get(playerEntity).radius = 0.3f;
 		healthMapper.get(playerEntity).maxHealth = 5;
 		healthMapper.get(playerEntity).health = 5;

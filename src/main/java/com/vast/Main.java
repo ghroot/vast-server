@@ -1,13 +1,12 @@
 package com.vast;
 
 import com.nhnent.haste.bootstrap.GameServerBootstrap;
+import com.nhnent.haste.bootstrap.options.UDPOption;
 import com.nhnent.haste.transport.MetricListener;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -22,7 +21,7 @@ public class Main {
 			Options options = new Options();
 			options.addOption("log", true, "Logging level");
 			options.addOption("format", true, "Snapshot format (json or bin)");
-			options.addOption("monitor","Show monitor");
+			options.addOption("monitor", "Show monitor");
 			CommandLineParser parser = new DefaultParser();
 			CommandLine cmd = parser.parse(options, args);
 
@@ -37,23 +36,22 @@ public class Main {
 			snapshotFormat = "json";
 		}
 
-		final Logger logger = LoggerFactory.getLogger(Main.class);
 		final Metrics metrics = new Metrics();
 
 		GameServerBootstrap bootstrap = new GameServerBootstrap();
 		bootstrap.application(new VastServerApplication(snapshotFormat, showMonitor, metrics))
-				.metricListener(new MetricListener() {
-					@Override
-					public long periodMilliseconds() {
-						return TimeUnit.SECONDS.toMillis(20);
-					}
+			.option(UDPOption.THREAD_COUNT, 4)
+			.metricListener(new MetricListener() {
+				@Override
+				public long periodMilliseconds() {
+					return TimeUnit.SECONDS.toMillis(20);
+				}
 
-					@Override
-					public void onReceive(int peerCount, double meanOfRoundTripTime, double meanOfRoundTripTimeDeviation) {
-						metrics.setRoundTripTime(meanOfRoundTripTime, meanOfRoundTripTimeDeviation);
-						logger.debug("peerCount: {}, meanOfRoundTripTime: {}, meanOfRoundTripTimeDeviation: {}", peerCount, meanOfRoundTripTime, meanOfRoundTripTimeDeviation);
-					}
-				})
-				.bind(PORT).start();
+				@Override
+				public void onReceive(int peerCount, double meanOfRoundTripTime, double meanOfRoundTripTimeDeviation) {
+					metrics.setRoundTripTime(meanOfRoundTripTime);
+				}
+			})
+			.bind(PORT).start();
 	}
 }

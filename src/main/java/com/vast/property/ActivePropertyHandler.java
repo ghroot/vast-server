@@ -17,7 +17,7 @@ public class ActivePropertyHandler implements PropertyHandler {
 	}
 
 	@Override
-	public void decorateDataObject(int entity, DataObject dataObject) {
+	public void decorateDataObject(int entity, DataObject dataObject, boolean force) {
 		if (playerMapper.has(entity)) {
 			dataObject.set(MessageCodes.PROPERTY_ACTIVE, activeMapper.has(entity));
 		}
