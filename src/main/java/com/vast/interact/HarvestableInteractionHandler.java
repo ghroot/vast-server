@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	private static final Logger logger = LoggerFactory.getLogger(HarvestableInteractionHandler.class);
 
-	private final float HARVEST_SPEED = 80.0f;
+	private final float HARVEST_SPEED = 50.0f;
 
 	private ComponentMapper<Harvestable> harvestableMapper;
 	private ComponentMapper<Inventory> inventoryMapper;

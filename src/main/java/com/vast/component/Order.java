@@ -18,7 +18,7 @@ public class Order extends PooledComponent {
 		EMOTE,
 		SET_HOME
 	}
-	public Type type;
+	public Type type = NONE;
 
 	public OrderHandler handler;
 
