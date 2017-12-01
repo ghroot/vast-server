@@ -15,7 +15,7 @@ public class VastPeer extends ClientPeer {
 	private static final Logger logger = LoggerFactory.getLogger(VastPeer.class);
 
 	private static long nextId = 1;
-	private static final SendOptions UNRELIABLE = SendOptions.take((byte) 0, false, QoS.UNRELIABLE_SEQUENCED);
+	private static final SendOptions UNRELIABLE = SendOptions.take((byte) 1, false, QoS.UNRELIABLE_SEQUENCED);
 
 	private VastServerApplication serverApplication;
 	private long id;
