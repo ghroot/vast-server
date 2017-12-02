@@ -11,7 +11,7 @@ public class ProgressPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Constructable> constructableMapper;
 	private ComponentMapper<SyncHistory> syncHistoryMapper;
 
-	private final int PROGRESS_THRESHOLD = 3;
+	private final int PROGRESS_THRESHOLD = 10;
 
 	@Override
 	public int getProperty() {

@@ -317,7 +317,7 @@ public class TerminalSystem extends IntervalSystem {
 					} else if (component instanceof SubType) {
 						detail = "" + ((SubType) component).subType;
 					} else if (component instanceof Interact) {
-						detail = "" + ((Interact) component).entity;
+						detail = "" + ((Interact) component).phase;
 					} else if (component instanceof Scan) {
 						detail = "" + ((Scan) component).nearbyEntities.size();
 					} else if (component instanceof Known) {
@@ -338,6 +338,8 @@ public class TerminalSystem extends IntervalSystem {
 						detail = ((Owner) component).name;
 					} else if (component instanceof Player) {
 						detail = ((Player) component).name;
+					} else if (component instanceof Order) {
+						detail = "" + ((Order) component).type;
 					} else if (component instanceof Spatial) {
 						detail = "" + ((Spatial) component).memberOfSpatialHash.x + ", " + ((Spatial) component).memberOfSpatialHash.y;
 					} else if (component instanceof Transform) {

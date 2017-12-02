@@ -11,7 +11,7 @@ public class DurabilityPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Harvestable> harvestableMapper;
 	private ComponentMapper<SyncHistory> syncHistoryMapper;
 
-	private final float DURABILITY_THRESHOLD = 3.0f;
+	private final float DURABILITY_THRESHOLD = 10.0f;
 
 	@Override
 	public int getProperty() {
