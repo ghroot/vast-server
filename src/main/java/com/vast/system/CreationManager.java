@@ -162,7 +162,7 @@ public class CreationManager extends BaseSystem {
 		typeMapper.get(treeEntity).type = "tree";
 		transformMapper.get(treeEntity).position.set(position);
 		collisionMapper.get(treeEntity).radius = 0.1f;
-		harvestableMapper.get(treeEntity).durability = 200.0f;
+		harvestableMapper.get(treeEntity).durability = 300.0f;
 		inventoryMapper.get(treeEntity).add(items.getItem("wood").getType(), 3);
 		syncPropagationMapper.get(treeEntity).setUnreliable(Properties.DURABILITY);
 		return treeEntity;
@@ -173,7 +173,7 @@ public class CreationManager extends BaseSystem {
 		typeMapper.get(rockEntity).type = "rock";
 		transformMapper.get(rockEntity).position.set(position);
 		collisionMapper.get(rockEntity).radius = 0.2f;
-		harvestableMapper.get(rockEntity).durability = 400.0f;
+		harvestableMapper.get(rockEntity).durability = 300.0f;
 		inventoryMapper.get(rockEntity).add(items.getItem("stone").getType(), 2);
 		syncPropagationMapper.get(rockEntity).setUnreliable(Properties.DURABILITY);
 		return rockEntity;
