@@ -74,6 +74,7 @@ public class CreationManager extends BaseSystem {
 
 		treeArchetype = new ArchetypeBuilder()
 			.add(Type.class)
+			.add(SubType.class)
 			.add(Transform.class)
 			.add(Spatial.class)
 			.add(Collision.class)
@@ -86,6 +87,7 @@ public class CreationManager extends BaseSystem {
 
 		rockArchetype = new ArchetypeBuilder()
 			.add(Type.class)
+			.add(SubType.class)
 			.add(Transform.class)
 			.add(Spatial.class)
 			.add(Collision.class)
@@ -160,7 +162,9 @@ public class CreationManager extends BaseSystem {
 	private int createTree(Point2f position) {
 		int treeEntity = world.create(treeArchetype);
 		typeMapper.get(treeEntity).type = "tree";
+		subTypeMapper.get(treeEntity).subType = (int) (Math.random() * 6);
 		transformMapper.get(treeEntity).position.set(position);
+		transformMapper.get(treeEntity).rotation = (float) Math.random() * 360;
 		collisionMapper.get(treeEntity).radius = 0.1f;
 		harvestableMapper.get(treeEntity).durability = 300.0f;
 		inventoryMapper.get(treeEntity).add(items.getItem("wood").getType(), 3);
@@ -171,7 +175,9 @@ public class CreationManager extends BaseSystem {
 	private int createRock(Point2f position) {
 		int rockEntity = world.create(rockArchetype);
 		typeMapper.get(rockEntity).type = "rock";
+		subTypeMapper.get(rockEntity).subType = (int) (Math.random() * 3);
 		transformMapper.get(rockEntity).position.set(position);
+		transformMapper.get(rockEntity).rotation = (float) Math.random() * 360;
 		collisionMapper.get(rockEntity).radius = 0.2f;
 		harvestableMapper.get(rockEntity).durability = 300.0f;
 		inventoryMapper.get(rockEntity).add(items.getItem("stone").getType(), 2);
