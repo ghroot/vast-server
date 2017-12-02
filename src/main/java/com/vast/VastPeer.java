@@ -50,6 +50,7 @@ public class VastPeer extends ClientPeer {
 	}
 
 	public boolean send(Message message) {
+		logger.info("Sending reliable message with code {}", message.getCode());
 		metrics.messageSent(message.getCode(), QoS.RELIABLE_SEQUENCED);
 		return send(message, SendOptions.ReliableSend);
 	}
