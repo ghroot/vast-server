@@ -36,6 +36,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Aura> auraMapper;
 	private ComponentMapper<Parent> parentMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
+	private ComponentMapper<Speed> speedMapper;
 
 	private WorldConfiguration worldConfiguration;
 	private Items items;
@@ -63,6 +64,7 @@ public class CreationManager extends BaseSystem {
 			.add(Inventory.class)
 			.add(Health.class)
 			.add(Transform.class)
+			.add(Speed.class)
 			.add(Spatial.class)
 			.add(Collision.class)
 			.add(Scan.class)
@@ -105,6 +107,7 @@ public class CreationManager extends BaseSystem {
 			.add(Inventory.class)
 			.add(Health.class)
 			.add(Transform.class)
+			.add(Speed.class)
 			.add(Spatial.class)
 			.add(Collision.class)
 			.add(Attack.class)
@@ -195,10 +198,12 @@ public class CreationManager extends BaseSystem {
 		typeMapper.get(aiEntity).type = "ai";
 		subTypeMapper.get(aiEntity).subType = aiEntity % 3;
 		transformMapper.get(aiEntity).position.set(position);
+		speedMapper.get(aiEntity).baseSpeed = 3.0f;
 		aiMapper.get(aiEntity).behaviourName = "basic";
 		collisionMapper.get(aiEntity).radius = 0.3f;
 		healthMapper.get(aiEntity).maxHealth = 2;
 		healthMapper.get(aiEntity).health = 2;
+		inventoryMapper.get(aiEntity).capacity = 20;
 		syncPropagationMapper.get(aiEntity).setUnreliable(Properties.POSITION);
 		syncPropagationMapper.get(aiEntity).setUnreliable(Properties.ROTATION);
 		return aiEntity;
@@ -214,9 +219,11 @@ public class CreationManager extends BaseSystem {
 		} else {
 			transformMapper.get(playerEntity).position.set(getRandomPositionInWorld());
 		}
+		speedMapper.get(playerEntity).baseSpeed = 4.0f;
 		collisionMapper.get(playerEntity).radius = 0.3f;
 		healthMapper.get(playerEntity).maxHealth = 5;
 		healthMapper.get(playerEntity).health = 5;
+		inventoryMapper.get(playerEntity).capacity = 20;
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.POSITION);
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.ROTATION);
 		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.INVENTORY);
@@ -241,7 +248,7 @@ public class CreationManager extends BaseSystem {
 			collisionMapper.get(buildingEntity).radius = 0.8f;
 		} else if (buildingType == 1) {
 			collisionMapper.get(buildingEntity).radius = 0.5f;
-			inventoryMapper.create(buildingEntity);
+			inventoryMapper.create(buildingEntity).capacity = 100;
 			containerMapper.create(buildingEntity).persistent = true;
 		} else if (buildingType == 2) {
 			collisionMapper.get(buildingEntity).radius = 0.5f;

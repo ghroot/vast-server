@@ -8,17 +8,20 @@ import java.util.Set;
 
 public class Inventory extends PooledComponent {
 	public short[] items = new short[0];
+	public int capacity = Integer.MAX_VALUE;
 
 	@Override
 	protected void reset() {
 		items = new short[0];
+		capacity = 0;
 	}
 
 	public void add(int itemType, int amount) {
 		if (itemType >= items.length) {
 			items = Arrays.copyOf(items, itemType + 1);
 		}
-		items[itemType] += amount;
+		int amountToAdd = Math.min(amount, capacity - getNumberOfItems());
+		items[itemType] += amountToAdd;
 	}
 
 	public void add(short[] otherItems) {
@@ -81,5 +84,17 @@ public class Inventory extends PooledComponent {
 			}
 		}
 		return true;
+	}
+
+	public boolean isFull() {
+		return getNumberOfItems() >= capacity;
+	}
+
+	public int getNumberOfItems() {
+		int numberOfItems = 0;
+		for (int type = 0; type < items.length; type++) {
+			numberOfItems += items[type];
+		}
+		return numberOfItems;
 	}
 }

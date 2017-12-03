@@ -91,6 +91,7 @@ public class VastWorld implements Runnable {
 			new CullingSystem(peers, propertyHandlers),
 			new OrderSystem(orderHandlers, incomingRequestsByPeer),
 			new AISystem(behaviours),
+			new SpeedSystem(),
 			new PathMoveSystem(),
 			new InteractSystem(interactionHandlers),
 			new CollisionSystem(new HashSet<CollisionHandler>(), metrics),

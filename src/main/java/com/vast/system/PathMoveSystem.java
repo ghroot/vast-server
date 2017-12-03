@@ -6,6 +6,7 @@ import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.Properties;
 import com.vast.component.Path;
+import com.vast.component.Speed;
 import com.vast.component.Sync;
 import com.vast.component.Transform;
 import org.slf4j.Logger;
@@ -18,16 +19,13 @@ public class PathMoveSystem extends IteratingSystem {
 
     private ComponentMapper<Transform> transformMapper;
     private ComponentMapper<Path> pathMapper;
+	private ComponentMapper<Speed> speedMapper;
 	private ComponentMapper<Sync> syncMapper;
-
-    private final float WALK_SPEED = 1.0f;
-    private final float RUN_SPEED = 4.0f;
-	private final float RUN_DISTANCE = 1.0f;
 
     private Vector2f reusableDirection;
 
     public PathMoveSystem() {
-        super(Aspect.all(Transform.class, Path.class));
+        super(Aspect.all(Transform.class, Path.class, Speed.class));
         reusableDirection = new Vector2f();
     }
 
@@ -43,6 +41,7 @@ public class PathMoveSystem extends IteratingSystem {
     protected void process(int entity) {
         Transform transform = transformMapper.get(entity);
         Path path = pathMapper.get(entity);
+        Speed speed = speedMapper.get(entity);
 
         reusableDirection.set(path.targetPosition.x - transform.position.x, path.targetPosition.y - transform.position.y);
         if (reusableDirection.length() > 0) {
@@ -50,18 +49,12 @@ public class PathMoveSystem extends IteratingSystem {
 			syncMapper.create(entity).markPropertyAsDirty(Properties.ROTATION);
 
             float distance = reusableDirection.length();
-            float speed;
-            if (distance > RUN_DISTANCE) {
-            	speed = RUN_SPEED;
-			} else {
-            	speed = WALK_SPEED;
-			}
             reusableDirection.normalize();
-            if (speed * world.delta > distance) {
+            if (speed.getModifiedSpeed() * world.delta > distance) {
                 transform.position.set(path.targetPosition);
                 pathMapper.remove(entity);
             } else {
-                reusableDirection.scale(speed * world.delta);
+                reusableDirection.scale(speed.getModifiedSpeed() * world.delta);
                 transform.position.add(reusableDirection);
             }
 			syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
