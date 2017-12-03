@@ -57,6 +57,9 @@ public class DeathSystem extends IteratingSystem {
 					respawnPosition,
 					aiMapper.has(deathEntity));
 				knownMapper.get(playerEntity).knownEntities.addAll(knownMapper.get(deathEntity).knownEntities);
+				if (homeMapper.has(deathEntity)) {
+					homeMapper.create(playerEntity).position.set(homeMapper.get(deathEntity).position);
+				}
 
 				world.delete(deathEntity);
 			}
