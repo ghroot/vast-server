@@ -3,10 +3,7 @@ package com.vast.interact;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
-import com.vast.component.Fueled;
-import com.vast.component.Inventory;
-import com.vast.component.Player;
-import com.vast.component.Sync;
+import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +13,7 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Fueled> fueledMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Sync> syncMapper;
+	private ComponentMapper<Message> messageMapper;
 
 	public FueledInteractionHandler() {
 		super(Aspect.all(Player.class, Inventory.class), Aspect.all(Fueled.class));
@@ -41,6 +39,8 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 
 			fueled.timeLeft = 60.0f;
 			syncMapper.create(fueledEntity).markPropertyAsDirty(Properties.FUELED);
+		} else {
+			messageMapper.create(playerEntity).text = "I don't have the required materials...";
 		}
 
 		return true;

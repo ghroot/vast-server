@@ -23,6 +23,7 @@ public class EventSystem extends AbstractNearbyEntityIteratingSystem {
 	private ComponentMapper<Active> activeMapper;
 
 	private Map<String, VastPeer> peers;
+
 	private EventMessage reusableEventMessage;
 
 	public EventSystem(Map<String, VastPeer> peers) {

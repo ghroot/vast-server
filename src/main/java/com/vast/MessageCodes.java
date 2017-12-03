@@ -23,6 +23,10 @@ public class MessageCodes {
 	public static byte EVENT_ENTITY_ID = 0;
 	public static byte EVENT_NAME = 1;
 
+	// Server -> Client
+	public static short MESSAGE = 4;
+	public static byte MESSAGE_TEXT = 0;
+
 	// Client -> Server
 	public static short MOVE = 50;
 	public static byte MOVE_POSITION = 0;
