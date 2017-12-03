@@ -161,7 +161,7 @@ public class TerminalSystem extends IntervalSystem {
 						} else if (typeMapper.get(entity).type.equals("rock")) {
 							screen.setCharacter(terminalPosition, new TextCharacter('^', colored ? TextColor.ANSI.Indexed.fromRGB(100, 100, 100) : gray, TextColor.ANSI.DEFAULT));
 							textGraphics.setForegroundColor(TextColor.ANSI.GREEN);
-						} else if (typeMapper.get(entity).type.equals("crate")) {
+						} else if (typeMapper.get(entity).type.equals("pickup")) {
 							screen.setCharacter(terminalPosition, new TextCharacter('.', colored ? TextColor.ANSI.RED : gray, TextColor.ANSI.DEFAULT));
 							textGraphics.setForegroundColor(TextColor.ANSI.RED);
 						} else if (typeMapper.get(entity).type.equals("building")) {
@@ -326,7 +326,7 @@ public class TerminalSystem extends IntervalSystem {
 					} else if (component instanceof AI) {
 						detail = ((AI) component).behaviourName;
 					} else if (component instanceof Health) {
-						detail = "" + ((Health) component).health;
+						detail = "" + ((Health) component).health + "/" + ((Health) component).maxHealth;
 					} else if (component instanceof Harvestable) {
 						detail = "" + (Math.round(((Harvestable) component).durability * 100.0f) / 100.0f);
 					} else if (component instanceof Constructable) {
@@ -341,6 +341,8 @@ public class TerminalSystem extends IntervalSystem {
 						detail = ((Player) component).name;
 					} else if (component instanceof Order) {
 						detail = "" + ((Order) component).type;
+					} else if (component instanceof Speed) {
+						detail = "" + (Math.round(((Speed) component).getModifiedSpeed() * 100.0f) / 100.0f);
 					} else if (component instanceof Spatial) {
 						detail = "" + ((Spatial) component).memberOfSpatialHash.x + ", " + ((Spatial) component).memberOfSpatialHash.y;
 					} else if (component instanceof Transform) {
