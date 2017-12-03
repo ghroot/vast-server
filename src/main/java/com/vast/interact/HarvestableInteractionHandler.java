@@ -17,6 +17,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Event> eventMapper;
+	private ComponentMapper<Message> messageMapper;
 
 	public HarvestableInteractionHandler() {
 		super(Aspect.all(Inventory.class), Aspect.all(Harvestable.class, Inventory.class));
@@ -35,16 +36,23 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public boolean process(int playerEntity, int harvestableEntity) {
-		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
-		harvestable.durability -= world.getDelta() * HARVEST_SPEED;
-		syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.DURABILITY);
-		if (harvestable.durability <= 0.0f) {
-			inventoryMapper.get(playerEntity).add(inventoryMapper.get(harvestableEntity));
-			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
-			deleteMapper.create(harvestableEntity).reason = "harvested";
+		Inventory inventory = inventoryMapper.get(playerEntity);
+
+		if (inventory.isFull()) {
+			messageMapper.create(playerEntity).text = "My backpack is full...";
 			return true;
 		} else {
-			return false;
+			Harvestable harvestable = harvestableMapper.get(harvestableEntity);
+			harvestable.durability -= world.getDelta() * HARVEST_SPEED;
+			syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.DURABILITY);
+			if (harvestable.durability <= 0.0f) {
+				inventoryMapper.get(playerEntity).add(inventoryMapper.get(harvestableEntity));
+				syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
+				deleteMapper.create(harvestableEntity).reason = "harvested";
+				return true;
+			} else {
+				return false;
+			}
 		}
 	}
 
