@@ -65,7 +65,7 @@ public class DeathSystem extends IteratingSystem {
 			if (inventoryMapper.has(deathEntity)) {
 				Inventory inventory = inventoryMapper.get(deathEntity);
 				if (!inventory.isEmpty()) {
-					int crateEntity = creationManager.createCrate(transformMapper.get(deathEntity).position, inventory);
+					int crateEntity = creationManager.createPickup(transformMapper.get(deathEntity).position, 0, inventory);
 					lifetimeMapper.create(crateEntity).timeLeft = 180.0f;
 					inventory.clear();
 					syncMapper.create(deathEntity).markPropertyAsDirty(Properties.INVENTORY);

@@ -16,6 +16,7 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Sync> syncMapper;
+	private ComponentMapper<Event> eventMapper;
 
 	public ContainerInteractionHandler() {
 		super(Aspect.all(Player.class, Inventory.class), Aspect.all(Container.class, Inventory.class));
@@ -60,6 +61,8 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
 			deleteMapper.create(containerEntity).reason = "collected";
 		}
+
+		eventMapper.create(playerEntity).name = "pickedUp";
 
 		return true;
 	}

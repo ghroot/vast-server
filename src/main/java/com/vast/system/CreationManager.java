@@ -46,7 +46,7 @@ public class CreationManager extends BaseSystem {
 	private Archetype rockArchetype;
 	private Archetype aiArchetype;
 	private Archetype buildingArchetype;
-	private Archetype crateArchetype;
+	private Archetype pickupArchetype;
 
 	public CreationManager(WorldConfiguration worldConfiguration, Items items, Buildings buildings) {
 		this.worldConfiguration = worldConfiguration;
@@ -125,8 +125,9 @@ public class CreationManager extends BaseSystem {
 			.add(SyncHistory.class)
 			.build(world);
 
-		crateArchetype = new ArchetypeBuilder()
+		pickupArchetype = new ArchetypeBuilder()
 			.add(Type.class)
+			.add(SubType.class)
 			.add(Transform.class)
 			.add(Spatial.class)
 			.add(Collision.class)
@@ -149,7 +150,11 @@ public class CreationManager extends BaseSystem {
 					createTree(new Point2f(x - 1.0f + (float) Math.random() * 2.0f, y - 1.0f + (float) Math.random() * 2.0f));
 				}
 				if (noise.GetWhiteNoise(x, y) > 0.8f) {
-					createRock(new Point2f(x, y));
+					if (Math.random() < 0.7) {
+						createRock(new Point2f(x, y));
+					} else {
+						createPickup(new Point2f(x, y), 1, new short[] {1});
+					}
 				}
 			}
 		}
@@ -249,13 +254,19 @@ public class CreationManager extends BaseSystem {
 		return buildingEntity;
 	}
 
-	public int createCrate(Point2f position, Inventory inventory) {
-		int crateEntity = world.create(crateArchetype);
-		typeMapper.get(crateEntity).type = "crate";
-		transformMapper.get(crateEntity).position.set(position);
-		collisionMapper.get(crateEntity).radius = 0.1f;
-		inventoryMapper.get(crateEntity).add(inventory);
-		return crateEntity;
+	public int createPickup(Point2f position, int subType, short[] items) {
+		int pickupEntity = world.create(pickupArchetype);
+		typeMapper.get(pickupEntity).type = "pickup";
+		subTypeMapper.get(pickupEntity).subType = subType;
+		transformMapper.get(pickupEntity).position.set(position);
+		transformMapper.get(pickupEntity).rotation = (float) Math.random() * 360.0f;
+		collisionMapper.get(pickupEntity).radius = 0.1f;
+		inventoryMapper.get(pickupEntity).add(items);
+		return pickupEntity;
+	}
+
+	public int createPickup(Point2f position, int subType, Inventory inventory) {
+		return createPickup(position, subType, inventory.items);
 	}
 
 	public int createAura(Point2f position, String effectName, float range, int parentEntity) {
