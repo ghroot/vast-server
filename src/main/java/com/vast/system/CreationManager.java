@@ -37,6 +37,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Parent> parentMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 	private ComponentMapper<Speed> speedMapper;
+	private ComponentMapper<Attack> attackMapper;
 
 	private WorldConfiguration worldConfiguration;
 	private Items items;
@@ -46,6 +47,7 @@ public class CreationManager extends BaseSystem {
 	private Archetype treeArchetype;
 	private Archetype rockArchetype;
 	private Archetype aiArchetype;
+	private Archetype animalArchetype;
 	private Archetype buildingArchetype;
 	private Archetype pickupArchetype;
 
@@ -115,6 +117,20 @@ public class CreationManager extends BaseSystem {
 			.add(SyncHistory.class)
 			.build(world);
 
+		animalArchetype = new ArchetypeBuilder()
+			.add(AI.class)
+			.add(Type.class)
+			.add(SubType.class)
+			.add(Inventory.class)
+			.add(Health.class)
+			.add(Transform.class)
+			.add(Speed.class)
+			.add(Spatial.class)
+			.add(Collision.class)
+			.add(SyncPropagation.class)
+			.add(SyncHistory.class)
+			.build(world);
+
 		buildingArchetype = new ArchetypeBuilder()
 			.add(Type.class)
 			.add(SubType.class)
@@ -162,6 +178,11 @@ public class CreationManager extends BaseSystem {
 			}
 		}
 
+		for (int i = 0; i < worldConfiguration.numberOfAnimals; i++) {
+			int subType = (int) (Math.random() * 3);
+			createAnimal(getRandomPositionInWorld(), subType);
+		}
+
 		for (int i = 0; i < worldConfiguration.numberOfAIs; i++) {
 			createAI(getRandomPositionInWorld());
 		}
@@ -207,6 +228,38 @@ public class CreationManager extends BaseSystem {
 		syncPropagationMapper.get(aiEntity).setUnreliable(Properties.POSITION);
 		syncPropagationMapper.get(aiEntity).setUnreliable(Properties.ROTATION);
 		return aiEntity;
+	}
+
+	private int createAnimal(Point2f position, int subType) {
+		int animalEntity = world.create(animalArchetype);
+		typeMapper.get(animalEntity).type = "animal";
+		subTypeMapper.get(animalEntity).subType = subType;
+		transformMapper.get(animalEntity).position.set(position);
+		if (subType == 0) {
+			speedMapper.get(animalEntity).baseSpeed = 1.5f;
+			healthMapper.get(animalEntity).maxHealth = 2;
+			inventoryMapper.get(animalEntity).add(items.getItem("meat").getType(), 1);
+			inventoryMapper.get(animalEntity).add(items.getItem("fur").getType(), 1);
+			aiMapper.get(animalEntity).behaviourName = "fleeingAnimal";
+		} else if (subType == 1) {
+			speedMapper.get(animalEntity).baseSpeed = 1.0f;
+			healthMapper.get(animalEntity).maxHealth = 3;
+			inventoryMapper.get(animalEntity).add(items.getItem("meat").getType(), 2);
+			inventoryMapper.get(animalEntity).add(items.getItem("fur").getType(), 2);
+			aiMapper.get(animalEntity).behaviourName = "fleeingAnimal";
+		} else if (subType == 2) {
+			speedMapper.get(animalEntity).baseSpeed = 1.0f;
+			healthMapper.get(animalEntity).maxHealth = 3;
+			inventoryMapper.get(animalEntity).add(items.getItem("meat").getType(), 2);
+			inventoryMapper.get(animalEntity).add(items.getItem("fur").getType(), 2);
+			aiMapper.get(animalEntity).behaviourName = "aggressiveAnimal";
+			attackMapper.create(animalEntity);
+		}
+		healthMapper.get(animalEntity).health = healthMapper.get(animalEntity).maxHealth;
+		collisionMapper.get(animalEntity).radius = 0.3f;
+		syncPropagationMapper.get(animalEntity).setUnreliable(Properties.POSITION);
+		syncPropagationMapper.get(animalEntity).setUnreliable(Properties.ROTATION);
+		return animalEntity;
 	}
 
 	public int createPlayer(String name, int subType, Point2f position, boolean fakePlayer) {

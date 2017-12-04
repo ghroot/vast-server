@@ -2,5 +2,6 @@
   "width": 1000,
   "height": 1000,
   "sectionSize": 8,
-  "numberOfAIs": 500
+  "numberOfAIs": 500,
+  "numberOfAnimals": 2000
 }

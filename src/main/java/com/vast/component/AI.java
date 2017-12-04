@@ -8,4 +8,6 @@ import com.vast.behaviour.Behaviour;
 public class AI extends Component {
 	public String behaviourName = null;
 	public transient Behaviour behaviour;
+	public transient String state = "none";
+	public transient float countdown = 0.0f;
 }

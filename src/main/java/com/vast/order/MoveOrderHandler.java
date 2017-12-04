@@ -6,8 +6,6 @@ import com.vast.MessageCodes;
 import com.vast.component.Order;
 import com.vast.component.Path;
 
-import javax.vecmath.Point2f;
-
 public class MoveOrderHandler implements OrderHandler {
 	private ComponentMapper<Path> pathMapper;
 
@@ -37,11 +35,8 @@ public class MoveOrderHandler implements OrderHandler {
 
 	@Override
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
-		if (!pathMapper.has(orderEntity)) {
-			pathMapper.create(orderEntity);
-		}
 		float[] position = (float[]) dataObject.get(MessageCodes.MOVE_POSITION).value;
-		pathMapper.get(orderEntity).targetPosition = new Point2f(position[0], position[1]);
+		pathMapper.create(orderEntity).targetPosition.set(position[0], position[1]);
 		return true;
 	}
 }

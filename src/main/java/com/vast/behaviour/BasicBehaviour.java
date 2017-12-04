@@ -6,7 +6,6 @@ import com.vast.component.Path;
 import com.vast.component.Transform;
 import com.vast.interact.InteractionHandler;
 
-import javax.vecmath.Point2f;
 import java.util.List;
 
 public class BasicBehaviour extends AbstractBehaviour {
@@ -31,8 +30,10 @@ public class BasicBehaviour extends AbstractBehaviour {
 				int randomNearbyInteractableEntity = nearbyInteractableEntities.get(randomIndex);
 				interactMapper.create(entity).entity = randomNearbyInteractableEntity;
 			} else {
-				pathMapper.create(entity).targetPosition = new Point2f(transformMapper.get(entity).position);
-				pathMapper.create(entity).targetPosition.add(new Point2f((float) (-2.0f + Math.random() * 4.0f), (float) (-2.0f + Math.random() * 4.0f)));
+				pathMapper.create(entity).targetPosition.set(
+					transformMapper.get(entity).position.x - 2.0f + (float) Math.random() * 4.0f,
+					transformMapper.get(entity).position.y - 2.0f + (float) Math.random() * 4.0f
+				);
 			}
 			scanMapper.remove(entity);
 		} else {

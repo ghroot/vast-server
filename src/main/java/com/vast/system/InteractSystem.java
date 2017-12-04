@@ -10,7 +10,6 @@ import com.vast.interact.InteractionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
 import java.util.List;
 
@@ -96,13 +95,13 @@ public class InteractSystem  extends IteratingSystem {
 		reusableVector.set(otherTransform.position.x - transform.position.x, otherTransform.position.y - transform.position.y);
 		if (reusableVector.length() > interactDistance) {
 			if (interact.phase == Interact.Phase.APPROACHING) {
-				pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);
+				pathMapper.create(entity).targetPosition.set(otherTransform.position);
 			} else {
 				if (interact.phase == Interact.Phase.INTERACTING) {
 					interact.handler.stop(entity, interact.entity);
 				}
 				logger.debug("Entity {} started approaching entity {}", entity, interact.entity);
-				pathMapper.create(entity).targetPosition = new Point2f(otherTransform.position);
+				pathMapper.create(entity).targetPosition.set(otherTransform.position);
 				interact.phase = Interact.Phase.APPROACHING;
 			}
 		} else {

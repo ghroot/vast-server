@@ -4,9 +4,7 @@ import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
-import com.vast.behaviour.BasicBehaviour;
-import com.vast.behaviour.Behaviour;
-import com.vast.behaviour.FakeHumanBehaviour;
+import com.vast.behaviour.*;
 import com.vast.collision.CollisionHandler;
 import com.vast.data.Buildings;
 import com.vast.data.Items;
@@ -72,6 +70,8 @@ public class VastWorld implements Runnable {
 		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
 		behaviours.put("basic", new BasicBehaviour(interactionHandlers));
 		behaviours.put("fakeHuman", new FakeHumanBehaviour(interactionHandlers, peers, incomingRequestsByPeer));
+		behaviours.put("fleeingAnimal", new FleeingAnimalBehaviour(interactionHandlers));
+		behaviours.put("aggressiveAnimal", new AggressiveAnimalBehaviour(interactionHandlers));
 		Map<String, Effect> effects = new HashMap<String, Effect>();
 		effects.put("heal", new HealEffect());
 
