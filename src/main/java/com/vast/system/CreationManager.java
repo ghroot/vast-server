@@ -162,7 +162,7 @@ public class CreationManager extends BaseSystem {
 	}
 
 	public void createWorld() {
-		FastNoise noise = new FastNoise();
+		FastNoise noise = new FastNoise((int) (System.currentTimeMillis() % Integer.MAX_VALUE));
 		for (float x = -worldConfiguration.width / 2.0f; x < worldConfiguration.width / 2.0f; x += 3.0f) {
 			for (float y = -worldConfiguration.height / 2.0f; y < worldConfiguration.height / 2.0f; y += 3.0f) {
 				if (noise.GetSimplex(x, y) > 0.35f) {
