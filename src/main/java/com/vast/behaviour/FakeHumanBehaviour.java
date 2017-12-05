@@ -6,10 +6,7 @@ import com.nhnent.haste.protocol.messages.RequestMessage;
 import com.vast.IncomingRequest;
 import com.vast.MessageCodes;
 import com.vast.VastPeer;
-import com.vast.component.Interact;
-import com.vast.component.Path;
-import com.vast.component.Player;
-import com.vast.component.Transform;
+import com.vast.component.*;
 import com.vast.interact.InteractionHandler;
 
 import java.util.ArrayList;
@@ -21,6 +18,7 @@ public class FakeHumanBehaviour extends AbstractBehaviour {
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Transform> transformMapper;
+	private ComponentMapper<Craft> craftMapper;
 
 	private Map<String, VastPeer> peers;
 	private Map<String, List<IncomingRequest>> incomingRequestsByPeer;
@@ -33,7 +31,7 @@ public class FakeHumanBehaviour extends AbstractBehaviour {
 
 	@Override
 	public void process(int entity) {
-		if (interactMapper.has(entity) || pathMapper.has(entity)) {
+		if (interactMapper.has(entity) || pathMapper.has(entity) || craftMapper.has(entity)) {
 			return;
 		}
 
@@ -42,7 +40,9 @@ public class FakeHumanBehaviour extends AbstractBehaviour {
 		int roll = (int) (Math.random() * 100);
 		if (roll <= 1) {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.SET_HOME)));
-		} else if (roll <= 5) {
+		} else if (roll <= 3) {
+			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.CRAFT, new DataObject().set(MessageCodes.CRAFT_ITEM_TYPE, (short) 4))));
+		} else if (roll <= 8) {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.EMOTE, new DataObject().set(MessageCodes.EMOTE_TYPE, (byte) 0))));
 		} else if (roll <= 15) {
 			byte buildingType = (byte) (Math.random() * 4);

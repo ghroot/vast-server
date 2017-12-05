@@ -342,7 +342,10 @@ public class TerminalSystem extends IntervalSystem {
 					} else if (component instanceof Player) {
 						detail = ((Player) component).name;
 					} else if (component instanceof Order) {
-						detail = "" + ((Order) component).type;
+						Order order = (Order) component;
+						if (order.handler != null) {
+							detail = "" + order.handler.getClass().getSimpleName();
+						}
 					} else if (component instanceof Speed) {
 						detail = "" + (Math.round(((Speed) component).getModifiedSpeed() * 100.0f) / 100.0f);
 					} else if (component instanceof Spatial) {

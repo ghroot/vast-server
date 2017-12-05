@@ -14,5 +14,13 @@
   {
     "type": 3,
     "name": "fur"
+  },
+  {
+    "type": 4,
+    "name": "axe",
+    "cost": {
+      "wood": 1,
+      "stone": 1
+    }
   }
 ]

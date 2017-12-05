@@ -5,7 +5,6 @@ import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.MessageCodes;
 import com.vast.Properties;
 import com.vast.component.Home;
-import com.vast.component.Order;
 import com.vast.component.Sync;
 import com.vast.component.Transform;
 
@@ -24,11 +23,6 @@ public class SetHomeOrderHandler implements OrderHandler {
 	@Override
 	public short getMessageCode() {
 		return MessageCodes.SET_HOME;
-	}
-
-	@Override
-	public Order.Type getOrderType() {
-		return Order.Type.SET_HOME;
 	}
 
 	@Override

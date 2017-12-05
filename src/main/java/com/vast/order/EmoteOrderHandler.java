@@ -4,7 +4,6 @@ import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.MessageCodes;
 import com.vast.component.Event;
-import com.vast.component.Order;
 
 public class EmoteOrderHandler implements OrderHandler {
 	private ComponentMapper<Event> eventMapper;
@@ -16,11 +15,6 @@ public class EmoteOrderHandler implements OrderHandler {
 	@Override
 	public short getMessageCode() {
 		return MessageCodes.EMOTE;
-	}
-
-	@Override
-	public Order.Type getOrderType() {
-		return Order.Type.EMOTE;
 	}
 
 	@Override

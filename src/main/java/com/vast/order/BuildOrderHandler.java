@@ -43,11 +43,6 @@ public class BuildOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public Order.Type getOrderType() {
-		return Order.Type.BUILD;
-	}
-
-	@Override
 	public boolean isOrderComplete(int orderEntity) {
 		return !interactMapper.has(orderEntity);
 	}

@@ -46,7 +46,8 @@ public class VastWorld implements Runnable {
 			new InteractOrderHandler(),
 			new BuildOrderHandler(buildings),
 			new EmoteOrderHandler(),
-			new SetHomeOrderHandler()
+			new SetHomeOrderHandler(),
+			new CraftOrderHandler(items)
 		));
 		List<InteractionHandler> interactionHandlers = new ArrayList<InteractionHandler>(Arrays.asList(
 			new HarvestableInteractionHandler(),
@@ -96,6 +97,7 @@ public class VastWorld implements Runnable {
 			new InteractSystem(interactionHandlers),
 			new CollisionSystem(new HashSet<CollisionHandler>(), metrics),
 			new FuelSystem(),
+			new CraftSystem(items),
 			new AuraSystem(effects),
 			new LifetimeSystem(),
 			new DeathSystem(),

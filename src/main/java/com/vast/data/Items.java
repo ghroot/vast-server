@@ -24,7 +24,15 @@ public class Items {
 				JSONObject itemData = (JSONObject) it.next();
 				int type = itemData.getInt("type");
 				String name = itemData.getString("name");
-				items.put(type, new Item(type, name));
+				Item item = new Item(type, name);
+				if (itemData.has("cost")) {
+					JSONObject costData = itemData.getJSONObject("cost");
+					for (String itemName : costData.keySet()) {
+						int amount = costData.getInt(itemName);
+						item.addCost(new Cost(getItem(itemName).getType(), amount));
+					}
+				}
+				items.put(type, item);
 			}
 		} catch (Exception exception) {
 			logger.error("Error parsing items", exception);

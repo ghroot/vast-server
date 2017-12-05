@@ -47,6 +47,10 @@ public class MessageCodes {
 	// Client -> Server
 	public static short SET_HOME = 54;
 
+	// Client -> Server
+	public static short CRAFT = 55;
+	public static byte CRAFT_ITEM_TYPE = 0;
+
 	// Properties
 	public static byte PROPERTY_POSITION = 100;
 	public static byte PROPERTY_ROTATION = 101;

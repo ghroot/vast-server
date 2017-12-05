@@ -61,7 +61,7 @@ public class OrderSystem extends IteratingSystem {
 		if (orderMapper.has(playerEntity)) {
 			Order order = orderMapper.get(playerEntity);
 			if (order.handler.isOrderComplete(playerEntity)) {
-				logger.debug("{} order completed for entity {}", order.type, playerEntity);
+				logger.debug("Order completed for entity {} with handler {}", playerEntity, order.handler.getClass().getSimpleName());
 				orderMapper.remove(playerEntity);
 			}
 		}
@@ -88,9 +88,11 @@ public class OrderSystem extends IteratingSystem {
 	private void cancelOrder(int playerEntity) {
 		Order order = orderMapper.get(playerEntity);
 		if (order != null) {
-			logger.debug("Canceling {} order for entity {}", order.type, playerEntity);
 			if (order.handler != null) {
+				logger.debug("Canceling order for entity {} with handler {}", playerEntity, order.handler.getClass().getSimpleName());
 				order.handler.cancelOrder(playerEntity);
+			} else {
+				logger.debug("Canceling order for entity {}", playerEntity);
 			}
 			orderMapper.remove(playerEntity);
 		}
@@ -98,9 +100,8 @@ public class OrderSystem extends IteratingSystem {
 
 	private void startOrder(int playerEntity, OrderHandler handler, DataObject dataObject) {
 		if (handler.startOrder(playerEntity, dataObject)) {
-			orderMapper.create(playerEntity).type = handler.getOrderType();
-			orderMapper.get(playerEntity).handler = handler;
-			logger.debug("Starting {} order for entity {}", handler.getOrderType(), playerEntity);
+			orderMapper.create(playerEntity).handler = handler;
+			logger.debug("Starting order for entity {} with handler {}", playerEntity, handler.getClass().getSimpleName());
 		}
 	}
 
