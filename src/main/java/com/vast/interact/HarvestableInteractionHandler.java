@@ -25,18 +25,9 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public boolean canInteract(int playerEntity, int harvestableEntity) {
-		Inventory inventory = inventoryMapper.get(playerEntity);
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
-		if (harvestable.requiredItemType != -1 && !inventory.has(harvestable.requiredItemType)) {
-			return false;
-		}
-
-		if (harvestable.durability <= 0.0f) {
-			return false;
-		}
-
-		return true;
+		return harvestable.durability > 0.0f;
 	}
 
 	@Override

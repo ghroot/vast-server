@@ -42,7 +42,7 @@ public class CraftOrderHandler implements OrderHandler {
 
 	@Override
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
-		int itemType = (short) dataObject.get(MessageCodes.CRAFT_ITEM_TYPE).value;
+		int itemType = (byte) dataObject.get(MessageCodes.CRAFT_ITEM_TYPE).value;
 		Item itemToCraft = items.getItem(itemType);
 		Inventory inventory = inventoryMapper.get(orderEntity);
 		if (inventory.has(itemToCraft.getCosts())) {

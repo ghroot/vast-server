@@ -12,7 +12,7 @@ public class PickupSystem extends IteratingSystem {
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<Transform> transformMapper;
-	private ComponentMapper<Lifetime> lifeTimeMapper;
+	private ComponentMapper<Lifetime> lifetimeMapper;
 
 	private final float PICKUP_LIFETIME = 3.0f;
 
@@ -38,8 +38,8 @@ public class PickupSystem extends IteratingSystem {
 
 		boolean hasPickupNearby = false;
 		for (int nearbyEntity : scan.nearbyEntities) {
-			if (typeMapper.get(nearbyEntity).type.equals("pickup")) {
-				lifeTimeMapper.create(nearbyEntity).timeLeft = PICKUP_LIFETIME;
+			if (typeMapper.has(nearbyEntity) && typeMapper.get(nearbyEntity).type.equals("pickup")) {
+				lifetimeMapper.create(nearbyEntity).timeLeft = PICKUP_LIFETIME;
 				hasPickupNearby = true;
 			}
 		}
@@ -58,11 +58,11 @@ public class PickupSystem extends IteratingSystem {
 
 			int pickupEntity;
 			if (Math.random() < 0.7) {
-				pickupEntity = creationManager.createPickup(reusablePosition, 1, new short[]{1});
+				pickupEntity = creationManager.createPickup(reusablePosition, 1, new short[] {1});
 			} else {
-				pickupEntity = creationManager.createPickup(reusablePosition, 2, new short[]{0, 1});
+				pickupEntity = creationManager.createPickup(reusablePosition, 2, new short[] {0, 1});
 			}
-			lifeTimeMapper.create(pickupEntity).timeLeft = PICKUP_LIFETIME;
+			lifetimeMapper.create(pickupEntity).timeLeft = PICKUP_LIFETIME;
 		}
 	}
 }

@@ -24,7 +24,7 @@ public class InventoryPropertyHandler implements PropertyHandler {
 			Inventory inventory = inventoryMapper.get(entity);
 			SyncHistory syncHistory = syncHistoryMapper.get(entity);
 
-			boolean inventoryChanged = false;
+			boolean inventoryChanged = true;
 			if (!force && syncHistory != null && syncHistory.syncedValues.containsKey(Properties.INVENTORY)) {
 				int lastSyncedItemsHashCode = (int) syncHistory.syncedValues.get(Properties.INVENTORY);
 				inventoryChanged = Arrays.hashCode(inventory.items) != lastSyncedItemsHashCode;

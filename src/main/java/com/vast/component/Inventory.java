@@ -13,7 +13,7 @@ public class Inventory extends PooledComponent {
 	@Override
 	protected void reset() {
 		items = new short[0];
-		capacity = 0;
+		capacity = Integer.MAX_VALUE;
 	}
 
 	public void add(int itemType, int amount) {

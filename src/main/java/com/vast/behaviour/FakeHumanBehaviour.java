@@ -47,7 +47,7 @@ public class FakeHumanBehaviour extends AbstractBehaviour {
 			} else {
 				itemType = 5;
 			}
-			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.CRAFT, new DataObject().set(MessageCodes.CRAFT_ITEM_TYPE, (short) itemType))));
+			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.CRAFT, new DataObject().set(MessageCodes.CRAFT_ITEM_TYPE, (byte) itemType))));
 		} else if (roll <= 8) {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.EMOTE, new DataObject().set(MessageCodes.EMOTE_TYPE, (byte) 0))));
 		} else if (roll <= 15) {

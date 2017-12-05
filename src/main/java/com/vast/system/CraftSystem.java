@@ -3,11 +3,8 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
-import com.artemis.utils.IntBag;
 import com.vast.Properties;
-import com.vast.component.Craft;
-import com.vast.component.Inventory;
-import com.vast.component.Sync;
+import com.vast.component.*;
 import com.vast.data.Item;
 import com.vast.data.Items;
 
@@ -15,6 +12,10 @@ public class CraftSystem extends IteratingSystem {
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Craft> craftMapper;
 	private ComponentMapper<Sync> syncMapper;
+	private ComponentMapper<Message>  messageMapper;
+	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Event> eventMapper;
 
 	private Items items;
 
@@ -24,11 +25,17 @@ public class CraftSystem extends IteratingSystem {
 	}
 
 	@Override
-	public void inserted(IntBag entities) {
+	protected void inserted(int craftEntity) {
+		if (playerMapper.has(craftEntity) && activeMapper.has(craftEntity)) {
+			eventMapper.create(craftEntity).name = "startedCrafting";
+		}
 	}
 
 	@Override
-	public void removed(IntBag entities) {
+	protected void removed(int craftEntity) {
+		if (playerMapper.has(craftEntity) && activeMapper.has(craftEntity)) {
+			eventMapper.create(craftEntity).name = "stoppedCrafting";
+		}
 	}
 
 	@Override
@@ -43,6 +50,8 @@ public class CraftSystem extends IteratingSystem {
 				inventory.remove(itemToCraft.getCosts());
 				inventory.add(itemToCraft.getType(), 1);
 				syncMapper.create(craftEntity).markPropertyAsDirty(Properties.INVENTORY);
+				String capitalizedItemName = itemToCraft.getName().substring(0, 1).toUpperCase() + itemToCraft.getName().substring(1);
+				messageMapper.create(craftEntity).text = "Crafted Item: " + capitalizedItemName;
 			}
 			craftMapper.remove(craftEntity);
 		}
