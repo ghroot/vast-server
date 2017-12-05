@@ -19,7 +19,6 @@ public class DeathSystem extends IteratingSystem {
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<AI> aiMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
-	private ComponentMapper<Lifetime> lifetimeMapper;
 	private ComponentMapper<SubType> subTypeMapper;
 	private ComponentMapper<Death> deathMapper;
 	private ComponentMapper<Event> eventMapper;
@@ -68,8 +67,7 @@ public class DeathSystem extends IteratingSystem {
 			if (inventoryMapper.has(deathEntity)) {
 				Inventory inventory = inventoryMapper.get(deathEntity);
 				if (!inventory.isEmpty()) {
-					int crateEntity = creationManager.createPickup(transformMapper.get(deathEntity).position, 0, inventory);
-					lifetimeMapper.create(crateEntity).timeLeft = 180.0f;
+					creationManager.createPickup(transformMapper.get(deathEntity).position, 0, inventory);
 					inventory.clear();
 					syncMapper.create(deathEntity).markPropertyAsDirty(Properties.INVENTORY);
 				}

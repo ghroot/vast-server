@@ -100,6 +100,7 @@ public class VastWorld implements Runnable {
 			new CraftSystem(items),
 			new AuraSystem(effects),
 			new LifetimeSystem(),
+			new PickupSystem(),
 			new DeathSystem(),
 			new ParentSystem(),
 			new DeleteSystem(peers),

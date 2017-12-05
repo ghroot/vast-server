@@ -168,16 +168,8 @@ public class CreationManager extends BaseSystem {
 				if (noise.GetSimplex(x, y) > 0.35f) {
 					createTree(new Point2f(x - 1.0f + (float) Math.random() * 2.0f, y - 1.0f + (float) Math.random() * 2.0f));
 				}
-				if (noise.GetWhiteNoise(x, y) > 0.8f) {
-					if (Math.random() < 0.7) {
-						createRock(new Point2f(x, y));
-					} else {
-						if (Math.random() < 0.7) {
-							createPickup(new Point2f(x, y), 1, new short[]{1});
-						} else {
-							createPickup(new Point2f(x, y), 2, new short[]{0, 1});
-						}
-					}
+				if (noise.GetWhiteNoise(x, y) > 0.9f) {
+					createRock(new Point2f(x, y));
 				}
 			}
 		}
