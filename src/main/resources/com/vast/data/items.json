@@ -22,5 +22,13 @@
       "wood": 1,
       "stone": 1
     }
+  },
+  {
+    "type": 5,
+    "name": "pickaxe",
+    "cost": {
+      "wood": 1,
+      "stone": 2
+    }
   }
 ]

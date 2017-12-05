@@ -60,6 +60,10 @@ public class Inventory extends PooledComponent {
 		}
 	}
 
+	public boolean has(int itemType) {
+		return has(itemType, 1);
+	}
+
 	public boolean has(Cost cost) {
 		return has(cost.getItemType(), cost.getCount());
 	}

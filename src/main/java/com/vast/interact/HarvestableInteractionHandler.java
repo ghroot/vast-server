@@ -25,24 +25,42 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public boolean canInteract(int playerEntity, int harvestableEntity) {
+		Inventory inventory = inventoryMapper.get(playerEntity);
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
-		return harvestable.durability > 0.0f;
+
+		if (harvestable.requiredItemType != -1 && !inventory.has(harvestable.requiredItemType)) {
+			return false;
+		}
+
+		if (harvestable.durability <= 0.0f) {
+			return false;
+		}
+
+		return true;
 	}
 
 	@Override
 	public void start(int playerEntity, int harvestableEntity) {
-		eventMapper.create(playerEntity).name = "startedHarvesting";
+		Inventory inventory = inventoryMapper.get(playerEntity);
+		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
+
+		if (harvestable.requiredItemType == -1 || inventory.has(harvestable.requiredItemType)) {
+			eventMapper.create(playerEntity).name = "startedHarvesting";
+		}
 	}
 
 	@Override
 	public boolean process(int playerEntity, int harvestableEntity) {
 		Inventory inventory = inventoryMapper.get(playerEntity);
+		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
-		if (inventory.isFull()) {
+		if (harvestable.requiredItemType != -1 && !inventory.has(harvestable.requiredItemType)) {
+			messageMapper.create(playerEntity).text = "I don't have the required tool...";
+			return true;
+		} else if (inventory.isFull()) {
 			messageMapper.create(playerEntity).text = "My backpack is full...";
 			return true;
 		} else {
-			Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 			harvestable.durability -= world.getDelta() * HARVEST_SPEED;
 			syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.DURABILITY);
 			if (harvestable.durability <= 0.0f) {
@@ -58,6 +76,11 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public void stop(int playerEntity, int harvestableEntity) {
-		eventMapper.create(playerEntity).name = "stoppedHarvesting";
+		Inventory inventory = inventoryMapper.get(playerEntity);
+		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
+
+		if (harvestable.requiredItemType == -1 || inventory.has(harvestable.requiredItemType)) {
+			eventMapper.create(playerEntity).name = "stoppedHarvesting";
+		}
 	}
 }

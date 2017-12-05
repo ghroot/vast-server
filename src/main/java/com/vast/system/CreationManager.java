@@ -172,7 +172,11 @@ public class CreationManager extends BaseSystem {
 					if (Math.random() < 0.7) {
 						createRock(new Point2f(x, y));
 					} else {
-						createPickup(new Point2f(x, y), 1, new short[] {1});
+						if (Math.random() < 0.7) {
+							createPickup(new Point2f(x, y), 1, new short[]{1});
+						} else {
+							createPickup(new Point2f(x, y), 2, new short[]{0, 1});
+						}
 					}
 				}
 			}
@@ -195,6 +199,7 @@ public class CreationManager extends BaseSystem {
 		transformMapper.get(treeEntity).position.set(position);
 		transformMapper.get(treeEntity).rotation = (float) Math.random() * 360;
 		collisionMapper.get(treeEntity).radius = 0.1f;
+		harvestableMapper.get(treeEntity).requiredItemType = items.getItem("axe").getType();
 		harvestableMapper.get(treeEntity).durability = 300.0f;
 		inventoryMapper.get(treeEntity).add(items.getItem("wood").getType(), 3);
 		syncPropagationMapper.get(treeEntity).setUnreliable(Properties.DURABILITY);
@@ -208,6 +213,7 @@ public class CreationManager extends BaseSystem {
 		transformMapper.get(rockEntity).position.set(position);
 		transformMapper.get(rockEntity).rotation = (float) Math.random() * 360;
 		collisionMapper.get(rockEntity).radius = 0.2f;
+		harvestableMapper.get(rockEntity).requiredItemType = items.getItem("pickaxe").getType();
 		harvestableMapper.get(rockEntity).durability = 300.0f;
 		inventoryMapper.get(rockEntity).add(items.getItem("stone").getType(), 2);
 		syncPropagationMapper.get(rockEntity).setUnreliable(Properties.DURABILITY);

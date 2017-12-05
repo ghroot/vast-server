@@ -41,7 +41,7 @@ public class CraftSystem extends IteratingSystem {
 			Item itemToCraft = items.getItem(craft.itemType);
 			if (inventory.has(itemToCraft.getCosts())) {
 				inventory.remove(itemToCraft.getCosts());
-				inventory.add(craft.itemType, 1);
+				inventory.add(itemToCraft.getType(), 1);
 				syncMapper.create(craftEntity).markPropertyAsDirty(Properties.INVENTORY);
 			}
 			craftMapper.remove(craftEntity);
