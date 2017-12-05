@@ -35,8 +35,6 @@ public class AISystem extends IteratingSystem {
 		AI ai = aiMapper.get(aiEntity);
 
 		ai.behaviour = behaviours.get(ai.behaviourName);
-
-		// TODO: Spread out scan "pulses". Need to be solved in a better way.
 		ai.state = "idling";
 		ai.countdown = (float) Math.random() * 3.0f;
 	}
