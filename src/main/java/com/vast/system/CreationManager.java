@@ -285,7 +285,7 @@ public class CreationManager extends BaseSystem {
 		collisionMapper.get(playerEntity).radius = 0.3f;
 		healthMapper.get(playerEntity).maxHealth = 5;
 		healthMapper.get(playerEntity).health = 5;
-		inventoryMapper.get(playerEntity).capacity = 20;
+		inventoryMapper.get(playerEntity).capacity = 50;
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.POSITION);
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.ROTATION);
 		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.INVENTORY);
