@@ -9,7 +9,7 @@
       "duration": 10,
       "cost": {
         "wood": 5,
-        "iron": 2
+        "stone": 2
       }
     },
     "inventory": {
