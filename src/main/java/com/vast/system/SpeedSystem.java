@@ -22,8 +22,8 @@ public class SpeedSystem extends IteratingSystem {
 
 		if (playerMapper.has(entity) && inventoryMapper.has(entity)) {
 			Inventory inventory = inventoryMapper.get(entity);
-			if ((float) inventory.getNumberOfItems() / inventory.capacity >= 0.5f) {
-				speed.modifier = 0.5f;
+			if ((float) inventory.getNumberOfItems() / inventory.capacity >= 0.75f) {
+				speed.modifier = 0.85f;
 			} else {
 				speed.modifier = 1.0f;
 			}
