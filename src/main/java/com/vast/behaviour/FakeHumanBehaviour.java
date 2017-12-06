@@ -7,6 +7,8 @@ import com.vast.IncomingRequest;
 import com.vast.MessageCodes;
 import com.vast.VastPeer;
 import com.vast.component.*;
+import com.vast.data.Buildings;
+import com.vast.data.Items;
 import com.vast.interact.InteractionHandler;
 
 import java.util.ArrayList;
@@ -22,11 +24,15 @@ public class FakeHumanBehaviour extends AbstractBehaviour {
 
 	private Map<String, VastPeer> peers;
 	private Map<String, List<IncomingRequest>> incomingRequestsByPeer;
+	private Items items;
+	private Buildings buildings;
 
-	public FakeHumanBehaviour(List<InteractionHandler> interactionHandlers, Map<String, VastPeer> peers, Map<String, List<IncomingRequest>> incomingRequestsByPeer) {
+	public FakeHumanBehaviour(List<InteractionHandler> interactionHandlers, Map<String, VastPeer> peers, Map<String, List<IncomingRequest>> incomingRequestsByPeer, Items items, Buildings buildings) {
 		super(interactionHandlers);
 		this.peers = peers;
 		this.incomingRequestsByPeer = incomingRequestsByPeer;
+		this.items = items;
+		this.buildings = buildings;
 	}
 
 	@Override
@@ -41,21 +47,21 @@ public class FakeHumanBehaviour extends AbstractBehaviour {
 		if (roll <= 1) {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.SET_HOME)));
 		} else if (roll <= 3) {
-			int itemType;
+			int itemId;
 			if (Math.random() <= 0.5f) {
-				itemType = 4;
+				itemId = items.getItem("axe").getId();
 			} else {
-				itemType = 5;
+				itemId = items.getItem("pickaxe").getId();
 			}
-			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.CRAFT, new DataObject().set(MessageCodes.CRAFT_ITEM_TYPE, (byte) itemType))));
+			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.CRAFT, new DataObject().set(MessageCodes.CRAFT_ITEM_TYPE, (byte) itemId))));
 		} else if (roll <= 8) {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.EMOTE, new DataObject().set(MessageCodes.EMOTE_TYPE, (byte) 0))));
 		} else if (roll <= 15) {
-			byte buildingType = (byte) (Math.random() * 4);
+			byte buildingId = (byte) (Math.random() * 3);
 			float x = transformMapper.get(entity).position.x;
 			float y = transformMapper.get(entity).position.y + 1.0f;
 			float[] buildPosition = new float[] {x, y};
-			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD, new DataObject().set(MessageCodes.BUILD_TYPE, buildingType).set(MessageCodes.BUILD_POSITION, buildPosition))));
+			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD, new DataObject().set(MessageCodes.BUILD_TYPE, buildingId).set(MessageCodes.BUILD_POSITION, buildPosition))));
 		} else if (roll <= 50) {
 			List<Integer> nearbyInteractableEntities = getNearbyInteractableEntities(entity);
 			if (nearbyInteractableEntities.size() > 0) {

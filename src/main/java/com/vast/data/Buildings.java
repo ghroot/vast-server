@@ -7,9 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class Buildings {
 	private static final Logger logger = LoggerFactory.getLogger(Buildings.class);
@@ -22,23 +20,36 @@ public class Buildings {
 			JSONArray buildingsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream("buildings.json"), Charset.defaultCharset()));
 			for (Iterator<Object> it = buildingsData.iterator(); it.hasNext();) {
 				JSONObject buildingData = (JSONObject) it.next();
-				int type = buildingData.getInt("type");
-				String name = buildingData.getString("name");
-				float buildDuration = buildingData.getFloat("buildDuration");
-				Building building = new Building(type, name, buildDuration);
-				JSONObject costData = buildingData.getJSONObject("cost");
-				for (String itemName : costData.keySet()) {
-					int amount = costData.getInt(itemName);
-					building.addCost(new Cost(items.getItem(itemName).getType(), amount));
+				int id = -1;
+				String name = null;
+				Set<Cost> costs = new HashSet<Cost>();
+				Map<String, JSONObject> aspects = new HashMap<String, JSONObject>();
+				for (String key : buildingData.keySet()) {
+					Object value = buildingData.get(key);
+					if (key.equals("id")) {
+						id = (int) value;
+					} else if (key.equals("name")) {
+						name = (String) value;
+					} else {
+						if (key.equals("constructable")) {
+							JSONObject costData = ((JSONObject) value).getJSONObject("cost");
+							for (String itemName : costData.keySet()) {
+								int amount = costData.getInt(itemName);
+								costs.add(new Cost(items.getItem(itemName).getId(), amount));
+							}
+						}
+						aspects.put(key, (JSONObject) value);
+					}
 				}
-				buildings.put(type, building);
+				Building building = new Building(id, name, costs, aspects);
+				buildings.put(id, building);
 			}
 		} catch (Exception exception) {
 			logger.error("Error parsing buildings", exception);
 		}
 	}
 
-	public Building getBuilding(int type) {
-		return buildings.get(type);
+	public Building getBuilding(int id) {
+		return buildings.get(id);
 	}
 }

@@ -1,33 +1,25 @@
 package com.vast.data;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class Item {
-	private int type;
+	private int id;
+	private String type;
 	private String name;
-	private Set<Cost> costs;
 
-	public Item(int type, String name) {
-		this.type = type;
+	public Item(int id, String type, String name) {
+		this.id = id;
 		this.name = name;
-
-		costs = new HashSet<Cost>();
+		this.type = type;
 	}
 
-	public int getType() {
+	public int getId() {
+		return id;
+	}
+
+	public String getType() {
 		return type;
 	}
 
 	public String getName() {
 		return name;
-	}
-
-	public void addCost(Cost cost) {
-		costs.add(cost);
-	}
-
-	public Set<Cost> getCosts() {
-		return costs;
 	}
 }

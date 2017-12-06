@@ -1,34 +1,51 @@
 [
   {
-    "type": 0,
+    "id": 0,
+    "type": "basic",
     "name": "wood"
   },
   {
-    "type": 1,
+    "id": 1,
+    "type": "basic",
     "name": "stone"
   },
   {
-    "type": 2,
+    "id": 2,
+    "type": "basic",
+    "name": "iron"
+  },
+  {
+    "id": 3,
+    "type": "basic",
     "name": "meat"
   },
   {
-    "type": 3,
+    "id": 4,
+    "type": "basic",
     "name": "fur"
   },
   {
-    "type": 4,
+    "id": 5,
+    "type": "tool",
     "name": "axe",
-    "cost": {
-      "wood": 1,
-      "stone": 1
+    "craftable": {
+      "duration": 3,
+      "cost": {
+        "wood": 1,
+        "stone": 1
+      }
     }
   },
   {
-    "type": 5,
+    "id": 6,
+    "type": "tool",
     "name": "pickaxe",
-    "cost": {
-      "wood": 1,
-      "stone": 2
+    "craftable": {
+      "duration": 5,
+      "cost": {
+        "wood": 1,
+        "stone": 2
+      }
     }
   }
 ]

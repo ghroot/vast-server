@@ -5,13 +5,13 @@ import org.json.JSONObject;
 import java.util.Map;
 import java.util.Set;
 
-public class Building {
+public class Animal {
 	private int id;
 	private String name;
 	private Set<Cost> costs;
 	private Map<String, JSONObject> aspects;
 
-	public Building(int id, String name, Set<Cost> costs, Map<String, JSONObject> aspects) {
+	public Animal(int id, String name, Map<String, JSONObject> aspects) {
 		this.id = id;
 		this.name = name;
 		this.costs = costs;
@@ -24,10 +24,6 @@ public class Building {
 
 	public String getName() {
 		return name;
-	}
-
-	public Set<Cost> getCosts() {
-		return costs;
 	}
 
 	public boolean hasAspect(String name) {

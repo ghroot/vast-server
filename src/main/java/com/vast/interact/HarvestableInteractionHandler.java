@@ -35,7 +35,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		Inventory inventory = inventoryMapper.get(playerEntity);
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
-		if (harvestable.requiredItemType == -1 || inventory.has(harvestable.requiredItemType)) {
+		if (harvestable.requiredItemId == -1 || inventory.has(harvestable.requiredItemId)) {
 			eventMapper.create(playerEntity).name = "startedHarvesting";
 		}
 	}
@@ -45,7 +45,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		Inventory inventory = inventoryMapper.get(playerEntity);
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
-		if (harvestable.requiredItemType != -1 && !inventory.has(harvestable.requiredItemType)) {
+		if (harvestable.requiredItemId != -1 && !inventory.has(harvestable.requiredItemId)) {
 			messageMapper.create(playerEntity).text = "I don't have the required tool...";
 			return true;
 		} else if (inventory.isFull()) {
@@ -70,7 +70,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		Inventory inventory = inventoryMapper.get(playerEntity);
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
-		if (harvestable.requiredItemType == -1 || inventory.has(harvestable.requiredItemType)) {
+		if (harvestable.requiredItemId == -1 || inventory.has(harvestable.requiredItemId)) {
 			eventMapper.create(playerEntity).name = "stoppedHarvesting";
 		}
 	}

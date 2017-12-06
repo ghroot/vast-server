@@ -7,9 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class Items {
 	private static final Logger logger = LoggerFactory.getLogger(Items.class);
@@ -22,25 +20,31 @@ public class Items {
 			JSONArray itemsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream("items.json"), Charset.defaultCharset()));
 			for (Iterator<Object> it = itemsData.iterator(); it.hasNext();) {
 				JSONObject itemData = (JSONObject) it.next();
-				int type = itemData.getInt("type");
+				int id = itemData.getInt("id");
+				String type = itemData.getString("type");
 				String name = itemData.getString("name");
-				Item item = new Item(type, name);
-				if (itemData.has("cost")) {
-					JSONObject costData = itemData.getJSONObject("cost");
+				Item item;
+				if (itemData.has("craftable")) {
+					Set<Cost> costs = new HashSet<Cost>();
+					float craftDuration = itemData.getJSONObject("craftable").getFloat("duration");
+					JSONObject costData = itemData.getJSONObject("craftable").getJSONObject("cost");
 					for (String itemName : costData.keySet()) {
 						int amount = costData.getInt(itemName);
-						item.addCost(new Cost(getItem(itemName).getType(), amount));
+						costs.add(new Cost(getItem(itemName).getId(), amount));
 					}
+					item = new CraftableItem(id, type, name, costs, craftDuration);
+				} else {
+					item = new Item(id, type, name);
 				}
-				items.put(type, item);
+				items.put(id, item);
 			}
 		} catch (Exception exception) {
 			logger.error("Error parsing items", exception);
 		}
 	}
 
-	public Item getItem(int type) {
-		return items.get(type);
+	public Item getItem(int id) {
+		return items.get(id);
 	}
 
 	public Item getItem(String name) {

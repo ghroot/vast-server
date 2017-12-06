@@ -16,18 +16,18 @@ public class Inventory extends PooledComponent {
 		capacity = Integer.MAX_VALUE;
 	}
 
-	public void add(int itemType, int amount) {
-		if (itemType >= items.length) {
-			items = Arrays.copyOf(items, itemType + 1);
+	public void add(int itemId, int amount) {
+		if (itemId >= items.length) {
+			items = Arrays.copyOf(items, itemId + 1);
 		}
 		int amountToAdd = Math.min(amount, capacity - getNumberOfItems());
-		items[itemType] += amountToAdd;
+		items[itemId] += amountToAdd;
 	}
 
 	public void add(short[] otherItems) {
-		for (int type = 0; type < otherItems.length; type++) {
-			if (otherItems[type] > 0) {
-				add(type, otherItems[type]);
+		for (int itemId = 0; itemId < otherItems.length; itemId++) {
+			if (otherItems[itemId] > 0) {
+				add(itemId, otherItems[itemId]);
 			}
 		}
 	}
@@ -36,14 +36,14 @@ public class Inventory extends PooledComponent {
 		add(otherInventory.items);
 	}
 
-	public void remove(int itemType, int amount) {
+	public void remove(int itemId, int amount) {
 		if (amount > 0) {
-			items[itemType] -= amount;
+			items[itemId] -= amount;
 		}
 	}
 
 	public void remove(Cost cost) {
-		remove(cost.getItemType(), cost.getCount());
+		remove(cost.getItemId(), cost.getCount());
 	}
 
 	public void remove(Set<Cost> costs) {
@@ -52,25 +52,25 @@ public class Inventory extends PooledComponent {
 		}
 	}
 
-	public boolean has(int itemType, int amount) {
+	public boolean has(int itemId, int amount) {
 		if (amount > 0) {
-			return itemType < items.length && items[itemType] >= amount;
+			return itemId < items.length && items[itemId] >= amount;
 		} else {
 			return true;
 		}
 	}
 
-	public boolean has(int itemType) {
-		return has(itemType, 1);
+	public boolean has(int itemId) {
+		return has(itemId, 1);
 	}
 
 	public boolean has(Cost cost) {
-		return has(cost.getItemType(), cost.getCount());
+		return has(cost.getItemId(), cost.getCount());
 	}
 
 	public boolean has(Set<Cost> costs) {
 		for (Cost cost : costs) {
-			if (!has(cost.getItemType(), cost.getCount())) {
+			if (!has(cost.getItemId(), cost.getCount())) {
 				return false;
 			}
 		}
@@ -82,8 +82,8 @@ public class Inventory extends PooledComponent {
 	}
 
 	public boolean isEmpty() {
-		for (int type = 0; type < items.length; type++) {
-			if (items[type] > 0) {
+		for (int itemId = 0; itemId < items.length; itemId++) {
+			if (items[itemId] > 0) {
 				return false;
 			}
 		}
@@ -96,8 +96,8 @@ public class Inventory extends PooledComponent {
 
 	public int getNumberOfItems() {
 		int numberOfItems = 0;
-		for (int type = 0; type < items.length; type++) {
-			numberOfItems += items[type];
+		for (int itemId = 0; itemId < items.length; itemId++) {
+			numberOfItems += items[itemId];
 		}
 		return numberOfItems;
 	}

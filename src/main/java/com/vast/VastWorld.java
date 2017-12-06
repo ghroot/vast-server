@@ -6,6 +6,7 @@ import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
 import com.vast.behaviour.*;
 import com.vast.collision.CollisionHandler;
+import com.vast.data.Animals;
 import com.vast.data.Buildings;
 import com.vast.data.Items;
 import com.vast.data.WorldConfiguration;
@@ -37,6 +38,7 @@ public class VastWorld implements Runnable {
 		WorldConfiguration worldConfiguration = new WorldConfiguration();
 		Items items = new Items();
 		Buildings buildings = new Buildings(items);
+		Animals animals = new Animals(items);
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<String, List<IncomingRequest>>();
 		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
@@ -70,14 +72,14 @@ public class VastWorld implements Runnable {
 		));
 		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
 		behaviours.put("basic", new BasicBehaviour(interactionHandlers));
-		behaviours.put("fakeHuman", new FakeHumanBehaviour(interactionHandlers, peers, incomingRequestsByPeer));
+		behaviours.put("fakeHuman", new FakeHumanBehaviour(interactionHandlers, peers, incomingRequestsByPeer, items, buildings));
 		behaviours.put("fleeingAnimal", new FleeingAnimalBehaviour(interactionHandlers));
 		behaviours.put("aggressiveAnimal", new AggressiveAnimalBehaviour(interactionHandlers));
 		Map<String, Effect> effects = new HashMap<String, Effect>();
 		effects.put("heal", new HealEffect());
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
-			new CreationManager(worldConfiguration, items, buildings),
+			new CreationManager(worldConfiguration, items, buildings, animals),
 			new TimeManager(),
 
 			new WorldSerializationSystem(snapshotFormat, metrics),

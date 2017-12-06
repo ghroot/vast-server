@@ -6,7 +6,7 @@ import com.vast.MessageCodes;
 import com.vast.component.Craft;
 import com.vast.component.Inventory;
 import com.vast.component.Message;
-import com.vast.data.Item;
+import com.vast.data.CraftableItem;
 import com.vast.data.Items;
 
 public class CraftOrderHandler implements OrderHandler {
@@ -42,12 +42,12 @@ public class CraftOrderHandler implements OrderHandler {
 
 	@Override
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
-		int itemType = (byte) dataObject.get(MessageCodes.CRAFT_ITEM_TYPE).value;
-		Item itemToCraft = items.getItem(itemType);
+		int itemId = (byte) dataObject.get(MessageCodes.CRAFT_ITEM_TYPE).value;
+		CraftableItem itemToCraft = (CraftableItem) items.getItem(itemId);
 		Inventory inventory = inventoryMapper.get(orderEntity);
 		if (inventory.has(itemToCraft.getCosts())) {
-			craftMapper.create(orderEntity).countdown = 3.0f;
-			craftMapper.get(orderEntity).itemType = itemType;
+			craftMapper.create(orderEntity).countdown = itemToCraft.getCraftDuration();
+			craftMapper.get(orderEntity).itemId = itemId;
 			return true;
 		} else {
 			messageMapper.create(orderEntity).text = "I don't have the required materials...";

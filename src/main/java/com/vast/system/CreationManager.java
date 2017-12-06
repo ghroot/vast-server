@@ -6,15 +6,14 @@ import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
 import com.vast.component.*;
-import com.vast.data.Buildings;
-import com.vast.data.Cost;
-import com.vast.data.Items;
-import com.vast.data.WorldConfiguration;
+import com.vast.data.*;
 import fastnoise.FastNoise;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
+import java.util.HashSet;
 
 public class CreationManager extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CreationManager.class);
@@ -42,6 +41,7 @@ public class CreationManager extends BaseSystem {
 	private WorldConfiguration worldConfiguration;
 	private Items items;
 	private Buildings buildings;
+	private Animals animals;
 
 	private Archetype playerArchetype;
 	private Archetype treeArchetype;
@@ -51,10 +51,11 @@ public class CreationManager extends BaseSystem {
 	private Archetype buildingArchetype;
 	private Archetype pickupArchetype;
 
-	public CreationManager(WorldConfiguration worldConfiguration, Items items, Buildings buildings) {
+	public CreationManager(WorldConfiguration worldConfiguration, Items items, Buildings buildings, Animals animals) {
 		this.worldConfiguration = worldConfiguration;
 		this.items = items;
 		this.buildings = buildings;
+		this.animals = animals;
 	}
 
 	@Override
@@ -118,15 +119,10 @@ public class CreationManager extends BaseSystem {
 			.build(world);
 
 		animalArchetype = new ArchetypeBuilder()
-			.add(AI.class)
 			.add(Type.class)
 			.add(SubType.class)
-			.add(Inventory.class)
-			.add(Health.class)
 			.add(Transform.class)
-			.add(Speed.class)
 			.add(Spatial.class)
-			.add(Collision.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -137,9 +133,7 @@ public class CreationManager extends BaseSystem {
 			.add(Owner.class)
 			.add(Transform.class)
 			.add(Spatial.class)
-			.add(Collision.class)
 			.add(Static.class)
-			.add(Constructable.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -191,9 +185,9 @@ public class CreationManager extends BaseSystem {
 		transformMapper.get(treeEntity).position.set(position);
 		transformMapper.get(treeEntity).rotation = (float) Math.random() * 360;
 		collisionMapper.get(treeEntity).radius = 0.1f;
-		harvestableMapper.get(treeEntity).requiredItemType = items.getItem("axe").getType();
+		harvestableMapper.get(treeEntity).requiredItemId = items.getItem("axe").getId();
 		harvestableMapper.get(treeEntity).durability = 300.0f;
-		inventoryMapper.get(treeEntity).add(items.getItem("wood").getType(), 3);
+		inventoryMapper.get(treeEntity).add(items.getItem("wood").getId(), 3);
 		syncPropagationMapper.get(treeEntity).setUnreliable(Properties.DURABILITY);
 		return treeEntity;
 	}
@@ -205,9 +199,9 @@ public class CreationManager extends BaseSystem {
 		transformMapper.get(rockEntity).position.set(position);
 		transformMapper.get(rockEntity).rotation = (float) Math.random() * 360;
 		collisionMapper.get(rockEntity).radius = 0.2f;
-		harvestableMapper.get(rockEntity).requiredItemType = items.getItem("pickaxe").getType();
+		harvestableMapper.get(rockEntity).requiredItemId = items.getItem("pickaxe").getId();
 		harvestableMapper.get(rockEntity).durability = 300.0f;
-		inventoryMapper.get(rockEntity).add(items.getItem("stone").getType(), 2);
+		inventoryMapper.get(rockEntity).add(items.getItem("stone").getId(), 2);
 		syncPropagationMapper.get(rockEntity).setUnreliable(Properties.DURABILITY);
 		return rockEntity;
 	}
@@ -228,33 +222,51 @@ public class CreationManager extends BaseSystem {
 		return aiEntity;
 	}
 
-	private int createAnimal(Point2f position, int subType) {
+	private int createAnimal(Point2f position, int animalId) {
+		Animal animal = animals.getAnimal(animalId);
 		int animalEntity = world.create(animalArchetype);
 		typeMapper.get(animalEntity).type = "animal";
-		subTypeMapper.get(animalEntity).subType = subType;
+		subTypeMapper.get(animalEntity).subType = animalId;
 		transformMapper.get(animalEntity).position.set(position);
-		if (subType == 0) {
-			speedMapper.get(animalEntity).baseSpeed = 1.5f;
-			healthMapper.get(animalEntity).maxHealth = 2;
-			inventoryMapper.get(animalEntity).add(items.getItem("meat").getType(), 1);
-			inventoryMapper.get(animalEntity).add(items.getItem("fur").getType(), 1);
-			aiMapper.get(animalEntity).behaviourName = "fleeingAnimal";
-		} else if (subType == 1) {
-			speedMapper.get(animalEntity).baseSpeed = 1.0f;
-			healthMapper.get(animalEntity).maxHealth = 3;
-			inventoryMapper.get(animalEntity).add(items.getItem("meat").getType(), 2);
-			inventoryMapper.get(animalEntity).add(items.getItem("fur").getType(), 2);
-			aiMapper.get(animalEntity).behaviourName = "fleeingAnimal";
-		} else if (subType == 2) {
-			speedMapper.get(animalEntity).baseSpeed = 1.0f;
-			healthMapper.get(animalEntity).maxHealth = 3;
-			inventoryMapper.get(animalEntity).add(items.getItem("meat").getType(), 2);
-			inventoryMapper.get(animalEntity).add(items.getItem("fur").getType(), 2);
-			aiMapper.get(animalEntity).behaviourName = "aggressiveAnimal";
+
+		if (animal.hasAspect("collision")) {
+			JSONObject collisionAspect = animal.getAspect("collision");
+			Collision collision = collisionMapper.create(animalEntity);
+			collision.radius = collisionAspect.getFloat("radius");
+		}
+
+		if (animal.hasAspect("inventory")) {
+			JSONObject inventoryAspect = animal.getAspect("inventory");
+			Inventory inventory = inventoryMapper.create(animalEntity);
+			for (String itemName : inventoryAspect.getJSONObject("items").keySet()) {
+				int amount = inventoryAspect.getJSONObject("items").getInt(itemName);
+				inventory.add(items.getItem(itemName).getId(), amount);
+			}
+		}
+
+		if (animal.hasAspect("health")) {
+			JSONObject healthAspect = animal.getAspect("health");
+			Health health = healthMapper.create(animalEntity);
+			health.maxHealth = healthAspect.getInt("health");
+			health.health = health.maxHealth;
+		}
+
+		if (animal.hasAspect("speed")) {
+			JSONObject speedAspect = animal.getAspect("speed");
+			Speed speed = speedMapper.create(animalEntity);
+			speed.baseSpeed = speedAspect.getFloat("baseSpeed");
+		}
+
+		if (animal.hasAspect("ai")) {
+			JSONObject aiAspect = animal.getAspect("ai");
+			AI ai = aiMapper.create(animalEntity);
+			ai.behaviourName = aiAspect.getString("behaviour");
+		}
+
+		if (animal.hasAspect("attack")) {
 			attackMapper.create(animalEntity);
 		}
-		healthMapper.get(animalEntity).health = healthMapper.get(animalEntity).maxHealth;
-		collisionMapper.get(animalEntity).radius = 0.3f;
+
 		syncPropagationMapper.get(animalEntity).setUnreliable(Properties.POSITION);
 		syncPropagationMapper.get(animalEntity).setUnreliable(Properties.ROTATION);
 		return animalEntity;
@@ -289,26 +301,53 @@ public class CreationManager extends BaseSystem {
 		return createPlayer(name, subType, null, fakePlayer);
 	}
 
-	public int createBuilding(Point2f position, int buildingType) {
+	public int createBuilding(Point2f position, int buildingId) {
+		Building building = buildings.getBuilding(buildingId);
 		int buildingEntity = world.create(buildingArchetype);
 		typeMapper.get(buildingEntity).type = "building";
-		subTypeMapper.get(buildingEntity).subType = buildingType;
+		subTypeMapper.get(buildingEntity).subType = buildingId;
 		transformMapper.get(buildingEntity).position.set(position);
-		constructableMapper.get(buildingEntity).buildDuration = buildings.getBuilding(buildingType).getBuildDuration();
-		if (buildingType == 0) {
-			collisionMapper.get(buildingEntity).radius = 0.8f;
-		} else if (buildingType == 1) {
-			collisionMapper.get(buildingEntity).radius = 0.5f;
-			inventoryMapper.create(buildingEntity).capacity = 100;
-			containerMapper.create(buildingEntity).persistent = true;
-		} else if (buildingType == 2) {
-			collisionMapper.get(buildingEntity).radius = 0.5f;
-			healthMapper.create(buildingEntity).maxHealth = 3;
-			healthMapper.create(buildingEntity).health = 3;
-		} else if (buildingType == 3) {
-			fueledMapper.create(buildingEntity).cost = new Cost(items.getItem("wood").getType(), 1);
-			fueledMapper.get(buildingEntity).fueledAuraEffectName = "heal";
+
+		JSONObject constructableAspect = building.getAspect("constructable");
+		Constructable constructable = constructableMapper.create(buildingEntity);
+		constructable.buildDuration = (float) constructableAspect.getInt("duration");
+
+		if (building.hasAspect("collision")) {
+			JSONObject collisionAspect = building.getAspect("collision");
+			Collision collision = collisionMapper.create(buildingEntity);
+			collision.radius = collisionAspect.getFloat("radius");
 		}
+
+		if (building.hasAspect("inventory")) {
+			JSONObject inventoryAspect = building.getAspect("inventory");
+			Inventory inventory = inventoryMapper.create(buildingEntity);
+			inventory.capacity = inventoryAspect.getInt("capacity");
+		}
+
+		if (building.hasAspect("container")) {
+			JSONObject containerAspect = building.getAspect("container");
+			Container container = containerMapper.create(buildingEntity);
+			container.persistent = containerAspect.getBoolean("persistent");
+		}
+
+		if (building.hasAspect("health")) {
+			JSONObject healthAspect = building.getAspect("health");
+			Health health = healthMapper.create(buildingEntity);
+			health.maxHealth = healthAspect.getInt("health");
+			health.health = health.maxHealth;
+		}
+
+		if (building.hasAspect("fueled")) {
+			JSONObject fueledAspect = building.getAspect("fueled");
+			Fueled fueled = fueledMapper.create(buildingEntity);
+			fueled.costs = new HashSet<Cost>();
+			for (String itemName : fueledAspect.getJSONObject("cost").keySet()) {
+				int amount = fueledAspect.getJSONObject("cost").getInt(itemName);
+				fueled.costs.add(new Cost(items.getItem(itemName).getId(), amount));
+			}
+			fueled.fueledAuraEffectName = fueledAspect.getString("effect");
+		}
+
 		return buildingEntity;
 	}
 

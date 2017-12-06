@@ -1,35 +1,58 @@
 [
   {
-    "type": 0,
-    "name": "house",
-    "buildDuration": 30,
-    "cost": {
-      "wood": 10
-    }
-  },
-  {
-    "type": 1,
+    "id": 0,
     "name": "chest",
-    "buildDuration": 10,
-    "cost": {
-      "wood": 5
+    "collision": {
+      "radius": 0.8
+    },
+    "constructable": {
+      "duration": 10,
+      "cost": {
+        "wood": 5,
+        "iron": 2
+      }
+    },
+    "inventory": {
+      "capacity": 100
+    },
+    "container": {
+      "persistent": true
     }
   },
   {
-    "type": 2,
+    "id": 1,
     "name": "wall",
-    "buildDuration": 5,
-    "cost": {
-      "wood": 1
+    "collision": {
+      "radius": 0.5
+    },
+    "constructable": {
+      "duration": 5,
+      "cost": {
+        "wood": 1
+      }
+    },
+    "health": {
+      "health": 3
     }
   },
   {
-    "type": 3,
+    "id": 2,
     "name": "fireplace",
-    "buildDuration": 10,
-    "cost": {
-      "wood": 3,
-      "stone": 1
+    "collision": {
+      "radius": 0.8
+    },
+    "constructable": {
+      "duration": 10,
+      "cost": {
+        "wood": 3,
+        "stone": 1
+      }
+    },
+    "fueled": {
+      "cost": {
+        "wood": 1
+      },
+      "effect": "heal"
     }
   }
 ]

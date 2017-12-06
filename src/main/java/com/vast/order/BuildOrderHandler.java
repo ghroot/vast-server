@@ -56,14 +56,14 @@ public class BuildOrderHandler implements OrderHandler {
 	@Override
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
 		Inventory inventory = inventoryMapper.get(orderEntity);
-		int buildingType = (byte) dataObject.get(MessageCodes.BUILD_TYPE).value;
-		Building building = buildings.getBuilding(buildingType);
+		int buildingId = (byte) dataObject.get(MessageCodes.BUILD_TYPE).value;
+		Building building = buildings.getBuilding(buildingId);
 		if (inventory.has(building.getCosts())) {
 			inventory.remove(building.getCosts());
 			syncMapper.create(orderEntity).markPropertyAsDirty(Properties.INVENTORY);
 			float[] position = (float[]) dataObject.get(MessageCodes.BUILD_POSITION).value;
 			Point2f buildPosition = new Point2f(position[0], position[1]);
-			int buildingEntity = creationManager.createBuilding(buildPosition, building.getType());
+			int buildingEntity = creationManager.createBuilding(buildPosition, building.getId());
 			ownerMapper.get(buildingEntity).name = playerMapper.get(orderEntity).name;
 			createMapper.create(buildingEntity).reason = "built";
 

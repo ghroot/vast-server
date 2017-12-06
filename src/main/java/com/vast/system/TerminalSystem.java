@@ -410,7 +410,7 @@ public class TerminalSystem extends IntervalSystem {
 					} else if (keyStroke.getCharacter().toString().equals("p") || keyStroke.getCharacter().toString().equals("a")) {
 						IntBag playerEntities;
 						if (keyStroke.getCharacter().toString().equals("p")) {
-							playerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class).exclude(AI.class)).getEntities();
+							playerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class)).getEntities();
 						} else {
 							playerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class, Active.class).exclude(AI.class)).getEntities();
 						}

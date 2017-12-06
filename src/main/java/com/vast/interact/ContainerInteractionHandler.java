@@ -74,10 +74,10 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 
 	private void transferAllOrUntilFull(Inventory from, Inventory to) {
 		while (!from.isEmpty() && !to.isFull()) {
-			for (int itemType = 0; itemType < from.items.length; itemType++) {
-				if (from.items[itemType] > 0) {
-					from.remove(itemType, 1);
-					to.add(itemType, 1);
+			for (int itemId = 0; itemId < from.items.length; itemId++) {
+				if (from.items[itemId] > 0) {
+					from.remove(itemId, 1);
+					to.add(itemId, 1);
 					break;
 				}
 			}

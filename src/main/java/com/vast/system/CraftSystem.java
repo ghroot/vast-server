@@ -5,7 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.vast.Properties;
 import com.vast.component.*;
-import com.vast.data.Item;
+import com.vast.data.CraftableItem;
 import com.vast.data.Items;
 
 public class CraftSystem extends IteratingSystem {
@@ -45,10 +45,10 @@ public class CraftSystem extends IteratingSystem {
 		craft.countdown -= world.getDelta();
 		if (craft.countdown <= 0.0f) {
 			Inventory inventory = inventoryMapper.get(craftEntity);
-			Item itemToCraft = items.getItem(craft.itemType);
+			CraftableItem itemToCraft = (CraftableItem) items.getItem(craft.itemId);
 			if (inventory.has(itemToCraft.getCosts())) {
 				inventory.remove(itemToCraft.getCosts());
-				inventory.add(itemToCraft.getType(), 1);
+				inventory.add(itemToCraft.getId(), 1);
 				syncMapper.create(craftEntity).markPropertyAsDirty(Properties.INVENTORY);
 				String capitalizedItemName = itemToCraft.getName().substring(0, 1).toUpperCase() + itemToCraft.getName().substring(1);
 				messageMapper.create(craftEntity).text = "Crafted Item: " + capitalizedItemName;

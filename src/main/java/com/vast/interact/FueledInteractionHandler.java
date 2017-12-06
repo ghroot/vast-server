@@ -33,8 +33,8 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 		Inventory inventory = inventoryMapper.get(playerEntity);
 		Fueled fueled = fueledMapper.get(fueledEntity);
 
-		if (inventory.has(fueled.cost)) {
-			inventory.remove(fueled.cost);
+		if (inventory.has(fueled.costs)) {
+			inventory.remove(fueled.costs);
 			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
 
 			fueled.timeLeft = 60.0f;

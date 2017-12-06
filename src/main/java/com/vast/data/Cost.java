@@ -1,21 +1,21 @@
 package com.vast.data;
 
 public class Cost {
-	private int itemType;
+	private int itemId;
 	private int count;
 
 	public Cost() {
-		itemType = -1;
+		itemId = -1;
 		count = 0;
 	}
 
-	public Cost(int itemType, int count) {
-		this.itemType = itemType;
+	public Cost(int itemId, int count) {
+		this.itemId = itemId;
 		this.count = count;
 	}
 
-	public int getItemType() {
-		return itemType;
+	public int getItemId() {
+		return itemId;
 	}
 
 	public int getCount() {
