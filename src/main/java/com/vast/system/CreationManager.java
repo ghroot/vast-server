@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
-import java.util.HashSet;
 
 public class CreationManager extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CreationManager.class);
@@ -340,10 +339,10 @@ public class CreationManager extends BaseSystem {
 		if (building.hasAspect("fueled")) {
 			JSONObject fueledAspect = building.getAspect("fueled");
 			Fueled fueled = fueledMapper.create(buildingEntity);
-			fueled.costs = new HashSet<Cost>();
 			for (String itemName : fueledAspect.getJSONObject("cost").keySet()) {
 				int amount = fueledAspect.getJSONObject("cost").getInt(itemName);
-				fueled.costs.add(new Cost(items.getItem(itemName).getId(), amount));
+				fueled.cost = new Cost(items.getItem(itemName).getId(), amount);
+				break;
 			}
 			fueled.fueledAuraEffectName = fueledAspect.getString("effect");
 		}

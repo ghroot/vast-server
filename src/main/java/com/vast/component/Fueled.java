@@ -4,11 +4,9 @@ import com.artemis.PooledComponent;
 import com.artemis.annotations.EntityId;
 import com.vast.data.Cost;
 
-import java.util.Set;
-
 public class Fueled extends PooledComponent {
 	public float timeLeft = 0.0f;
-	public Set<Cost> costs = null;
+	public Cost cost = null;
 	public String fueledAuraEffectName = null;
 	@EntityId public int effectEntity = -1;
 
@@ -19,7 +17,7 @@ public class Fueled extends PooledComponent {
 	@Override
 	protected void reset() {
 		timeLeft = 0.0f;
-		costs = null;
+		cost = null;
 		fueledAuraEffectName = null;
 		effectEntity = -1;
 	}
