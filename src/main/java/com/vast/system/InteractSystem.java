@@ -52,6 +52,7 @@ public class InteractSystem  extends IteratingSystem {
 		Interact interact = interactMapper.get(entity);
 		if (interact != null && interact.phase == Interact.Phase.INTERACTING) {
 			if (interact.handler != null) {
+				// TODO: interact.entity can be -1 here, needs to be handled in all interaction handlers
 				interact.handler.stop(entity, interact.entity);
 			}
 		}

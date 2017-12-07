@@ -37,6 +37,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 
 		if (harvestable.requiredItemId == -1 || inventory.has(harvestable.requiredItemId)) {
 			eventMapper.create(playerEntity).name = "startedHarvesting";
+			eventMapper.create(harvestableEntity).name = "startedHarvesting";
 		}
 	}
 
@@ -68,10 +69,16 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	@Override
 	public void stop(int playerEntity, int harvestableEntity) {
 		Inventory inventory = inventoryMapper.get(playerEntity);
-		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
+		Harvestable harvestable = null;
+		if (harvestableEntity != -1) {
+			harvestable = harvestableMapper.get(harvestableEntity);
+		}
 
-		if (harvestable.requiredItemId == -1 || inventory.has(harvestable.requiredItemId)) {
+		if (harvestable == null || harvestable.requiredItemId == -1 || inventory.has(harvestable.requiredItemId)) {
 			eventMapper.create(playerEntity).name = "stoppedHarvesting";
+			if (harvestableEntity != -1) {
+				eventMapper.create(harvestableEntity).name = "stoppedHarvesting";
+			}
 		}
 	}
 }
