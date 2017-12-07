@@ -81,10 +81,9 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 	public void stop(int playerEntity, int containerEntity) {
 	}
 
-	// TODO: This can end up in an infinite loop
 	private boolean transferAllOrUntilFull(Inventory from, Inventory to, String onlyItemType) {
 		boolean atLeastOneItemWasTransferred = false;
-		while (!from.isEmpty() && !to.isFull()) {
+		while (!from.isEmpty() && !to.isFull() && (onlyItemType == null || hasAnyItemWithType(from, onlyItemType))) {
 			for (int itemId = 0; itemId < from.items.length; itemId++) {
 				Item item = items.getItem(itemId);
 				if ((onlyItemType == null || item.getType().equals(onlyItemType)) && from.items[itemId] > 0) {
@@ -100,5 +99,14 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 
 	private boolean transferAllOrUntilFull(Inventory from, Inventory to) {
 		return transferAllOrUntilFull(from, to, null);
+	}
+
+	private boolean hasAnyItemWithType(Inventory inventory, String type) {
+		for (int itemId = 0; itemId < inventory.items.length; itemId++) {
+			if (inventory.items[itemId] > 0 && items.getItem(itemId).getType().equals(type)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
