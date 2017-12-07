@@ -263,7 +263,9 @@ public class CreationManager extends BaseSystem {
 		}
 
 		if (animal.hasAspect("attack")) {
-			attackMapper.create(animalEntity);
+			JSONObject attackAspect = animal.getAspect("attack");
+			Attack attack = attackMapper.create(animalEntity);
+			attack.implicitWeapon = attackAspect.getBoolean("implicitWeapon");
 		}
 
 		syncPropagationMapper.get(animalEntity).setUnreliable(Properties.POSITION);

@@ -47,5 +47,17 @@
         "stone": 2
       }
     }
+  },
+  {
+    "id": 7,
+    "type": "weapon",
+    "name": "spear",
+    "craftable": {
+      "duration": 5,
+      "cost": {
+        "wood": 4,
+        "stone": 3
+      }
+    }
   }
 ]

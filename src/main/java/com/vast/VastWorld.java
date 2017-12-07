@@ -54,7 +54,7 @@ public class VastWorld implements Runnable {
 		List<InteractionHandler> interactionHandlers = new ArrayList<InteractionHandler>(Arrays.asList(
 			new HarvestableInteractionHandler(),
 			new ConstructableInteractionHandler(),
-			new AttackInteractionHandler(),
+			new AttackInteractionHandler(items),
 			new ContainerInteractionHandler(items),
 			new FueledInteractionHandler()
 		));

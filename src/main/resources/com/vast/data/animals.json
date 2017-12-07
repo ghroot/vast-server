@@ -65,6 +65,7 @@
       }
     },
     "attack": {
+      "implicitWeapon": true
     }
   }
 ]
