@@ -185,6 +185,7 @@ public class CreationManager extends BaseSystem {
 		transformMapper.get(treeEntity).rotation = (float) Math.random() * 360;
 		collisionMapper.get(treeEntity).radius = 0.1f;
 		harvestableMapper.get(treeEntity).requiredItemId = items.getItem("axe").getId();
+		harvestableMapper.get(treeEntity).harvestEventName = "chopping";
 		harvestableMapper.get(treeEntity).durability = 300.0f;
 		inventoryMapper.get(treeEntity).add(items.getItem("wood").getId(), 3);
 		syncPropagationMapper.get(treeEntity).setUnreliable(Properties.DURABILITY);
@@ -199,6 +200,7 @@ public class CreationManager extends BaseSystem {
 		transformMapper.get(rockEntity).rotation = (float) Math.random() * 360;
 		collisionMapper.get(rockEntity).radius = 0.2f;
 		harvestableMapper.get(rockEntity).requiredItemId = items.getItem("pickaxe").getId();
+		harvestableMapper.get(rockEntity).harvestEventName = "picking";
 		harvestableMapper.get(rockEntity).durability = 300.0f;
 		inventoryMapper.get(rockEntity).add(items.getItem("stone").getId(), 2);
 		syncPropagationMapper.get(rockEntity).setUnreliable(Properties.DURABILITY);

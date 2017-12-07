@@ -47,8 +47,9 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
 		if (harvestable.requiredItemId == -1 || inventory.has(harvestable.requiredItemId)) {
-			eventMapper.create(playerEntity).name = "startedHarvesting";
-			eventMapper.create(harvestableEntity).name = "startedHarvesting";
+			String capitalizedEventName = "started" + harvestable.harvestEventName.substring(0, 1).toUpperCase() + harvestable.harvestEventName.substring(1);
+			eventMapper.create(playerEntity).name = capitalizedEventName;
+			eventMapper.create(harvestableEntity).name = capitalizedEventName;
 		}
 	}
 
