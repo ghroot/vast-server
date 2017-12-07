@@ -57,7 +57,7 @@ public class PickupSystem extends IteratingSystem {
 			);
 
 			int pickupEntity;
-			if (Math.random() < 0.7) {
+			if (Math.random() < 0.55) {
 				pickupEntity = creationManager.createPickup(reusablePosition, 1, new short[] {1});
 			} else {
 				pickupEntity = creationManager.createPickup(reusablePosition, 2, new short[] {0, 1});
