@@ -4,6 +4,8 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
 import com.vast.component.*;
+import com.vast.data.Item;
+import com.vast.data.Items;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +21,11 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<Message> messageMapper;
 
-	public ContainerInteractionHandler() {
+	private Items items;
+
+	public ContainerInteractionHandler(Items items) {
 		super(Aspect.all(Player.class, Inventory.class), Aspect.all(Container.class, Inventory.class));
+		this.items = items;
 	}
 
 	@Override
@@ -47,22 +52,26 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 			if (containerMapper.get(containerEntity).persistent) {
 				if (containerInventory.isEmpty()) {
 					if (!playerInventory.isEmpty()) {
-						transferAllOrUntilFull(playerInventory, containerInventory);
-						syncMapper.create(containerEntity).markPropertyAsDirty(Properties.INVENTORY);
-						syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
+						if (transferAllOrUntilFull(playerInventory, containerInventory, "basic")) {
+							syncMapper.create(containerEntity).markPropertyAsDirty(Properties.INVENTORY);
+							syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
+							eventMapper.create(playerEntity).name = "pickedUp";
+						}
 					}
 				} else {
-					transferAllOrUntilFull(containerInventory, playerInventory);
-					syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
-					syncMapper.create(containerEntity).markPropertyAsDirty(Properties.INVENTORY);
+					if (transferAllOrUntilFull(containerInventory, playerInventory)) {
+						syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
+						syncMapper.create(containerEntity).markPropertyAsDirty(Properties.INVENTORY);
+						eventMapper.create(playerEntity).name = "pickedUp";
+					}
 				}
 			} else {
-				transferAllOrUntilFull(containerInventory, playerInventory);
-				syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
-				deleteMapper.create(containerEntity).reason = "collected";
+				if (transferAllOrUntilFull(containerInventory, playerInventory)) {
+					syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
+					eventMapper.create(playerEntity).name = "pickedUp";
+					deleteMapper.create(containerEntity).reason = "collected";
+				}
 			}
-
-			eventMapper.create(playerEntity).name = "pickedUp";
 		}
 
 		return true;
@@ -72,15 +81,23 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 	public void stop(int playerEntity, int containerEntity) {
 	}
 
-	private void transferAllOrUntilFull(Inventory from, Inventory to) {
+	private boolean transferAllOrUntilFull(Inventory from, Inventory to, String onlyItemType) {
+		boolean atLeastOneItemWasTransferred = false;
 		while (!from.isEmpty() && !to.isFull()) {
 			for (int itemId = 0; itemId < from.items.length; itemId++) {
-				if (from.items[itemId] > 0) {
+				Item item = items.getItem(itemId);
+				if ((onlyItemType == null || item.getType().equals(onlyItemType)) && from.items[itemId] > 0) {
 					from.remove(itemId, 1);
 					to.add(itemId, 1);
+					atLeastOneItemWasTransferred = true;
 					break;
 				}
 			}
 		}
+		return atLeastOneItemWasTransferred;
+	}
+
+	private boolean transferAllOrUntilFull(Inventory from, Inventory to) {
+		return transferAllOrUntilFull(from, to, null);
 	}
 }

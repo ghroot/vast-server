@@ -55,7 +55,7 @@ public class VastWorld implements Runnable {
 			new HarvestableInteractionHandler(),
 			new ConstructableInteractionHandler(),
 			new AttackInteractionHandler(),
-			new ContainerInteractionHandler(),
+			new ContainerInteractionHandler(items),
 			new FueledInteractionHandler()
 		));
 		Set<PropertyHandler> propertyHandlers = new HashSet<PropertyHandler>(Arrays.asList(
