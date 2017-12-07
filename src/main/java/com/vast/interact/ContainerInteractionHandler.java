@@ -81,6 +81,7 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 	public void stop(int playerEntity, int containerEntity) {
 	}
 
+	// TODO: This can end up in an infinite loop
 	private boolean transferAllOrUntilFull(Inventory from, Inventory to, String onlyItemType) {
 		boolean atLeastOneItemWasTransferred = false;
 		while (!from.isEmpty() && !to.isFull()) {
