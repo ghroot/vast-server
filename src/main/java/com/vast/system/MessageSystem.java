@@ -37,6 +37,7 @@ public class MessageSystem extends IteratingSystem {
 			VastPeer peer = peers.get(playerMapper.get(entity).name);
 			reusableMessage.getDataObject().clear();
 			reusableMessage.getDataObject().set(MessageCodes.MESSAGE_TEXT, message.text);
+			reusableMessage.getDataObject().set(MessageCodes.MESSAGE_TYPE, (byte) message.type);
 			peer.send(reusableMessage);
 		}
 

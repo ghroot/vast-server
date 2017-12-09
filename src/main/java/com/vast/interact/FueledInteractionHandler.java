@@ -25,7 +25,16 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 	}
 
 	@Override
-	public void start(int playerEntity, int fueledEntity) {
+	public boolean attemptStart(int playerEntity, int fueledEntity) {
+		Inventory inventory = inventoryMapper.get(playerEntity);
+		Fueled fueled = fueledMapper.get(fueledEntity);
+
+		if (!inventory.has(fueled.cost)) {
+			messageMapper.create(playerEntity).text = "I don't have the required materials...";
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	@Override
@@ -33,15 +42,11 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 		Inventory inventory = inventoryMapper.get(playerEntity);
 		Fueled fueled = fueledMapper.get(fueledEntity);
 
-		if (inventory.has(fueled.cost)) {
-			inventory.remove(fueled.cost);
-			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
+		inventory.remove(fueled.cost);
+		syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
 
-			fueled.timeLeft = 60.0f;
-			syncMapper.create(fueledEntity).markPropertyAsDirty(Properties.FUELED);
-		} else {
-			messageMapper.create(playerEntity).text = "I don't have the required materials...";
-		}
+		fueled.timeLeft = 60.0f;
+		syncMapper.create(fueledEntity).markPropertyAsDirty(Properties.FUELED);
 
 		return true;
 	}

@@ -42,33 +42,36 @@ public class AttackInteractionHandler extends AbstractInteractionHandler {
 	}
 
 	@Override
-	public void start(int attackEntity, int healthEntity) {
+	public boolean attemptStart(int attackEntity, int healthEntity) {
+		Attack attack = attackMapper.get(attackEntity);
+
+		if (!attack.implicitWeapon && !hasWeapon(attackEntity)) {
+			messageMapper.create(attackEntity).text = "I need a weapon!";
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	@Override
 	public boolean process(int attackEntity, int healthEntity) {
 		Attack attack = attackMapper.get(attackEntity);
 
-		if (!attack.implicitWeapon && !hasWeapon(attackEntity)) {
-			messageMapper.create(attackEntity).text = "I need a weapon!";
-			return true;
-		} else {
-			float time = world.getSystem(TimeManager.class).getTime();
-			if (time - attack.lastAttackTime >= attack.cooldown) {
-				Health health = healthMapper.get(healthEntity);
-				health.takeDamage(1);
-				syncMapper.create(healthEntity).markPropertyAsDirty(Properties.HEALTH);
-				eventMapper.create(attackEntity).name = "attacked";
-				logger.debug("Entity {} is attacking entity {}, health left: {}", attackEntity, healthEntity, health.health);
-				if (health.isDead()) {
-					logger.debug("Entity {} killed entity {}", attackEntity, healthEntity);
-					deathMapper.create(healthEntity);
-					return true;
-				}
-				attack.lastAttackTime = time;
+		float time = world.getSystem(TimeManager.class).getTime();
+		if (time - attack.lastAttackTime >= attack.cooldown) {
+			Health health = healthMapper.get(healthEntity);
+			health.takeDamage(1);
+			syncMapper.create(healthEntity).markPropertyAsDirty(Properties.HEALTH);
+			eventMapper.create(attackEntity).name = "attacked";
+			logger.debug("Entity {} is attacking entity {}, health left: {}", attackEntity, healthEntity, health.health);
+			if (health.isDead()) {
+				logger.debug("Entity {} killed entity {}", attackEntity, healthEntity);
+				deathMapper.create(healthEntity);
+				return true;
 			}
-			return false;
+			attack.lastAttackTime = time;
 		}
+		return false;
 	}
 
 	@Override

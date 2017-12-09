@@ -42,54 +42,44 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	}
 
 	@Override
-	public void start(int playerEntity, int harvestableEntity) {
+	public boolean attemptStart(int playerEntity, int harvestableEntity) {
 		Inventory inventory = inventoryMapper.get(playerEntity);
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
-		if (harvestable.requiredItemId == -1 || inventory.has(harvestable.requiredItemId)) {
+		if (inventory.isFull()) {
+			messageMapper.create(playerEntity).text = "My backpack is full...";
+			return false;
+		} else if (harvestable.requiredItemId != -1 && !inventory.has(harvestable.requiredItemId)) {
+			messageMapper.create(playerEntity).text = "I don't have the required tool...";
+			return false;
+		} else {
 			String capitalizedEventName = "started" + harvestable.harvestEventName.substring(0, 1).toUpperCase() + harvestable.harvestEventName.substring(1);
 			eventMapper.create(playerEntity).name = capitalizedEventName;
 			eventMapper.create(harvestableEntity).name = capitalizedEventName;
+			return true;
 		}
 	}
 
 	@Override
 	public boolean process(int playerEntity, int harvestableEntity) {
-		Inventory inventory = inventoryMapper.get(playerEntity);
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
-		if (harvestable.requiredItemId != -1 && !inventory.has(harvestable.requiredItemId)) {
-			messageMapper.create(playerEntity).text = "I don't have the required tool...";
-			return true;
-		} else if (inventory.isFull()) {
-			messageMapper.create(playerEntity).text = "My backpack is full...";
+		harvestable.durability -= world.getDelta() * HARVEST_SPEED;
+		if (harvestable.durability <= 0.0f) {
+			creationManager.createPickup(transformMapper.get(harvestableEntity).position, 0, inventoryMapper.get(harvestableEntity));
+			deleteMapper.create(harvestableEntity).reason = "harvested";
 			return true;
 		} else {
-			harvestable.durability -= world.getDelta() * HARVEST_SPEED;
-			if (harvestable.durability <= 0.0f) {
-				creationManager.createPickup(transformMapper.get(harvestableEntity).position, 0, inventoryMapper.get(harvestableEntity));
-				deleteMapper.create(harvestableEntity).reason = "harvested";
-				return true;
-			} else {
-				syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.DURABILITY);
-				return false;
-			}
+			syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.DURABILITY);
+			return false;
 		}
 	}
 
 	@Override
 	public void stop(int playerEntity, int harvestableEntity) {
-		Inventory inventory = inventoryMapper.get(playerEntity);
-		Harvestable harvestable = null;
+		eventMapper.create(playerEntity).name = "stoppedHarvesting";
 		if (harvestableEntity != -1) {
-			harvestable = harvestableMapper.get(harvestableEntity);
-		}
-
-		if (harvestable == null || harvestable.requiredItemId == -1 || inventory.has(harvestable.requiredItemId)) {
-			eventMapper.create(playerEntity).name = "stoppedHarvesting";
-			if (harvestableEntity != -1) {
-				eventMapper.create(harvestableEntity).name = "stoppedHarvesting";
-			}
+			eventMapper.create(harvestableEntity).name = "stoppedHarvesting";
 		}
 	}
 }

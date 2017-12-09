@@ -43,20 +43,20 @@ public class VastWorld implements Runnable {
 		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<String, List<IncomingRequest>>();
 		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
-		Set<OrderHandler> orderHandlers = new HashSet<OrderHandler>(Arrays.asList(
-			new MoveOrderHandler(),
-			new InteractOrderHandler(),
-			new BuildOrderHandler(buildings),
-			new EmoteOrderHandler(),
-			new SetHomeOrderHandler(),
-			new CraftOrderHandler(items)
-		));
 		List<InteractionHandler> interactionHandlers = new ArrayList<InteractionHandler>(Arrays.asList(
 			new HarvestableInteractionHandler(),
 			new ConstructableInteractionHandler(),
 			new AttackInteractionHandler(items),
 			new ContainerInteractionHandler(items),
 			new FueledInteractionHandler()
+		));
+		Set<OrderHandler> orderHandlers = new HashSet<OrderHandler>(Arrays.asList(
+			new MoveOrderHandler(),
+			new InteractOrderHandler(interactionHandlers),
+			new BuildOrderHandler(buildings),
+			new EmoteOrderHandler(),
+			new SetHomeOrderHandler(),
+			new CraftOrderHandler(items)
 		));
 		Set<PropertyHandler> propertyHandlers = new HashSet<PropertyHandler>(Arrays.asList(
 			new PositionPropertyHandler(),

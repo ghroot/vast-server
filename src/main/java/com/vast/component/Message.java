@@ -8,4 +8,5 @@ import com.artemis.annotations.Transient;
 @PooledWeaver
 public class Message extends Component {
 	public String text;
+	public int type;
 }

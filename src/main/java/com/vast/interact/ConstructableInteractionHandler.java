@@ -28,8 +28,9 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 	}
 
 	@Override
-	public void start(int playerEntity, int constructableEntity) {
+	public boolean attemptStart(int playerEntity, int constructableEntity) {
 		eventMapper.create(playerEntity).name = "startedBuilding";
+		return true;
 	}
 
 	@Override

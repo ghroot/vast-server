@@ -52,6 +52,7 @@ public class CraftSystem extends IteratingSystem {
 				syncMapper.create(craftEntity).markPropertyAsDirty(Properties.INVENTORY);
 				String capitalizedItemName = itemToCraft.getName().substring(0, 1).toUpperCase() + itemToCraft.getName().substring(1);
 				messageMapper.create(craftEntity).text = "Crafted Item: " + capitalizedItemName;
+				messageMapper.get(craftEntity).type = 1;
 			}
 			craftMapper.remove(craftEntity);
 		}

@@ -26,6 +26,7 @@ public class MessageCodes {
 	// Server -> Client
 	public static short MESSAGE = 4;
 	public static byte MESSAGE_TEXT = 0;
+	public static byte MESSAGE_TYPE = 1;
 
 	// Client -> Server
 	public static short MOVE = 50;
