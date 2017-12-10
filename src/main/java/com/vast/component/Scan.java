@@ -11,7 +11,7 @@ public class Scan extends PooledComponent {
 
 	@Override
 	protected void reset() {
-		distance = 8.0f;
+		distance = 10.0f;
 		nearbyEntities = new HashSet<Integer>();
 	}
 }

@@ -32,16 +32,14 @@ public class AggressiveAnimalBehaviour extends AbstractBehaviour {
 		if (ai.state.equals("none")) {
 			if (scanMapper.has(entity)) {
 				Transform transform = transformMapper.get(entity);
-				for (int nearbyEntity : getNearbyEntities(entity)) {
-					if (playerMapper.has(nearbyEntity)) {
-						Transform nearbyTransform = transformMapper.get(nearbyEntity);
-						reusableVector.set(transform.position.x - nearbyTransform.position.x, transform.position.y - nearbyTransform.position.y);
-						if (reusableVector.length() <= ATTACK_DISTANCE) {
-							interactMapper.create(entity).entity = nearbyEntity;
-							speedMapper.get(entity).modifier = 2.0f;
-							ai.state = "attacking";
-							break;
-						}
+				for (int nearbyInteractableEntity : getNearbyInteractableEntities(entity)) {
+					Transform nearbyTransform = transformMapper.get(nearbyInteractableEntity);
+					reusableVector.set(transform.position.x - nearbyTransform.position.x, transform.position.y - nearbyTransform.position.y);
+					if (reusableVector.length() <= ATTACK_DISTANCE) {
+						interactMapper.create(entity).entity = nearbyInteractableEntity;
+						speedMapper.get(entity).modifier = 2.0f;
+						ai.state = "attacking";
+						break;
 					}
 				}
 				if (ai.state.equals("none")) {
@@ -63,8 +61,9 @@ public class AggressiveAnimalBehaviour extends AbstractBehaviour {
 		} else if (ai.state.equals("attacking")) {
 			boolean stop = false;
 			if (interactMapper.has(entity)) {
+				Interact interact = interactMapper.get(entity);
 				Transform transform = transformMapper.get(entity);
-				Transform interactTransform = transformMapper.get(interactMapper.get(entity).entity);
+				Transform interactTransform = transformMapper.get(interact.entity);
 				reusableVector.set(transform.position.x - interactTransform.position.x, transform.position.y - interactTransform.position.y);
 				if (reusableVector.length() >= GIVE_UP_DISTANCE) {
 					stop = true;

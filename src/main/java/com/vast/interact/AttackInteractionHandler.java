@@ -31,7 +31,7 @@ public class AttackInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public boolean canInteract(int attackEntity, int healthEntity) {
-		if (healthMapper.get(healthEntity).isDead()) {
+		if (deathMapper.has(healthEntity) || healthMapper.get(healthEntity).isDead()) {
 			return false;
 		}
 		if (playerMapper.has(attackEntity) && ownerMapper.has(healthEntity) &&

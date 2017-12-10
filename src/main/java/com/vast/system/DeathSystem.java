@@ -20,9 +20,9 @@ public class DeathSystem extends IteratingSystem {
 	private ComponentMapper<AI> aiMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<SubType> subTypeMapper;
+	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Death> deathMapper;
 	private ComponentMapper<Event> eventMapper;
-	private ComponentMapper<Disabled> disabledMapper;
 	private ComponentMapper<Home> homeMapper;
 	private ComponentMapper<Sync> syncMapper;
 
@@ -73,7 +73,7 @@ public class DeathSystem extends IteratingSystem {
 				}
 			}
 			if (playerMapper.has(deathEntity)) {
-				disabledMapper.create(deathEntity);
+				collisionMapper.remove(deathEntity);
 				eventMapper.create(deathEntity).name = "died";
 				deathMapper.get(deathEntity).countdown = 5.0f;
 			} else {

@@ -21,7 +21,6 @@ public class CollisionSystem extends IteratingSystem {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Static> staticMapper;
-	private ComponentMapper<Death> disabledMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Sync> syncMapper;
@@ -33,7 +32,7 @@ public class CollisionSystem extends IteratingSystem {
 	private int numberOfCollisionChecks;
 
 	public CollisionSystem(Set<CollisionHandler> collisionHandlers, Metrics metrics) {
-		super(Aspect.all(Transform.class, Collision.class, Scan.class).exclude(Static.class, Disabled.class));
+		super(Aspect.all(Transform.class, Collision.class, Scan.class).exclude(Static.class));
 		this.collisionHandlers = collisionHandlers;
 		this.metrics = metrics;
 
@@ -84,7 +83,7 @@ public class CollisionSystem extends IteratingSystem {
 			Scan scan = scanMapper.get(entity);
 			for (int nearbyEntity : scan.nearbyEntities) {
 				if (nearbyEntity != entity) {
-					if (!collisionMapper.has(nearbyEntity) || deleteMapper.has(entity) || deleteMapper.has(nearbyEntity) || disabledMapper.has(nearbyEntity)) {
+					if (!collisionMapper.has(nearbyEntity) || deleteMapper.has(entity) || deleteMapper.has(nearbyEntity)) {
 						continue;
 					}
 
