@@ -112,9 +112,17 @@ public class InteractSystem  extends IteratingSystem {
 
 	private boolean isWithinInteractionDistance(int entity, int otherEntity) {
 		Transform transform = transformMapper.get(entity);
+		Collision collision = collisionMapper.get(entity);
 		Transform otherTransform = transformMapper.get(otherEntity);
+		Collision otherCollision = collisionMapper.get(otherEntity);
 
-		float interactDistance = collisionMapper.get(entity).radius + INTERACTION_SPACING + collisionMapper.get(otherEntity).radius;
+		float interactDistance = INTERACTION_SPACING;
+		if (collision != null) {
+			interactDistance += collision.radius;
+		}
+		if (otherCollision != null) {
+			interactDistance += otherCollision.radius;
+		}
 		reusableVector.set(otherTransform.position.x - transform.position.x, otherTransform.position.y - transform.position.y);
 		return reusableVector.length() <= interactDistance;
 	}
