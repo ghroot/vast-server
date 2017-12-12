@@ -332,6 +332,8 @@ public class TerminalSystem extends IntervalSystem {
 						detail = "" + ((Health) component).health + "/" + ((Health) component).maxHealth;
 					} else if (component instanceof Harvestable) {
 						detail = "" + (Math.round(((Harvestable) component).durability * 100.0f) / 100.0f);
+					} else if (component instanceof Growing) {
+						detail = "" + (Math.round(((Growing) component).timeLeft * 100.0f) / 100.0f);
 					} else if (component instanceof Constructable) {
 						Constructable constructable = (Constructable) component;
 						int progress = (int) Math.floor(100.0f * constructable.buildTime / constructable.buildDuration);
