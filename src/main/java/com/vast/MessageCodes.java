@@ -52,6 +52,9 @@ public class MessageCodes {
 	public static short CRAFT = 55;
 	public static byte CRAFT_ITEM_TYPE = 0;
 
+	// Client -> Server
+	public static short PLANT = 56;
+
 	// Properties
 	public static byte PROPERTY_POSITION = 100;
 	public static byte PROPERTY_ROTATION = 101;
@@ -63,4 +66,5 @@ public class MessageCodes {
 	public static byte PROPERTY_INVENTORY = 107;
 	public static byte PROPERTY_FUELED = 108;
 	public static byte PROPERTY_HOME = 109;
+	public static byte PROPERTY_GROWING = 110;
 }

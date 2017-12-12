@@ -36,6 +36,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 	private ComponentMapper<Speed> speedMapper;
 	private ComponentMapper<Attack> attackMapper;
+	private ComponentMapper<Growing> growingMapper;
 
 	private WorldConfiguration worldConfiguration;
 	private Items items;
@@ -159,7 +160,7 @@ public class CreationManager extends BaseSystem {
 		for (float x = -worldConfiguration.width / 2.0f; x < worldConfiguration.width / 2.0f; x += 3.0f) {
 			for (float y = -worldConfiguration.height / 2.0f; y < worldConfiguration.height / 2.0f; y += 3.0f) {
 				if (noise.GetSimplex(x, y) > 0.35f) {
-					createTree(new Point2f(x - 1.0f + (float) Math.random() * 2.0f, y - 1.0f + (float) Math.random() * 2.0f));
+					createTree(new Point2f(x - 1.0f + (float) Math.random() * 2.0f, y - 1.0f + (float) Math.random() * 2.0f), false);
 				}
 				if (noise.GetWhiteNoise(x, y) > 0.9f) {
 					createRock(new Point2f(x, y));
@@ -171,13 +172,9 @@ public class CreationManager extends BaseSystem {
 			int subType = (int) (Math.random() * 3);
 			createAnimal(getRandomPositionInWorld(), subType);
 		}
-
-		for (int i = 0; i < worldConfiguration.numberOfAIs; i++) {
-			createAI(getRandomPositionInWorld());
-		}
 	}
 
-	private int createTree(Point2f position) {
+	public int createTree(Point2f position, boolean growing) {
 		int treeEntity = world.create(treeArchetype);
 		typeMapper.get(treeEntity).type = "tree";
 		subTypeMapper.get(treeEntity).subType = (int) (Math.random() * 6);
@@ -188,11 +185,15 @@ public class CreationManager extends BaseSystem {
 		harvestableMapper.get(treeEntity).harvestEventName = "chopping";
 		harvestableMapper.get(treeEntity).durability = 300.0f;
 		inventoryMapper.get(treeEntity).add(items.getItem("wood").getId(), 3);
+		inventoryMapper.get(treeEntity).add(items.getItem("seed").getId(), 1);
+		if (growing) {
+			growingMapper.create(treeEntity).timeLeft = 60.0f;
+		}
 		syncPropagationMapper.get(treeEntity).setUnreliable(Properties.DURABILITY);
 		return treeEntity;
 	}
 
-	private int createRock(Point2f position) {
+	public int createRock(Point2f position) {
 		int rockEntity = world.create(rockArchetype);
 		typeMapper.get(rockEntity).type = "rock";
 		subTypeMapper.get(rockEntity).subType = (int) (Math.random() * 3);
@@ -205,22 +206,6 @@ public class CreationManager extends BaseSystem {
 		inventoryMapper.get(rockEntity).add(items.getItem("stone").getId(), 2);
 		syncPropagationMapper.get(rockEntity).setUnreliable(Properties.DURABILITY);
 		return rockEntity;
-	}
-
-	private int createAI(Point2f position) {
-		int aiEntity = world.create(aiArchetype);
-		typeMapper.get(aiEntity).type = "ai";
-		subTypeMapper.get(aiEntity).subType = aiEntity % 3;
-		transformMapper.get(aiEntity).position.set(position);
-		speedMapper.get(aiEntity).baseSpeed = 3.0f;
-		aiMapper.get(aiEntity).behaviourName = "basic";
-		collisionMapper.get(aiEntity).radius = 0.3f;
-		healthMapper.get(aiEntity).maxHealth = 2;
-		healthMapper.get(aiEntity).health = 2;
-		inventoryMapper.get(aiEntity).capacity = 20;
-		syncPropagationMapper.get(aiEntity).setUnreliable(Properties.POSITION);
-		syncPropagationMapper.get(aiEntity).setUnreliable(Properties.ROTATION);
-		return aiEntity;
 	}
 
 	private int createAnimal(Point2f position, int animalId) {

@@ -59,5 +59,10 @@
         "stone": 0
       }
     }
+  },
+  {
+    "id": 8,
+    "type": "basic",
+    "name": "seed"
   }
 ]

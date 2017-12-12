@@ -11,4 +11,5 @@ public class Properties {
 	public static int INVENTORY = 1 << 7;
 	public static int FUELED = 1 << 8;
 	public static int HOME = 1 << 9;
+	public static int GROWING = 1 << 10;
 }

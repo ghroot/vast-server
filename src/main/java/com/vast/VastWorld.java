@@ -4,7 +4,10 @@ import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
-import com.vast.behaviour.*;
+import com.vast.behaviour.AggressiveAnimalBehaviour;
+import com.vast.behaviour.Behaviour;
+import com.vast.behaviour.FakeHumanBehaviour;
+import com.vast.behaviour.FleeingAnimalBehaviour;
 import com.vast.collision.CollisionHandler;
 import com.vast.data.Animals;
 import com.vast.data.Buildings;
@@ -44,6 +47,7 @@ public class VastWorld implements Runnable {
 		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
 		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
 		List<InteractionHandler> interactionHandlers = new ArrayList<InteractionHandler>(Arrays.asList(
+			new GrowingInteractionHandler(),
 			new HarvestableInteractionHandler(),
 			new ConstructableInteractionHandler(),
 			new AttackInteractionHandler(items),
@@ -56,7 +60,8 @@ public class VastWorld implements Runnable {
 			new BuildOrderHandler(buildings),
 			new EmoteOrderHandler(),
 			new SetHomeOrderHandler(),
-			new CraftOrderHandler(items)
+			new CraftOrderHandler(items),
+			new PlantOrderHandler(items)
 		));
 		Set<PropertyHandler> propertyHandlers = new HashSet<PropertyHandler>(Arrays.asList(
 			new PositionPropertyHandler(),
@@ -68,10 +73,10 @@ public class VastWorld implements Runnable {
 			new MaxHealthPropertyHandler(),
 			new InventoryPropertyHandler(),
 			new FueledPropertyHandler(),
-			new HomePropertyHandler()
+			new HomePropertyHandler(),
+			new GrowingPropertyHandler()
 		));
 		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
-		behaviours.put("basic", new BasicBehaviour(interactionHandlers));
 		behaviours.put("fakeHuman", new FakeHumanBehaviour(interactionHandlers, peers, incomingRequestsByPeer, items, buildings));
 		behaviours.put("fleeingAnimal", new FleeingAnimalBehaviour(interactionHandlers));
 		behaviours.put("aggressiveAnimal", new AggressiveAnimalBehaviour(interactionHandlers));
@@ -101,6 +106,7 @@ public class VastWorld implements Runnable {
 			new FuelSystem(),
 			new CraftSystem(items),
 			new AuraSystem(effects),
+			new GrowSystem(),
 			new LifetimeSystem(),
 			new PickupSystem(),
 			new DeathSystem(),
