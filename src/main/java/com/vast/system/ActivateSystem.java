@@ -6,7 +6,9 @@ import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.Properties;
 import com.vast.VastPeer;
-import com.vast.component.*;
+import com.vast.component.Active;
+import com.vast.component.Player;
+import com.vast.component.Sync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +24,7 @@ public class ActivateSystem extends IteratingSystem {
 	private Map<String, VastPeer> peers;
 
 	public ActivateSystem(Map<String, VastPeer> peers) {
-		super(Aspect.all(Player.class, Scan.class, Known.class).exclude(Active.class));
+		super(Aspect.all(Player.class).exclude(Active.class));
 		this.peers = peers;
 	}
 
