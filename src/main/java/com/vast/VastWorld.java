@@ -4,17 +4,14 @@ import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
-import com.vast.behaviour.AggressiveAnimalBehaviour;
+import com.vast.behaviour.AnimalBehaviour;
 import com.vast.behaviour.Behaviour;
-import com.vast.behaviour.FakeHumanBehaviour;
-import com.vast.behaviour.FleeingAnimalBehaviour;
+import com.vast.behaviour.HumanBehaviour;
 import com.vast.collision.CollisionHandler;
 import com.vast.data.Animals;
 import com.vast.data.Buildings;
 import com.vast.data.Items;
 import com.vast.data.WorldConfiguration;
-import com.vast.effect.Effect;
-import com.vast.effect.HealEffect;
 import com.vast.interact.*;
 import com.vast.order.*;
 import com.vast.property.*;
@@ -50,7 +47,6 @@ public class VastWorld implements Runnable {
 			new GrowingInteractionHandler(),
 			new HarvestableInteractionHandler(),
 			new ConstructableInteractionHandler(),
-			new AttackInteractionHandler(items),
 			new ContainerInteractionHandler(items),
 			new FueledInteractionHandler()
 		));
@@ -69,19 +65,14 @@ public class VastWorld implements Runnable {
 			new ActivePropertyHandler(),
 			new DurabilityPropertyHandler(),
 			new ProgressPropertyHandler(),
-			new HealthPropertyHandler(),
-			new MaxHealthPropertyHandler(),
 			new InventoryPropertyHandler(),
 			new FueledPropertyHandler(),
 			new HomePropertyHandler(),
 			new GrowingPropertyHandler()
 		));
 		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
-		behaviours.put("fakeHuman", new FakeHumanBehaviour(interactionHandlers, peers, incomingRequestsByPeer, items, buildings));
-		behaviours.put("fleeingAnimal", new FleeingAnimalBehaviour(interactionHandlers));
-		behaviours.put("aggressiveAnimal", new AggressiveAnimalBehaviour(interactionHandlers));
-		Map<String, Effect> effects = new HashMap<String, Effect>();
-		effects.put("heal", new HealEffect());
+		behaviours.put("human", new HumanBehaviour(interactionHandlers, peers, incomingRequestsByPeer, items, buildings));
+		behaviours.put("animal", new AnimalBehaviour(interactionHandlers));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldConfiguration, items, buildings, animals),
@@ -105,11 +96,9 @@ public class VastWorld implements Runnable {
 			new CollisionSystem(new HashSet<CollisionHandler>(), metrics),
 			new FuelSystem(),
 			new CraftSystem(items),
-			new AuraSystem(effects),
 			new GrowSystem(),
 			new LifetimeSystem(),
 			new PickupSystem(),
-			new DeathSystem(),
 			new ParentSystem(),
 			new DeleteSystem(peers),
 			new CreateSystem(peers, propertyHandlers),

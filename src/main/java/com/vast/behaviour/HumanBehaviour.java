@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class FakeHumanBehaviour extends AbstractBehaviour {
+public class HumanBehaviour extends AbstractBehaviour {
 	private ComponentMapper<Interact> interactMapper;
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Player> playerMapper;
@@ -27,7 +27,7 @@ public class FakeHumanBehaviour extends AbstractBehaviour {
 	private Items items;
 	private Buildings buildings;
 
-	public FakeHumanBehaviour(List<InteractionHandler> interactionHandlers, Map<String, VastPeer> peers, Map<String, List<IncomingRequest>> incomingRequestsByPeer, Items items, Buildings buildings) {
+	public HumanBehaviour(List<InteractionHandler> interactionHandlers, Map<String, VastPeer> peers, Map<String, List<IncomingRequest>> incomingRequestsByPeer, Items items, Buildings buildings) {
 		super(interactionHandlers);
 		this.peers = peers;
 		this.incomingRequestsByPeer = incomingRequestsByPeer;
@@ -69,7 +69,9 @@ public class FakeHumanBehaviour extends AbstractBehaviour {
 			if (nearbyInteractableEntities.size() > 0) {
 				int randomIndex = (int) (Math.random() * nearbyInteractableEntities.size());
 				int randomNearbyInteractableEntity = nearbyInteractableEntities.get(randomIndex);
-				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.INTERACT, new DataObject().set(MessageCodes.INTERACT_ENTITY_ID, randomNearbyInteractableEntity))));
+				if (!playerMapper.has(randomNearbyInteractableEntity)) {
+					addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.INTERACT, new DataObject().set(MessageCodes.INTERACT_ENTITY_ID, randomNearbyInteractableEntity))));
+				}
 			}
 		} else {
 			float x = transformMapper.get(entity).position.x - 2.0f + (float) Math.random() * 4.0f;

@@ -7,7 +7,7 @@ import com.vast.interact.InteractionHandler;
 import javax.vecmath.Vector2f;
 import java.util.List;
 
-public class FleeingAnimalBehaviour extends AbstractBehaviour {
+public class AnimalBehaviour extends AbstractBehaviour {
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Speed> speedMapper;
@@ -19,7 +19,7 @@ public class FleeingAnimalBehaviour extends AbstractBehaviour {
 
 	private Vector2f reusableVector;
 
-	public FleeingAnimalBehaviour(List<InteractionHandler> interactionHandlers) {
+	public AnimalBehaviour(List<InteractionHandler> interactionHandlers) {
 		super(interactionHandlers);
 
 		reusableVector = new Vector2f();

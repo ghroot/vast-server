@@ -49,18 +49,6 @@
     }
   },
   {
-    "id": 7,
-    "type": "weapon",
-    "name": "spear",
-    "craftable": {
-      "duration": 5,
-      "cost": {
-        "wood": 0,
-        "stone": 0
-      }
-    }
-  },
-  {
     "id": 8,
     "type": "basic",
     "name": "seed"
