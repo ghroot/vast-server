@@ -22,6 +22,7 @@ public class InteractSystem  extends IteratingSystem {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Collision> collisionMapper;
+	private ComponentMapper<Message> messageMapper;
 	private ComponentMapper<Sync> syncMapper;
 
 	private List<InteractionHandler> interactionHandlers;
@@ -84,14 +85,20 @@ public class InteractSystem  extends IteratingSystem {
 				} else {
 					pathMapper.remove(entity);
 
-					InteractionHandler handler = findInteractionHandler(entity, interact.entity);
-					if (handler != null && handler.attemptStart(entity, interact.entity)) {
-						interact.handler = handler;
-						logger.debug("Entity {} started interacting with entity {}", entity, interact.entity);
-						interact.phase = Interact.Phase.INTERACTING;
-					} else {
-						logger.debug("Entity {} can not interact with entity {}", entity, interact.entity);
+					if (isBeingInteractedWith(interact.entity)) {
+						logger.debug("Entity {} can not interact with entity {} because it is already being interacted with", entity, interact.entity);
 						interactMapper.remove(entity);
+						messageMapper.create(entity).text = "Someone is already using this...";
+					} else {
+						InteractionHandler handler = findInteractionHandler(entity, interact.entity);
+						if (handler != null && handler.attemptStart(entity, interact.entity)) {
+							interact.handler = handler;
+							logger.debug("Entity {} started interacting with entity {}", entity, interact.entity);
+							interact.phase = Interact.Phase.INTERACTING;
+						} else {
+							logger.debug("Entity {} can not interact with entity {}", entity, interact.entity);
+							interactMapper.remove(entity);
+						}
 					}
 				}
 			} else {
@@ -125,6 +132,18 @@ public class InteractSystem  extends IteratingSystem {
 		}
 		reusableVector.set(otherTransform.position.x - transform.position.x, otherTransform.position.y - transform.position.y);
 		return reusableVector.length() <= interactDistance;
+	}
+
+	private boolean isBeingInteractedWith(int entity) {
+		IntBag interactEntities = world.getAspectSubscriptionManager().get(Aspect.all(Interact.class)).getEntities();
+		for (int i = 0; i < interactEntities.size(); i++) {
+			int interactEntity = interactEntities.get(i);
+			Interact interact = interactMapper.get(interactEntity);
+			if (interact != null && interact.phase == Interact.Phase.INTERACTING && interact.entity == entity) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private InteractionHandler findInteractionHandler(int entity, int otherEntity) {
