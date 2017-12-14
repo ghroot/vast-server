@@ -23,8 +23,7 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 
 	@Override
 	public boolean canInteract(int playerEntity, int constructableEntity) {
-		Constructable constructable = constructableMapper.get(constructableEntity);
-		return !constructable.isComplete();
+		return !constructableMapper.get(constructableEntity).isComplete();
 	}
 
 	@Override
@@ -39,6 +38,7 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 		constructable.buildTime += world.getDelta();
 		syncMapper.create(constructableEntity).markPropertyAsDirty(Properties.PROGRESS);
 		if (constructable.isComplete()) {
+			constructableMapper.remove(constructableEntity);
 			return true;
 		} else {
 			return false;

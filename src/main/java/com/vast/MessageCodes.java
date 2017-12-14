@@ -39,7 +39,6 @@ public class MessageCodes {
 	// Client -> Server
 	public static short BUILD = 52;
 	public static byte BUILD_TYPE = 0;
-	public static byte BUILD_POSITION = 1;
 
 	// Client -> Server
 	public static short EMOTE = 53;
@@ -61,8 +60,6 @@ public class MessageCodes {
 	public static byte PROPERTY_ACTIVE = 102;
 	public static byte PROPERTY_DURABILITY = 103;
 	public static byte PROPERTY_PROGRESS = 104;
-	public static byte PROPERTY_HEALTH = 105;
-	public static byte PROPERTY_MAX_HEALTH = 106;
 	public static byte PROPERTY_INVENTORY = 107;
 	public static byte PROPERTY_FUELED = 108;
 	public static byte PROPERTY_HOME = 109;

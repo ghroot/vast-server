@@ -30,9 +30,6 @@
       "cost": {
         "wood": 1
       }
-    },
-    "health": {
-      "health": 3
     }
   },
   {
@@ -51,8 +48,7 @@
     "fueled": {
       "cost": {
         "wood": 1
-      },
-      "effect": "heal"
+      }
     }
   }
 ]

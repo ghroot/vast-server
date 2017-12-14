@@ -6,7 +6,6 @@ import com.artemis.systems.IteratingSystem;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.IncomingRequest;
 import com.vast.component.Active;
-import com.vast.component.Death;
 import com.vast.component.Order;
 import com.vast.component.Player;
 import com.vast.order.OrderHandler;
@@ -27,7 +26,7 @@ public class OrderSystem extends IteratingSystem {
 	private Map<String, List<IncomingRequest>> incomingRequestsByPeer;
 
 	public OrderSystem(Set<OrderHandler> orderHandlers, Map<String, List<IncomingRequest>> incomingRequestsByPeer) {
-		super(Aspect.all(Player.class, Active.class).exclude(Death.class));
+		super(Aspect.all(Player.class, Active.class));
 		this.orderHandlers = orderHandlers;
 		this.incomingRequestsByPeer = incomingRequestsByPeer;
 	}

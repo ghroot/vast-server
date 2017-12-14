@@ -6,19 +6,10 @@
       "radius": 0.3
     },
     "ai": {
-      "behaviour": "fleeingAnimal"
+      "behaviour": "animal"
     },
     "speed": {
       "baseSpeed": 1.5
-    },
-    "health": {
-      "health": 1
-    },
-    "inventory": {
-      "items": {
-        "meat": 1,
-        "fur": 1
-      }
     }
   },
   {
@@ -28,44 +19,10 @@
       "radius": 0.4
     },
     "ai": {
-      "behaviour": "fleeingAnimal"
+      "behaviour": "animal"
     },
     "speed": {
       "baseSpeed": 1.5
-    },
-    "health": {
-      "health": 2
-    },
-    "inventory": {
-      "items": {
-        "meat": 2,
-        "fur": 2
-      }
-    }
-  },
-  {
-    "id": 2,
-    "name": "boar",
-    "collision": {
-      "radius": 0.4
-    },
-    "ai": {
-      "behaviour": "aggressiveAnimal"
-    },
-    "speed": {
-      "baseSpeed": 1
-    },
-    "health": {
-      "health": 3
-    },
-    "inventory": {
-      "items": {
-        "meat": 3,
-        "fur": 2
-      }
-    },
-    "attack": {
-      "implicitWeapon": true
     }
   }
 ]

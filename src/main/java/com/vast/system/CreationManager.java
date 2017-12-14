@@ -26,16 +26,13 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Harvestable> harvestableMapper;
-	private ComponentMapper<Health> healthMapper;
 	private ComponentMapper<AI> aiMapper;
 	private ComponentMapper<Constructable> constructableMapper;
 	private ComponentMapper<Container> containerMapper;
 	private ComponentMapper<Fueled> fueledMapper;
-	private ComponentMapper<Aura> auraMapper;
 	private ComponentMapper<Parent> parentMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 	private ComponentMapper<Speed> speedMapper;
-	private ComponentMapper<Attack> attackMapper;
 	private ComponentMapper<Growing> growingMapper;
 
 	private WorldConfiguration worldConfiguration;
@@ -65,14 +62,12 @@ public class CreationManager extends BaseSystem {
 			.add(Type.class)
 			.add(SubType.class)
 			.add(Inventory.class)
-			.add(Health.class)
 			.add(Transform.class)
 			.add(Speed.class)
 			.add(Spatial.class)
 			.add(Collision.class)
 			.add(Scan.class)
 			.add(Known.class)
-			.add(Attack.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -108,12 +103,10 @@ public class CreationManager extends BaseSystem {
 			.add(Type.class)
 			.add(SubType.class)
 			.add(Inventory.class)
-			.add(Health.class)
 			.add(Transform.class)
 			.add(Speed.class)
 			.add(Spatial.class)
 			.add(Collision.class)
-			.add(Attack.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -156,21 +149,20 @@ public class CreationManager extends BaseSystem {
 	}
 
 	public void createWorld() {
-		FastNoise noise = new FastNoise((int) (System.currentTimeMillis() % Integer.MAX_VALUE));
+		FastNoise noise1 = new FastNoise((int) (Math.random() * 10000000));
+		FastNoise noise2 = new FastNoise((int) (Math.random() * 10000000));
 		for (float x = -worldConfiguration.width / 2.0f; x < worldConfiguration.width / 2.0f; x += 3.0f) {
 			for (float y = -worldConfiguration.height / 2.0f; y < worldConfiguration.height / 2.0f; y += 3.0f) {
-				if (noise.GetSimplex(x, y) > 0.35f) {
+				if (noise1.GetSimplex(x, y) > 0.35f) {
 					createTree(new Point2f(x - 1.0f + (float) Math.random() * 2.0f, y - 1.0f + (float) Math.random() * 2.0f), false);
 				}
-				if (noise.GetWhiteNoise(x, y) > 0.9f) {
+				if (noise1.GetWhiteNoise(x, y) > 0.9f) {
 					createRock(new Point2f(x, y));
 				}
+				if (noise2.GetWhiteNoise(x, y) > 0.99f) {
+					createAnimal(new Point2f(x, y), (int) (Math.random() * 2));
+				}
 			}
-		}
-
-		for (int i = 0; i < worldConfiguration.numberOfAnimals; i++) {
-			int subType = (int) (Math.random() * 3);
-			createAnimal(getRandomPositionInWorld(), subType);
 		}
 	}
 
@@ -230,13 +222,6 @@ public class CreationManager extends BaseSystem {
 			}
 		}
 
-		if (animal.hasAspect("health")) {
-			JSONObject healthAspect = animal.getAspect("health");
-			Health health = healthMapper.create(animalEntity);
-			health.maxHealth = healthAspect.getInt("health");
-			health.health = health.maxHealth;
-		}
-
 		if (animal.hasAspect("speed")) {
 			JSONObject speedAspect = animal.getAspect("speed");
 			Speed speed = speedMapper.create(animalEntity);
@@ -247,12 +232,6 @@ public class CreationManager extends BaseSystem {
 			JSONObject aiAspect = animal.getAspect("ai");
 			AI ai = aiMapper.create(animalEntity);
 			ai.behaviourName = aiAspect.getString("behaviour");
-		}
-
-		if (animal.hasAspect("attack")) {
-			JSONObject attackAspect = animal.getAspect("attack");
-			Attack attack = attackMapper.create(animalEntity);
-			attack.implicitWeapon = attackAspect.getBoolean("implicitWeapon");
 		}
 
 		syncPropagationMapper.get(animalEntity).setUnreliable(Properties.POSITION);
@@ -272,15 +251,13 @@ public class CreationManager extends BaseSystem {
 		}
 		speedMapper.get(playerEntity).baseSpeed = 4.0f;
 		collisionMapper.get(playerEntity).radius = 0.3f;
-		healthMapper.get(playerEntity).maxHealth = 5;
-		healthMapper.get(playerEntity).health = 5;
 		inventoryMapper.get(playerEntity).capacity = 50;
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.POSITION);
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.ROTATION);
 		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.INVENTORY);
 		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.HOME);
 		if (fakePlayer) {
-			aiMapper.create(playerEntity).behaviourName = "fakeHuman";
+			aiMapper.create(playerEntity).behaviourName = "human";
 		}
 		return playerEntity;
 	}
@@ -318,13 +295,6 @@ public class CreationManager extends BaseSystem {
 			container.persistent = containerAspect.getBoolean("persistent");
 		}
 
-		if (building.hasAspect("health")) {
-			JSONObject healthAspect = building.getAspect("health");
-			Health health = healthMapper.create(buildingEntity);
-			health.maxHealth = healthAspect.getInt("health");
-			health.health = health.maxHealth;
-		}
-
 		if (building.hasAspect("fueled")) {
 			JSONObject fueledAspect = building.getAspect("fueled");
 			Fueled fueled = fueledMapper.create(buildingEntity);
@@ -333,7 +303,6 @@ public class CreationManager extends BaseSystem {
 				fueled.cost = new Cost(items.getItem(itemName).getId(), amount);
 				break;
 			}
-			fueled.fueledAuraEffectName = fueledAspect.getString("effect");
 		}
 
 		return buildingEntity;
@@ -352,19 +321,6 @@ public class CreationManager extends BaseSystem {
 
 	public int createPickup(Point2f position, int subType, Inventory inventory) {
 		return createPickup(position, subType, inventory.items);
-	}
-
-	public int createAura(Point2f position, String effectName, float range, int parentEntity) {
-		int auraEntity = world.create();
-		transformMapper.create(auraEntity).position.set(position);
-		spatialMapper.create(auraEntity);
-		auraMapper.create(auraEntity).range = range;
-		auraMapper.get(auraEntity).effectName = effectName;
-		scanMapper.create(auraEntity);
-		if (parentEntity != -1) {
-			parentMapper.create(auraEntity).parentEntity = parentEntity;
-		}
-		return auraEntity;
 	}
 
 	private Point2f getRandomPositionInWorld() {
