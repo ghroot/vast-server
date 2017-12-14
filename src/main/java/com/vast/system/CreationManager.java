@@ -149,21 +149,20 @@ public class CreationManager extends BaseSystem {
 	}
 
 	public void createWorld() {
-		FastNoise noise = new FastNoise((int) (System.currentTimeMillis() % Integer.MAX_VALUE));
+		FastNoise noise1 = new FastNoise((int) (Math.random() * 10000000));
+		FastNoise noise2 = new FastNoise((int) (Math.random() * 10000000));
 		for (float x = -worldConfiguration.width / 2.0f; x < worldConfiguration.width / 2.0f; x += 3.0f) {
 			for (float y = -worldConfiguration.height / 2.0f; y < worldConfiguration.height / 2.0f; y += 3.0f) {
-				if (noise.GetSimplex(x, y) > 0.35f) {
+				if (noise1.GetSimplex(x, y) > 0.35f) {
 					createTree(new Point2f(x - 1.0f + (float) Math.random() * 2.0f, y - 1.0f + (float) Math.random() * 2.0f), false);
 				}
-				if (noise.GetWhiteNoise(x, y) > 0.9f) {
+				if (noise1.GetWhiteNoise(x, y) > 0.9f) {
 					createRock(new Point2f(x, y));
 				}
+				if (noise2.GetWhiteNoise(x, y) > 0.99f) {
+					createAnimal(new Point2f(x, y), (int) (Math.random() * 2));
+				}
 			}
-		}
-
-		for (int i = 0; i < worldConfiguration.numberOfAnimals; i++) {
-			int subType = (int) (Math.random() * 2);
-			createAnimal(getRandomPositionInWorld(), subType);
 		}
 	}
 
