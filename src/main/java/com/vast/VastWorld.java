@@ -7,7 +7,6 @@ import com.artemis.managers.WorldSerializationManager;
 import com.vast.behaviour.AnimalBehaviour;
 import com.vast.behaviour.Behaviour;
 import com.vast.behaviour.HumanBehaviour;
-import com.vast.collision.CollisionHandler;
 import com.vast.data.Animals;
 import com.vast.data.Buildings;
 import com.vast.data.Items;
@@ -94,7 +93,7 @@ public class VastWorld implements Runnable {
 			new AISystem(behaviours),
 			new SpeedSystem(),
 			new PathMoveSystem(),
-			new CollisionSystem(new HashSet<CollisionHandler>(), metrics),
+			new CollisionSystem(metrics),
 			new FollowSystem(),
 			new FuelSystem(),
 			new CraftSystem(items),

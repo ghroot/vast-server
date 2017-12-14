@@ -6,14 +6,12 @@ import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.Metrics;
 import com.vast.Properties;
-import com.vast.collision.CollisionHandler;
 import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
-import java.util.Set;
 
 public class CollisionSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem.class);
@@ -25,26 +23,16 @@ public class CollisionSystem extends IteratingSystem {
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Sync> syncMapper;
 
-	private Set<CollisionHandler> collisionHandlers;
 	private Metrics metrics;
 
 	private Vector2f reusableVector;
 	private int numberOfCollisionChecks;
 
-	public CollisionSystem(Set<CollisionHandler> collisionHandlers, Metrics metrics) {
+	public CollisionSystem(Metrics metrics) {
 		super(Aspect.all(Transform.class, Collision.class, Scan.class).exclude(Static.class));
-		this.collisionHandlers = collisionHandlers;
 		this.metrics = metrics;
 
 		reusableVector = new Vector2f();
-	}
-
-	@Override
-	protected void initialize() {
-		for (CollisionHandler collisionHandler : collisionHandlers) {
-			world.inject(collisionHandler);
-			collisionHandler.initialize();
-		}
 	}
 
 	@Override
@@ -92,41 +80,28 @@ public class CollisionSystem extends IteratingSystem {
 					reusableVector.set(nearbyTransform.position.x - transform.position.x, nearbyTransform.position.y - transform.position.y);
 					float overlap = (collision.radius + nearbyCollision.radius) - reusableVector.length();
 					if (overlap > 0.0f) {
-						boolean handled = false;
-						for (CollisionHandler collisionHandler : collisionHandlers) {
-							if (collisionHandler.getAspect1().isInterested(world.getEntity(entity)) &&
-									collisionHandler.getAspect2().isInterested(world.getEntity(nearbyEntity))) {
-								collisionHandler.handleCollision(entity, nearbyEntity);
-								handled = true;
-							} else if (collisionHandler.getAspect1().isInterested(world.getEntity(nearbyEntity)) &&
-									collisionHandler.getAspect2().isInterested(world.getEntity(entity))) {
-								collisionHandler.handleCollision(nearbyEntity, entity);
-								handled = true;
-							}
+						if (reusableVector.lengthSquared() == 0.0f) {
+							reusableVector.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
 						}
-						if (!handled) {
-							if (reusableVector.lengthSquared() == 0.0f) {
-								reusableVector.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
-							}
-							if (staticMapper.has(nearbyEntity)) {
-								reusableVector.normalize();
-								reusableVector.scale(-overlap);
-								transform.position.add(reusableVector);
-								syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
-							} else {
-								reusableVector.normalize();
-								reusableVector.scale(-overlap * 0.5f);
-								transform.position.add(reusableVector);
-								syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
+						if (staticMapper.has(nearbyEntity)) {
+							reusableVector.normalize();
+							reusableVector.scale(-overlap);
+							transform.position.add(reusableVector);
+							syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
+						} else {
+							reusableVector.normalize();
+							reusableVector.scale(-overlap * 0.5f);
+							transform.position.add(reusableVector);
+							syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
 
-								reusableVector.normalize();
-								reusableVector.scale(-overlap * 0.5f);
-								nearbyTransform.position.add(reusableVector);
-								syncMapper.create(nearbyEntity).markPropertyAsDirty(Properties.POSITION);
-							}
+							reusableVector.normalize();
+							reusableVector.scale(-overlap * 0.5f);
+							nearbyTransform.position.add(reusableVector);
+							syncMapper.create(nearbyEntity).markPropertyAsDirty(Properties.POSITION);
 						}
-						numberOfCollisionChecks++;
 					}
+
+					numberOfCollisionChecks++;
 				}
 			}
 		}

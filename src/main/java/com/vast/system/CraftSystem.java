@@ -12,7 +12,7 @@ public class CraftSystem extends IteratingSystem {
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Craft> craftMapper;
 	private ComponentMapper<Sync> syncMapper;
-	private ComponentMapper<Message>  messageMapper;
+	private ComponentMapper<Message> messageMapper;
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Event> eventMapper;

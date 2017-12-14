@@ -5,6 +5,7 @@ import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.MessageCodes;
 import com.vast.Properties;
 import com.vast.component.Home;
+import com.vast.component.Message;
 import com.vast.component.Sync;
 import com.vast.component.Transform;
 
@@ -12,6 +13,7 @@ public class SetHomeOrderHandler implements OrderHandler {
 	private ComponentMapper<Home> homeMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Sync> syncMapper;
+	private ComponentMapper<Message> messageMapper;
 
 	public SetHomeOrderHandler() {
 	}
