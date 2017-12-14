@@ -3,7 +3,6 @@ package com.vast.behaviour;
 import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.vast.component.AI;
-import com.vast.component.Death;
 import com.vast.component.Scan;
 import com.vast.interact.InteractionHandler;
 
