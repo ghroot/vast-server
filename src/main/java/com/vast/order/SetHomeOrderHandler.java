@@ -40,6 +40,8 @@ public class SetHomeOrderHandler implements OrderHandler {
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
 		homeMapper.create(orderEntity).position.set(transformMapper.get(orderEntity).position);
 		syncMapper.create(orderEntity).markPropertyAsDirty(Properties.HOME);
+		messageMapper.create(orderEntity).text = "There is no place like home...";
+		messageMapper.get(orderEntity).type = 1;
 		return true;
 	}
 }
