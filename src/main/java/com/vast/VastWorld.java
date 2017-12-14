@@ -48,7 +48,8 @@ public class VastWorld implements Runnable {
 			new HarvestableInteractionHandler(),
 			new ConstructableInteractionHandler(),
 			new ContainerInteractionHandler(items),
-			new FueledInteractionHandler()
+			new FueledInteractionHandler(),
+			new PlayerInteractionHandler()
 		));
 		Set<OrderHandler> orderHandlers = new HashSet<OrderHandler>(Arrays.asList(
 			new MoveOrderHandler(),
