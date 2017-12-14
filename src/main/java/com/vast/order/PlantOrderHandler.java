@@ -9,6 +9,8 @@ import com.vast.component.*;
 import com.vast.data.Items;
 import com.vast.system.CreationManager;
 
+import javax.vecmath.Point2f;
+
 public class PlantOrderHandler implements OrderHandler {
 	private World world;
 
@@ -17,6 +19,8 @@ public class PlantOrderHandler implements OrderHandler {
 	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Message> messageMapper;
+
+	private final float PLANT_DISTANCE = 1.0f;
 
 	private Items items;
 
@@ -52,7 +56,11 @@ public class PlantOrderHandler implements OrderHandler {
 			inventory.remove(items.getItem("seed").getId(), 1);
 			syncMapper.create(orderEntity).markPropertyAsDirty(Properties.INVENTORY);
 
-			int treeEntity = creationManager.createTree(transformMapper.get(orderEntity).position, true);
+			Transform transform = transformMapper.get(orderEntity);
+			Point2f plantPosition = new Point2f(transform.position);
+			plantPosition.x += Math.cos(Math.toRadians(transform.rotation)) * PLANT_DISTANCE;
+			plantPosition.y += Math.sin(Math.toRadians(transform.rotation)) * PLANT_DISTANCE;
+			int treeEntity = creationManager.createTree(plantPosition, true);
 			createMapper.create(treeEntity).reason = "planted";
 
 			return true;
