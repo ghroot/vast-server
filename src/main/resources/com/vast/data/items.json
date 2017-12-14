@@ -17,15 +17,10 @@
   {
     "id": 3,
     "type": "basic",
-    "name": "meat"
+    "name": "seed"
   },
   {
     "id": 4,
-    "type": "basic",
-    "name": "fur"
-  },
-  {
-    "id": 5,
     "type": "tool",
     "name": "axe",
     "craftable": {
@@ -37,7 +32,7 @@
     }
   },
   {
-    "id": 6,
+    "id": 5,
     "type": "tool",
     "name": "pickaxe",
     "craftable": {
@@ -47,10 +42,5 @@
         "stone": 0
       }
     }
-  },
-  {
-    "id": 8,
-    "type": "basic",
-    "name": "seed"
   }
 ]
