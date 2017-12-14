@@ -88,11 +88,13 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 		while (!from.isEmpty() && !to.isFull() && (onlyItemType == null || hasAnyItemWithType(from, onlyItemType))) {
 			for (int itemId = 0; itemId < from.items.length; itemId++) {
 				Item item = items.getItem(itemId);
-				if ((onlyItemType == null || item.getType().equals(onlyItemType)) && from.items[itemId] > 0) {
-					from.remove(itemId, 1);
-					to.add(itemId, 1);
-					atLeastOneItemWasTransferred = true;
-					break;
+				if (item != null) {
+					if ((onlyItemType == null || item.getType().equals(onlyItemType)) && from.items[itemId] > 0) {
+						from.remove(itemId, 1);
+						to.add(itemId, 1);
+						atLeastOneItemWasTransferred = true;
+						break;
+					}
 				}
 			}
 		}
