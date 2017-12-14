@@ -36,7 +36,6 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 	@Override
 	public boolean attemptStart(int playerEntity, int containerEntity) {
 		Inventory playerInventory = inventoryMapper.get(playerEntity);
-		Inventory containerInventory = inventoryMapper.get(containerEntity);
 
 		if (ownerMapper.has(containerEntity) && !playerMapper.get(playerEntity).name.equals(ownerMapper.get(containerEntity).name)) {
 			messageMapper.create(playerEntity).text = "This is not mine...";
