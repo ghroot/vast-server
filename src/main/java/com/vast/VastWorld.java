@@ -48,8 +48,7 @@ public class VastWorld implements Runnable {
 			new HarvestableInteractionHandler(),
 			new ConstructableInteractionHandler(),
 			new ContainerInteractionHandler(items),
-			new FueledInteractionHandler(),
-			new PlayerInteractionHandler()
+			new FueledInteractionHandler()
 		));
 		Set<OrderHandler> orderHandlers = new HashSet<OrderHandler>(Arrays.asList(
 			new MoveOrderHandler(),
@@ -58,7 +57,8 @@ public class VastWorld implements Runnable {
 			new EmoteOrderHandler(),
 			new SetHomeOrderHandler(),
 			new CraftOrderHandler(items),
-			new PlantOrderHandler(items)
+			new PlantOrderHandler(items),
+			new FollowOrderHandler()
 		));
 		Set<PropertyHandler> propertyHandlers = new HashSet<PropertyHandler>(Arrays.asList(
 			new PositionPropertyHandler(),
@@ -95,6 +95,7 @@ public class VastWorld implements Runnable {
 			new SpeedSystem(),
 			new PathMoveSystem(),
 			new CollisionSystem(new HashSet<CollisionHandler>(), metrics),
+			new FollowSystem(),
 			new FuelSystem(),
 			new CraftSystem(items),
 			new GrowSystem(),

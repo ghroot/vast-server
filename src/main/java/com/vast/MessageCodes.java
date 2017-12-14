@@ -54,6 +54,10 @@ public class MessageCodes {
 	// Client -> Server
 	public static short PLANT = 56;
 
+	// Client -> Server
+	public static short FOLLOW = 57;
+	public static byte FOLLOW_ENTITY_ID = 0;
+
 	// Properties
 	public static byte PROPERTY_POSITION = 100;
 	public static byte PROPERTY_ROTATION = 101;
