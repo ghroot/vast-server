@@ -60,10 +60,7 @@ public class HumanBehaviour extends AbstractBehaviour {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.PLANT)));
 		} else if (roll <= 20) {
 			byte buildingId = (byte) (Math.random() * 3);
-			float x = transformMapper.get(entity).position.x;
-			float y = transformMapper.get(entity).position.y + 1.0f;
-			float[] buildPosition = new float[] {x, y};
-			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD, new DataObject().set(MessageCodes.BUILD_TYPE, buildingId).set(MessageCodes.BUILD_POSITION, buildPosition))));
+			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD, new DataObject().set(MessageCodes.BUILD_TYPE, buildingId))));
 		} else if (roll <= 55) {
 			List<Integer> nearbyInteractableEntities = getNearbyInteractableEntities(entity);
 			if (nearbyInteractableEntities.size() > 0) {
