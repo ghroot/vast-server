@@ -167,7 +167,7 @@ public class TerminalSystem extends IntervalSystem {
 							textGraphics.setForegroundColor(TextColor.ANSI.RED);
 						} else if (typeMapper.get(entity).type.equals("building")) {
 							Constructable constructable = constructableMapper.get(entity);
-							if (constructable.isComplete()) {
+							if (constructable == null || constructable.isComplete()) {
 								screen.setCharacter(terminalPosition, new TextCharacter('#', colored ? TextColor.ANSI.WHITE : gray, TextColor.ANSI.DEFAULT));
 							} else {
 								screen.setCharacter(terminalPosition, new TextCharacter('#', colored ? TextColor.ANSI.Indexed.fromRGB(100, 100, 100) : gray, TextColor.ANSI.DEFAULT));
