@@ -46,10 +46,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		Inventory inventory = inventoryMapper.get(playerEntity);
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
-		if (inventory.isFull()) {
-			messageMapper.create(playerEntity).text = "My backpack is full...";
-			return false;
-		} else if (harvestable.requiredItemId != -1 && !inventory.has(harvestable.requiredItemId)) {
+		if (harvestable.requiredItemId != -1 && !inventory.has(harvestable.requiredItemId)) {
 			messageMapper.create(playerEntity).text = "I don't have the required tool...";
 			return false;
 		} else {
