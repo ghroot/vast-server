@@ -3,10 +3,7 @@ package com.vast.interact;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.Properties;
-import com.vast.component.Constructable;
-import com.vast.component.Event;
-import com.vast.component.Player;
-import com.vast.component.Sync;
+import com.vast.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +12,7 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 
 	private ComponentMapper<Constructable> constructableMapper;
 	private ComponentMapper<Sync> syncMapper;
-	private ComponentMapper<Event> eventMapper;
+	private ComponentMapper<State> stateMapper;
 
 	public ConstructableInteractionHandler() {
 		super(Aspect.all(Player.class), Aspect.all(Constructable.class));
@@ -28,7 +25,8 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 
 	@Override
 	public boolean attemptStart(int playerEntity, int constructableEntity) {
-		eventMapper.create(playerEntity).name = "startedBuilding";
+		stateMapper.get(playerEntity).name = "building";
+		syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
 		return true;
 	}
 
@@ -47,6 +45,7 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 
 	@Override
 	public void stop(int playerEntity, int buildingEntity) {
-		eventMapper.create(playerEntity).name = "stoppedBuilding";
+		stateMapper.get(playerEntity).name = null;
+		syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
 	}
 }

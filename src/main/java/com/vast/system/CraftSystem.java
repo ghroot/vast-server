@@ -13,9 +13,7 @@ public class CraftSystem extends IteratingSystem {
 	private ComponentMapper<Craft> craftMapper;
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Message> messageMapper;
-	private ComponentMapper<Player> playerMapper;
-	private ComponentMapper<Active> activeMapper;
-	private ComponentMapper<Event> eventMapper;
+	private ComponentMapper<State> stateMapper;
 
 	private Items items;
 
@@ -26,16 +24,14 @@ public class CraftSystem extends IteratingSystem {
 
 	@Override
 	protected void inserted(int craftEntity) {
-		if (playerMapper.has(craftEntity) && activeMapper.has(craftEntity)) {
-			eventMapper.create(craftEntity).name = "startedCrafting";
-		}
+		stateMapper.get(craftEntity).name = "crafting";
+		syncMapper.create(craftEntity).markPropertyAsDirty(Properties.STATE);
 	}
 
 	@Override
 	protected void removed(int craftEntity) {
-		if (playerMapper.has(craftEntity) && activeMapper.has(craftEntity)) {
-			eventMapper.create(craftEntity).name = "stoppedCrafting";
-		}
+		stateMapper.get(craftEntity).name = null;
+		syncMapper.create(craftEntity).markPropertyAsDirty(Properties.STATE);
 	}
 
 	@Override
