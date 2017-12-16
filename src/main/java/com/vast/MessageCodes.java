@@ -62,8 +62,8 @@ public class MessageCodes {
 	public static byte PROPERTY_POSITION = 100;
 	public static byte PROPERTY_ROTATION = 101;
 	public static byte PROPERTY_ACTIVE = 102;
-	public static byte PROPERTY_DURABILITY = 103;
 	public static byte PROPERTY_PROGRESS = 104;
+	public static byte PROPERTY_STATE = 105;
 	public static byte PROPERTY_INVENTORY = 107;
 	public static byte PROPERTY_FUELED = 108;
 	public static byte PROPERTY_HOME = 109;

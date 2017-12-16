@@ -75,12 +75,12 @@ public class TerminalSystem extends IntervalSystem {
 		propertyNames.put(Properties.POSITION, "Position");
 		propertyNames.put(Properties.ROTATION, "Rotation");
 		propertyNames.put(Properties.ACTIVE, "Active");
-		propertyNames.put(Properties.DURABILITY, "Durability");
 		propertyNames.put(Properties.PROGRESS, "Progress");
 		propertyNames.put(Properties.INVENTORY, "Inventory");
 		propertyNames.put(Properties.FUELED, "Fueled");
 		propertyNames.put(Properties.HOME, "Home");
 		propertyNames.put(Properties.GROWING, "Growing");
+		propertyNames.put(Properties.STATE, "State");
 	}
 
 	@Override
@@ -326,6 +326,9 @@ public class TerminalSystem extends IntervalSystem {
 						detail = "" + ((Known) component).knownEntities.size();
 					} else if (component instanceof AI) {
 						detail = ((AI) component).behaviourName;
+					} else if (component instanceof State) {
+						String stateName = ((State) component).name;
+						detail = stateName != null ? stateName : "";
 					} else if (component instanceof Harvestable) {
 						detail = "" + (Math.round(((Harvestable) component).durability * 100.0f) / 100.0f);
 					} else if (component instanceof Growing) {

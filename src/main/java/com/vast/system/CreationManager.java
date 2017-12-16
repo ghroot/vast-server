@@ -43,7 +43,6 @@ public class CreationManager extends BaseSystem {
 	private Archetype playerArchetype;
 	private Archetype treeArchetype;
 	private Archetype rockArchetype;
-	private Archetype aiArchetype;
 	private Archetype animalArchetype;
 	private Archetype buildingArchetype;
 	private Archetype pickupArchetype;
@@ -61,6 +60,7 @@ public class CreationManager extends BaseSystem {
 			.add(Player.class)
 			.add(Type.class)
 			.add(SubType.class)
+			.add(State.class)
 			.add(Inventory.class)
 			.add(Transform.class)
 			.add(Speed.class)
@@ -75,6 +75,7 @@ public class CreationManager extends BaseSystem {
 		treeArchetype = new ArchetypeBuilder()
 			.add(Type.class)
 			.add(SubType.class)
+			.add(State.class)
 			.add(Transform.class)
 			.add(Spatial.class)
 			.add(Collision.class)
@@ -88,25 +89,13 @@ public class CreationManager extends BaseSystem {
 		rockArchetype = new ArchetypeBuilder()
 			.add(Type.class)
 			.add(SubType.class)
+			.add(State.class)
 			.add(Transform.class)
 			.add(Spatial.class)
 			.add(Collision.class)
 			.add(Static.class)
 			.add(Harvestable.class)
 			.add(Inventory.class)
-			.add(SyncPropagation.class)
-			.add(SyncHistory.class)
-			.build(world);
-
-		aiArchetype = new ArchetypeBuilder()
-			.add(AI.class)
-			.add(Type.class)
-			.add(SubType.class)
-			.add(Inventory.class)
-			.add(Transform.class)
-			.add(Speed.class)
-			.add(Spatial.class)
-			.add(Collision.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -181,7 +170,6 @@ public class CreationManager extends BaseSystem {
 		if (growing) {
 			growingMapper.create(treeEntity).timeLeft = 60.0f;
 		}
-		syncPropagationMapper.get(treeEntity).setUnreliable(Properties.DURABILITY);
 		return treeEntity;
 	}
 
@@ -196,7 +184,6 @@ public class CreationManager extends BaseSystem {
 		harvestableMapper.get(rockEntity).harvestEventName = "picking";
 		harvestableMapper.get(rockEntity).durability = 300.0f;
 		inventoryMapper.get(rockEntity).add(items.getItem("stone").getId(), 2);
-		syncPropagationMapper.get(rockEntity).setUnreliable(Properties.DURABILITY);
 		return rockEntity;
 	}
 

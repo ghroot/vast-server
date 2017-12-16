@@ -18,8 +18,8 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Sync> syncMapper;
-	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<Message> messageMapper;
+	private ComponentMapper<State> stateMapper;
 
 	private CreationManager creationManager;
 
@@ -50,9 +50,10 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 			messageMapper.create(playerEntity).text = "I don't have the required tool...";
 			return false;
 		} else {
-			String capitalizedEventName = "started" + harvestable.harvestEventName.substring(0, 1).toUpperCase() + harvestable.harvestEventName.substring(1);
-			eventMapper.create(playerEntity).name = capitalizedEventName;
-			eventMapper.create(harvestableEntity).name = capitalizedEventName;
+			stateMapper.get(playerEntity).name = harvestable.harvestEventName;
+			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
+			stateMapper.get(harvestableEntity).name = harvestable.harvestEventName;
+			syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.STATE);
 			return true;
 		}
 	}
@@ -67,16 +68,17 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 			deleteMapper.create(harvestableEntity).reason = "harvested";
 			return true;
 		} else {
-			syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.DURABILITY);
 			return false;
 		}
 	}
 
 	@Override
 	public void stop(int playerEntity, int harvestableEntity) {
-		eventMapper.create(playerEntity).name = "stoppedHarvesting";
+		stateMapper.get(playerEntity).name = null;
+		syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
 		if (harvestableEntity != -1) {
-			eventMapper.create(harvestableEntity).name = "stoppedHarvesting";
+			stateMapper.get(harvestableEntity).name = null;
+			syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.STATE);
 		}
 	}
 }
