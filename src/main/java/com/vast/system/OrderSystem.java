@@ -3,6 +3,7 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
+import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.IncomingRequest;
 import com.vast.component.Active;
@@ -21,12 +22,13 @@ public class OrderSystem extends IteratingSystem {
 
 	private ComponentMapper<Order> orderMapper;
 	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
 
 	private Set<OrderHandler> orderHandlers;
 	private Map<String, List<IncomingRequest>> incomingRequestsByPeer;
 
 	public OrderSystem(Set<OrderHandler> orderHandlers, Map<String, List<IncomingRequest>> incomingRequestsByPeer) {
-		super(Aspect.all(Player.class, Active.class));
+		super(Aspect.all(Player.class));
 		this.orderHandlers = orderHandlers;
 		this.incomingRequestsByPeer = incomingRequestsByPeer;
 	}
@@ -40,46 +42,49 @@ public class OrderSystem extends IteratingSystem {
 	}
 
 	@Override
-	protected void inserted(int playerEntity) {
-		Player player = playerMapper.get(playerEntity);
-
-		if (incomingRequestsByPeer.containsKey(player.name)) {
-			incomingRequestsByPeer.get(player.name).clear();
-		}
+	public void inserted(IntBag entities) {
 	}
 
 	@Override
-	protected void removed(int playerEntity) {
-		cancelOrder(playerEntity);
+	public void removed(IntBag entities) {
 	}
 
 	@Override
 	protected void process(int playerEntity) {
 		Player player = playerMapper.get(playerEntity);
 
-		if (orderMapper.has(playerEntity)) {
-			Order order = orderMapper.get(playerEntity);
-			if (order.handler.isOrderComplete(playerEntity)) {
-				logger.debug("Order completed for entity {} with handler {}", playerEntity, order.handler.getClass().getSimpleName());
-				orderMapper.remove(playerEntity);
+		if (activeMapper.has(playerEntity)) {
+			if (orderMapper.has(playerEntity)) {
+				Order order = orderMapper.get(playerEntity);
+				if (order.handler.isOrderComplete(playerEntity)) {
+					logger.debug("Order completed for entity {} with handler {}", playerEntity, order.handler.getClass().getSimpleName());
+					orderMapper.remove(playerEntity);
+				}
 			}
-		}
 
-		if (incomingRequestsByPeer.containsKey(player.name)) {
-			List<IncomingRequest> incomingRequests = incomingRequestsByPeer.get(player.name);
-			if (incomingRequests.size() > 0) {
-				if (orderMapper.has(playerEntity)) {
-					cancelOrder(playerEntity);
-				} else {
-					IncomingRequest lastIncomingRequest = incomingRequests.get(incomingRequests.size() - 1);
-					incomingRequests.clear();
-					OrderHandler handler = getOrderHandler(lastIncomingRequest.getMessage().getCode());
-					if (handler != null) {
-						startOrder(playerEntity, handler, lastIncomingRequest.getMessage().getDataObject());
+			if (incomingRequestsByPeer.containsKey(player.name)) {
+				List<IncomingRequest> incomingRequests = incomingRequestsByPeer.get(player.name);
+				if (incomingRequests.size() > 0) {
+					if (orderMapper.has(playerEntity)) {
+						cancelOrder(playerEntity);
 					} else {
-						logger.warn("Could not find order handler for message code {}", lastIncomingRequest.getMessage().getCode());
+						IncomingRequest lastIncomingRequest = incomingRequests.get(incomingRequests.size() - 1);
+						incomingRequests.clear();
+						OrderHandler handler = getOrderHandler(lastIncomingRequest.getMessage().getCode());
+						if (handler != null) {
+							startOrder(playerEntity, handler, lastIncomingRequest.getMessage().getDataObject());
+						} else {
+							logger.warn("Could not find order handler for message code {}", lastIncomingRequest.getMessage().getCode());
+						}
 					}
 				}
+			}
+		} else {
+			if (incomingRequestsByPeer.containsKey(player.name)) {
+				incomingRequestsByPeer.get(player.name).clear();
+			}
+			if (orderMapper.has(playerEntity)) {
+				cancelOrder(playerEntity);
 			}
 		}
 	}
