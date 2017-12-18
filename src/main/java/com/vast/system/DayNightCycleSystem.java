@@ -39,7 +39,7 @@ public class DayNightCycleSystem extends IteratingSystem {
 	protected void inserted(int playerEntity) {
 		DayNightCycle dayNightCycle = dayNightCycleMapper.get(clockSubscription.getEntities().get(0));
 
-		eventMapper.create(playerEntity).name = dayNightCycle.isDay ? "dayInital" : "nightInital";
+		eventMapper.create(playerEntity).name = dayNightCycle.isDay ? "dayInital" : "nightInitial";
 		eventMapper.get(playerEntity).ownerOnly = true;
 	}
 
