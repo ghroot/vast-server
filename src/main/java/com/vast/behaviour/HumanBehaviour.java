@@ -60,7 +60,14 @@ public class HumanBehaviour extends AbstractBehaviour {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.PLANT)));
 		} else if (roll <= 20) {
 			byte buildingId = (byte) (Math.random() * 3);
-			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD, new DataObject().set(MessageCodes.BUILD_TYPE, buildingId))));
+			float x = transformMapper.get(entity).position.x;
+			float y = transformMapper.get(entity).position.y - 1.0f;
+			float[] position = new float[] {x, y};
+			float rotation = (float) Math.random() * 360.0f;
+			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD, new DataObject()
+				.set(MessageCodes.BUILD_TYPE, buildingId)
+				.set(MessageCodes.BUILD_POSITION, position)
+				.set(MessageCodes.BUILD_ROTATION, rotation))));
 		} else if (roll <= 55) {
 			List<Integer> nearbyInteractableEntities = getNearbyInteractableEntities(entity);
 			if (nearbyInteractableEntities.size() > 0) {

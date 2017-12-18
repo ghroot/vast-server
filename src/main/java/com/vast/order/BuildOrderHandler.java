@@ -25,8 +25,6 @@ public class BuildOrderHandler implements OrderHandler {
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Message> messageMapper;
 
-	private final float BUILD_DISTANCE = 1.5f;
-
 	private Buildings buildings;
 
 	private CreationManager creationManager;
@@ -60,17 +58,16 @@ public class BuildOrderHandler implements OrderHandler {
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
 		Inventory inventory = inventoryMapper.get(orderEntity);
 		int buildingId = (byte) dataObject.get(MessageCodes.BUILD_TYPE).value;
+		float[] position = (float[]) dataObject.get(MessageCodes.BUILD_POSITION).value;
+		float rotation = (float) dataObject.get(MessageCodes.BUILD_ROTATION).value;
 		Building building = buildings.getBuilding(buildingId);
 		if (inventory.has(building.getCosts())) {
 			inventory.remove(building.getCosts());
 			syncMapper.create(orderEntity).markPropertyAsDirty(Properties.INVENTORY);
 
-			Transform transform = transformMapper.get(orderEntity);
-			Point2f buildPosition = new Point2f(transform.position);
-			buildPosition.x += Math.cos(Math.toRadians(transform.rotation)) * BUILD_DISTANCE;
-			buildPosition.y += Math.sin(Math.toRadians(transform.rotation)) * BUILD_DISTANCE;
+			Point2f buildPosition = new Point2f(position[0], position[1]);
 			int buildingEntity = creationManager.createBuilding(buildPosition, building.getId());
-			transformMapper.get(buildingEntity).rotation = (transform.rotation + 180.0f) % 360.0f;
+			transformMapper.get(buildingEntity).rotation = rotation;
 			ownerMapper.get(buildingEntity).name = playerMapper.get(orderEntity).name;
 			createMapper.create(buildingEntity).reason = "built";
 
