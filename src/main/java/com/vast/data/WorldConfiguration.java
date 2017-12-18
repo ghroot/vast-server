@@ -13,6 +13,8 @@ public class WorldConfiguration {
 	public int width;
 	public int height;
 	public int sectionSize;
+	public int dayDuration;
+	public int nightDuration;
 
 	public WorldConfiguration() {
 		try {
@@ -20,6 +22,8 @@ public class WorldConfiguration {
 			width = worldData.getInt("width");
 			height = worldData.getInt("height");
 			sectionSize = worldData.getInt("sectionSize");
+			dayDuration = worldData.getInt("dayDuration");
+			nightDuration = worldData.getInt("nightDuration");
 		} catch (Exception exception) {
 			logger.error("Error parsing world configuration", exception);
 		}

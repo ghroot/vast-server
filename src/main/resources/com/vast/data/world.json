@@ -1,5 +1,7 @@
 {
   "width": 1000,
   "height": 1000,
-  "sectionSize": 4
+  "sectionSize": 4,
+  "dayDuration": 8,
+  "nightDuration": 2
 }

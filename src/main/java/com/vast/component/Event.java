@@ -8,4 +8,5 @@ import com.artemis.annotations.Transient;
 @PooledWeaver
 public class Event extends Component {
 	public String name = null;
+	public boolean ownerOnly = false;
 }

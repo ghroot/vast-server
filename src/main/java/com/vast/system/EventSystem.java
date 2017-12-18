@@ -49,10 +49,17 @@ public class EventSystem extends AbstractNearbyEntityIteratingSystem {
 		reusableEventMessage.getDataObject().set(MessageCodes.EVENT_ENTITY_ID, eventEntity);
 		reusableEventMessage.getDataObject().set(MessageCodes.EVENT_NAME, event.name);
 
-		for (int nearbyEntity : nearbyEntities) {
-			if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
-				VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyEntity).name);
+		if (event.ownerOnly) {
+			if (playerMapper.has(eventEntity) && activeMapper.has(eventEntity)) {
+				VastPeer nearbyPeer = peers.get(playerMapper.get(eventEntity).name);
 				nearbyPeer.send(reusableEventMessage);
+			}
+		} else {
+			for (int nearbyEntity : nearbyEntities) {
+				if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
+					VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyEntity).name);
+					nearbyPeer.send(reusableEventMessage);
+				}
 			}
 		}
 

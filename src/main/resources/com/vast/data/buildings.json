@@ -50,5 +50,19 @@
         "wood": 1
       }
     }
+  },
+  {
+    "id": 3,
+    "name": "torch",
+    "collision": {
+      "radius": 0.2
+    },
+    "constructable": {
+      "duration": 5,
+      "cost": {
+        "wood": 2,
+        "stone": 1
+      }
+    }
   }
 ]

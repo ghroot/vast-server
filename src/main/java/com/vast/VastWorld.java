@@ -101,6 +101,7 @@ public class VastWorld implements Runnable {
 			new GrowSystem(),
 			new LifetimeSystem(),
 			new PickupSystem(),
+			new DayNightCycleSystem(worldConfiguration),
 			new ParentSystem(),
 			new DeleteSystem(peers),
 			new EventSystem(peers),

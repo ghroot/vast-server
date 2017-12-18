@@ -26,8 +26,8 @@
     "craftable": {
       "duration": 3,
       "cost": {
-        "wood": 0,
-        "stone": 0
+        "wood": 2,
+        "stone": 1
       }
     }
   },
@@ -38,8 +38,8 @@
     "craftable": {
       "duration": 5,
       "cost": {
-        "wood": 0,
-        "stone": 0
+        "wood": 2,
+        "stone": 2
       }
     }
   }
