@@ -16,6 +16,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Harvestable> harvestableMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Transform> transformMapper;
+	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Message> messageMapper;
@@ -64,7 +65,8 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 
 		harvestable.durability -= world.getDelta() * HARVEST_SPEED;
 		if (harvestable.durability <= 0.0f) {
-			creationManager.createPickup(transformMapper.get(harvestableEntity).position, 0, inventoryMapper.get(harvestableEntity));
+			int pickupEntity = creationManager.createPickup(transformMapper.get(harvestableEntity).position, 0, inventoryMapper.get(harvestableEntity));
+			createMapper.create(pickupEntity).reason = "harvested";
 			deleteMapper.create(harvestableEntity).reason = "harvested";
 			return true;
 		} else {

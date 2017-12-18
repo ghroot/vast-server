@@ -87,6 +87,7 @@ public class VastWorld implements Runnable {
 			new SpatialShiftSystem(worldConfiguration, spatialHashes),
 			new SpatialUpdateSystem(worldConfiguration, spatialHashes),
 			new ScanSystem(worldConfiguration, spatialHashes),
+			new CreateSystem(peers, propertyHandlers),
 			new CullingSystem(peers, propertyHandlers),
 			new OrderSystem(orderHandlers, incomingRequestsByPeer),
 			new InteractSystem(interactionHandlers),
@@ -102,7 +103,6 @@ public class VastWorld implements Runnable {
 			new PickupSystem(),
 			new ParentSystem(),
 			new DeleteSystem(peers),
-			new CreateSystem(peers, propertyHandlers),
 			new EventSystem(peers),
 			new MessageSystem(peers),
 			new SyncSystem(propertyHandlers, peers, metrics)
