@@ -8,8 +8,8 @@
     "constructable": {
       "duration": 10,
       "cost": {
-        "wood": 5,
-        "stone": 2
+        "wood": 10,
+        "stone": 0
       }
     },
     "inventory": {
@@ -28,7 +28,7 @@
     "constructable": {
       "duration": 5,
       "cost": {
-        "wood": 1
+        "wood": 3
       }
     }
   },
@@ -41,8 +41,8 @@
     "constructable": {
       "duration": 10,
       "cost": {
-        "wood": 3,
-        "stone": 1
+        "wood": 4,
+        "stone": 3
       }
     },
     "fueled": {
