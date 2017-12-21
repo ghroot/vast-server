@@ -1,8 +1,8 @@
 package com.vast.system;
 
 import com.artemis.BaseSystem;
-import com.vast.VastPeer;
-import com.vast.VastServerApplication;
+import com.vast.network.VastPeer;
+import com.vast.network.VastServerApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

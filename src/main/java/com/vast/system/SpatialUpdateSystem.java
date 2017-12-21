@@ -4,7 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.SpatialHash;
+import com.vast.data.SpatialHash;
 import com.vast.data.WorldConfiguration;
 import com.vast.component.Spatial;
 import com.vast.component.Static;

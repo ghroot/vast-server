@@ -1,4 +1,4 @@
-package com.vast;
+package com.vast.data;
 
 import javax.vecmath.Point2i;
 

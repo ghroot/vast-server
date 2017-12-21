@@ -1,4 +1,4 @@
-package com.vast;
+package com.vast.network;
 
 import com.nhnent.haste.protocol.messages.RequestMessage;
 

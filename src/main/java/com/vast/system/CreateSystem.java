@@ -4,9 +4,9 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
-import com.vast.MessageCodes;
-import com.vast.VastPeer;
 import com.vast.component.*;
+import com.vast.network.MessageCodes;
+import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public class CreateSystem extends AbstractNearbyEntityIteratingSystem {
 		this.peers = peers;
 		this.propertyHandlers = propertyHandlers;
 
-		reusableEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED, new DataObject());
+		reusableEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
 	}
 
 	@Override
@@ -56,8 +56,10 @@ public class CreateSystem extends AbstractNearbyEntityIteratingSystem {
 					if (playerMapper.has(createEntity)) {
 						reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(createEntity).name));
 					}
+					DataObject propertiesDataObject = new DataObject();
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, propertiesDataObject);
 					for (PropertyHandler propertyHandler : propertyHandlers) {
-						propertyHandler.decorateDataObject(createEntity, reusableEventMessage.getDataObject(), true);
+						propertyHandler.decorateDataObject(createEntity, propertiesDataObject, true);
 					}
 					peer.send(reusableEventMessage);
 					knownEntities.add(createEntity);

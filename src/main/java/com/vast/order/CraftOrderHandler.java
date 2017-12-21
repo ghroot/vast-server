@@ -2,7 +2,7 @@ package com.vast.order;
 
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.MessageCodes;
+import com.vast.network.MessageCodes;
 import com.vast.component.Craft;
 import com.vast.component.Inventory;
 import com.vast.component.Message;

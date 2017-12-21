@@ -5,7 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.IncomingRequest;
+import com.vast.network.IncomingRequest;
 import com.vast.component.Active;
 import com.vast.component.Order;
 import com.vast.component.Player;

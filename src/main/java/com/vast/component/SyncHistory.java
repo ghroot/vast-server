@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SyncHistory extends PooledComponent {
-	public transient Map<Integer, Object> syncedValues = new HashMap<Integer, Object>();
+	public transient Map<Byte, Object> syncedValues = new HashMap<Byte, Object>();
 
 	@Override
 	protected void reset() {
-		syncedValues = new HashMap<Integer, Object>();
+		syncedValues = new HashMap<Byte, Object>();
 	}
 }

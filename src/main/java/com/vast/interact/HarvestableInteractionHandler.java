@@ -2,7 +2,7 @@ package com.vast.interact;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.vast.Properties;
+import com.vast.data.Properties;
 import com.vast.component.*;
 import com.vast.system.CreationManager;
 import org.slf4j.Logger;

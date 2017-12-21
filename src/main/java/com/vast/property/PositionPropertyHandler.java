@@ -2,8 +2,8 @@ package com.vast.property;
 
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.MessageCodes;
-import com.vast.Properties;
+import com.vast.network.MessageCodes;
+import com.vast.data.Properties;
 import com.vast.component.SyncHistory;
 import com.vast.component.Transform;
 
@@ -45,7 +45,7 @@ public class PositionPropertyHandler implements PropertyHandler {
 			if (force || positionDifference >= POSITION_THRESHOLD) {
 				reusablePosition[0] = transform.position.x;
 				reusablePosition[1] = transform.position.y;
-				dataObject.set(MessageCodes.PROPERTY_POSITION, reusablePosition);
+				dataObject.set(Properties.POSITION, reusablePosition);
 				if (syncHistory != null) {
 					if (lastSyncedPosition != null) {
 						lastSyncedPosition.set(transform.position);

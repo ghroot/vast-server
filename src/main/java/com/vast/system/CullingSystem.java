@@ -3,10 +3,11 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.utils.IntBag;
+import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
-import com.vast.MessageCodes;
-import com.vast.VastPeer;
 import com.vast.component.*;
+import com.vast.network.MessageCodes;
+import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,8 +101,10 @@ public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
 		if (playerMapper.has(newEntity)) {
 			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(newEntity).name));
 		}
+		DataObject propertiesDataObject = new DataObject();
+		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, propertiesDataObject);
 		for (PropertyHandler propertyHandler : propertyHandlers) {
-			propertyHandler.decorateDataObject(newEntity, reusableCreatedEventMessage.getDataObject(), true);
+			propertyHandler.decorateDataObject(newEntity, propertiesDataObject, true);
 		}
 		peer.send(reusableCreatedEventMessage);
 	}

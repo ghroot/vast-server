@@ -2,9 +2,8 @@ package com.vast.property;
 
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.MessageCodes;
-import com.vast.Properties;
 import com.vast.component.Growing;
+import com.vast.data.Properties;
 
 public class GrowingPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Growing> growingMapper;
@@ -18,12 +17,12 @@ public class GrowingPropertyHandler implements PropertyHandler {
 	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
 		if (force) {
 			if (growingMapper.has(entity)) {
-				dataObject.set(MessageCodes.PROPERTY_GROWING, growingMapper.get(entity).timeLeft > 0.0f);
+				dataObject.set(Properties.GROWING, growingMapper.get(entity).timeLeft > 0.0f);
 				return true;
 			}
 			return false;
 		} else {
-			dataObject.set(MessageCodes.PROPERTY_GROWING, growingMapper.has(entity) && growingMapper.get(entity).timeLeft > 0.0f);
+			dataObject.set(Properties.GROWING, growingMapper.has(entity) && growingMapper.get(entity).timeLeft > 0.0f);
 			return true;
 		}
 	}

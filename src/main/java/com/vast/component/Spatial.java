@@ -2,7 +2,7 @@ package com.vast.component;
 
 import com.artemis.PooledComponent;
 import com.artemis.annotations.DelayedComponentRemoval;
-import com.vast.SpatialHash;
+import com.vast.data.SpatialHash;
 
 import javax.vecmath.Point2f;
 

@@ -2,10 +2,9 @@ package com.vast.property;
 
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.MessageCodes;
-import com.vast.Properties;
 import com.vast.component.Constructable;
 import com.vast.component.SyncHistory;
+import com.vast.data.Properties;
 
 public class ProgressPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Constructable> constructableMapper;
@@ -32,7 +31,7 @@ public class ProgressPropertyHandler implements PropertyHandler {
 				progressDifference = (int) Math.abs(lastSyncedProgress - progress);
 			}
 			if (force || progress == 100 || progressDifference >= PROGRESS_THRESHOLD) {
-				dataObject.set(MessageCodes.PROPERTY_PROGRESS, progress);
+				dataObject.set(Properties.PROGRESS, progress);
 				if (syncHistory != null) {
 					syncHistory.syncedValues.put(Properties.PROGRESS, progress);
 				}

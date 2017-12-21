@@ -2,10 +2,9 @@ package com.vast.property;
 
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.MessageCodes;
-import com.vast.Properties;
 import com.vast.component.SyncHistory;
 import com.vast.component.Transform;
+import com.vast.data.Properties;
 
 public class RotationPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Transform> transformMapper;
@@ -33,7 +32,7 @@ public class RotationPropertyHandler implements PropertyHandler {
 				rotationDifference = getAngleDifference(lastSyncedRotation, transform.rotation);
 			}
 			if (force || rotationDifference >= ROTATION_THRESHOLD) {
-				dataObject.set(MessageCodes.PROPERTY_ROTATION, transform.rotation);
+				dataObject.set(Properties.ROTATION, transform.rotation);
 				if (syncHistory != null) {
 					syncHistory.syncedValues.put(Properties.ROTATION, transform.rotation);
 				}

@@ -2,9 +2,8 @@ package com.vast.property;
 
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.MessageCodes;
-import com.vast.Properties;
 import com.vast.component.Home;
+import com.vast.data.Properties;
 
 public class HomePropertyHandler implements PropertyHandler {
 	private ComponentMapper<Home> homeMapper;
@@ -26,7 +25,7 @@ public class HomePropertyHandler implements PropertyHandler {
 			Home home = homeMapper.get(entity);
 			reusablePosition[0] = home.position.x;
 			reusablePosition[1] = home.position.y;
-			dataObject.set(MessageCodes.PROPERTY_HOME, reusablePosition);
+			dataObject.set(Properties.HOME, reusablePosition);
 			return true;
 		}
 		return false;

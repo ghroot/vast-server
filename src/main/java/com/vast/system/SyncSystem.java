@@ -3,14 +3,15 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.utils.IntBag;
+import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
-import com.vast.MessageCodes;
 import com.vast.Metrics;
-import com.vast.VastPeer;
 import com.vast.component.Active;
 import com.vast.component.Player;
 import com.vast.component.Sync;
 import com.vast.component.SyncPropagation;
+import com.vast.network.MessageCodes;
+import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 	private Set<PropertyHandler> propertyHandlers;
 	private Map<String, VastPeer> peers;
 	private Metrics metrics;
-	private EventMessage reusableEventMessage;
+	private EventMessage reusableMessage;
 
 	public SyncSystem(Set<PropertyHandler> propertyHandlers, Map<String, VastPeer> peers, Metrics metrics) {
 		super(Aspect.all(Sync.class, SyncPropagation.class));
@@ -37,7 +38,7 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 		this.peers = peers;
 		this.metrics = metrics;
 
-		reusableEventMessage = new EventMessage(MessageCodes.UPDATE_PROPERTIES);
+		reusableMessage = new EventMessage(MessageCodes.UPDATE_PROPERTIES);
 	}
 
 	@Override
@@ -61,14 +62,16 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 
 		boolean reliable = false;
 		boolean atLeastOnePropertySet = false;
-		reusableEventMessage.getDataObject().clear();
-		reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
+		reusableMessage.getDataObject().clear();
+		reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
+		DataObject propertiesDataObject = new DataObject();
+		reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, propertiesDataObject);
 		for (PropertyHandler syncHandler : propertyHandlers) {
 			int property = syncHandler.getProperty();
 			if (sync.isPropertyDirty(property)) {
 				SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
 				if (syncPropagation.isNearbyPropagation(property)) {
-					if (syncHandler.decorateDataObject(syncEntity, reusableEventMessage.getDataObject(), false)) {
+					if (syncHandler.decorateDataObject(syncEntity, propertiesDataObject, false)) {
 						atLeastOnePropertySet = true;
 						metrics.incrementSyncedProperty(property);
 					}
@@ -83,9 +86,9 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 				if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
 					VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyEntity).name);
 					if (reliable) {
-						nearbyPeer.send(reusableEventMessage);
+						nearbyPeer.send(reusableMessage);
 					} else {
-						nearbyPeer.sendUnreliable(reusableEventMessage);
+						nearbyPeer.sendUnreliable(reusableMessage);
 					}
 				}
 			}
@@ -94,14 +97,16 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 		if (playerMapper.has(syncEntity) && activeMapper.has(syncEntity)) {
 			reliable = false;
 			atLeastOnePropertySet = false;
-			reusableEventMessage.getDataObject().clear();
-			reusableEventMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
+			reusableMessage.getDataObject().clear();
+			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
+			propertiesDataObject = new DataObject();
+			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, propertiesDataObject);
 			for (PropertyHandler syncHandler : propertyHandlers) {
 				int property = syncHandler.getProperty();
 				if (sync.isPropertyDirty(property)) {
 					SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
 					if (syncPropagation.isOwnerPropagation(property)) {
-						if (syncHandler.decorateDataObject(syncEntity, reusableEventMessage.getDataObject(), false)) {
+						if (syncHandler.decorateDataObject(syncEntity, propertiesDataObject, false)) {
 							atLeastOnePropertySet = true;
 							metrics.incrementSyncedProperty(property);
 						}
@@ -114,9 +119,9 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 			if (atLeastOnePropertySet) {
 				VastPeer nearbyPeer = peers.get(playerMapper.get(syncEntity).name);
 				if (reliable) {
-					nearbyPeer.send(reusableEventMessage);
+					nearbyPeer.send(reusableMessage);
 				} else {
-					nearbyPeer.sendUnreliable(reusableEventMessage);
+					nearbyPeer.sendUnreliable(reusableMessage);
 				}
 			}
 		}

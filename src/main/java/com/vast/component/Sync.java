@@ -10,10 +10,10 @@ public class Sync extends Component {
 	public int dirtyProperties = 0;
 
 	public void markPropertyAsDirty(int property) {
-		dirtyProperties |= property;
+		dirtyProperties |= (1 << property);
 	}
 
 	public boolean isPropertyDirty(int property) {
-		return (dirtyProperties & property) > 0;
+		return (dirtyProperties & (1 << property)) > 0;
 	}
 }

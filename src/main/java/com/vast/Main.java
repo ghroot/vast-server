@@ -3,6 +3,7 @@ package com.vast;
 import com.nhnent.haste.bootstrap.GameServerBootstrap;
 import com.nhnent.haste.bootstrap.options.UDPOption;
 import com.nhnent.haste.transport.MetricListener;
+import com.vast.network.VastServerApplication;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;

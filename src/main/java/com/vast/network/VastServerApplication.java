@@ -1,4 +1,4 @@
-package com.vast;
+package com.vast.network;
 
 import com.nhnent.haste.framework.ClientPeer;
 import com.nhnent.haste.framework.ServerApplication;
@@ -6,6 +6,8 @@ import com.nhnent.haste.protocol.messages.InitialRequest;
 import com.nhnent.haste.protocol.messages.RequestMessage;
 import com.nhnent.haste.transport.DisconnectReason;
 import com.nhnent.haste.transport.NetworkPeer;
+import com.vast.Metrics;
+import com.vast.VastWorld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

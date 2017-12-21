@@ -1,4 +1,4 @@
-package com.vast;
+package com.vast.network;
 
 public class MessageCodes {
 	// Server -> Client
@@ -8,6 +8,7 @@ public class MessageCodes {
 	public static byte ENTITY_CREATED_SUB_TYPE = 2;
 	public static byte ENTITY_CREATED_OWNER = 3;
 	public static byte ENTITY_CREATED_REASON = 4;
+	public static byte ENTITY_CREATED_PROPERTIES = 5;
 
 	// Server -> Client
 	public static short ENTITY_DESTROYED = 1;
@@ -17,6 +18,7 @@ public class MessageCodes {
 	// Server -> Client
 	public static short UPDATE_PROPERTIES = 2;
 	public static byte UPDATE_PROPERTIES_ENTITY_ID = 0;
+	public static byte UPDATE_PROPERTIES_PROPERTIES = 1;
 
 	// Server -> Client
 	public static short EVENT = 3;
@@ -59,15 +61,4 @@ public class MessageCodes {
 	// Client -> Server
 	public static short FOLLOW = 57;
 	public static byte FOLLOW_ENTITY_ID = 0;
-
-	// Properties
-	public static byte PROPERTY_POSITION = 100;
-	public static byte PROPERTY_ROTATION = 101;
-	public static byte PROPERTY_ACTIVE = 102;
-	public static byte PROPERTY_PROGRESS = 104;
-	public static byte PROPERTY_STATE = 105;
-	public static byte PROPERTY_INVENTORY = 107;
-	public static byte PROPERTY_FUELED = 108;
-	public static byte PROPERTY_HOME = 109;
-	public static byte PROPERTY_GROWING = 110;
 }

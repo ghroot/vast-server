@@ -17,12 +17,12 @@ import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.nhnent.haste.transport.QoS;
-import com.vast.MessageCodes;
 import com.vast.Metrics;
-import com.vast.Properties;
-import com.vast.VastPeer;
 import com.vast.component.*;
+import com.vast.data.Properties;
 import com.vast.data.WorldConfiguration;
+import com.vast.network.MessageCodes;
+import com.vast.network.VastPeer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ public class TerminalSystem extends IntervalSystem {
 	private boolean showSentMessages = false;
 	private Map<Short, String> messageNames = new HashMap<Short, String>();
 	private boolean showSyncedProperties = false;
-	private Map<Integer, String> propertyNames = new HashMap<Integer, String>();
+	private Map<Byte, String> propertyNames = new HashMap<Byte, String>();
 	private int focusedEntity = -1;
 	private int processDuration = 0;
 

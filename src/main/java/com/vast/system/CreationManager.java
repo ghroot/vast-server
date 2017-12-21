@@ -4,7 +4,7 @@ import com.artemis.Archetype;
 import com.artemis.ArchetypeBuilder;
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
-import com.vast.Properties;
+import com.vast.data.Properties;
 import com.vast.component.*;
 import com.vast.data.*;
 import fastnoise.FastNoise;

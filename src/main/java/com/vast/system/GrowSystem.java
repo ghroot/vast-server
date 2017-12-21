@@ -3,7 +3,7 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
-import com.vast.Properties;
+import com.vast.data.Properties;
 import com.vast.component.Growing;
 import com.vast.component.Sync;
 

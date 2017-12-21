@@ -1,8 +1,8 @@
 package com.vast.system;
 
 import com.artemis.BaseSystem;
-import com.vast.IncomingRequest;
-import com.vast.VastServerApplication;
+import com.vast.network.IncomingRequest;
+import com.vast.network.VastServerApplication;
 
 import java.util.ArrayList;
 import java.util.List;
