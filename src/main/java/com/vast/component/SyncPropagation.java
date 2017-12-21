@@ -17,7 +17,7 @@ public class SyncPropagation extends Component {
 	}
 
 	public boolean isReliable(int property) {
-		return !isUnreliable((1 << property));
+		return !isUnreliable(property);
 	}
 
 	public void setOwnerPropagation(int property) {
@@ -29,6 +29,6 @@ public class SyncPropagation extends Component {
 	}
 
 	public boolean isNearbyPropagation(int property) {
-		return !isOwnerPropagation((1 << property));
+		return !isOwnerPropagation(property);
 	}
 }
