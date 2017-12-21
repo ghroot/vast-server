@@ -4,7 +4,6 @@ import com.artemis.Archetype;
 import com.artemis.ArchetypeBuilder;
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
-import com.vast.data.Properties;
 import com.vast.component.*;
 import com.vast.data.*;
 import fastnoise.FastNoise;
@@ -59,6 +58,7 @@ public class CreationManager extends BaseSystem {
 	protected void initialize() {
 		worldArchetype = new ArchetypeBuilder()
 			.add(DayNightCycle.class)
+			.add(Weather.class)
 			.build(world);
 
 		playerArchetype = new ArchetypeBuilder()

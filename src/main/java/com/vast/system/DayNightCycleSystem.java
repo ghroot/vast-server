@@ -17,7 +17,7 @@ public class DayNightCycleSystem extends IteratingSystem {
 
 	private WorldConfiguration worldConfiguration;
 
-	private EntitySubscription clockSubscription;
+	private EntitySubscription dayNightCycleSubscription;
 	private boolean changed;
 
 	public DayNightCycleSystem(WorldConfiguration worldConfiguration) {
@@ -28,16 +28,16 @@ public class DayNightCycleSystem extends IteratingSystem {
 
 	@Override
 	protected void initialize() {
-		clockSubscription = world.getAspectSubscriptionManager().get(Aspect.all(DayNightCycle.class));
+		dayNightCycleSubscription = world.getAspectSubscriptionManager().get(Aspect.all(DayNightCycle.class));
 
-		DayNightCycle dayNightCycle = dayNightCycleMapper.get(clockSubscription.getEntities().get(0));
+		DayNightCycle dayNightCycle = dayNightCycleMapper.get(dayNightCycleSubscription.getEntities().get(0));
 		dayNightCycle.isDay = true;
 		dayNightCycle.countdown = worldConfiguration.dayDuration * 60.0f;
 	}
 
 	@Override
 	protected void inserted(int playerEntity) {
-		DayNightCycle dayNightCycle = dayNightCycleMapper.get(clockSubscription.getEntities().get(0));
+		DayNightCycle dayNightCycle = dayNightCycleMapper.get(dayNightCycleSubscription.getEntities().get(0));
 
 		eventMapper.create(playerEntity).name = dayNightCycle.isDay ? "dayInital" : "nightInitial";
 		eventMapper.get(playerEntity).ownerOnly = true;
@@ -49,7 +49,7 @@ public class DayNightCycleSystem extends IteratingSystem {
 
 	@Override
 	protected void begin() {
-		DayNightCycle dayNightCycle = dayNightCycleMapper.get(clockSubscription.getEntities().get(0));
+		DayNightCycle dayNightCycle = dayNightCycleMapper.get(dayNightCycleSubscription.getEntities().get(0));
 
 		dayNightCycle.countdown -= world.getDelta();
 		if (dayNightCycle.countdown <= 0.0f) {
@@ -65,7 +65,7 @@ public class DayNightCycleSystem extends IteratingSystem {
 	@Override
 	protected void process(int playerEntity) {
 		if (changed) {
-			DayNightCycle dayNightCycle = dayNightCycleMapper.get(clockSubscription.getEntities().get(0));
+			DayNightCycle dayNightCycle = dayNightCycleMapper.get(dayNightCycleSubscription.getEntities().get(0));
 
 			eventMapper.create(playerEntity).name = dayNightCycle.isDay ? "dayChanged" : "nightChanged";
 			eventMapper.get(playerEntity).ownerOnly = true;
