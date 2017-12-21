@@ -9,26 +9,26 @@ public class SyncPropagation extends Component {
 	public int ownerPropagationProperties = 0;
 
 	public void setUnreliable(int property) {
-		unreliableProperties |= property;
+		unreliableProperties |= (1 << property);
 	}
 
 	public boolean isUnreliable(int property) {
-		return (unreliableProperties & property) > 0;
+		return (unreliableProperties & (1 << property)) > 0;
 	}
 
 	public boolean isReliable(int property) {
-		return !isUnreliable(property);
+		return !isUnreliable((1 << property));
 	}
 
 	public void setOwnerPropagation(int property) {
-		ownerPropagationProperties |= property;
+		ownerPropagationProperties |= (1 << property);
 	}
 
 	public boolean isOwnerPropagation(int property) {
-		return (ownerPropagationProperties & property) > 0;
+		return (ownerPropagationProperties & (1 << property)) > 0;
 	}
 
 	public boolean isNearbyPropagation(int property) {
-		return !isOwnerPropagation(property);
+		return !isOwnerPropagation((1 << property));
 	}
 }
