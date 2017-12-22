@@ -5,5 +5,5 @@ import com.artemis.annotations.PooledWeaver;
 
 @PooledWeaver
 public class State extends Component{
-	public String name = null;
+	public transient String name = null;
 }
