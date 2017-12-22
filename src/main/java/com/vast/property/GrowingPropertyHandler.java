@@ -9,7 +9,7 @@ public class GrowingPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Growing> growingMapper;
 
 	@Override
-	public int getProperty() {
+	public byte getProperty() {
 		return Properties.GROWING;
 	}
 

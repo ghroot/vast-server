@@ -67,7 +67,7 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 		DataObject propertiesDataObject = new DataObject();
 		reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, propertiesDataObject);
 		for (PropertyHandler syncHandler : propertyHandlers) {
-			int property = syncHandler.getProperty();
+			byte property = syncHandler.getProperty();
 			if (sync.isPropertyDirty(property)) {
 				SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
 				if (syncPropagation.isNearbyPropagation(property)) {
@@ -102,7 +102,7 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 			propertiesDataObject = new DataObject();
 			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, propertiesDataObject);
 			for (PropertyHandler syncHandler : propertyHandlers) {
-				int property = syncHandler.getProperty();
+				byte property = syncHandler.getProperty();
 				if (sync.isPropertyDirty(property)) {
 					SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
 					if (syncPropagation.isOwnerPropagation(property)) {

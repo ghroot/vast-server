@@ -283,12 +283,12 @@ public class TerminalSystem extends IntervalSystem {
 
 			if (showSyncedProperties) {
 				int longestLength = 0;
-				for (int property : metrics.getSyncedProperties().keySet()) {
+				for (byte property : metrics.getSyncedProperties().keySet()) {
 					String propertyName = propertyNames.get(property);
 					longestLength = Math.max(propertyName.length(), longestLength);
 				}
 				int row = 11;
-				for (int property : metrics.getSyncedProperties().keySet()) {
+				for (byte property : metrics.getSyncedProperties().keySet()) {
 					int count = metrics.getSyncedProperties().get(property);
 					String propertyName = propertyNames.get(property);
 					textGraphics.putString(0, row, propertyName);

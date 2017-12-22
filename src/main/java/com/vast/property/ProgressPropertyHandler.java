@@ -13,7 +13,7 @@ public class ProgressPropertyHandler implements PropertyHandler {
 	private final int PROGRESS_THRESHOLD = 10;
 
 	@Override
-	public int getProperty() {
+	public byte getProperty() {
 		return Properties.PROGRESS;
 	}
 

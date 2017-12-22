@@ -11,7 +11,7 @@ public class StatePropertyHandler implements PropertyHandler {
 	private ComponentMapper<State> stateMapper;
 
 	@Override
-	public int getProperty() {
+	public byte getProperty() {
 		return Properties.STATE;
 	}
 

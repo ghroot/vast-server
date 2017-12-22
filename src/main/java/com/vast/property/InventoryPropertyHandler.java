@@ -9,7 +9,7 @@ public class InventoryPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Inventory> inventoryMapper;
 
 	@Override
-	public int getProperty() {
+	public byte getProperty() {
 		return Properties.INVENTORY;
 	}
 

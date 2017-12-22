@@ -3,6 +3,6 @@ package com.vast.property;
 import com.nhnent.haste.protocol.data.DataObject;
 
 public interface PropertyHandler {
-	int getProperty();
+	byte getProperty();
 	boolean decorateDataObject(int entity, DataObject dataObject, boolean force);
 }

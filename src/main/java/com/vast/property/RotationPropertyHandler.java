@@ -16,7 +16,7 @@ public class RotationPropertyHandler implements PropertyHandler {
 	}
 
 	@Override
-	public int getProperty() {
+	public byte getProperty() {
 		return Properties.ROTATION;
 	}
 

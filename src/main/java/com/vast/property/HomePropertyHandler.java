@@ -15,7 +15,7 @@ public class HomePropertyHandler implements PropertyHandler {
 	}
 
 	@Override
-	public int getProperty() {
+	public byte getProperty() {
 		return Properties.HOME;
 	}
 

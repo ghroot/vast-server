@@ -11,7 +11,7 @@ public class ActivePropertyHandler implements PropertyHandler {
 	private ComponentMapper<Active> activeMapper;
 
 	@Override
-	public int getProperty() {
+	public byte getProperty() {
 		return Properties.ACTIVE;
 	}
 

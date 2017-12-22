@@ -25,7 +25,7 @@ public class PositionPropertyHandler implements PropertyHandler {
 	}
 
 	@Override
-	public int getProperty() {
+	public byte getProperty() {
 		return Properties.POSITION;
 	}
 

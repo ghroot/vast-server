@@ -9,7 +9,7 @@ public class FueledPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Fueled> fueledMapper;
 
 	@Override
-	public int getProperty() {
+	public byte getProperty() {
 		return Properties.FUELED;
 	}
 
