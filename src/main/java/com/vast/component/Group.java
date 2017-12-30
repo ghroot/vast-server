@@ -4,7 +4,6 @@ import com.artemis.Component;
 import com.artemis.annotations.PooledWeaver;
 
 @PooledWeaver
-public class DayNightCycle extends Component {
-	public float countdown = 0.0f;
-	public boolean isDay = true;
+public class Group extends Component {
+	public int id = -1;
 }

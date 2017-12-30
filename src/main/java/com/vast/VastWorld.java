@@ -4,9 +4,10 @@ import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
-import com.vast.behaviour.AnimalBehaviour;
+import com.vast.behaviour.AdultAnimalBehaviour;
 import com.vast.behaviour.Behaviour;
 import com.vast.behaviour.HumanBehaviour;
+import com.vast.behaviour.YoungAnimalBehaviour;
 import com.vast.data.Animals;
 import com.vast.data.Buildings;
 import com.vast.data.Items;
@@ -76,7 +77,8 @@ public class VastWorld implements Runnable {
 		));
 		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
 		behaviours.put("human", new HumanBehaviour(interactionHandlers, peers, incomingRequestsByPeer, items, buildings));
-		behaviours.put("animal", new AnimalBehaviour(interactionHandlers));
+		behaviours.put("adultAnimal", new AdultAnimalBehaviour(interactionHandlers));
+		behaviours.put("youngAnimal", new YoungAnimalBehaviour(interactionHandlers));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldConfiguration, items, buildings, animals),

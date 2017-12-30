@@ -34,6 +34,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Speed> speedMapper;
 	private ComponentMapper<Growing> growingMapper;
 	private ComponentMapper<Plantable> plantableMapper;
+	private ComponentMapper<Group> groupMapper;
 
 	private WorldConfiguration worldConfiguration;
 	private Items items;
@@ -48,6 +49,8 @@ public class CreationManager extends BaseSystem {
 	private Archetype buildingArchetype;
 	private Archetype pickupArchetype;
 
+	private int nextAnimalGroupId = 0;
+
 	public CreationManager(WorldConfiguration worldConfiguration, Items items, Buildings buildings, Animals animals) {
 		this.worldConfiguration = worldConfiguration;
 		this.items = items;
@@ -58,7 +61,7 @@ public class CreationManager extends BaseSystem {
 	@Override
 	protected void initialize() {
 		worldArchetype = new ArchetypeBuilder()
-			.add(DayNightCycle.class)
+			.add(Time.class)
 			.add(Weather.class)
 			.build(world);
 
@@ -109,6 +112,8 @@ public class CreationManager extends BaseSystem {
 		animalArchetype = new ArchetypeBuilder()
 			.add(Type.class)
 			.add(SubType.class)
+			.add(AI.class)
+			.add(Group.class)
 			.add(Transform.class)
 			.add(Spatial.class)
 			.add(SyncPropagation.class)
@@ -157,7 +162,7 @@ public class CreationManager extends BaseSystem {
 					createRock(new Point2f(x, y));
 				}
 				if (noise2.GetWhiteNoise(x, y) > 0.99f) {
-					createAnimal(new Point2f(x, y), (int) (Math.random() * 2));
+					createAnimalGroup(new Point2f(x, y), (int) (Math.random() * 2));
 				}
 			}
 		}
@@ -195,12 +200,21 @@ public class CreationManager extends BaseSystem {
 		return rockEntity;
 	}
 
-	private int createAnimal(Point2f position, int animalId) {
+	private void createAnimalGroup(Point2f position, int animalId) {
+		int groupId = nextAnimalGroupId++;
+		createAnimal(new Point2f(position.x - 1.0f + 2.0f * (float) Math.random(), position.y - 1.0f + 2.0f * (float) Math.random()), animalId, "adultAnimal", groupId);
+		createAnimal(new Point2f(position.x - 1.0f + 2.0f * (float) Math.random(), position.y - 1.0f + 2.0f * (float) Math.random()), animalId, "youngAnimal", groupId);
+		createAnimal(new Point2f(position.x - 1.0f + 2.0f * (float) Math.random(), position.y - 1.0f + 2.0f * (float) Math.random()), animalId, "youngAnimal", groupId);
+	}
+
+	public int createAnimal(Point2f position, int animalId, String behaviour, int groupId) {
 		Animal animal = animals.getAnimal(animalId);
 		int animalEntity = world.create(animalArchetype);
 		typeMapper.get(animalEntity).type = "animal";
 		subTypeMapper.get(animalEntity).subType = animalId;
 		transformMapper.get(animalEntity).position.set(position);
+		aiMapper.get(animalEntity).behaviourName = behaviour;
+		groupMapper.get(animalEntity).id = groupId;
 
 		if (animal.hasAspect("collision")) {
 			JSONObject collisionAspect = animal.getAspect("collision");
@@ -221,12 +235,6 @@ public class CreationManager extends BaseSystem {
 			JSONObject speedAspect = animal.getAspect("speed");
 			Speed speed = speedMapper.create(animalEntity);
 			speed.baseSpeed = speedAspect.getFloat("baseSpeed");
-		}
-
-		if (animal.hasAspect("ai")) {
-			JSONObject aiAspect = animal.getAspect("ai");
-			AI ai = aiMapper.create(animalEntity);
-			ai.behaviourName = aiAspect.getString("behaviour");
 		}
 
 		syncPropagationMapper.get(animalEntity).setUnreliable(Properties.POSITION);

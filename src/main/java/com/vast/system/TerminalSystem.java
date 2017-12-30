@@ -343,6 +343,10 @@ public class TerminalSystem extends IntervalSystem {
 						detail = ((Owner) component).name;
 					} else if (component instanceof Player) {
 						detail = ((Player) component).name;
+					} else if (component instanceof Follow) {
+						detail = "" + ((Follow) component).entity;
+					} else if (component instanceof Group) {
+						detail = "" + ((Group) component).id;
 					} else if (component instanceof Order) {
 						Order order = (Order) component;
 						if (order.handler != null) {
