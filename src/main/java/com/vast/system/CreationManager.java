@@ -33,6 +33,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 	private ComponentMapper<Speed> speedMapper;
 	private ComponentMapper<Growing> growingMapper;
+	private ComponentMapper<Plantable> plantableMapper;
 
 	private WorldConfiguration worldConfiguration;
 	private Items items;
@@ -297,6 +298,10 @@ public class CreationManager extends BaseSystem {
 				fueled.cost = new Cost(items.getItem(itemName).getId(), amount);
 				break;
 			}
+		}
+
+		if (building.hasAspect("plantable")) {
+			plantableMapper.create(buildingEntity);
 		}
 
 		return buildingEntity;

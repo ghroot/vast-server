@@ -49,6 +49,7 @@ public class VastWorld implements Runnable {
 			new GrowingInteractionHandler(),
 			new HarvestableInteractionHandler(),
 			new ConstructableInteractionHandler(),
+			new PlantableInteractionHandler(items),
 			new ContainerInteractionHandler(items),
 			new FueledInteractionHandler()
 		));

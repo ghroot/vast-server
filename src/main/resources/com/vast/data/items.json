@@ -42,5 +42,10 @@
         "stone": 2
       }
     }
+  },
+  {
+    "id": 6,
+    "type": "food",
+    "name": "food"
   }
 ]

@@ -64,5 +64,21 @@
         "stone": 1
       }
     }
+  },
+  {
+    "id": 4,
+    "name": "planter",
+    "collision": {
+      "radius": 0.4
+    },
+    "constructable": {
+      "duration": 5,
+      "cost": {
+        "wood": 5,
+        "stone": 1
+      }
+    },
+    "plantable": {
+    }
   }
 ]

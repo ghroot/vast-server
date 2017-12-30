@@ -2,6 +2,7 @@ package com.vast.component;
 
 import com.artemis.PooledComponent;
 import com.vast.data.Cost;
+import com.vast.data.Item;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -24,6 +25,10 @@ public class Inventory extends PooledComponent {
 		items[itemId] += amountToAdd;
 	}
 
+	public void add(Item item, int amount) {
+		add(item.getId(), amount);
+	}
+
 	public void add(short[] otherItems) {
 		for (int itemId = 0; itemId < otherItems.length; itemId++) {
 			if (otherItems[itemId] > 0) {
@@ -40,6 +45,14 @@ public class Inventory extends PooledComponent {
 		if (amount > 0) {
 			items[itemId] -= amount;
 		}
+	}
+
+	public void remove(int itemId) {
+		remove(itemId, 1);
+	}
+
+	public void remove(Item item) {
+		remove(item.getId());
 	}
 
 	public void remove(Cost cost) {
@@ -62,6 +75,10 @@ public class Inventory extends PooledComponent {
 
 	public boolean has(int itemId) {
 		return has(itemId, 1);
+	}
+
+	public boolean has(Item item) {
+		return has(item.getId());
 	}
 
 	public boolean has(Cost cost) {
