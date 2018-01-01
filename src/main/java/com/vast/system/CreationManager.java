@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
+import java.util.Random;
 
 public class CreationManager extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CreationManager.class);
@@ -112,7 +113,6 @@ public class CreationManager extends BaseSystem {
 		animalArchetype = new ArchetypeBuilder()
 			.add(Type.class)
 			.add(SubType.class)
-			.add(AI.class)
 			.add(Group.class)
 			.add(Transform.class)
 			.add(Spatial.class)
@@ -162,7 +162,7 @@ public class CreationManager extends BaseSystem {
 					createRock(new Point2f(x, y));
 				}
 				if (noise2.GetWhiteNoise(x, y) > 0.99f) {
-					createAnimalGroup(new Point2f(x, y), (int) (Math.random() * 2));
+					createAnimalGroup(new Point2f(x, y), Math.random() < 0.5f ? 0 : 2);
 				}
 			}
 		}
@@ -201,19 +201,20 @@ public class CreationManager extends BaseSystem {
 	}
 
 	private void createAnimalGroup(Point2f position, int animalId) {
+		int adultAnimalId = animalId;
+		int youngAnimalId = animalId + 1;
 		int groupId = nextAnimalGroupId++;
-		createAnimal(new Point2f(position.x - 1.0f + 2.0f * (float) Math.random(), position.y - 1.0f + 2.0f * (float) Math.random()), animalId, "adultAnimal", groupId);
-		createAnimal(new Point2f(position.x - 1.0f + 2.0f * (float) Math.random(), position.y - 1.0f + 2.0f * (float) Math.random()), animalId, "youngAnimal", groupId);
-		createAnimal(new Point2f(position.x - 1.0f + 2.0f * (float) Math.random(), position.y - 1.0f + 2.0f * (float) Math.random()), animalId, "youngAnimal", groupId);
+		createAnimal(new Point2f(position.x - 1.0f + 2.0f * (float) Math.random(), position.y - 1.0f + 2.0f * (float) Math.random()), adultAnimalId, groupId);
+		createAnimal(new Point2f(position.x - 1.0f + 2.0f * (float) Math.random(), position.y - 1.0f + 2.0f * (float) Math.random()), youngAnimalId, groupId);
+		createAnimal(new Point2f(position.x - 1.0f + 2.0f * (float) Math.random(), position.y - 1.0f + 2.0f * (float) Math.random()), youngAnimalId, groupId);
 	}
 
-	public int createAnimal(Point2f position, int animalId, String behaviour, int groupId) {
+	public int createAnimal(Point2f position, int animalId, int groupId) {
 		Animal animal = animals.getAnimal(animalId);
 		int animalEntity = world.create(animalArchetype);
 		typeMapper.get(animalEntity).type = "animal";
 		subTypeMapper.get(animalEntity).subType = animalId;
 		transformMapper.get(animalEntity).position.set(position);
-		aiMapper.get(animalEntity).behaviourName = behaviour;
 		groupMapper.get(animalEntity).id = groupId;
 
 		if (animal.hasAspect("collision")) {
@@ -235,6 +236,12 @@ public class CreationManager extends BaseSystem {
 			JSONObject speedAspect = animal.getAspect("speed");
 			Speed speed = speedMapper.create(animalEntity);
 			speed.baseSpeed = speedAspect.getFloat("baseSpeed");
+		}
+
+		if (animal.hasAspect("ai")) {
+			JSONObject aiAspect = animal.getAspect("ai");
+			AI ai = aiMapper.create(animalEntity);
+			ai.behaviourName = aiAspect.getString("behaviour");
 		}
 
 		syncPropagationMapper.get(animalEntity).setUnreliable(Properties.POSITION);
