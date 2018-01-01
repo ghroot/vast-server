@@ -68,6 +68,8 @@ public class CollisionSystem extends IteratingSystem {
 			} else {
 				collision.lastCheckedPosition.set(transform.position);
 			}
+			// TODO: Collision should probably use spatials instead of scan.nearbyEntities??
+			// TODO: e.g. animals currently don't collide with each other
 			Scan scan = scanMapper.get(entity);
 			for (int nearbyEntity : scan.nearbyEntities) {
 				if (nearbyEntity != entity) {
