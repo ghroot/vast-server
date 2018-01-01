@@ -5,33 +5,46 @@ import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.Metrics;
-import com.vast.data.Properties;
 import com.vast.component.*;
+import com.vast.data.Properties;
+import com.vast.data.SpatialHash;
+import com.vast.data.WorldConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class CollisionSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem.class);
 
 	private ComponentMapper<Transform> transformMapper;
+	private ComponentMapper<Spatial> spatialMapper;
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Static> staticMapper;
 	private ComponentMapper<Delete> deleteMapper;
-	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Sync> syncMapper;
 
+	private WorldConfiguration worldConfiguration;
+	private Map<Integer, Set<Integer>> spatialHashes;
 	private Metrics metrics;
 
+	private SpatialHash reusableHash;
+	private Set<Integer> reusableAdjacentEntities;
 	private Vector2f reusableVector;
 	private int numberOfCollisionChecks;
 
-	public CollisionSystem(Metrics metrics) {
-		super(Aspect.all(Transform.class, Collision.class, Scan.class).exclude(Static.class));
+	public CollisionSystem(WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes, Metrics metrics) {
+		super(Aspect.all(Transform.class, Spatial.class, Collision.class).exclude(Static.class));
+		this.worldConfiguration = worldConfiguration;
+		this.spatialHashes = spatialHashes;
 		this.metrics = metrics;
 
+		reusableHash = new SpatialHash();
+		reusableAdjacentEntities = new HashSet<Integer>();
 		reusableVector = new Vector2f();
 	}
 
@@ -68,24 +81,21 @@ public class CollisionSystem extends IteratingSystem {
 			} else {
 				collision.lastCheckedPosition.set(transform.position);
 			}
-			// TODO: Collision should probably use spatials instead of scan.nearbyEntities??
-			// TODO: e.g. animals currently don't collide with each other
-			Scan scan = scanMapper.get(entity);
-			for (int nearbyEntity : scan.nearbyEntities) {
-				if (nearbyEntity != entity) {
-					if (!collisionMapper.has(nearbyEntity) || deleteMapper.has(nearbyEntity)) {
+			for (int adjacentEntity : getAdjacentEntities(entity)) {
+				if (adjacentEntity != entity) {
+					if (!collisionMapper.has(adjacentEntity) || deleteMapper.has(adjacentEntity)) {
 						continue;
 					}
 
-					Transform nearbyTransform = transformMapper.get(nearbyEntity);
-					Collision nearbyCollision = collisionMapper.get(nearbyEntity);
+					Transform nearbyTransform = transformMapper.get(adjacentEntity);
+					Collision nearbyCollision = collisionMapper.get(adjacentEntity);
 					reusableVector.set(nearbyTransform.position.x - transform.position.x, nearbyTransform.position.y - transform.position.y);
 					float overlap = (collision.radius + nearbyCollision.radius) - reusableVector.length();
 					if (overlap > 0.0f) {
 						if (reusableVector.lengthSquared() == 0.0f) {
 							reusableVector.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
 						}
-						if (staticMapper.has(nearbyEntity)) {
+						if (staticMapper.has(adjacentEntity)) {
 							reusableVector.normalize();
 							reusableVector.scale(-overlap);
 							transform.position.add(reusableVector);
@@ -99,7 +109,7 @@ public class CollisionSystem extends IteratingSystem {
 							reusableVector.normalize();
 							reusableVector.scale(-overlap * 0.5f);
 							nearbyTransform.position.add(reusableVector);
-							syncMapper.create(nearbyEntity).markPropertyAsDirty(Properties.POSITION);
+							syncMapper.create(adjacentEntity).markPropertyAsDirty(Properties.POSITION);
 						}
 					}
 
@@ -107,5 +117,22 @@ public class CollisionSystem extends IteratingSystem {
 				}
 			}
 		}
+	}
+
+	private Set<Integer> getAdjacentEntities(int entity) {
+		reusableAdjacentEntities.clear();
+		Spatial spatial = spatialMapper.get(entity);
+		if (spatial.memberOfSpatialHash != null) {
+			for (int x = spatial.memberOfSpatialHash.x - worldConfiguration.sectionSize; x <= spatial.memberOfSpatialHash.x + worldConfiguration.sectionSize; x += worldConfiguration.sectionSize) {
+				for (int y = spatial.memberOfSpatialHash.y - worldConfiguration.sectionSize; y <= spatial.memberOfSpatialHash.y + worldConfiguration.sectionSize; y += worldConfiguration.sectionSize) {
+					reusableHash.set(x, y);
+					Set<Integer> entitiesInHash = spatialHashes.get(reusableHash.uniqueKey());
+					if (entitiesInHash != null) {
+						reusableAdjacentEntities.addAll(entitiesInHash);
+					}
+				}
+			}
+		}
+		return reusableAdjacentEntities;
 	}
 }

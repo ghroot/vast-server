@@ -100,7 +100,7 @@ public class VastWorld implements Runnable {
 			new AISystem(behaviours),
 			new SpeedSystem(),
 			new PathMoveSystem(),
-			new CollisionSystem(metrics),
+			new CollisionSystem(worldConfiguration, spatialHashes, metrics),
 			new FollowSystem(),
 			new FuelSystem(),
 			new CraftSystem(items),
