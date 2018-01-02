@@ -4,12 +4,12 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.messages.EventMessage;
-import com.vast.network.MessageCodes;
-import com.vast.network.VastPeer;
 import com.vast.component.Active;
 import com.vast.component.Delete;
 import com.vast.component.Known;
 import com.vast.component.Player;
+import com.vast.network.MessageCodes;
+import com.vast.network.VastPeer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

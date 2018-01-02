@@ -3,10 +3,10 @@ package com.vast.order;
 import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.network.MessageCodes;
 import com.vast.component.Interact;
 import com.vast.component.Path;
 import com.vast.interact.InteractionHandler;
+import com.vast.network.MessageCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -3,10 +3,10 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
-import com.vast.data.Properties;
 import com.vast.component.Parent;
 import com.vast.component.Sync;
 import com.vast.component.Transform;
+import com.vast.data.Properties;
 
 public class ParentSystem extends IteratingSystem {
 	private ComponentMapper<Parent> parentMapper;

@@ -4,12 +4,12 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.data.Properties;
-import com.vast.network.VastPeer;
 import com.vast.component.Active;
 import com.vast.component.Known;
 import com.vast.component.Player;
 import com.vast.component.Sync;
+import com.vast.data.Properties;
+import com.vast.network.VastPeer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

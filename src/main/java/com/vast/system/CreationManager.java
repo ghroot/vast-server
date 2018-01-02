@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
-import java.util.Random;
 
 public class CreationManager extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CreationManager.class);

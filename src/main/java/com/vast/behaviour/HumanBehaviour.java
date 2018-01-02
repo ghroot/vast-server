@@ -3,13 +3,13 @@ package com.vast.behaviour;
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.RequestMessage;
-import com.vast.network.IncomingRequest;
-import com.vast.network.MessageCodes;
-import com.vast.network.VastPeer;
 import com.vast.component.*;
 import com.vast.data.Buildings;
 import com.vast.data.Items;
 import com.vast.interact.InteractionHandler;
+import com.vast.network.IncomingRequest;
+import com.vast.network.MessageCodes;
+import com.vast.network.VastPeer;
 
 import java.util.ArrayList;
 import java.util.List;

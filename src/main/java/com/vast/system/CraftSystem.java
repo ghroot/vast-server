@@ -3,10 +3,10 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
-import com.vast.data.Properties;
 import com.vast.component.*;
 import com.vast.data.CraftableItem;
 import com.vast.data.Items;
+import com.vast.data.Properties;
 
 public class CraftSystem extends IteratingSystem {
 	private ComponentMapper<Inventory> inventoryMapper;

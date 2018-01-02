@@ -2,12 +2,12 @@ package com.vast.order;
 
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.network.MessageCodes;
-import com.vast.data.Properties;
 import com.vast.component.Home;
 import com.vast.component.Message;
 import com.vast.component.Sync;
 import com.vast.component.Transform;
+import com.vast.data.Properties;
+import com.vast.network.MessageCodes;
 
 public class SetHomeOrderHandler implements OrderHandler {
 	private ComponentMapper<Home> homeMapper;

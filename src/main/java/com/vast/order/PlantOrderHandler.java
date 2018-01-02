@@ -3,10 +3,10 @@ package com.vast.order;
 import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.network.MessageCodes;
-import com.vast.data.Properties;
 import com.vast.component.*;
 import com.vast.data.Items;
+import com.vast.data.Properties;
+import com.vast.network.MessageCodes;
 import com.vast.system.CreationManager;
 
 import javax.vecmath.Point2f;

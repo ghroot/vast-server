@@ -2,10 +2,10 @@ package com.vast.order;
 
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.component.Type;
-import com.vast.network.MessageCodes;
 import com.vast.component.Follow;
 import com.vast.component.Message;
+import com.vast.component.Type;
+import com.vast.network.MessageCodes;
 
 public class FollowOrderHandler implements OrderHandler {
 	private ComponentMapper<Follow> followMapper;

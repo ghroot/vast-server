@@ -2,10 +2,9 @@ package com.vast.property;
 
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.network.MessageCodes;
-import com.vast.data.Properties;
 import com.vast.component.SyncHistory;
 import com.vast.component.Transform;
+import com.vast.data.Properties;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;

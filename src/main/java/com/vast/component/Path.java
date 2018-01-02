@@ -1,8 +1,6 @@
 package com.vast.component;
 
-import com.artemis.Component;
 import com.artemis.PooledComponent;
-import com.artemis.annotations.PooledWeaver;
 import com.artemis.annotations.Transient;
 
 import javax.vecmath.Point2f;

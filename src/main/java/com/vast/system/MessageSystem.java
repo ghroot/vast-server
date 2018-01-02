@@ -4,11 +4,11 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.nhnent.haste.protocol.messages.EventMessage;
-import com.vast.network.MessageCodes;
-import com.vast.network.VastPeer;
 import com.vast.component.Active;
 import com.vast.component.Message;
 import com.vast.component.Player;
+import com.vast.network.MessageCodes;
+import com.vast.network.VastPeer;
 
 import java.util.Map;
 

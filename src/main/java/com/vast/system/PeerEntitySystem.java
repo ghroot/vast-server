@@ -4,10 +4,10 @@ import com.artemis.Aspect;
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.artemis.utils.IntBag;
-import com.vast.network.FakePeer;
-import com.vast.network.VastPeer;
 import com.vast.component.Player;
 import com.vast.component.Transform;
+import com.vast.network.FakePeer;
+import com.vast.network.VastPeer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

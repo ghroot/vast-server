@@ -2,12 +2,12 @@ package com.vast.order;
 
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.network.MessageCodes;
 import com.vast.component.Craft;
 import com.vast.component.Inventory;
 import com.vast.component.Message;
 import com.vast.data.CraftableItem;
 import com.vast.data.Items;
+import com.vast.network.MessageCodes;
 
 public class CraftOrderHandler implements OrderHandler {
 	private ComponentMapper<Inventory> inventoryMapper;

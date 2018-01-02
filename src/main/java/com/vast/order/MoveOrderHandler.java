@@ -2,8 +2,8 @@ package com.vast.order;
 
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.network.MessageCodes;
 import com.vast.component.Path;
+import com.vast.network.MessageCodes;
 
 public class MoveOrderHandler implements OrderHandler {
 	private ComponentMapper<Path> pathMapper;
