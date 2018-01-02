@@ -1,7 +1,7 @@
 [
   {
     "id": 0,
-    "name": "rabbit_adult",
+    "name": "rabbitAdult",
     "collision": {
       "radius": 0.3
     },
@@ -14,7 +14,7 @@
   },
   {
     "id": 1,
-    "name": "rabbit_young",
+    "name": "rabbitYoung",
     "collision": {
       "radius": 0.2
     },
@@ -27,7 +27,7 @@
   },
   {
     "id": 2,
-    "name": "deer_adult",
+    "name": "deerAdult",
     "collision": {
       "radius": 0.4
     },
@@ -40,7 +40,7 @@
   },
   {
     "id": 3,
-    "name": "deer_young",
+    "name": "deerYoung",
     "collision": {
       "radius": 0.2
     },
