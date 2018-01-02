@@ -123,10 +123,10 @@ public class CollisionSystem extends IteratingSystem {
 		reusableAdjacentEntities.clear();
 		Spatial spatial = spatialMapper.get(entity);
 		if (spatial.memberOfSpatialHash != null) {
-			for (int x = spatial.memberOfSpatialHash.x - worldConfiguration.sectionSize; x <= spatial.memberOfSpatialHash.x + worldConfiguration.sectionSize; x += worldConfiguration.sectionSize) {
-				for (int y = spatial.memberOfSpatialHash.y - worldConfiguration.sectionSize; y <= spatial.memberOfSpatialHash.y + worldConfiguration.sectionSize; y += worldConfiguration.sectionSize) {
-					reusableHash.set(x, y);
-					Set<Integer> entitiesInHash = spatialHashes.get(reusableHash.uniqueKey());
+			for (int x = spatial.memberOfSpatialHash.getX() - worldConfiguration.sectionSize; x <= spatial.memberOfSpatialHash.getX() + worldConfiguration.sectionSize; x += worldConfiguration.sectionSize) {
+				for (int y = spatial.memberOfSpatialHash.getY() - worldConfiguration.sectionSize; y <= spatial.memberOfSpatialHash.getY() + worldConfiguration.sectionSize; y += worldConfiguration.sectionSize) {
+					reusableHash.setXY(x, y);
+					Set<Integer> entitiesInHash = spatialHashes.get(reusableHash.getUniqueKey());
 					if (entitiesInHash != null) {
 						reusableAdjacentEntities.addAll(entitiesInHash);
 					}

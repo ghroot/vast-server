@@ -4,11 +4,11 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.data.SpatialHash;
-import com.vast.data.WorldConfiguration;
 import com.vast.component.Spatial;
 import com.vast.component.Static;
 import com.vast.component.Transform;
+import com.vast.data.SpatialHash;
+import com.vast.data.WorldConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,18 +60,19 @@ public class SpatialUpdateSystem extends IteratingSystem {
 		Spatial spatial = spatialMapper.get(entity);
 
 		if (spatial.memberOfSpatialHash != null) {
-			spatialHashes.get(spatial.memberOfSpatialHash.uniqueKey()).remove(entity);
+			spatialHashes.get(spatial.memberOfSpatialHash.getUniqueKey()).remove(entity);
 		} else {
 			spatial.memberOfSpatialHash = new SpatialHash();
 		}
 
-		spatial.memberOfSpatialHash.x = Math.round(transform.position.x / worldConfiguration.sectionSize) * worldConfiguration.sectionSize;
-		spatial.memberOfSpatialHash.y = Math.round(transform.position.y / worldConfiguration.sectionSize) * worldConfiguration.sectionSize;
+		spatial.memberOfSpatialHash.setXY(
+			Math.round(transform.position.x / worldConfiguration.sectionSize) * worldConfiguration.sectionSize,
+			Math.round(transform.position.y / worldConfiguration.sectionSize) * worldConfiguration.sectionSize);
 
-		Set<Integer> entitiesInHash = spatialHashes.get(spatial.memberOfSpatialHash.uniqueKey());
+		Set<Integer> entitiesInHash = spatialHashes.get(spatial.memberOfSpatialHash.getUniqueKey());
 		if (entitiesInHash == null) {
 			entitiesInHash = new HashSet<Integer>();
-			spatialHashes.put(spatial.memberOfSpatialHash.uniqueKey(), entitiesInHash);
+			spatialHashes.put(spatial.memberOfSpatialHash.getUniqueKey(), entitiesInHash);
 		}
 		entitiesInHash.add(entity);
 	}

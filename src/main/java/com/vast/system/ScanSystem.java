@@ -4,10 +4,10 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.data.SpatialHash;
-import com.vast.data.WorldConfiguration;
 import com.vast.component.Scan;
 import com.vast.component.Spatial;
+import com.vast.data.SpatialHash;
+import com.vast.data.WorldConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,10 +49,10 @@ public class ScanSystem extends IteratingSystem {
 		scan.nearbyEntities.clear();
 		int sectionsInEachDirection = (int) Math.ceil(scan.distance / worldConfiguration.sectionSize);
 		if (spatial.memberOfSpatialHash != null) {
-			for (int x = spatial.memberOfSpatialHash.x - sectionsInEachDirection * worldConfiguration.sectionSize; x <= spatial.memberOfSpatialHash.x + sectionsInEachDirection * worldConfiguration.sectionSize; x += worldConfiguration.sectionSize) {
-				for (int y = spatial.memberOfSpatialHash.y - sectionsInEachDirection * worldConfiguration.sectionSize; y <= spatial.memberOfSpatialHash.y + sectionsInEachDirection * worldConfiguration.sectionSize; y += worldConfiguration.sectionSize) {
-					reusableHash.set(x, y);
-					Set<Integer> entitiesInHash = spatialHashes.get(reusableHash.uniqueKey());
+			for (int x = spatial.memberOfSpatialHash.getX() - sectionsInEachDirection * worldConfiguration.sectionSize; x <= spatial.memberOfSpatialHash.getX() + sectionsInEachDirection * worldConfiguration.sectionSize; x += worldConfiguration.sectionSize) {
+				for (int y = spatial.memberOfSpatialHash.getY() - sectionsInEachDirection * worldConfiguration.sectionSize; y <= spatial.memberOfSpatialHash.getY() + sectionsInEachDirection * worldConfiguration.sectionSize; y += worldConfiguration.sectionSize) {
+					reusableHash.setXY(x, y);
+					Set<Integer> entitiesInHash = spatialHashes.get(reusableHash.getUniqueKey());
 					if (entitiesInHash != null) {
 						scan.nearbyEntities.addAll(entitiesInHash);
 					}
