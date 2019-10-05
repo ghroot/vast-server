@@ -29,7 +29,6 @@ public class MessageSystem extends IteratingSystem {
 	}
 
 	@Override
-
 	protected void process(int entity) {
 		Message message = messageMapper.get(entity);
 
