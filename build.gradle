@@ -31,7 +31,7 @@ dependencies {
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
     compile group: 'org.json', name: 'json', version: '20171018'
-    compile name: 'artemis-odb-2.2.0-SNAPSHOT'
+    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb', version: '2.2.0'
     compile name: 'haste-all-1.0.0'
 }
 

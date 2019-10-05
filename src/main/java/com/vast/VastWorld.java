@@ -117,7 +117,7 @@ public class VastWorld implements Runnable {
 		).with(
 			new WorldSerializationManager(),
 			new EntityLinkManager()
-		);
+		).alwaysDelayComponentRemoval(true);
 		if (showMonitor) {
 			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, spatialHashes));
 			worldConfigurationBuilder.register(new ProfiledInvocationStrategy(metrics));
