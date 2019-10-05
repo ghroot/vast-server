@@ -7,31 +7,32 @@ import com.artemis.utils.IntBag;
 import com.vast.component.Active;
 import com.vast.component.Event;
 import com.vast.component.Player;
+import com.vast.data.Time;
 import com.vast.data.WorldConfiguration;
 
 public class DayNightCycleSystem extends IteratingSystem {
 	private ComponentMapper<Event> eventMapper;
 
 	private WorldConfiguration worldConfiguration;
+	private Time time;
 
-	private TimeManager timeManager;
 	private boolean changed;
 
-	public DayNightCycleSystem(WorldConfiguration worldConfiguration) {
+	public DayNightCycleSystem(WorldConfiguration worldConfiguration, Time time) {
 		super(Aspect.all(Player.class, Active.class));
 
 		this.worldConfiguration = worldConfiguration;
+		this.time = time;
 	}
 
 	@Override
 	protected void initialize() {
-		timeManager = world.getSystem(TimeManager.class);
 		changed = false;
 	}
 
 	@Override
 	protected void inserted(int playerEntity) {
-		eventMapper.create(playerEntity).name = isDay(timeManager.getTime()) ? "dayInital" : "nightInitial";
+		eventMapper.create(playerEntity).name = isDay(time.currentTime) ? "dayInital" : "nightInitial";
 		eventMapper.get(playerEntity).ownerOnly = true;
 	}
 
@@ -41,15 +42,15 @@ public class DayNightCycleSystem extends IteratingSystem {
 
 	@Override
 	protected void begin() {
-		boolean wasDay = isDay(timeManager.getPreviousTime());
-		boolean isDay = isDay(timeManager.getTime());
+		boolean wasDay = isDay(time.previousTime);
+		boolean isDay = isDay(time.currentTime);
 		changed = isDay != wasDay;
 	}
 
 	@Override
 	protected void process(int playerEntity) {
 		if (changed) {
-			eventMapper.create(playerEntity).name = isDay(timeManager.getTime()) ? "dayChanged" : "nightChanged";
+			eventMapper.create(playerEntity).name = isDay(time.currentTime) ? "dayChanged" : "nightChanged";
 			eventMapper.get(playerEntity).ownerOnly = true;
 		}
 	}

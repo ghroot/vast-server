@@ -41,7 +41,6 @@ public class CreationManager extends BaseSystem {
 	private Buildings buildings;
 	private Animals animals;
 
-	private Archetype worldArchetype;
 	private Archetype playerArchetype;
 	private Archetype treeArchetype;
 	private Archetype rockArchetype;
@@ -60,11 +59,6 @@ public class CreationManager extends BaseSystem {
 
 	@Override
 	protected void initialize() {
-		worldArchetype = new ArchetypeBuilder()
-			.add(Time.class)
-			.add(Weather.class)
-			.build(world);
-
 		playerArchetype = new ArchetypeBuilder()
 			.add(Player.class)
 			.add(Type.class)
@@ -148,8 +142,6 @@ public class CreationManager extends BaseSystem {
 	}
 
 	public void createWorld() {
-		world.create(worldArchetype);
-
 		FastNoise noise1 = new FastNoise((int) (Math.random() * 10000000));
 		FastNoise noise2 = new FastNoise((int) (Math.random() * 10000000));
 		for (float x = -worldConfiguration.width / 2.0f; x < worldConfiguration.width / 2.0f; x += 3.0f) {

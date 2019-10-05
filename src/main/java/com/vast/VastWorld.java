@@ -8,10 +8,7 @@ import com.vast.behaviour.AdultAnimalBehaviour;
 import com.vast.behaviour.Behaviour;
 import com.vast.behaviour.HumanBehaviour;
 import com.vast.behaviour.YoungAnimalBehaviour;
-import com.vast.data.Animals;
-import com.vast.data.Buildings;
-import com.vast.data.Items;
-import com.vast.data.WorldConfiguration;
+import com.vast.data.*;
 import com.vast.interact.*;
 import com.vast.network.IncomingRequest;
 import com.vast.network.VastPeer;
@@ -75,6 +72,8 @@ public class VastWorld implements Runnable {
 			new GrowingPropertyHandler(),
 			new StatePropertyHandler()
 		));
+		Time time = new Time();
+		Weather weather = new Weather();
 		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
 		behaviours.put("human", new HumanBehaviour(interactionHandlers, peers, incomingRequestsByPeer, items, buildings));
 		behaviours.put("adultAnimal", new AdultAnimalBehaviour(interactionHandlers));
@@ -82,12 +81,12 @@ public class VastWorld implements Runnable {
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldConfiguration, items, buildings, animals),
-			new TimeManager(),
 
 			new WorldSerializationSystem(snapshotFormat, metrics),
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequestsByPeer),
 			new PeerEntitySystem(peers, entitiesByPeer),
+			new TimeSystem(time),
 			new DeactivateSystem(peers),
 			new ActivateSystem(peers),
 			new SpatialShiftSystem(worldConfiguration, spatialHashes),
@@ -107,8 +106,8 @@ public class VastWorld implements Runnable {
 			new GrowSystem(),
 			new LifetimeSystem(),
 			new PickupSystem(),
-			new DayNightCycleSystem(worldConfiguration),
-			new WeatherSystem(),
+			new DayNightCycleSystem(worldConfiguration, time),
+			new WeatherSystem(weather),
 			new ParentSystem(),
 			new DeleteSystem(peers),
 			new EventSystem(peers),
