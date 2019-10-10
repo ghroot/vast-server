@@ -81,6 +81,7 @@ public class TerminalSystem extends IntervalSystem {
 		propertyNames.put(Properties.HOME, "Home");
 		propertyNames.put(Properties.GROWING, "Growing");
 		propertyNames.put(Properties.STATE, "State");
+		propertyNames.put(Properties.CONFIGURATION, "Configuration");
 	}
 
 	@Override

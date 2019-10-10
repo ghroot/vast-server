@@ -43,6 +43,10 @@ public class Items {
 		}
 	}
 
+	public List<Item> getAllItems() {
+		return new ArrayList<Item>(items.values());
+	}
+
 	public Item getItem(int id) {
 		return items.get(id);
 	}

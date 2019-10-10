@@ -73,7 +73,8 @@ public class VastWorld implements Runnable {
 			new FueledPropertyHandler(),
 			new HomePropertyHandler(),
 			new GrowingPropertyHandler(),
-			new StatePropertyHandler()
+			new StatePropertyHandler(),
+			new ConfigurationPropertyHandler(items, buildings)
 		));
 		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
 		behaviours.put("human", new HumanBehaviour(interactionHandlers, peers, incomingRequestsByPeer, items, buildings));
@@ -90,6 +91,7 @@ public class VastWorld implements Runnable {
 			new PeerEntitySystem(peers, entitiesByPeer),
 			new DeactivateSystem(peers),
 			new ActivateSystem(peers),
+			new ConfigurationSystem(),
 			new SpatialShiftSystem(worldConfiguration, spatialHashes),
 			new SpatialUpdateSystem(worldConfiguration, spatialHashes),
 			new ScanSystem(worldConfiguration, spatialHashes),

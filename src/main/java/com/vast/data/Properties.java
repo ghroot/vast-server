@@ -10,4 +10,5 @@ public class Properties {
 	public static byte FUELED = 6;
 	public static byte HOME = 7;
 	public static byte GROWING = 8;
+	public static byte CONFIGURATION = 9;
 }

@@ -49,6 +49,10 @@ public class Buildings {
 		}
 	}
 
+	public List<Building> getAllBuildings() {
+		return new ArrayList<Building>(buildings.values());
+	}
+
 	public Building getBuilding(int id) {
 		return buildings.get(id);
 	}
