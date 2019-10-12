@@ -44,11 +44,11 @@ public class PathMoveSystem extends IteratingSystem {
         Speed speed = speedMapper.get(entity);
 
         reusableDirection.set(path.targetPosition.x - transform.position.x, path.targetPosition.y - transform.position.y);
-        if (reusableDirection.length() > 0) {
+		float distance = reusableDirection.length();
+        if (distance > 0) {
 			transform.rotation = getAngle(reusableDirection);
 			syncMapper.create(entity).markPropertyAsDirty(Properties.ROTATION);
 
-            float distance = reusableDirection.length();
             reusableDirection.normalize();
             if (speed.getModifiedSpeed() * world.delta > distance) {
                 transform.position.set(path.targetPosition);
