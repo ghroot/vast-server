@@ -47,7 +47,7 @@ public class TerminalSystem extends IntervalSystem {
 	private Map<Integer, Set<Integer>> spatialHashes;
 
 	private Screen screen;
-	private float scale = 3.0f;
+	private float scale = 0.15f;//3.0f;
 	private Point2f cameraPosition = new Point2f();
 	private boolean showPlayerNames = false;
 	private boolean showIds = false;
