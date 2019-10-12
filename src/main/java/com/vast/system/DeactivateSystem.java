@@ -20,6 +20,7 @@ public class DeactivateSystem extends IteratingSystem {
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Know> knowMapper;
+	private ComponentMapper<Known> knownMapper;
 
 	private Map<String, VastPeer> peers;
 
@@ -45,6 +46,9 @@ public class DeactivateSystem extends IteratingSystem {
 			activeMapper.remove(activePlayerEntity);
 			syncMapper.create(activePlayerEntity).markPropertyAsDirty(Properties.ACTIVE);
 			scanMapper.remove(activePlayerEntity);
+			for (int knowEntity : knowMapper.get(activePlayerEntity).knowEntities) {
+				knownMapper.get(knowEntity).knownByEntities.remove(activePlayerEntity);
+			}
 			knowMapper.remove(activePlayerEntity);
 		}
 	}

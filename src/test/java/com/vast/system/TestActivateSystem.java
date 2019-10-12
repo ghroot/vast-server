@@ -27,15 +27,16 @@ public class TestActivateSystem {
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
-		int entityId = world.create();
-		playerMapper.create(entityId).name = "TestName";
+		ComponentMapper<Active> activeMapper = world.getMapper(Active.class);
+		ComponentMapper<Sync> syncMapper = world.getMapper(Sync.class);
+
+		int playerEntity = world.create();
+		playerMapper.create(playerEntity).name = "TestName";
 
 		world.process();
 
-		ComponentMapper<Active> activeMapper = world.getMapper(Active.class);
-		ComponentMapper<Sync> syncMapper = world.getMapper(Sync.class);
-		Assert.assertTrue(activeMapper.has(entityId));
-		Assert.assertTrue(syncMapper.get(entityId).isPropertyDirty(Properties.ACTIVE));
-		Assert.assertEquals(123L, playerMapper.get(entityId).id);
+		Assert.assertTrue(activeMapper.has(playerEntity));
+		Assert.assertTrue(syncMapper.get(playerEntity).isPropertyDirty(Properties.ACTIVE));
+		Assert.assertEquals(123L, playerMapper.get(playerEntity).id);
 	}
 }
