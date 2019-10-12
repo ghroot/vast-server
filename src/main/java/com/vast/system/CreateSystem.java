@@ -2,6 +2,10 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.artemis.EntitySubscription;
+import com.artemis.annotations.All;
+import com.artemis.systems.IteratingSystem;
+import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.component.*;
@@ -14,15 +18,19 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Set;
 
-public class CreateSystem extends AbstractNearbyEntityIteratingSystem {
+public class CreateSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CreateSystem.class);
 
 	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Player> playerMapper;
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Know> knowMapper;
 	private ComponentMapper<Known> knownMapper;
+	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<SubType> subTypeMapper;
+
+	@All({Know.class, Scan.class})
+	private EntitySubscription interestedSubscription;
 
 	private Map<String, VastPeer> peers;
 	private Set<PropertyHandler> propertyHandlers;
@@ -38,12 +46,16 @@ public class CreateSystem extends AbstractNearbyEntityIteratingSystem {
 	}
 
 	@Override
-	protected void process(int createEntity, Set<Integer> nearbyEntities) {
-		for (int nearbyEntity : nearbyEntities) {
-			if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity) && knownMapper.has(nearbyEntity)) {
-				Set<Integer> knownEntities = knownMapper.get(nearbyEntity).knownEntities;
-				if (!knownEntities.contains(createEntity)) {
-					VastPeer peer = peers.get(playerMapper.get(nearbyEntity).name);
+	protected void process(int createEntity) {
+		Known known = knownMapper.get(createEntity);
+		IntBag interestedEntities = interestedSubscription.getEntities();
+		for (int i = 0; i < interestedEntities.size(); i++) {
+			int interestedEntity = interestedEntities.get(i);
+			Know interestedKnow = knowMapper.get(interestedEntity);
+			Scan interestedScan = scanMapper.get(interestedEntity);
+			if (interestedScan.nearbyEntities.contains(createEntity)) {
+				if (playerMapper.has(interestedEntity)) {
+					VastPeer peer = peers.get(playerMapper.get(interestedEntity).name);
 					String reason = createMapper.get(createEntity).reason;
 					logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);
 					reusableEventMessage.getDataObject().clear();
@@ -62,10 +74,14 @@ public class CreateSystem extends AbstractNearbyEntityIteratingSystem {
 						propertyHandler.decorateDataObject(createEntity, propertiesDataObject, true);
 					}
 					peer.send(reusableEventMessage);
-					knownEntities.add(createEntity);
+				}
+				interestedKnow.knowEntities.add(createEntity);
+				if (known != null) {
+					known.knownByEntities.add(interestedEntity);
 				}
 			}
 		}
+
 		createMapper.remove(createEntity);
 	}
 }

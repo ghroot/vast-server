@@ -2,10 +2,14 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.artemis.EntitySubscription;
+import com.artemis.annotations.All;
+import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.component.Active;
 import com.vast.component.Event;
+import com.vast.component.Know;
 import com.vast.component.Player;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
@@ -13,14 +17,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Set;
 
-public class EventSystem extends AbstractNearbyEntityIteratingSystem {
+public class EventSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(EventSystem.class);
 
 	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Know> knowMapper;
+
+	@All({Know.class})
+	private EntitySubscription interestedSubscription;
 
 	private Map<String, VastPeer> peers;
 
@@ -42,7 +49,7 @@ public class EventSystem extends AbstractNearbyEntityIteratingSystem {
 	}
 
 	@Override
-	protected void process(int eventEntity, Set<Integer> nearbyEntities) {
+	protected void process(int eventEntity) {
 		Event event = eventMapper.get(eventEntity);
 
 		reusableEventMessage.getDataObject().clear();
@@ -55,10 +62,15 @@ public class EventSystem extends AbstractNearbyEntityIteratingSystem {
 				nearbyPeer.send(reusableEventMessage);
 			}
 		} else {
-			for (int nearbyEntity : nearbyEntities) {
-				if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
-					VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyEntity).name);
-					nearbyPeer.send(reusableEventMessage);
+			IntBag interestedEntities = interestedSubscription.getEntities();
+			for (int i = 0; i < interestedEntities.size(); i++) {
+				int interestedEntity = interestedEntities.get(i);
+				Know interestedKnow = knowMapper.get(interestedEntity);
+				if (interestedKnow.knowEntities.contains(eventEntity)) {
+					if (playerMapper.has(interestedEntity)) {
+						VastPeer nearbyPeer = peers.get(playerMapper.get(interestedEntity).name);
+						nearbyPeer.send(reusableEventMessage);
+					}
 				}
 			}
 		}

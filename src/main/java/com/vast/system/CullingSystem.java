@@ -2,6 +2,7 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
@@ -17,10 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
+public class CullingSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CullingSystem.class);
 
 	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Scan> scanMapper;
+	private ComponentMapper<Know> knowMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<SubType> subTypeMapper;
@@ -33,7 +36,7 @@ public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
 	private EventMessage reusableCreatedEventMessage;
 
 	public CullingSystem(Map<String, VastPeer> peers, Set<PropertyHandler> propertyHandlers) {
-		super(Aspect.all(Player.class, Active.class, Known.class));
+		super(Aspect.all(Scan.class, Know.class));
 		this.peers = peers;
 		this.propertyHandlers = propertyHandlers;
 
@@ -51,25 +54,34 @@ public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
 	}
 
 	@Override
-	protected void process(int activePlayerEntity, Set<Integer> nearbyEntities) {
-		Player player = playerMapper.get(activePlayerEntity);
-		Known known = knownMapper.get(activePlayerEntity);
-		if (peers.containsKey(player.name)) {
-			VastPeer peer = peers.get(player.name);
-			notifyAboutRemovedEntities(peer, nearbyEntities, known.knownEntities);
-			notifyAboutNewEntities(peer, nearbyEntities, known.knownEntities);
+	protected void process(int entity) {
+		Player player = playerMapper.get(entity);
+		Scan scan = scanMapper.get(entity);
+		Know know = knowMapper.get(entity);
+
+		VastPeer peer = null;
+		if (player != null && peers.containsKey(player.name)) {
+			peer = peers.get(player.name);
 		}
+
+		notifyAboutRemovedEntities(peer, entity, scan, know);
+		notifyAboutNewEntities(peer, entity, scan, know);
 	}
 
-	private void notifyAboutRemovedEntities(VastPeer peer, Set<Integer> nearbyEntities, Set<Integer> knownEntities) {
+	private void notifyAboutRemovedEntities(VastPeer peer, int entity, Scan scan, Know know) {
 		reusableRemovedEntities.clear();
-		for (int knownEntity : knownEntities) {
-			if (!nearbyEntities.contains(knownEntity)) {
-				notifyAboutRemovedEntity(peer, knownEntity);
-				reusableRemovedEntities.add(knownEntity);
+		for (int knowEntity : know.knowEntities) {
+			if (!scan.nearbyEntities.contains(knowEntity)) {
+				if (peer != null) {
+					notifyAboutRemovedEntity(peer, knowEntity);
+				}
+				reusableRemovedEntities.add(knowEntity);
+				if (knownMapper.has(knowEntity)) {
+					knownMapper.get(knowEntity).knownByEntities.remove(entity);
+				}
 			}
 		}
-		knownEntities.removeAll(reusableRemovedEntities);
+		know.knowEntities.removeAll(reusableRemovedEntities);
 	}
 
 	private void notifyAboutRemovedEntity(VastPeer peer, int deletedEntity) {
@@ -80,11 +92,16 @@ public class CullingSystem extends AbstractNearbyEntityIteratingSystem {
 		peer.send(reusableDestroyedEventMessage);
 	}
 
-	private void notifyAboutNewEntities(VastPeer peer, Set<Integer> nearbyEntities, Set<Integer> knownEntities) {
-		for (int nearbyEntity : nearbyEntities) {
-			if (!knownEntities.contains(nearbyEntity) && typeMapper.has(nearbyEntity)) {
-				notifyAboutNewEntity(peer, nearbyEntity);
-				knownEntities.add(nearbyEntity);
+	private void notifyAboutNewEntities(VastPeer peer, int entity, Scan scan, Know know) {
+		for (int nearbyEntity : scan.nearbyEntities) {
+			if (!know.knowEntities.contains(nearbyEntity) && typeMapper.has(nearbyEntity)) {
+				if (peer != null) {
+					notifyAboutNewEntity(peer, nearbyEntity);
+				}
+				know.knowEntities.add(nearbyEntity);
+				if (knownMapper.has(nearbyEntity)) {
+					knownMapper.get(nearbyEntity).knownByEntities.add(entity);
+				}
 			}
 		}
 	}

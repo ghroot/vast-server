@@ -6,10 +6,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Known extends PooledComponent {
-	public transient Set<Integer> knownEntities = new HashSet<Integer>();
+	public transient Set<Integer> knownByEntities = new HashSet<Integer>();
 
 	@Override
 	protected void reset() {
-		knownEntities = new HashSet<Integer>();
+		knownByEntities = new HashSet<Integer>();
 	}
 }

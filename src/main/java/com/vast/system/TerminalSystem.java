@@ -323,8 +323,10 @@ public class TerminalSystem extends IntervalSystem {
 						detail = "" + ((Interact) component).phase;
 					} else if (component instanceof Scan) {
 						detail = "" + ((Scan) component).nearbyEntities.size();
+					} else if (component instanceof Know) {
+						detail = "" + ((Know) component).knowEntities.size();
 					} else if (component instanceof Known) {
-						detail = "" + ((Known) component).knownEntities.size();
+						detail = "" + ((Known) component).knownByEntities.size();
 					} else if (component instanceof AI) {
 						detail = ((AI) component).behaviourName;
 					} else if (component instanceof State) {

@@ -74,9 +74,8 @@ public class CreationManager extends BaseSystem {
 			.add(Transform.class)
 			.add(Speed.class)
 			.add(Spatial.class)
-			.add(Collision.class)
-			.add(Scan.class)
 			.add(Known.class)
+			.add(Collision.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -87,6 +86,7 @@ public class CreationManager extends BaseSystem {
 			.add(State.class)
 			.add(Transform.class)
 			.add(Spatial.class)
+			.add(Known.class)
 			.add(Collision.class)
 			.add(Static.class)
 			.add(Harvestable.class)
@@ -101,6 +101,7 @@ public class CreationManager extends BaseSystem {
 			.add(State.class)
 			.add(Transform.class)
 			.add(Spatial.class)
+			.add(Known.class)
 			.add(Collision.class)
 			.add(Static.class)
 			.add(Harvestable.class)
@@ -115,6 +116,7 @@ public class CreationManager extends BaseSystem {
 			.add(Group.class)
 			.add(Transform.class)
 			.add(Spatial.class)
+			.add(Known.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -125,6 +127,7 @@ public class CreationManager extends BaseSystem {
 			.add(Owner.class)
 			.add(Transform.class)
 			.add(Spatial.class)
+			.add(Known.class)
 			.add(Static.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
@@ -135,6 +138,7 @@ public class CreationManager extends BaseSystem {
 			.add(SubType.class)
 			.add(Transform.class)
 			.add(Spatial.class)
+			.add(Known.class)
 			.add(Collision.class)
 			.add(Static.class)
 			.add(Inventory.class)
@@ -167,6 +171,7 @@ public class CreationManager extends BaseSystem {
 		}
 	}
 
+	// TODO: Move to json somehow?
 	public int createTree(Point2f position, boolean growing) {
 		int treeEntity = world.create(treeArchetype);
 		typeMapper.get(treeEntity).type = "tree";
@@ -185,6 +190,7 @@ public class CreationManager extends BaseSystem {
 		return treeEntity;
 	}
 
+	// TODO: Move to json somehow?
 	public int createRock(Point2f position) {
 		int rockEntity = world.create(rockArchetype);
 		typeMapper.get(rockEntity).type = "rock";

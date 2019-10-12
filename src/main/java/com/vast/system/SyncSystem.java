@@ -2,14 +2,14 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.artemis.EntitySubscription;
+import com.artemis.annotations.All;
+import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.Metrics;
-import com.vast.component.Active;
-import com.vast.component.Player;
-import com.vast.component.Sync;
-import com.vast.component.SyncPropagation;
+import com.vast.component.*;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
@@ -19,13 +19,17 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Set;
 
-public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
+public class SyncSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(SyncSystem.class);
 
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Know> knowMapper;
+
+	@All({Know.class})
+	private EntitySubscription interestedSubscription;
 
 	private Set<PropertyHandler> propertyHandlers;
 	private Map<String, VastPeer> peers;
@@ -57,7 +61,7 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 	}
 
 	@Override
-	protected void process(int syncEntity, Set<Integer> nearbyEntities) {
+	protected void process(int syncEntity) {
 		Sync sync = syncMapper.get(syncEntity);
 
 		boolean reliable = false;
@@ -82,13 +86,18 @@ public class SyncSystem extends AbstractNearbyEntityIteratingSystem {
 			}
 		}
 		if (atLeastOnePropertySet) {
-			for (int nearbyEntity : nearbyEntities) {
-				if (playerMapper.has(nearbyEntity) && activeMapper.has(nearbyEntity)) {
-					VastPeer nearbyPeer = peers.get(playerMapper.get(nearbyEntity).name);
-					if (reliable) {
-						nearbyPeer.send(reusableMessage);
-					} else {
-						nearbyPeer.sendUnreliable(reusableMessage);
+			IntBag interestedEntities = interestedSubscription.getEntities();
+			for (int i = 0; i < interestedEntities.size(); i++) {
+				int interestedEntity = interestedEntities.get(i);
+				Know interestedKnow = knowMapper.get(interestedEntity);
+				if (interestedKnow.knowEntities.contains(syncEntity)) {
+					if (playerMapper.has(interestedEntity)) {
+						VastPeer nearbyPeer = peers.get(playerMapper.get(interestedEntity).name);
+						if (reliable) {
+							nearbyPeer.send(reusableMessage);
+						} else {
+							nearbyPeer.sendUnreliable(reusableMessage);
+						}
 					}
 				}
 			}
