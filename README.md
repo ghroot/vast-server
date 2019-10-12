@@ -1,4 +1,4 @@
-# vast-server
+# Vast Multiplayer Server
 
 Multiplayer server using ECS implementation through [Artemis ODB](https://github.com/junkdog/artemis-odb) and networking with [Toast Haste](https://github.com/nhn/toast-haste.framework).
 
