@@ -10,7 +10,7 @@ Mac:
 
 Windows:
 
-`gradlew fatJar`
+`gradlew.bat fatJar`
 
 ## Run
 
