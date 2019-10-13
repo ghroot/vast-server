@@ -15,7 +15,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class TestSyncSystem {
-	private final byte TEST_PROPERTY = 1;
+	private final byte TEST_PROPERTY_WITH_NEARBY_PROPAGATION = 1;
+	private final byte TEST_PROPERTY_WITH_OWNER_PROPAGATION = 2;
 
 	@Test
 	public void notifiesOwnerAndNearbyPlayer() {
@@ -23,7 +24,18 @@ public class TestSyncSystem {
 		propertyHandlers.add(new PropertyHandler() {
 			@Override
 			public byte getProperty() {
-				return TEST_PROPERTY;
+				return TEST_PROPERTY_WITH_NEARBY_PROPAGATION;
+			}
+
+			@Override
+			public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
+				return true;
+			}
+		});
+		propertyHandlers.add(new PropertyHandler() {
+			@Override
+			public byte getProperty() {
+				return TEST_PROPERTY_WITH_OWNER_PROPAGATION;
 			}
 
 			@Override
@@ -55,15 +67,16 @@ public class TestSyncSystem {
 		activeMapper.create(playerEntity).peer = ownerPeer;
 		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
 		knownMapper.get(playerEntity).knownByEntities.add(nearbyEntity);
-		syncPropagationMapper.create(playerEntity);
-		syncMapper.create(playerEntity).markPropertyAsDirty(TEST_PROPERTY);
+		syncPropagationMapper.create(playerEntity).setOwnerPropagation(TEST_PROPERTY_WITH_OWNER_PROPAGATION);
+		syncMapper.create(playerEntity).markPropertyAsDirty(TEST_PROPERTY_WITH_NEARBY_PROPAGATION);
+		syncMapper.create(playerEntity).markPropertyAsDirty(TEST_PROPERTY_WITH_OWNER_PROPAGATION);
 
 		playerMapper.create(nearbyEntity).name = "Nearby";
 		activeMapper.create(nearbyEntity).peer = nearbyPeer;
 
 		world.process();
 
-		Mockito.verify(ownerPeer).send(Mockito.any());
+		Mockito.verify(ownerPeer, Mockito.times(2)).send(Mockito.any());
 		Mockito.verify(nearbyPeer).send(Mockito.any());
 	}
 }

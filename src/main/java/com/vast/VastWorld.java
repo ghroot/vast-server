@@ -126,6 +126,10 @@ public class VastWorld implements Runnable {
 		}
 		world = new World(worldConfigurationBuilder.build());
 
+		for (PropertyHandler propertyHandler : propertyHandlers) {
+			world.inject(propertyHandler);
+		}
+
 		alive = true;
 	}
 
