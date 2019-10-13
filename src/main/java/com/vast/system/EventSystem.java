@@ -26,7 +26,7 @@ public class EventSystem extends IteratingSystem {
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Know> knowMapper;
 
-	@All({Know.class})
+	@All({Player.class, Active.class, Know.class})
 	private EntitySubscription interestedSubscription;
 
 	private Map<String, VastPeer> peers;
@@ -58,8 +58,8 @@ public class EventSystem extends IteratingSystem {
 
 		if (event.ownerOnly) {
 			if (playerMapper.has(eventEntity) && activeMapper.has(eventEntity)) {
-				VastPeer nearbyPeer = peers.get(playerMapper.get(eventEntity).name);
-				nearbyPeer.send(reusableEventMessage);
+				VastPeer ownerPeer = peers.get(playerMapper.get(eventEntity).name);
+				ownerPeer.send(reusableEventMessage);
 			}
 		} else {
 			IntBag interestedEntities = interestedSubscription.getEntities();
@@ -67,10 +67,8 @@ public class EventSystem extends IteratingSystem {
 				int interestedEntity = interestedEntities.get(i);
 				Know interestedKnow = knowMapper.get(interestedEntity);
 				if (interestedKnow.knowEntities.contains(eventEntity)) {
-					if (playerMapper.has(interestedEntity)) {
-						VastPeer nearbyPeer = peers.get(playerMapper.get(interestedEntity).name);
-						nearbyPeer.send(reusableEventMessage);
-					}
+					VastPeer nearbyPeer = peers.get(playerMapper.get(interestedEntity).name);
+					nearbyPeer.send(reusableEventMessage);
 				}
 			}
 		}
