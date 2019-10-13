@@ -16,12 +16,11 @@ import java.util.Map;
 public class TestMessageSystem {
 	@Test
 	public void sendsMessage() {
-		Map<String, VastPeer> peers = new HashMap<>();
 		VastPeer peer = Mockito.mock(VastPeer.class);
 		Mockito.when(peer.getId()).thenReturn(123L);
-		peers.put("TestName", peer);
+
 		World world = new World(new WorldConfigurationBuilder().with(
-			new MessageSystem(peers)
+			new MessageSystem()
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
@@ -29,7 +28,7 @@ public class TestMessageSystem {
 		ComponentMapper<Message> messageMapper = world.getMapper(Message.class);
 		int entityId = world.create();
 		playerMapper.create(entityId).name = "TestName";
-		activeMapper.create(entityId);
+		activeMapper.create(entityId).peer = peer;
 		messageMapper.create(entityId).text = "TestText";
 
 		world.process();

@@ -18,7 +18,7 @@ public class TestCreateSystem {
 	@Test
 	public void removesCreateComponent() {
 		World world = new World(new WorldConfigurationBuilder().with(
-			new CreateSystem(new HashMap<String, VastPeer>(), new HashSet<PropertyHandler>())
+			new CreateSystem(new HashSet<PropertyHandler>())
 		).build());
 
 		ComponentMapper<Create> createMapper = world.getMapper(Create.class);
@@ -40,10 +40,11 @@ public class TestCreateSystem {
 		Mockito.when(peer.getId()).thenReturn(123L);
 		peers.put("TestName", peer);
 		World world = new World(new WorldConfigurationBuilder().with(
-			new CreateSystem(peers, new HashSet<PropertyHandler>())
+			new CreateSystem(new HashSet<PropertyHandler>())
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
+		ComponentMapper<Active> activeMapper = world.getMapper(Active.class);
 		ComponentMapper<Create> createMapper = world.getMapper(Create.class);
 		ComponentMapper<Know> knowMapper = world.getMapper(Know.class);
 		ComponentMapper<Known> knownMapper = world.getMapper(Known.class);
@@ -55,6 +56,7 @@ public class TestCreateSystem {
 		int entityToCreate = world.create();
 
 		playerMapper.create(playerEntity).name = "TestName";
+		activeMapper.create(playerEntity).peer = peer;
 		knowMapper.create(playerEntity);
 		scanMapper.create(playerEntity).nearbyEntities.add(entityToCreate);
 

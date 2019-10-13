@@ -11,9 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class TestSyncSystem {
@@ -34,16 +32,14 @@ public class TestSyncSystem {
 			}
 		});
 
-		Map<String, VastPeer> peers = new HashMap<>();
 		VastPeer ownerPeer = Mockito.mock(VastPeer.class);
 		Mockito.when(ownerPeer.getId()).thenReturn(123L);
-		peers.put("Owner", ownerPeer);
+
 		VastPeer nearbyPeer = Mockito.mock(VastPeer.class);
 		Mockito.when(nearbyPeer.getId()).thenReturn(321L);
-		peers.put("Nearby", nearbyPeer);
 
 		World world = new World(new WorldConfigurationBuilder().with(
-			new SyncSystem(propertyHandlers, peers, null)
+			new SyncSystem(propertyHandlers, null)
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
@@ -56,14 +52,14 @@ public class TestSyncSystem {
 		int nearbyEntity = world.create();
 
 		playerMapper.create(playerEntity).name = "Owner";
-		activeMapper.create(playerEntity);
+		activeMapper.create(playerEntity).peer = ownerPeer;
 		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
 		knownMapper.get(playerEntity).knownByEntities.add(nearbyEntity);
 		syncPropagationMapper.create(playerEntity);
 		syncMapper.create(playerEntity).markPropertyAsDirty(TEST_PROPERTY);
 
 		playerMapper.create(nearbyEntity).name = "Nearby";
-		activeMapper.create(nearbyEntity);
+		activeMapper.create(nearbyEntity).peer = nearbyPeer;
 
 		world.process();
 

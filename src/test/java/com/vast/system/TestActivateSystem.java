@@ -36,6 +36,7 @@ public class TestActivateSystem {
 		world.process();
 
 		Assert.assertTrue(activeMapper.has(playerEntity));
+		Assert.assertEquals(peer, activeMapper.get(playerEntity).peer);
 		Assert.assertTrue(syncMapper.get(playerEntity).isPropertyDirty(Properties.ACTIVE));
 		Assert.assertEquals(123L, playerMapper.get(playerEntity).id);
 	}

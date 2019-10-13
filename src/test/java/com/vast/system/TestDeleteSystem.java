@@ -17,7 +17,7 @@ public class TestDeleteSystem {
 	@Test
 	public void removesDeleteComponent() {
 		World world = new World(new WorldConfigurationBuilder().with(
-			new DeleteSystem(new HashMap<String, VastPeer>())
+			new DeleteSystem()
 		).build());
 
 		ComponentMapper<Delete> deleteMapper = world.getMapper(Delete.class);
@@ -32,15 +32,15 @@ public class TestDeleteSystem {
 
 	@Test
 	public void removesKnownEntityOnBothSides() {
-		Map<String, VastPeer> peers = new HashMap<>();
 		VastPeer peer = Mockito.mock(VastPeer.class);
 		Mockito.when(peer.getId()).thenReturn(123L);
-		peers.put("TestName", peer);
+
 		World world = new World(new WorldConfigurationBuilder().with(
-			new DeleteSystem(peers)
+			new DeleteSystem()
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
+		ComponentMapper<Active> activeMapper = world.getMapper(Active.class);
 		ComponentMapper<Delete> deleteMapper = world.getMapper(Delete.class);
 		ComponentMapper<Know> knowMapper = world.getMapper(Know.class);
 		ComponentMapper<Known> knownMapper = world.getMapper(Known.class);
@@ -52,6 +52,7 @@ public class TestDeleteSystem {
 		knownMapper.create(entityToDelete).knownByEntities.add(playerEntity);
 
 		playerMapper.create(playerEntity).name = "TestName";
+		activeMapper.create(playerEntity).peer = peer;
 		knowMapper.create(playerEntity).knowEntities.add(entityToDelete);
 
 		world.process();

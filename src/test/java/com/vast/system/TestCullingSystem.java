@@ -17,15 +17,15 @@ import java.util.Map;
 public class TestCullingSystem {
 	@Test
 	public void newEntityIsKnownFromBothSides() {
-		Map<String, VastPeer> peers = new HashMap<>();
 		VastPeer peer = Mockito.mock(VastPeer.class);
 		Mockito.when(peer.getId()).thenReturn(123L);
-		peers.put("TestName", peer);
+
 		World world = new World(new WorldConfigurationBuilder().with(
-			new CullingSystem(peers, new HashSet<PropertyHandler>())
+			new CullingSystem(new HashSet<PropertyHandler>())
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
+		ComponentMapper<Active> activeMapper = world.getMapper(Active.class);
 		ComponentMapper<Know> knowMapper = world.getMapper(Know.class);
 		ComponentMapper<Known> knownMapper = world.getMapper(Known.class);
 		ComponentMapper<Scan> scanMapper = world.getMapper(Scan.class);
@@ -36,6 +36,7 @@ public class TestCullingSystem {
 		int entityToCreate = world.create();
 
 		playerMapper.create(playerEntity).name = "TestName";
+		activeMapper.create(playerEntity).peer = peer;
 		knowMapper.create(playerEntity);
 		scanMapper.create(playerEntity).nearbyEntities.add(entityToCreate);
 
@@ -57,15 +58,15 @@ public class TestCullingSystem {
 
 	@Test
 	public void outOfRangeEntityIsRemovedBothSides() {
-		Map<String, VastPeer> peers = new HashMap<>();
 		VastPeer peer = Mockito.mock(VastPeer.class);
 		Mockito.when(peer.getId()).thenReturn(123L);
-		peers.put("TestName", peer);
+
 		World world = new World(new WorldConfigurationBuilder().with(
-			new CullingSystem(peers, new HashSet<PropertyHandler>())
+			new CullingSystem(new HashSet<PropertyHandler>())
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
+		ComponentMapper<Active> activeMapper = world.getMapper(Active.class);
 		ComponentMapper<Know> knowMapper = world.getMapper(Know.class);
 		ComponentMapper<Known> knownMapper = world.getMapper(Known.class);
 		ComponentMapper<Scan> scanMapper = world.getMapper(Scan.class);
@@ -76,6 +77,7 @@ public class TestCullingSystem {
 		int outOfRangeEntity = world.create();
 
 		playerMapper.create(playerEntity).name = "TestName";
+		activeMapper.create(playerEntity).peer = peer;
 		knowMapper.create(playerEntity).knowEntities.add(outOfRangeEntity);
 		scanMapper.create(playerEntity);
 
