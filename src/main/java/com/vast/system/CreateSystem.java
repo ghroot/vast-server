@@ -23,6 +23,7 @@ public class CreateSystem extends IteratingSystem {
 
 	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Know> knowMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Scan> scanMapper;
@@ -56,7 +57,7 @@ public class CreateSystem extends IteratingSystem {
 			Know interestedKnow = knowMapper.get(interestedEntity);
 			Scan interestedScan = scanMapper.get(interestedEntity);
 			if (interestedScan.nearbyEntities.contains(createEntity)) {
-				if (playerMapper.has(interestedEntity)) {
+				if (playerMapper.has(interestedEntity) && activeMapper.has(interestedEntity)) {
 					VastPeer peer = peers.get(playerMapper.get(interestedEntity).name);
 					String reason = createMapper.get(createEntity).reason;
 					logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);

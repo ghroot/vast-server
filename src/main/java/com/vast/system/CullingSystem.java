@@ -22,6 +22,7 @@ public class CullingSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CullingSystem.class);
 
 	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Know> knowMapper;
 	private ComponentMapper<Known> knownMapper;
@@ -56,13 +57,12 @@ public class CullingSystem extends IteratingSystem {
 
 	@Override
 	protected void process(int entity) {
-		Player player = playerMapper.get(entity);
 		Scan scan = scanMapper.get(entity);
 		Know know = knowMapper.get(entity);
 
 		VastPeer peer = null;
-		if (player != null && peers.containsKey(player.name)) {
-			peer = peers.get(player.name);
+		if (playerMapper.has(entity) && activeMapper.has(entity)) {
+			peer = peers.get(playerMapper.get(entity).name);
 		}
 
 		notifyAboutRemovedEntities(peer, entity, scan, know);

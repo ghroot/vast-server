@@ -51,8 +51,8 @@ public class DeleteSystem extends IteratingSystem {
 		if (knownMapper.has(deleteEntity)) {
 			Set<Integer> knownByEntities = knownMapper.get(deleteEntity).knownByEntities;
 			for (int entityToNotify : knownByEntities) {
-				VastPeer peer = peers.get(playerMapper.get(entityToNotify).name);
-				if (peer != null) {
+				if (playerMapper.has(entityToNotify) && activeMapper.has(entityToNotify)) {
+					VastPeer peer = peers.get(playerMapper.get(entityToNotify).name);
 					notifyAboutRemovedEntity(peer, deleteEntity, reason);
 				}
 				knowMapper.get(entityToNotify).knowEntities.remove(deleteEntity);
