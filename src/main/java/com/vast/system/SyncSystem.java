@@ -2,8 +2,6 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.EntitySubscription;
-import com.artemis.annotations.All;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
@@ -26,10 +24,7 @@ public class SyncSystem extends IteratingSystem {
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
-	private ComponentMapper<Know> knowMapper;
-
-	@All({Know.class})
-	private EntitySubscription interestedSubscription;
+	private ComponentMapper<Known> knownMapper;
 
 	private Set<PropertyHandler> propertyHandlers;
 	private Map<String, VastPeer> peers;
@@ -37,7 +32,7 @@ public class SyncSystem extends IteratingSystem {
 	private EventMessage reusableMessage;
 
 	public SyncSystem(Set<PropertyHandler> propertyHandlers, Map<String, VastPeer> peers, Metrics metrics) {
-		super(Aspect.all(Sync.class, SyncPropagation.class));
+		super(Aspect.all(Sync.class, SyncPropagation.class, Known.class));
 		this.propertyHandlers = propertyHandlers;
 		this.peers = peers;
 		this.metrics = metrics;
@@ -77,7 +72,9 @@ public class SyncSystem extends IteratingSystem {
 				if (syncPropagation.isNearbyPropagation(property)) {
 					if (syncHandler.decorateDataObject(syncEntity, propertiesDataObject, false)) {
 						atLeastOnePropertySet = true;
-						metrics.incrementSyncedProperty(property);
+						if (metrics != null) {
+							metrics.incrementSyncedProperty(property);
+						}
 					}
 				}
 				if (!reliable && syncPropagation.isReliable(property)) {
@@ -86,18 +83,13 @@ public class SyncSystem extends IteratingSystem {
 			}
 		}
 		if (atLeastOnePropertySet) {
-			IntBag interestedEntities = interestedSubscription.getEntities();
-			for (int i = 0; i < interestedEntities.size(); i++) {
-				int interestedEntity = interestedEntities.get(i);
-				Know interestedKnow = knowMapper.get(interestedEntity);
-				if (interestedKnow.knowEntities.contains(syncEntity)) {
-					if (playerMapper.has(interestedEntity)) {
-						VastPeer nearbyPeer = peers.get(playerMapper.get(interestedEntity).name);
-						if (reliable) {
-							nearbyPeer.send(reusableMessage);
-						} else {
-							nearbyPeer.sendUnreliable(reusableMessage);
-						}
+			for (int knownByEntity : knownMapper.get(syncEntity).knownByEntities) {
+				if (playerMapper.has(knownByEntity) && activeMapper.has(knownByEntity)) {
+					VastPeer knownByPeer = peers.get(playerMapper.get(knownByEntity).name);
+					if (reliable) {
+						knownByPeer.send(reusableMessage);
+					} else {
+						knownByPeer.sendUnreliable(reusableMessage);
 					}
 				}
 			}
@@ -117,7 +109,9 @@ public class SyncSystem extends IteratingSystem {
 					if (syncPropagation.isOwnerPropagation(property)) {
 						if (syncHandler.decorateDataObject(syncEntity, propertiesDataObject, false)) {
 							atLeastOnePropertySet = true;
-							metrics.incrementSyncedProperty(property);
+							if (metrics != null) {
+								metrics.incrementSyncedProperty(property);
+							}
 						}
 					}
 					if (!reliable && syncPropagation.isReliable(property)) {
