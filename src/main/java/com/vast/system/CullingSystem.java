@@ -27,6 +27,7 @@ public class CullingSystem extends IteratingSystem {
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<SubType> subTypeMapper;
+	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 
 	private Map<String, VastPeer> peers;
 	private Set<PropertyHandler> propertyHandlers;
@@ -96,7 +97,7 @@ public class CullingSystem extends IteratingSystem {
 		for (int nearbyEntity : scan.nearbyEntities) {
 			if (!know.knowEntities.contains(nearbyEntity) && typeMapper.has(nearbyEntity)) {
 				if (peer != null) {
-					notifyAboutNewEntity(peer, nearbyEntity);
+					notifyAboutNewEntity(peer, entity, nearbyEntity);
 				}
 				know.knowEntities.add(nearbyEntity);
 				if (knownMapper.has(nearbyEntity)) {
@@ -106,8 +107,9 @@ public class CullingSystem extends IteratingSystem {
 		}
 	}
 
-	private void notifyAboutNewEntity(VastPeer peer, int newEntity) {
+	private void notifyAboutNewEntity(VastPeer peer, int entity, int newEntity) {
 		logger.debug("Notifying peer {} about new entity {} (culling)", peer.getName(), newEntity);
+		SyncPropagation syncPropagation = syncPropagationMapper.get(newEntity);
 		reusableCreatedEventMessage.getDataObject().clear();
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, newEntity);
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(newEntity).type);
@@ -121,7 +123,9 @@ public class CullingSystem extends IteratingSystem {
 		DataObject propertiesDataObject = new DataObject();
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, propertiesDataObject);
 		for (PropertyHandler propertyHandler : propertyHandlers) {
-			propertyHandler.decorateDataObject(newEntity, propertiesDataObject, true);
+			if (newEntity == entity || syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
+				propertyHandler.decorateDataObject(newEntity, propertiesDataObject, true);
+			}
 		}
 		peer.send(reusableCreatedEventMessage);
 	}

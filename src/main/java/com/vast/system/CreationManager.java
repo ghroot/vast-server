@@ -187,6 +187,7 @@ public class CreationManager extends BaseSystem {
 		if (growing) {
 			growingMapper.create(treeEntity).timeLeft = 60.0f;
 		}
+		syncPropagationMapper.get(treeEntity).setOwnerPropagation(Properties.INVENTORY);
 		return treeEntity;
 	}
 
@@ -202,6 +203,7 @@ public class CreationManager extends BaseSystem {
 		harvestableMapper.get(rockEntity).harvestEventName = "picking";
 		harvestableMapper.get(rockEntity).durability = 300.0f;
 		inventoryMapper.get(rockEntity).add(items.getItem("stone").getId(), 2);
+		syncPropagationMapper.get(rockEntity).setOwnerPropagation(Properties.INVENTORY);
 		return rockEntity;
 	}
 
@@ -251,6 +253,7 @@ public class CreationManager extends BaseSystem {
 
 		syncPropagationMapper.get(animalEntity).setUnreliable(Properties.POSITION);
 		syncPropagationMapper.get(animalEntity).setUnreliable(Properties.ROTATION);
+		syncPropagationMapper.get(animalEntity).setOwnerPropagation(Properties.INVENTORY);
 		return animalEntity;
 	}
 
@@ -325,6 +328,8 @@ public class CreationManager extends BaseSystem {
 			plantableMapper.create(buildingEntity);
 		}
 
+		syncPropagationMapper.get(buildingEntity).setOwnerPropagation(Properties.INVENTORY);
+
 		return buildingEntity;
 	}
 
@@ -336,6 +341,7 @@ public class CreationManager extends BaseSystem {
 		transformMapper.get(pickupEntity).rotation = (float) Math.random() * 360.0f;
 		collisionMapper.get(pickupEntity).radius = 0.1f;
 		inventoryMapper.get(pickupEntity).add(items);
+		syncPropagationMapper.get(pickupEntity).setOwnerPropagation(Properties.INVENTORY);
 		return pickupEntity;
 	}
 

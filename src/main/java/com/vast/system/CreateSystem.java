@@ -28,6 +28,7 @@ public class CreateSystem extends IteratingSystem {
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<SubType> subTypeMapper;
+	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 
 	@All({Know.class, Scan.class})
 	private EntitySubscription interestedSubscription;
@@ -48,6 +49,7 @@ public class CreateSystem extends IteratingSystem {
 	@Override
 	protected void process(int createEntity) {
 		Known known = knownMapper.get(createEntity);
+		SyncPropagation syncPropagation = syncPropagationMapper.get(createEntity);
 		IntBag interestedEntities = interestedSubscription.getEntities();
 		for (int i = 0; i < interestedEntities.size(); i++) {
 			int interestedEntity = interestedEntities.get(i);
@@ -71,7 +73,9 @@ public class CreateSystem extends IteratingSystem {
 					DataObject propertiesDataObject = new DataObject();
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, propertiesDataObject);
 					for (PropertyHandler propertyHandler : propertyHandlers) {
-						propertyHandler.decorateDataObject(createEntity, propertiesDataObject, true);
+						if (interestedEntity == createEntity || syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
+							propertyHandler.decorateDataObject(createEntity, propertiesDataObject, true);
+						}
 					}
 					peer.send(reusableEventMessage);
 				}
