@@ -19,17 +19,16 @@ public class HumanBehaviour extends AbstractBehaviour {
 	private ComponentMapper<Interact> interactMapper;
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Craft> craftMapper;
 
-	private Map<String, VastPeer> peers;
 	private Map<String, List<IncomingRequest>> incomingRequestsByPeer;
 	private Items items;
 	private Buildings buildings;
 
-	public HumanBehaviour(List<InteractionHandler> interactionHandlers, Map<String, VastPeer> peers, Map<String, List<IncomingRequest>> incomingRequestsByPeer, Items items, Buildings buildings) {
+	public HumanBehaviour(List<InteractionHandler> interactionHandlers, Map<String, List<IncomingRequest>> incomingRequestsByPeer, Items items, Buildings buildings) {
 		super(interactionHandlers);
-		this.peers = peers;
 		this.incomingRequestsByPeer = incomingRequestsByPeer;
 		this.items = items;
 		this.buildings = buildings;
@@ -37,12 +36,11 @@ public class HumanBehaviour extends AbstractBehaviour {
 
 	@Override
 	public void process(int entity) {
-		if (interactMapper.has(entity) || pathMapper.has(entity) || craftMapper.has(entity)) {
+		if (!activeMapper.has(entity) || interactMapper.has(entity) || pathMapper.has(entity) || craftMapper.has(entity)) {
 			return;
 		}
 
-		Player player = playerMapper.get(entity);
-		VastPeer peer = peers.get(player.name);
+		VastPeer peer = activeMapper.get(entity).peer;
 		int roll = (int) (Math.random() * 100);
 		if (roll <= 1) {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.SET_HOME)));

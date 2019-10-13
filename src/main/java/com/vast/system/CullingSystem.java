@@ -37,9 +37,8 @@ public class CullingSystem extends IteratingSystem {
 	private EventMessage reusableDestroyedEventMessage;
 	private EventMessage reusableCreatedEventMessage;
 
-	public CullingSystem(Map<String, VastPeer> peers, Set<PropertyHandler> propertyHandlers) {
+	public CullingSystem(Set<PropertyHandler> propertyHandlers) {
 		super(Aspect.all(Scan.class, Know.class));
-		this.peers = peers;
 		this.propertyHandlers = propertyHandlers;
 
 		reusableRemovedEntities = new ArrayList<Integer>();
@@ -62,7 +61,7 @@ public class CullingSystem extends IteratingSystem {
 
 		VastPeer peer = null;
 		if (playerMapper.has(entity) && activeMapper.has(entity)) {
-			peer = peers.get(playerMapper.get(entity).name);
+			peer = activeMapper.get(entity).peer;
 		}
 
 		notifyAboutRemovedEntities(peer, entity, scan, know);

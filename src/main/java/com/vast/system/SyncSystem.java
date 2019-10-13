@@ -27,14 +27,12 @@ public class SyncSystem extends IteratingSystem {
 	private ComponentMapper<Known> knownMapper;
 
 	private Set<PropertyHandler> propertyHandlers;
-	private Map<String, VastPeer> peers;
 	private Metrics metrics;
 	private EventMessage reusableMessage;
 
-	public SyncSystem(Set<PropertyHandler> propertyHandlers, Map<String, VastPeer> peers, Metrics metrics) {
+	public SyncSystem(Set<PropertyHandler> propertyHandlers, Metrics metrics) {
 		super(Aspect.all(Sync.class, SyncPropagation.class, Known.class));
 		this.propertyHandlers = propertyHandlers;
-		this.peers = peers;
 		this.metrics = metrics;
 
 		reusableMessage = new EventMessage(MessageCodes.UPDATE_PROPERTIES);
@@ -85,7 +83,7 @@ public class SyncSystem extends IteratingSystem {
 		if (atLeastOnePropertySet) {
 			for (int knownByEntity : knownMapper.get(syncEntity).knownByEntities) {
 				if (playerMapper.has(knownByEntity) && activeMapper.has(knownByEntity)) {
-					VastPeer knownByPeer = peers.get(playerMapper.get(knownByEntity).name);
+					VastPeer knownByPeer = activeMapper.get(knownByEntity).peer;
 					if (reliable) {
 						knownByPeer.send(reusableMessage);
 					} else {
@@ -120,11 +118,11 @@ public class SyncSystem extends IteratingSystem {
 				}
 			}
 			if (atLeastOnePropertySet) {
-				VastPeer nearbyPeer = peers.get(playerMapper.get(syncEntity).name);
+				VastPeer ownerPeer = activeMapper.get(syncEntity).peer;
 				if (reliable) {
-					nearbyPeer.send(reusableMessage);
+					ownerPeer.send(reusableMessage);
 				} else {
-					nearbyPeer.sendUnreliable(reusableMessage);
+					ownerPeer.sendUnreliable(reusableMessage);
 				}
 			}
 		}

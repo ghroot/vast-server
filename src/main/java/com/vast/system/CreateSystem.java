@@ -15,7 +15,6 @@ import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.Set;
 
 public class CreateSystem extends IteratingSystem {
@@ -34,14 +33,12 @@ public class CreateSystem extends IteratingSystem {
 	@All({Know.class, Scan.class})
 	private EntitySubscription interestedSubscription;
 
-	private Map<String, VastPeer> peers;
 	private Set<PropertyHandler> propertyHandlers;
 
 	private EventMessage reusableEventMessage;
 
-	public CreateSystem(Map<String, VastPeer> peers, Set<PropertyHandler> propertyHandlers) {
+	public CreateSystem(Set<PropertyHandler> propertyHandlers) {
 		super(Aspect.all(Create.class, Type.class));
-		this.peers = peers;
 		this.propertyHandlers = propertyHandlers;
 
 		reusableEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
@@ -58,7 +55,7 @@ public class CreateSystem extends IteratingSystem {
 			Scan interestedScan = scanMapper.get(interestedEntity);
 			if (interestedScan.nearbyEntities.contains(createEntity)) {
 				if (playerMapper.has(interestedEntity) && activeMapper.has(interestedEntity)) {
-					VastPeer peer = peers.get(playerMapper.get(interestedEntity).name);
+					VastPeer peer = activeMapper.get(interestedEntity).peer;
 					String reason = createMapper.get(createEntity).reason;
 					logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);
 					reusableEventMessage.getDataObject().clear();

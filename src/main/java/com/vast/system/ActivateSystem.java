@@ -40,9 +40,10 @@ public class ActivateSystem extends IteratingSystem {
 	protected void process(int inactivePlayerEntity) {
 		Player player = playerMapper.get(inactivePlayerEntity);
 		if (peers.containsKey(player.name)) {
-			player.id = peers.get(player.name).getId();
+			VastPeer peer = peers.get(player.name);
+			player.id = peer.getId();
 			logger.info("Activating peer entity: {} for {} ({})", inactivePlayerEntity, player.name, player.id);
-			activeMapper.create(inactivePlayerEntity);
+			activeMapper.create(inactivePlayerEntity).peer = peer;
 			syncMapper.create(inactivePlayerEntity).markPropertyAsDirty(Properties.ACTIVE);
 			scanMapper.create(inactivePlayerEntity);
 			knowMapper.create(inactivePlayerEntity);

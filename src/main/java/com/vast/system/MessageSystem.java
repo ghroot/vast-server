@@ -10,20 +10,15 @@ import com.vast.component.Player;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
 
-import java.util.Map;
-
 public class MessageSystem extends IteratingSystem {
 	private ComponentMapper<Message> messageMapper;
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
 
-	private Map<String, VastPeer> peers;
-
 	private EventMessage reusableMessage;
 
-	public MessageSystem(Map<String, VastPeer> peers) {
+	public MessageSystem() {
 		super(Aspect.all(Message.class));
-		this.peers = peers;
 
 		reusableMessage = new EventMessage(MessageCodes.MESSAGE);
 	}
@@ -33,7 +28,7 @@ public class MessageSystem extends IteratingSystem {
 		Message message = messageMapper.get(entity);
 
 		if (playerMapper.has(entity) && activeMapper.has(entity)) {
-			VastPeer peer = peers.get(playerMapper.get(entity).name);
+			VastPeer peer = activeMapper.get(entity).peer;
 			reusableMessage.getDataObject().clear();
 			reusableMessage.getDataObject().set(MessageCodes.MESSAGE_TEXT, message.text);
 			reusableMessage.getDataObject().set(MessageCodes.MESSAGE_TYPE, (byte) message.type);

@@ -77,7 +77,7 @@ public class VastWorld implements Runnable {
 			new ConfigurationPropertyHandler(items, buildings)
 		));
 		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
-		behaviours.put("human", new HumanBehaviour(interactionHandlers, peers, incomingRequestsByPeer, items, buildings));
+		behaviours.put("human", new HumanBehaviour(interactionHandlers, incomingRequestsByPeer, items, buildings));
 		behaviours.put("adultAnimal", new AdultAnimalBehaviour(interactionHandlers));
 		behaviours.put("youngAnimal", new YoungAnimalBehaviour(interactionHandlers));
 
@@ -95,8 +95,8 @@ public class VastWorld implements Runnable {
 			new SpatialShiftSystem(worldConfiguration, spatialHashes),
 			new SpatialUpdateSystem(worldConfiguration, spatialHashes),
 			new ScanSystem(worldConfiguration, spatialHashes),
-			new CreateSystem(peers, propertyHandlers),
-			new CullingSystem(peers, propertyHandlers),
+			new CreateSystem(propertyHandlers),
+			new CullingSystem(propertyHandlers),
 			new OrderSystem(orderHandlers, incomingRequestsByPeer),
 			new InteractSystem(interactionHandlers),
 			new AISystem(behaviours),
@@ -112,10 +112,10 @@ public class VastWorld implements Runnable {
 			new DayNightCycleSystem(worldConfiguration),
 			new WeatherSystem(),
 			new ParentSystem(),
-			new DeleteSystem(peers),
-			new EventSystem(peers),
-			new MessageSystem(peers),
-			new SyncSystem(propertyHandlers, peers, metrics)
+			new DeleteSystem(),
+			new EventSystem(),
+			new MessageSystem(),
+			new SyncSystem(propertyHandlers, metrics)
 		).with(
 			new WorldSerializationManager(),
 			new EntityLinkManager()

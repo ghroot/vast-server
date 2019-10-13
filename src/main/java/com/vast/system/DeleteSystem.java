@@ -11,7 +11,6 @@ import com.vast.network.VastPeer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,9 +27,8 @@ public class DeleteSystem extends IteratingSystem {
 
 	private EventMessage reusableEventMessage;
 
-	public DeleteSystem(Map<String, VastPeer> peers) {
+	public DeleteSystem() {
 		super(Aspect.one(Delete.class));
-		this.peers = peers;
 
 		reusableEventMessage = new EventMessage(MessageCodes.ENTITY_DESTROYED);
 	}
@@ -52,7 +50,7 @@ public class DeleteSystem extends IteratingSystem {
 			Set<Integer> knownByEntities = knownMapper.get(deleteEntity).knownByEntities;
 			for (int entityToNotify : knownByEntities) {
 				if (playerMapper.has(entityToNotify) && activeMapper.has(entityToNotify)) {
-					VastPeer peer = peers.get(playerMapper.get(entityToNotify).name);
+					VastPeer peer = activeMapper.get(entityToNotify).peer;
 					notifyAboutRemovedEntity(peer, deleteEntity, reason);
 				}
 				knowMapper.get(entityToNotify).knowEntities.remove(deleteEntity);
