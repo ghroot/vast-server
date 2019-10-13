@@ -2,6 +2,8 @@
 
 Multiplayer server using ECS implementation through [Artemis ODB](https://github.com/junkdog/artemis-odb) and networking with [Toast Haste](https://github.com/nhn/toast-haste.framework).
 
+![Monitor](doc/monitor.png)
+
 ## Build
 
 Mac:
