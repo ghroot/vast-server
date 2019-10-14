@@ -24,7 +24,6 @@ public class PlantableInteractionHandler extends AbstractInteractionHandler {
 
 	public PlantableInteractionHandler(Items items) {
 		super(Aspect.all(Inventory.class), Aspect.all(Plantable.class));
-
 		this.items = items;
 	}
 

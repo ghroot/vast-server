@@ -10,9 +10,6 @@ import com.vast.network.VastPeer;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class TestMessageSystem {
 	@Test
 	public void sendsMessage() {

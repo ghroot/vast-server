@@ -7,76 +7,189 @@ import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.*;
 import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public class TestSyncSystem {
-	private final byte TEST_PROPERTY_WITH_NEARBY_PROPAGATION = 1;
-	private final byte TEST_PROPERTY_WITH_OWNER_PROPAGATION = 2;
+	private World world;
+	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Known> knownMapper;
+	private ComponentMapper<SyncPropagation> syncPropagationMapper;
+	private ComponentMapper<Sync> syncMapper;
 
-	@Test
-	public void notifiesOwnerAndNearbyPlayer() {
-		Set<PropertyHandler> propertyHandlers = new HashSet<PropertyHandler>();
-		propertyHandlers.add(new PropertyHandler() {
-			@Override
-			public byte getProperty() {
-				return TEST_PROPERTY_WITH_NEARBY_PROPAGATION;
-			}
-
-			@Override
-			public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
-				return true;
-			}
-		});
-		propertyHandlers.add(new PropertyHandler() {
-			@Override
-			public byte getProperty() {
-				return TEST_PROPERTY_WITH_OWNER_PROPAGATION;
-			}
-
-			@Override
-			public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
-				return true;
-			}
-		});
-
-		VastPeer ownerPeer = Mockito.mock(VastPeer.class);
-		Mockito.when(ownerPeer.getId()).thenReturn(123L);
-
-		VastPeer nearbyPeer = Mockito.mock(VastPeer.class);
-		Mockito.when(nearbyPeer.getId()).thenReturn(321L);
-
-		World world = new World(new WorldConfigurationBuilder().with(
+	private void setupWorld(Set<PropertyHandler> propertyHandlers) {
+		world = new World(new WorldConfigurationBuilder().with(
 			new SyncSystem(propertyHandlers, null)
 		).build());
 
-		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
-		ComponentMapper<Active> activeMapper = world.getMapper(Active.class);
-		ComponentMapper<Known> knownMapper = world.getMapper(Known.class);
-		ComponentMapper<SyncPropagation> syncPropagationMapper = world.getMapper(SyncPropagation.class);
-		ComponentMapper<Sync> syncMapper = world.getMapper(Sync.class);
+		playerMapper = world.getMapper(Player.class);
+		activeMapper = world.getMapper(Active.class);
+		knownMapper = world.getMapper(Known.class);
+		syncPropagationMapper = world.getMapper(SyncPropagation.class);
+		syncMapper = world.getMapper(Sync.class);
+	}
+
+	private PropertyHandler createPropertyHandler(int property, boolean changes) {
+		return new PropertyHandler() {
+			@Override
+			public byte getProperty() {
+				return (byte) property;
+			}
+
+			@Override
+			public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
+				return changes;
+			}
+		};
+	}
+
+	private VastPeer createPeer(int id) {
+		VastPeer peer = Mockito.mock(VastPeer.class);
+		Mockito.when(peer.getId()).thenReturn((long) id);
+		return peer;
+	}
+
+	@Test
+	public void notifiesOwnerOnceEvenIfSeveralPropertiesChanged() {
+		VastPeer ownerPeer = createPeer(123);
+		setupWorld(new HashSet<PropertyHandler>(Arrays.asList(
+			createPropertyHandler(1, true),
+			createPropertyHandler(2, true)
+		)));
+
+		int playerEntity = world.create();
+		playerMapper.create(playerEntity);
+		activeMapper.create(playerEntity).peer = ownerPeer;
+		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
+		syncPropagationMapper.create(playerEntity).setOwnerPropagation(1);
+		syncPropagationMapper.create(playerEntity).setOwnerPropagation(2);
+		syncMapper.create(playerEntity).markPropertyAsDirty(1);
+		syncMapper.create(playerEntity).markPropertyAsDirty(2);
+
+		world.process();
+
+		Mockito.verify(ownerPeer, Mockito.times(1)).send(Mockito.any());
+	}
+
+	@Test
+	public void doesNotNotifyOwnerIfPropertyDidNotChange() {
+		VastPeer ownerPeer = createPeer(123);
+		setupWorld(new HashSet<PropertyHandler>(Arrays.asList(
+			createPropertyHandler(1, false)
+		)));
+
+		int playerEntity = world.create();
+		playerMapper.create(playerEntity);
+		activeMapper.create(playerEntity).peer = ownerPeer;
+		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
+		syncPropagationMapper.create(playerEntity).setOwnerPropagation(1);
+		syncMapper.create(playerEntity).markPropertyAsDirty(1);
+
+		world.process();
+
+		Mockito.verify(ownerPeer, Mockito.never()).send(Mockito.any());
+	}
+
+	@Test
+	public void doesNotNotifyOwnerIfPropertyWasNotMarkedAsDirty() {
+		VastPeer ownerPeer = createPeer(123);
+		setupWorld(new HashSet<PropertyHandler>(Arrays.asList(
+			createPropertyHandler(1, true)
+		)));
+
+		int playerEntity = world.create();
+		playerMapper.create(playerEntity);
+		activeMapper.create(playerEntity).peer = ownerPeer;
+		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
+		syncPropagationMapper.create(playerEntity).setOwnerPropagation(1);
+
+		world.process();
+
+		Mockito.verify(ownerPeer, Mockito.never()).send(Mockito.any());
+	}
+
+	@Test
+	public void notifiesWithReliableWhenPropertiesHaveMixedReliability() {
+		VastPeer ownerPeer = createPeer(123);
+		setupWorld(new HashSet<PropertyHandler>(Arrays.asList(
+			createPropertyHandler(1, true),
+			createPropertyHandler(2, true)
+		)));
+
+		int playerEntity = world.create();
+		playerMapper.create(playerEntity);
+		activeMapper.create(playerEntity).peer = ownerPeer;
+		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
+		syncPropagationMapper.create(playerEntity).setUnreliable(2);
+		syncMapper.create(playerEntity).markPropertyAsDirty(1);
+		syncMapper.create(playerEntity).markPropertyAsDirty(2);
+
+		world.process();
+
+		Mockito.verify(ownerPeer, Mockito.times(1)).send(Mockito.any());
+		Mockito.verify(ownerPeer, Mockito.never()).sendUnreliable(Mockito.any());
+	}
+
+	@Test
+	public void notifiesWithUnreliableWhenAllPropertiesAreUnreliable() {
+		VastPeer ownerPeer = createPeer(123);
+		setupWorld(new HashSet<PropertyHandler>(Arrays.asList(
+			createPropertyHandler(1, true),
+			createPropertyHandler(2, true)
+		)));
+
+		int playerEntity = world.create();
+		playerMapper.create(playerEntity);
+		activeMapper.create(playerEntity).peer = ownerPeer;
+		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
+		syncPropagationMapper.create(playerEntity).setUnreliable(1);
+		syncPropagationMapper.create(playerEntity).setUnreliable(2);
+		syncMapper.create(playerEntity).markPropertyAsDirty(1);
+		syncMapper.create(playerEntity).markPropertyAsDirty(2);
+
+		world.process();
+
+		Mockito.verify(ownerPeer, Mockito.times(1)).sendUnreliable(Mockito.any());
+		Mockito.verify(ownerPeer, Mockito.never()).send(Mockito.any());
+	}
+
+	@Test
+	public void notifiesOwnerAndNearbyButNotFarPlayer() {
+		VastPeer ownerPeer = createPeer(123);
+		VastPeer nearbyPeer = createPeer(321);
+		VastPeer farPeer = createPeer(213);
+		setupWorld(new HashSet<PropertyHandler>(Arrays.asList(
+			createPropertyHandler(1, true),
+			createPropertyHandler(2, true)
+		)));
 
 		int playerEntity = world.create();
 		int nearbyEntity = world.create();
+		int farEntity = world.create();
 
-		playerMapper.create(playerEntity).name = "Owner";
+		playerMapper.create(playerEntity);
 		activeMapper.create(playerEntity).peer = ownerPeer;
 		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
 		knownMapper.get(playerEntity).knownByEntities.add(nearbyEntity);
-		syncPropagationMapper.create(playerEntity).setOwnerPropagation(TEST_PROPERTY_WITH_OWNER_PROPAGATION);
-		syncMapper.create(playerEntity).markPropertyAsDirty(TEST_PROPERTY_WITH_NEARBY_PROPAGATION);
-		syncMapper.create(playerEntity).markPropertyAsDirty(TEST_PROPERTY_WITH_OWNER_PROPAGATION);
+		syncPropagationMapper.create(playerEntity).setOwnerPropagation(1);
+		syncMapper.create(playerEntity).markPropertyAsDirty(1);
+		syncMapper.create(playerEntity).markPropertyAsDirty(2);
 
-		playerMapper.create(nearbyEntity).name = "Nearby";
+		playerMapper.create(nearbyEntity);
 		activeMapper.create(nearbyEntity).peer = nearbyPeer;
+
+		playerMapper.create(farEntity);
+		activeMapper.create(farEntity).peer = farPeer;
 
 		world.process();
 
 		Mockito.verify(ownerPeer, Mockito.times(2)).send(Mockito.any());
-		Mockito.verify(nearbyPeer).send(Mockito.any());
+		Mockito.verify(nearbyPeer, Mockito.times(1)).send(Mockito.any());
+		Mockito.verify(farPeer, Mockito.never()).send(Mockito.any());
 	}
 }

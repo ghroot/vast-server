@@ -19,6 +19,7 @@ public class InteractOrderHandler implements OrderHandler {
 
 	private ComponentMapper<Interact> interactMapper;
 	private ComponentMapper<Path> pathMapper;
+
 	private List<InteractionHandler> interactionHandlers;
 
 	public InteractOrderHandler(List<InteractionHandler> interactionHandlers) {

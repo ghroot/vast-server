@@ -27,6 +27,9 @@ public class SyncSystem extends IteratingSystem {
 
 	private Set<PropertyHandler> propertyHandlers;
 	private Metrics metrics;
+
+	private DataObject reusablePropertiesDataObject;
+	private ChangedProperties reusableChangedProperties;
 	private EventMessage reusableMessage;
 
 	public SyncSystem(Set<PropertyHandler> propertyHandlers, Metrics metrics) {
@@ -34,6 +37,8 @@ public class SyncSystem extends IteratingSystem {
 		this.propertyHandlers = propertyHandlers;
 		this.metrics = metrics;
 
+		reusablePropertiesDataObject = new DataObject();
+		reusableChangedProperties = new ChangedProperties();
 		reusableMessage = new EventMessage(MessageCodes.UPDATE_PROPERTIES);
 	}
 
@@ -63,7 +68,7 @@ public class SyncSystem extends IteratingSystem {
 		if (changedProperties != null) {
 			reusableMessage.getDataObject().clear();
 			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
-			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, changedProperties.dataObject);
+			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, changedProperties.propertiesDataObject);
 			for (int knownByEntity : knownMapper.get(syncEntity).knownByEntities) {
 				if (playerMapper.has(knownByEntity) && activeMapper.has(knownByEntity)) {
 					VastPeer knownByPeer = activeMapper.get(knownByEntity).peer;
@@ -82,7 +87,7 @@ public class SyncSystem extends IteratingSystem {
 		if (changedProperties != null) {
 			reusableMessage.getDataObject().clear();
 			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
-			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, changedProperties.dataObject);
+			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, changedProperties.propertiesDataObject);
 			VastPeer ownerPeer = activeMapper.get(syncEntity).peer;
 			if (changedProperties.reliable) {
 				ownerPeer.send(reusableMessage);
@@ -95,7 +100,7 @@ public class SyncSystem extends IteratingSystem {
 	private ChangedProperties getChangedProperties(int syncEntity, Sync sync, boolean nearbyPropagation) {
 		boolean reliable = false;
 		boolean atLeastOnePropertySet = false;
-		DataObject propertiesDataObject = new DataObject();
+		reusablePropertiesDataObject.clear();
 
 		for (PropertyHandler syncHandler : propertyHandlers) {
 			byte property = syncHandler.getProperty();
@@ -103,7 +108,7 @@ public class SyncSystem extends IteratingSystem {
 				SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
 				if ((nearbyPropagation && syncPropagation.isNearbyPropagation(property)) ||
 					(!nearbyPropagation && syncPropagation.isOwnerPropagation(property))) {
-					if (syncHandler.decorateDataObject(syncEntity, propertiesDataObject, false)) {
+					if (syncHandler.decorateDataObject(syncEntity, reusablePropertiesDataObject, false)) {
 						atLeastOnePropertySet = true;
 						if (metrics != null) {
 							metrics.incrementSyncedProperty(property);
@@ -117,19 +122,16 @@ public class SyncSystem extends IteratingSystem {
 		}
 
 		if (atLeastOnePropertySet) {
-			return new ChangedProperties(propertiesDataObject, reliable);
+			reusableChangedProperties.propertiesDataObject = reusablePropertiesDataObject;
+			reusableChangedProperties.reliable = reliable;
+			return reusableChangedProperties;
 		} else {
 			return null;
 		}
 	}
 
 	class ChangedProperties {
-		private DataObject dataObject;
+		private DataObject propertiesDataObject;
 		private boolean reliable;
-
-		public ChangedProperties(DataObject dataObject, boolean reliable) {
-			this.dataObject = dataObject;
-			this.reliable = reliable;
-		}
 	}
 }

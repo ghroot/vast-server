@@ -9,10 +9,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
 public class TestDeleteSystem {
 	@Test
 	public void removesDeleteComponent() {
