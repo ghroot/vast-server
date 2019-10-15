@@ -27,7 +27,7 @@ public class TestDeleteSystem {
 	}
 
 	@Test
-	public void removesKnownEntityOnBothSides() {
+	public void removesKnownEntity() {
 		VastPeer peer = Mockito.mock(VastPeer.class);
 		Mockito.when(peer.getId()).thenReturn(123L);
 
