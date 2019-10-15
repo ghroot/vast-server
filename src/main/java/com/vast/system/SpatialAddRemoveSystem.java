@@ -10,12 +10,13 @@ import com.vast.data.WorldConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.vecmath.Point2f;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class SpatialShiftSystem extends IteratingSystem {
-	private static final Logger logger = LoggerFactory.getLogger(SpatialShiftSystem.class);
+public class SpatialAddRemoveSystem extends IteratingSystem {
+	private static final Logger logger = LoggerFactory.getLogger(SpatialAddRemoveSystem.class);
 
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Spatial> spatialMapper;
@@ -23,7 +24,7 @@ public class SpatialShiftSystem extends IteratingSystem {
 	private WorldConfiguration worldConfiguration;
 	private Map<Integer, Set<Integer>> spatialHashes;
 
-	public SpatialShiftSystem(WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes) {
+	public SpatialAddRemoveSystem(WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes) {
 		super(Aspect.all(Transform.class, Spatial.class));
 		this.worldConfiguration = worldConfiguration;
 		this.spatialHashes = spatialHashes;
@@ -59,6 +60,12 @@ public class SpatialShiftSystem extends IteratingSystem {
 			spatialHashes.put(spatial.memberOfSpatialHash.getUniqueKey(), entitiesInHash);
 		}
 		entitiesInHash.add(entity);
+
+		if (spatial.lastUsedPosition == null) {
+			spatial.lastUsedPosition = new Point2f(transform.position);
+		} else {
+			spatial.lastUsedPosition.set(transform.position);
+		}
 	}
 
 	private void removeSpatialHash(int entity) {

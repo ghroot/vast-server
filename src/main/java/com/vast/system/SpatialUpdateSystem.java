@@ -46,12 +46,6 @@ public class SpatialUpdateSystem extends IteratingSystem {
 		Spatial spatial = spatialMapper.get(entity);
 		if (spatial.lastUsedPosition == null || !spatial.lastUsedPosition.equals(transform.position)) {
 			updateSpatialHash(entity);
-
-			if (spatial.lastUsedPosition == null) {
-				spatial.lastUsedPosition = new Point2f(transform.position);
-			} else {
-				spatial.lastUsedPosition.set(transform.position);
-			}
 		}
 	}
 
@@ -75,5 +69,11 @@ public class SpatialUpdateSystem extends IteratingSystem {
 			spatialHashes.put(spatial.memberOfSpatialHash.getUniqueKey(), entitiesInHash);
 		}
 		entitiesInHash.add(entity);
+
+		if (spatial.lastUsedPosition == null) {
+			spatial.lastUsedPosition = new Point2f(transform.position);
+		} else {
+			spatial.lastUsedPosition.set(transform.position);
+		}
 	}
 }
