@@ -15,7 +15,7 @@ import java.util.HashMap;
 
 public class TestDeactivateSystem {
 	@Test
-	public void activatesPlayerEntity() {
+	public void deactivatesPlayerEntity() {
 		World world = new World(new WorldConfigurationBuilder().with(
 			new DeactivateSystem(new HashMap<String, VastPeer>())
 		).build());
