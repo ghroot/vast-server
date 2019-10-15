@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ScanSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(ScanSystem.class);
@@ -55,7 +54,7 @@ public class ScanSystem extends IteratingSystem {
 					reusableHash.setXY(x, y);
 					Set<Integer> entitiesInHash = spatialHashes.get(reusableHash.getUniqueKey());
 					if (entitiesInHash != null) {
-						scan.nearbyEntities.addAll(entitiesInHash); // TODO: Should self be excluded? (currently used for notifying about own player entity!)
+						scan.nearbyEntities.addAll(entitiesInHash);
 					}
 				}
 			}
