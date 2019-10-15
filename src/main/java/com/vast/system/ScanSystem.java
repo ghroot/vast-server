@@ -46,15 +46,25 @@ public class ScanSystem extends IteratingSystem {
 		Scan scan = scanMapper.get(scanEntity);
 		Spatial spatial = spatialMapper.get(scanEntity);
 
-		scan.nearbyEntities.clear();
-		int sectionsInEachDirection = (int) Math.ceil(scan.distance / worldConfiguration.sectionSize);
+		Set<Integer> nearbyEntities = scan.nearbyEntities;
+		nearbyEntities.clear();
+
 		if (spatial.memberOfSpatialHash != null) {
-			for (int x = spatial.memberOfSpatialHash.getX() - sectionsInEachDirection * worldConfiguration.sectionSize; x <= spatial.memberOfSpatialHash.getX() + sectionsInEachDirection * worldConfiguration.sectionSize; x += worldConfiguration.sectionSize) {
-				for (int y = spatial.memberOfSpatialHash.getY() - sectionsInEachDirection * worldConfiguration.sectionSize; y <= spatial.memberOfSpatialHash.getY() + sectionsInEachDirection * worldConfiguration.sectionSize; y += worldConfiguration.sectionSize) {
+			int sectionSize = worldConfiguration.sectionSize;
+			int sectionsInEachDirection = (int) Math.ceil(scan.distance / sectionSize);
+			int distanceInEachDirection = sectionsInEachDirection * sectionSize;
+			int spatialX = spatial.memberOfSpatialHash.getX();
+			int spatialY = spatial.memberOfSpatialHash.getY();
+			int startX = spatialX - distanceInEachDirection;
+			int endX = spatialX + distanceInEachDirection;
+			int startY = spatialY - distanceInEachDirection;
+			int endY = spatialY + distanceInEachDirection;
+			for (int x = startX; x <= endX; x += sectionSize) {
+				for (int y = startY; y <= endY; y += sectionSize) {
 					reusableHash.setXY(x, y);
 					Set<Integer> entitiesInHash = spatialHashes.get(reusableHash.getUniqueKey());
 					if (entitiesInHash != null) {
-						scan.nearbyEntities.addAll(entitiesInHash);
+						nearbyEntities.addAll(entitiesInHash);
 					}
 				}
 			}

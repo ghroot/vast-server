@@ -6,6 +6,13 @@ public class SpatialHash {
 
 	private int uniqueKey;
 
+	public SpatialHash() {
+	}
+
+	public SpatialHash(int x, int y) {
+		setXY(x, y);
+	}
+
 	public int getX() {
 		return x;
 	}
@@ -31,8 +38,8 @@ public class SpatialHash {
 	}
 
 	private void updateUniqueKey() {
-		long a = (long) (x >= 0 ? 2 * x : -2 * x - 1);
-		long b = (long) (y >= 0 ? 2 * y : -2 * y - 1);
+		long a = x >= 0 ? 2 * x : -2 * x - 1;
+		long b = y >= 0 ? 2 * y : -2 * y - 1;
 		int c = (int) ((a >= b ? a * a + a + b : a + b * b) / 2);
 		uniqueKey = x < 0 && y < 0 || x >= 0 && y >= 0 ? c : -c - 1;
 	}
