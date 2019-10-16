@@ -1,15 +1,15 @@
 package com.vast.component;
 
 import com.artemis.PooledComponent;
-
-import java.util.HashSet;
-import java.util.Set;
+import com.artemis.annotations.EntityId;
+import com.artemis.utils.IntBag;
 
 public class Known extends PooledComponent {
-	public transient Set<Integer> knownByEntities = new HashSet<Integer>();
+	@EntityId
+	public transient IntBag knownByEntities = new IntBag();
 
 	@Override
 	protected void reset() {
-		knownByEntities = new HashSet<Integer>();
+		knownByEntities = new IntBag();
 	}
 }

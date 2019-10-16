@@ -16,8 +16,6 @@ import com.vast.network.VastPeer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
 public class EventSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(EventSystem.class);
 

@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Set;
 
 public class DeleteSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(DeleteSystem.class);
@@ -47,13 +46,15 @@ public class DeleteSystem extends IteratingSystem {
 		logger.debug("Deleting entity {} ({})", deleteEntity, reason);
 
 		if (knownMapper.has(deleteEntity)) {
-			Set<Integer> knownByEntities = knownMapper.get(deleteEntity).knownByEntities;
-			for (int entityToNotify : knownByEntities) {
+			IntBag knownByEntitiesBag = knownMapper.get(deleteEntity).knownByEntities;
+			int[] knownByEntities = knownByEntitiesBag.getData();
+			for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
+				int entityToNotify = knownByEntities[i];
 				if (playerMapper.has(entityToNotify) && activeMapper.has(entityToNotify)) {
 					VastPeer peer = activeMapper.get(entityToNotify).peer;
 					notifyAboutRemovedEntity(peer, deleteEntity, reason);
 				}
-				knowMapper.get(entityToNotify).knowEntities.remove(deleteEntity);
+				knowMapper.get(entityToNotify).knowEntities.removeValue(deleteEntity);
 			}
 		}
 

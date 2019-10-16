@@ -4,6 +4,7 @@ import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
+import com.artemis.utils.IntBag;
 import com.vast.behaviour.AdultAnimalBehaviour;
 import com.vast.behaviour.Behaviour;
 import com.vast.behaviour.HumanBehaviour;
@@ -42,7 +43,7 @@ public class VastWorld implements Runnable {
 		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
 		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<String, List<IncomingRequest>>();
 		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
-		Map<Integer, Set<Integer>> spatialHashes = new HashMap<Integer, Set<Integer>>();
+		Map<Integer, IntBag> spatialHashes = new HashMap<Integer, IntBag>();
 		List<InteractionHandler> interactionHandlers = new ArrayList<InteractionHandler>(Arrays.asList(
 			new GrowingInteractionHandler(),
 			new HarvestableInteractionHandler(),

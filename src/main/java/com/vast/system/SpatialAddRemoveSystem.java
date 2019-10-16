@@ -3,6 +3,7 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
+import com.artemis.utils.IntBag;
 import com.vast.component.Spatial;
 import com.vast.component.Transform;
 import com.vast.data.SpatialHash;
@@ -11,9 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class SpatialAddRemoveSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(SpatialAddRemoveSystem.class);
@@ -22,9 +21,9 @@ public class SpatialAddRemoveSystem extends IteratingSystem {
 	private ComponentMapper<Spatial> spatialMapper;
 
 	private WorldConfiguration worldConfiguration;
-	private Map<Integer, Set<Integer>> spatialHashes;
+	private Map<Integer, IntBag> spatialHashes;
 
-	public SpatialAddRemoveSystem(WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes) {
+	public SpatialAddRemoveSystem(WorldConfiguration worldConfiguration, Map<Integer, IntBag> spatialHashes) {
 		super(Aspect.all(Transform.class, Spatial.class));
 		this.worldConfiguration = worldConfiguration;
 		this.spatialHashes = spatialHashes;
@@ -54,9 +53,9 @@ public class SpatialAddRemoveSystem extends IteratingSystem {
 			Math.round(transform.position.x / worldConfiguration.sectionSize) * worldConfiguration.sectionSize,
 			Math.round(transform.position.y / worldConfiguration.sectionSize) * worldConfiguration.sectionSize);
 
-		Set<Integer> entitiesInHash = spatialHashes.get(spatial.memberOfSpatialHash.getUniqueKey());
+		IntBag entitiesInHash = spatialHashes.get(spatial.memberOfSpatialHash.getUniqueKey());
 		if (entitiesInHash == null) {
-			entitiesInHash = new HashSet<Integer>();
+			entitiesInHash = new IntBag();
 			spatialHashes.put(spatial.memberOfSpatialHash.getUniqueKey(), entitiesInHash);
 		}
 		entitiesInHash.add(entity);
@@ -71,7 +70,7 @@ public class SpatialAddRemoveSystem extends IteratingSystem {
 	private void removeSpatialHash(int entity) {
 		Spatial spatial = spatialMapper.get(entity);
 		if (spatial != null && spatial.memberOfSpatialHash != null) {
-			spatialHashes.get(spatial.memberOfSpatialHash.getUniqueKey()).remove(entity);
+			spatialHashes.get(spatial.memberOfSpatialHash.getUniqueKey()).removeValue(entity);
 			spatial.memberOfSpatialHash = null;
 		}
 	}

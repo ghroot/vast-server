@@ -46,8 +46,11 @@ public class DeactivateSystem extends IteratingSystem {
 			activeMapper.remove(activePlayerEntity);
 			syncMapper.create(activePlayerEntity).markPropertyAsDirty(Properties.ACTIVE);
 			scanMapper.remove(activePlayerEntity);
-			for (int knowEntity : knowMapper.get(activePlayerEntity).knowEntities) {
-				knownMapper.get(knowEntity).knownByEntities.remove(activePlayerEntity);
+			IntBag knowEntitiesBag = knowMapper.get(activePlayerEntity).knowEntities;
+			int[] knowEntities = knowEntitiesBag.getData();
+			for (int i = 0, size = knowEntitiesBag.size(); i < size; ++i) {
+				int knowEntity = knowEntities[i];
+				knownMapper.get(knowEntity).knownByEntities.removeValue(activePlayerEntity);
 			}
 			knowMapper.remove(activePlayerEntity);
 		}

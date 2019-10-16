@@ -37,7 +37,9 @@ public class PickupSystem extends IteratingSystem {
 		Scan scan = scanMapper.get(playerEntity);
 
 		boolean hasPickupNearby = false;
-		for (int nearbyEntity : scan.nearbyEntities) {
+		int[] nearbyEntities = scan.nearbyEntities.getData();
+		for (int i = 0, size = scan.nearbyEntities.size(); i < size; ++i) {
+			int nearbyEntity = nearbyEntities[i];
 			if (typeMapper.has(nearbyEntity) && typeMapper.get(nearbyEntity).type.equals("pickup")) {
 				lifetimeMapper.create(nearbyEntity).timeLeft = PICKUP_LIFETIME;
 				hasPickupNearby = true;

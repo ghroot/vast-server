@@ -69,7 +69,10 @@ public class SyncSystem extends IteratingSystem {
 			reusableMessage.getDataObject().clear();
 			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
 			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, changedProperties.propertiesDataObject);
-			for (int knownByEntity : knownMapper.get(syncEntity).knownByEntities) {
+			IntBag knownByEntitiesBag = knownMapper.get(syncEntity).knownByEntities;
+			int[] knownByEntities = knownByEntitiesBag.getData();
+			for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
+				int knownByEntity = knownByEntities[i];
 				if (playerMapper.has(knownByEntity) && activeMapper.has(knownByEntity)) {
 					VastPeer knownByPeer = activeMapper.get(knownByEntity).peer;
 					if (changedProperties.reliable) {

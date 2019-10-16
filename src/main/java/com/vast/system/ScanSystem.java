@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Set;
 
 public class ScanSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(ScanSystem.class);
@@ -21,11 +20,11 @@ public class ScanSystem extends IteratingSystem {
 	private ComponentMapper<Spatial> spatialMapper;
 
 	private WorldConfiguration worldConfiguration;
-	private Map<Integer, Set<Integer>> spatialHashes;
+	private Map<Integer, IntBag> spatialHashes;
 
 	private SpatialHash reusableHash;
 
-	public ScanSystem(WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes) {
+	public ScanSystem(WorldConfiguration worldConfiguration, Map<Integer, IntBag> spatialHashes) {
 		super(Aspect.all(Scan.class, Spatial.class));
 		this.worldConfiguration = worldConfiguration;
 		this.spatialHashes = spatialHashes;
@@ -46,7 +45,7 @@ public class ScanSystem extends IteratingSystem {
 		Scan scan = scanMapper.get(scanEntity);
 		Spatial spatial = spatialMapper.get(scanEntity);
 
-		Set<Integer> nearbyEntities = scan.nearbyEntities;
+		IntBag nearbyEntities = scan.nearbyEntities;
 		nearbyEntities.clear();
 
 		if (spatial.memberOfSpatialHash != null) {
@@ -62,7 +61,7 @@ public class ScanSystem extends IteratingSystem {
 			for (int x = startX; x <= endX; x += sectionSize) {
 				for (int y = startY; y <= endY; y += sectionSize) {
 					reusableHash.setXY(x, y);
-					Set<Integer> entitiesInHash = spatialHashes.get(reusableHash.getUniqueKey());
+					IntBag entitiesInHash = spatialHashes.get(reusableHash.getUniqueKey());
 					if (entitiesInHash != null) {
 						nearbyEntities.addAll(entitiesInHash);
 					}

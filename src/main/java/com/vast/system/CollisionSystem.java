@@ -29,22 +29,22 @@ public class CollisionSystem extends IteratingSystem {
 	private ComponentMapper<Sync> syncMapper;
 
 	private WorldConfiguration worldConfiguration;
-	private Map<Integer, Set<Integer>> spatialHashes;
+	private Map<Integer, IntBag> spatialHashes;
 	private Metrics metrics;
 
 	private SpatialHash reusableHash;
-	private Set<Integer> reusableAdjacentEntities;
+	private IntBag reusableAdjacentEntities;
 	private Vector2f reusableVector;
 	private int numberOfCollisionChecks;
 
-	public CollisionSystem(WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes, Metrics metrics) {
+	public CollisionSystem(WorldConfiguration worldConfiguration, Map<Integer, IntBag> spatialHashes, Metrics metrics) {
 		super(Aspect.all(Transform.class, Spatial.class, Collision.class).exclude(Static.class));
 		this.worldConfiguration = worldConfiguration;
 		this.spatialHashes = spatialHashes;
 		this.metrics = metrics;
 
 		reusableHash = new SpatialHash();
-		reusableAdjacentEntities = new HashSet<Integer>();
+		reusableAdjacentEntities = new IntBag();
 		reusableVector = new Vector2f();
 	}
 
@@ -81,7 +81,10 @@ public class CollisionSystem extends IteratingSystem {
 			} else {
 				collision.lastCheckedPosition.set(transform.position);
 			}
-			for (int adjacentEntity : getAdjacentEntities(entity)) {
+			IntBag adjacentEntitiesBag = getAdjacentEntities(entity);
+			int[] adjacentEntities = adjacentEntitiesBag.getData();
+			for (int i = 0, size = adjacentEntitiesBag.size(); i < size; ++i) {
+				int adjacentEntity = adjacentEntities[i];
 				if (adjacentEntity != entity) {
 					if (!collisionMapper.has(adjacentEntity) || deleteMapper.has(adjacentEntity)) {
 						continue;
@@ -119,14 +122,14 @@ public class CollisionSystem extends IteratingSystem {
 		}
 	}
 
-	private Set<Integer> getAdjacentEntities(int entity) {
+	private IntBag getAdjacentEntities(int entity) {
 		reusableAdjacentEntities.clear();
 		Spatial spatial = spatialMapper.get(entity);
 		if (spatial.memberOfSpatialHash != null) {
 			for (int x = spatial.memberOfSpatialHash.getX() - worldConfiguration.sectionSize; x <= spatial.memberOfSpatialHash.getX() + worldConfiguration.sectionSize; x += worldConfiguration.sectionSize) {
 				for (int y = spatial.memberOfSpatialHash.getY() - worldConfiguration.sectionSize; y <= spatial.memberOfSpatialHash.getY() + worldConfiguration.sectionSize; y += worldConfiguration.sectionSize) {
 					reusableHash.setXY(x, y);
-					Set<Integer> entitiesInHash = spatialHashes.get(reusableHash.getUniqueKey());
+					IntBag entitiesInHash = spatialHashes.get(reusableHash.getUniqueKey());
 					if (entitiesInHash != null) {
 						reusableAdjacentEntities.addAll(entitiesInHash);
 					}

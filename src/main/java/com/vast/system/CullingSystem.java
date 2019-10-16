@@ -13,8 +13,6 @@ import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,7 +31,7 @@ public class CullingSystem extends IteratingSystem {
 	private Map<String, VastPeer> peers;
 	private Set<PropertyHandler> propertyHandlers;
 
-	private List<Integer> reusableRemovedEntities;
+	private IntBag reusableRemovedEntities;
 	private EventMessage reusableDestroyedEventMessage;
 	private EventMessage reusableCreatedEventMessage;
 
@@ -41,7 +39,7 @@ public class CullingSystem extends IteratingSystem {
 		super(Aspect.all(Scan.class, Know.class));
 		this.propertyHandlers = propertyHandlers;
 
-		reusableRemovedEntities = new ArrayList<Integer>();
+		reusableRemovedEntities = new IntBag();
 		reusableDestroyedEventMessage = new EventMessage(MessageCodes.ENTITY_DESTROYED);
 		reusableCreatedEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
 	}
@@ -70,18 +68,24 @@ public class CullingSystem extends IteratingSystem {
 
 	private void notifyAboutRemovedEntities(VastPeer peer, int entity, Scan scan, Know know) {
 		reusableRemovedEntities.clear();
-		for (int knowEntity : know.knowEntities) {
+		int[] knowEntities = know.knowEntities.getData();
+		for (int i = 0, size = know.knowEntities.size(); i < size; ++i) {
+			int knowEntity = knowEntities[i];
 			if (!scan.nearbyEntities.contains(knowEntity)) {
 				if (peer != null) {
 					notifyAboutRemovedEntity(peer, knowEntity);
 				}
 				reusableRemovedEntities.add(knowEntity);
 				if (knownMapper.has(knowEntity)) {
-					knownMapper.get(knowEntity).knownByEntities.remove(entity);
+					knownMapper.get(knowEntity).knownByEntities.removeValue(entity);
 				}
 			}
 		}
-		know.knowEntities.removeAll(reusableRemovedEntities);
+		int[] entitiesToRemove = reusableRemovedEntities.getData();
+		for (int i = 0, size = reusableRemovedEntities.size(); i < size; ++i) {
+			int entityToRemove = entitiesToRemove[i];
+			know.knowEntities.removeValue(entityToRemove);
+		}
 	}
 
 	private void notifyAboutRemovedEntity(VastPeer peer, int deletedEntity) {
@@ -93,7 +97,9 @@ public class CullingSystem extends IteratingSystem {
 	}
 
 	private void notifyAboutNewEntities(VastPeer peer, int entity, Scan scan, Know know) {
-		for (int nearbyEntity : scan.nearbyEntities) {
+		int[] nearbyEntities = scan.nearbyEntities.getData();
+		for (int i = 0, size = scan.nearbyEntities.size(); i < size; ++i) {
+			int nearbyEntity = nearbyEntities[i];
 			if (!know.knowEntities.contains(nearbyEntity) && typeMapper.has(nearbyEntity)) {
 				if (peer != null) {
 					notifyAboutNewEntity(peer, entity, nearbyEntity);
