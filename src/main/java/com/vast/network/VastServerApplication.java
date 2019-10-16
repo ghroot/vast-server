@@ -19,6 +19,7 @@ public class VastServerApplication extends ServerApplication {
 	private static final Logger logger = LoggerFactory.getLogger(VastServerApplication.class);
 
 	private String snapshotFormat;
+	private int numberOfPeersToSimulate;
 	private boolean showMonitor;
 	private Metrics metrics;
 
@@ -28,8 +29,9 @@ public class VastServerApplication extends ServerApplication {
 	private VastWorld world;
 	private Thread worldThread;
 
-	public VastServerApplication(String snapshotFormat, boolean showMonitor, Metrics metrics) {
+	public VastServerApplication(String snapshotFormat, int numberOfPeersToSimulate, boolean showMonitor, Metrics metrics) {
 		this.snapshotFormat = snapshotFormat;
+		this.numberOfPeersToSimulate = numberOfPeersToSimulate;
 		this.showMonitor = showMonitor;
 		this.metrics = metrics;
 	}
@@ -43,12 +45,13 @@ public class VastServerApplication extends ServerApplication {
 		worldThread = new Thread(world, "World");
 		worldThread.start();
 
-		// TODO: Add fake peer for testing
-		synchronized (peers) {
-			for (int i = 0; i < 100; i++) {
-				String name = "fakePeer" + (i + 1);
-				peers.add(new FakePeer(this, name, metrics));
-				logger.info("Added fake peer: {}", name);
+		if (numberOfPeersToSimulate > 0) {
+			synchronized (peers) {
+				for (int i = 0; i < numberOfPeersToSimulate; i++) {
+					String name = "fakePeer" + (i + 1);
+					peers.add(new FakePeer(this, name, metrics));
+					logger.info("Added fake peer: {}", name);
+				}
 			}
 		}
 	}
