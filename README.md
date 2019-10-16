@@ -16,7 +16,7 @@ Windows:
 
 ## Run
 
-`java -jar build/libs/vast-server-all.jar -monitor`
+`java -jar build/libs/vast-server-all.jar -simulate 500 -monitor`
 
 The `monitor` argument will enable the terminal monitor where most aspects of the server simulation can be inspected.
 
