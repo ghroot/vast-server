@@ -6,7 +6,7 @@ import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
-import com.vast.Metrics;
+import com.vast.data.Metrics;
 import com.vast.component.*;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;

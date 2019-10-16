@@ -7,67 +7,97 @@ import com.vast.component.Scan;
 import com.vast.component.Spatial;
 import com.vast.data.SpatialHash;
 import com.vast.data.WorldConfiguration;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.*;
 
 public class TestScanSystem {
-	@Test
-	public void scanFindsNearbyEntityIncludingSelf() {
-		WorldConfiguration worldConfiguration = new WorldConfiguration();
-		Map<Integer, Set<Integer>> spatialHashes = new HashMap<>();
-		World world = new World(new WorldConfigurationBuilder().with(
-				new ScanSystem(worldConfiguration, spatialHashes)
+	private World world;
+	private ComponentMapper<Scan> scanMapper;
+	private ComponentMapper<Spatial> spatialMapper;
+	private Map<Integer, Set<Integer>> spatialHashes;
+
+	@Before
+	public void setUp() {
+		spatialHashes = new HashMap<>();
+
+		world = new World(new WorldConfigurationBuilder().with(
+				new ScanSystem(new WorldConfiguration(), spatialHashes)
 		).build());
 
-		ComponentMapper<Scan> scanMapper = world.getMapper(Scan.class);
-		ComponentMapper<Spatial> spatialMapper = world.getMapper(Spatial.class);
+		scanMapper = world.getMapper(Scan.class);
+		spatialMapper = world.getMapper(Spatial.class);
+	}
 
+	@After
+	public void tearDown() {
+		scanMapper = null;
+		spatialMapper = null;
+		world.dispose();
+		world = null;
+		spatialHashes = null;
+	}
+
+	private void createSpatialHash(int entity, int x, int y) {
+		SpatialHash spatialHash = new SpatialHash(x, y);
+
+		Set<Integer> entitiesInHash = spatialHashes.get(spatialHash.getUniqueKey());
+		if (entitiesInHash == null) {
+			entitiesInHash = new HashSet<Integer>();
+			spatialHashes.put(spatialHash.getUniqueKey(), entitiesInHash);
+		}
+		entitiesInHash.add(entity);
+
+		spatialMapper.create(entity).memberOfSpatialHash = spatialHash;
+	}
+
+	@Test
+	public void scanFindsNearbyEntityIncludingSelf() {
 		int playerEntity = world.create();
 		scanMapper.create(playerEntity);
-		SpatialHash playerSpatialHash = new SpatialHash(0, 0);
-		spatialMapper.create(playerEntity).memberOfSpatialHash = playerSpatialHash;
+		createSpatialHash(playerEntity, 0, 0);
 
 		int otherEntity = world.create();
-        SpatialHash otherSpatialHash = new SpatialHash(0, 0);
-		spatialMapper.create(otherEntity).memberOfSpatialHash = otherSpatialHash;
-
-        spatialHashes.put(playerSpatialHash.getUniqueKey(), new HashSet<Integer>(Arrays.asList(playerEntity, otherEntity)));
+		createSpatialHash(otherEntity, 0, 0);
 
 		world.process();
 
 		Assert.assertEquals(2, scanMapper.get(playerEntity).nearbyEntities.size());
 		Assert.assertTrue(scanMapper.get(playerEntity).nearbyEntities.contains(playerEntity));
-        Assert.assertTrue(scanMapper.get(playerEntity).nearbyEntities.contains(otherEntity));
+		Assert.assertTrue(scanMapper.get(playerEntity).nearbyEntities.contains(otherEntity));
 	}
 
-    @Test
-    public void scanDoesNotFindsFarEntityOnlySelf() {
-        WorldConfiguration worldConfiguration = new WorldConfiguration();
-        Map<Integer, Set<Integer>> spatialHashes = new HashMap<>();
-        World world = new World(new WorldConfigurationBuilder().with(
-                new ScanSystem(worldConfiguration, spatialHashes)
-        ).build());
+	@Test
+	public void scanDoesNotFindsFarEntityOnlySelf() {
+		int playerEntity = world.create();
+		scanMapper.create(playerEntity);
+		createSpatialHash(playerEntity, 0, 0);
 
-        ComponentMapper<Scan> scanMapper = world.getMapper(Scan.class);
-        ComponentMapper<Spatial> spatialMapper = world.getMapper(Spatial.class);
+		int otherEntity = world.create();
+		createSpatialHash(otherEntity, 100, 0);
 
-        int playerEntity = world.create();
-        scanMapper.create(playerEntity).distance = 2f;
-        SpatialHash playerSpatialHash = new SpatialHash(0, 0);
-        spatialMapper.create(playerEntity).memberOfSpatialHash = playerSpatialHash;
+		world.process();
 
-        int otherEntity = world.create();
-        SpatialHash otherSpatialHash = new SpatialHash(100, 0);
-        spatialMapper.create(otherEntity).memberOfSpatialHash = otherSpatialHash;
+		Assert.assertEquals(1, scanMapper.get(playerEntity).nearbyEntities.size());
+		Assert.assertTrue(scanMapper.get(playerEntity).nearbyEntities.contains(playerEntity));
+	}
 
-        spatialHashes.put(playerSpatialHash.getUniqueKey(), new HashSet<Integer>(Arrays.asList(playerEntity)));
-        spatialHashes.put(otherSpatialHash.getUniqueKey(), new HashSet<Integer>(Arrays.asList(otherEntity)));
+	@Test
+	public void takesScanDistanceIntoAccount() {
+		int playerEntity = world.create();
+		scanMapper.create(playerEntity).distance = 1000f;
+		createSpatialHash(playerEntity, 0, 0);
 
-        world.process();
+		int otherEntity = world.create();
+		createSpatialHash(otherEntity, 100, 0);
 
-        Assert.assertEquals(1, scanMapper.get(playerEntity).nearbyEntities.size());
-        Assert.assertTrue(scanMapper.get(playerEntity).nearbyEntities.contains(playerEntity));
-    }
+		world.process();
+
+		Assert.assertEquals(2, scanMapper.get(playerEntity).nearbyEntities.size());
+		Assert.assertTrue(scanMapper.get(playerEntity).nearbyEntities.contains(playerEntity));
+		Assert.assertTrue(scanMapper.get(playerEntity).nearbyEntities.contains(otherEntity));
+	}
 }

@@ -9,7 +9,7 @@ import com.nhnent.haste.transport.DisconnectReason;
 import com.nhnent.haste.transport.NetworkPeer;
 import com.nhnent.haste.transport.QoS;
 import com.nhnent.haste.transport.state.ConnectionState;
-import com.vast.Metrics;
+import com.vast.data.Metrics;
 
 public class FakePeer extends VastPeer {
 	public FakePeer(VastServerApplication serverApplication, String name, Metrics metrics) {

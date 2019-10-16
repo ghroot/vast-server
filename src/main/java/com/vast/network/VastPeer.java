@@ -8,7 +8,7 @@ import com.nhnent.haste.protocol.messages.RequestMessage;
 import com.nhnent.haste.transport.DisconnectReason;
 import com.nhnent.haste.transport.NetworkPeer;
 import com.nhnent.haste.transport.QoS;
-import com.vast.Metrics;
+import com.vast.data.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

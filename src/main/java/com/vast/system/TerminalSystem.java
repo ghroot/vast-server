@@ -17,9 +17,10 @@ import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.nhnent.haste.transport.QoS;
-import com.vast.Metrics;
+import com.vast.data.Metrics;
 import com.vast.component.*;
 import com.vast.data.Properties;
+import com.vast.data.SystemMetrics;
 import com.vast.data.WorldConfiguration;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
@@ -225,24 +226,20 @@ public class TerminalSystem extends IntervalSystem {
 			String collisionsString = "Collision checks: " + metrics.getNumberOfCollisionChecks();
 			textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 6, collisionsString);
 
-			if (showSystemTimesMode > 0 && metrics.getSystemProcessingTimes().size() > 0) {
-				int longestLength = 0;
-				for (String systemName : metrics.getSystemProcessingTimes().keySet()) {
-					longestLength = Math.max(systemName.length(), longestLength);
-				}
-				Map<String, Integer> systemProcessingTimesToShow;
+			if (showSystemTimesMode > 0 && metrics.getSystemMetrics().size() > 0) {
+				Map<String, SystemMetrics> systemMetricsToShow;
 				if (showSystemTimesMode == 1) {
-					systemProcessingTimesToShow = metrics.getSystemProcessingTimes().entrySet()
+					systemMetricsToShow = metrics.getSystemMetrics().entrySet()
 							.stream()
-							.sorted(Map.Entry.comparingByValue(Collections.reverseOrder()))
+							.sorted(Map.Entry.comparingByValue(Comparator.comparingInt(SystemMetrics::getProcessingTime)))
 							.collect(Collectors.toMap(
 									Map.Entry::getKey,
 									Map.Entry::getValue,
 									(e1, e2) -> e1,
 									LinkedHashMap::new
 							));
-				} else {
-					systemProcessingTimesToShow = metrics.getSystemProcessingTimes().entrySet()
+				} else if (showSystemTimesMode == 2) {
+					systemMetricsToShow = metrics.getSystemMetrics().entrySet()
 							.stream()
 							.sorted(Map.Entry.comparingByKey())
 							.collect(Collectors.toMap(
@@ -251,14 +248,37 @@ public class TerminalSystem extends IntervalSystem {
 									(e1, e2) -> e1,
 									LinkedHashMap::new
 							));
+				} else {
+					systemMetricsToShow = metrics.getSystemMetrics().entrySet()
+							.stream()
+							.filter(entry -> entry.getValue().getNumberOfEntitiesInSystem() >= 0)
+							.sorted(Map.Entry.comparingByValue(Comparator.comparingInt(SystemMetrics::getNumberOfEntitiesInSystem).reversed()))
+							.collect(Collectors.toMap(
+									Map.Entry::getKey,
+									Map.Entry::getValue,
+									(e1, e2) -> e1,
+									LinkedHashMap::new
+							));
+				}
+
+				int longestSystemNameLength = 0;
+				for (String systemName : metrics.getSystemMetrics().keySet()) {
+					longestSystemNameLength = Math.max(systemName.length(), longestSystemNameLength);
 				}
 				int row = 8;
-				for (String systemName : systemProcessingTimesToShow.keySet()) {
-					int processingDuration = systemProcessingTimesToShow.get(systemName);
-					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestLength - 1, row, systemName);
-					String processDurationString = Integer.toString(processingDuration);
-					textGraphics.putString(screen.getTerminalSize().getColumns() - 6 + (3 - processDurationString.length()), row, processDurationString);
-					textGraphics.putString(screen.getTerminalSize().getColumns() - 2, row, "ms");
+				for (String systemName : systemMetricsToShow.keySet()) {
+					SystemMetrics systemMetrics = systemMetricsToShow.get(systemName);
+					if (showSystemTimesMode == 3) {
+						textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestSystemNameLength - 1, row, systemName);
+						String numberOfEntitiesString = Integer.toString(systemMetrics.getNumberOfEntitiesInSystem());
+						textGraphics.putString(screen.getTerminalSize().getColumns() - 6 + (6 - numberOfEntitiesString.length()), row, numberOfEntitiesString);
+					} else {
+						textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestSystemNameLength - 1, row, systemName);
+						String processDurationString = Integer.toString(systemMetrics.getProcessingTime());
+						textGraphics.putString(screen.getTerminalSize().getColumns() - 6 + (3 - processDurationString.length()), row, processDurationString);
+						textGraphics.putString(screen.getTerminalSize().getColumns() - 2, row, "ms");
+					}
+
 					row++;
 				}
 			}
@@ -476,7 +496,7 @@ public class TerminalSystem extends IntervalSystem {
 							showPlayerNames = false;
 						}
 					} else if (keyStroke.getCharacter().toString().equals("s")) {
-						if (showSystemTimesMode >= 2) {
+						if (showSystemTimesMode >= 3) {
 							showSystemTimesMode = 0;
 						} else {
 							showSystemTimesMode++;

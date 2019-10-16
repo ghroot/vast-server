@@ -7,7 +7,7 @@ import com.artemis.io.SaveFileFormat;
 import com.artemis.managers.WorldSerializationManager;
 import com.artemis.systems.IntervalSystem;
 import com.artemis.utils.IntBag;
-import com.vast.Metrics;
+import com.vast.data.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
