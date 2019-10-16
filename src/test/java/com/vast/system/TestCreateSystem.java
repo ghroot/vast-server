@@ -35,10 +35,8 @@ public class TestCreateSystem {
 
 	@Test
 	public void createdEntityIsKnownFromBothSides() {
-		Map<String, VastPeer> peers = new HashMap<>();
 		VastPeer peer = Mockito.mock(VastPeer.class);
 		Mockito.when(peer.getId()).thenReturn(123L);
-		peers.put("TestName", peer);
 		World world = new World(new WorldConfigurationBuilder().with(
 			new CreateSystem(new HashSet<PropertyHandler>())
 		).build());
@@ -46,22 +44,16 @@ public class TestCreateSystem {
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
 		ComponentMapper<Active> activeMapper = world.getMapper(Active.class);
 		ComponentMapper<Create> createMapper = world.getMapper(Create.class);
-		ComponentMapper<Know> knowMapper = world.getMapper(Know.class);
 		ComponentMapper<Known> knownMapper = world.getMapper(Known.class);
 		ComponentMapper<Scan> scanMapper = world.getMapper(Scan.class);
 		ComponentMapper<Type> typeMapper = world.getMapper(Type.class);
 
 		int playerEntity = world.create();
-		int nonPlayerEntity = world.create();
 		int entityToCreate = world.create();
 
 		playerMapper.create(playerEntity).name = "TestName";
 		activeMapper.create(playerEntity).peer = peer;
-		knowMapper.create(playerEntity);
 		scanMapper.create(playerEntity).nearbyEntities.add(entityToCreate);
-
-		knowMapper.create(nonPlayerEntity);
-		scanMapper.create(nonPlayerEntity).nearbyEntities.add(entityToCreate);
 
 		createMapper.create(entityToCreate).reason = "testing";
 		typeMapper.create(entityToCreate).type = "testType";
@@ -69,11 +61,8 @@ public class TestCreateSystem {
 
 		world.process();
 
-		Assert.assertTrue(knowMapper.get(playerEntity).knowEntities.contains(entityToCreate));
+		Assert.assertTrue(activeMapper.get(playerEntity).knowEntities.contains(entityToCreate));
 		Assert.assertTrue(knownMapper.get(entityToCreate).knownByEntities.contains(playerEntity));
 		Mockito.verify(peer).send(Mockito.any());
-
-		Assert.assertTrue(knowMapper.get(nonPlayerEntity).knowEntities.contains(entityToCreate));
-		Assert.assertTrue(knownMapper.get(entityToCreate).knownByEntities.contains(nonPlayerEntity));
 	}
 }

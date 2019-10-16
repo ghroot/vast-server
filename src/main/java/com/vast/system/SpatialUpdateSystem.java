@@ -13,9 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class SpatialUpdateSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(SpatialUpdateSystem.class);
@@ -24,9 +22,9 @@ public class SpatialUpdateSystem extends IteratingSystem {
 	private ComponentMapper<Spatial> spatialMapper;
 
 	private WorldConfiguration worldConfiguration;
-	private Map<Integer, Set<Integer>> spatialHashes;
+	private Map<Integer, IntBag> spatialHashes;
 
-	public SpatialUpdateSystem(WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes) {
+	public SpatialUpdateSystem(WorldConfiguration worldConfiguration, Map<Integer, IntBag> spatialHashes) {
 		super(Aspect.all(Transform.class, Spatial.class).exclude(Static.class));
 		this.worldConfiguration = worldConfiguration;
 		this.spatialHashes = spatialHashes;
@@ -54,18 +52,18 @@ public class SpatialUpdateSystem extends IteratingSystem {
 		Spatial spatial = spatialMapper.get(entity);
 
 		if (spatial.memberOfSpatialHash != null) {
-			spatialHashes.get(spatial.memberOfSpatialHash.getUniqueKey()).remove(entity);
+			spatialHashes.get(spatial.memberOfSpatialHash.getUniqueKey()).removeValue(entity);
 		} else {
 			spatial.memberOfSpatialHash = new SpatialHash();
 		}
 
 		spatial.memberOfSpatialHash.setXY(
-			Math.round(transform.position.x / worldConfiguration.sectionSize) * worldConfiguration.sectionSize,
-			Math.round(transform.position.y / worldConfiguration.sectionSize) * worldConfiguration.sectionSize);
+				Math.round(transform.position.x / worldConfiguration.sectionSize) * worldConfiguration.sectionSize,
+				Math.round(transform.position.y / worldConfiguration.sectionSize) * worldConfiguration.sectionSize);
 
-		Set<Integer> entitiesInHash = spatialHashes.get(spatial.memberOfSpatialHash.getUniqueKey());
+		IntBag entitiesInHash = spatialHashes.get(spatial.memberOfSpatialHash.getUniqueKey());
 		if (entitiesInHash == null) {
-			entitiesInHash = new HashSet<Integer>();
+			entitiesInHash = new IntBag();
 			spatialHashes.put(spatial.memberOfSpatialHash.getUniqueKey(), entitiesInHash);
 		}
 		entitiesInHash.add(entity);

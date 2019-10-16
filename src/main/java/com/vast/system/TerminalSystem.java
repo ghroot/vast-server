@@ -45,7 +45,7 @@ public class TerminalSystem extends IntervalSystem {
 	private Map<String, VastPeer> peers;
 	private Metrics metrics;
 	private WorldConfiguration worldConfiguration;
-	private Map<Integer, Set<Integer>> spatialHashes;
+	private Map<Integer, IntBag> spatialHashes;
 
 	private Screen screen;
 	private float scale = 0.15f;//3.0f;
@@ -60,7 +60,7 @@ public class TerminalSystem extends IntervalSystem {
 	private int focusedEntity = -1;
 	private int processDuration = 0;
 
-	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldConfiguration worldConfiguration, Map<Integer, Set<Integer>> spatialHashes) {
+	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldConfiguration worldConfiguration, Map<Integer, IntBag> spatialHashes) {
 		super(Aspect.all(), 0.1f);
 		this.peers = peers;
 		this.metrics = metrics;
@@ -199,7 +199,7 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.putString(0, 3, "Spatial hash size: " + worldConfiguration.sectionSize);
 			int numberOfSpatialHashes = 0;
 			int numberOfActiveSpatialHashes = 0;
-			for (Set<Integer> entitiesInSpatialHash : spatialHashes.values()) {
+			for (IntBag entitiesInSpatialHash : spatialHashes.values()) {
 				numberOfSpatialHashes++;
 				if (entitiesInSpatialHash.size() > 0) {
 					numberOfActiveSpatialHashes++;
@@ -343,8 +343,6 @@ public class TerminalSystem extends IntervalSystem {
 						detail = "" + ((Interact) component).phase;
 					} else if (component instanceof Scan) {
 						detail = "" + ((Scan) component).nearbyEntities.size();
-					} else if (component instanceof Know) {
-						detail = "" + ((Know) component).knowEntities.size();
 					} else if (component instanceof Known) {
 						detail = "" + ((Known) component).knownByEntities.size();
 					} else if (component instanceof AI) {
@@ -366,6 +364,8 @@ public class TerminalSystem extends IntervalSystem {
 						detail = ((Owner) component).name;
 					} else if (component instanceof Player) {
 						detail = ((Player) component).name;
+					} else if (component instanceof  Active) {
+						detail = Integer.toString(((Active) component).knowEntities.size());
 					} else if (component instanceof Follow) {
 						detail = "" + ((Follow) component).entity;
 					} else if (component instanceof Group) {

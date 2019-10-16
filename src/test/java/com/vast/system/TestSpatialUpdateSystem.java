@@ -3,6 +3,7 @@ package com.vast.system;
 import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
+import com.artemis.utils.IntBag;
 import com.vast.component.Spatial;
 import com.vast.component.Static;
 import com.vast.component.Transform;
@@ -20,7 +21,7 @@ import java.util.Set;
 
 public class TestSpatialUpdateSystem {
 	private World world;
-	private Map<Integer, Set<Integer>> spatialHashes;
+	private Map<Integer, IntBag> spatialHashes;
 	private ComponentMapper<Spatial> spatialMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Static> staticMapper;
@@ -50,9 +51,9 @@ public class TestSpatialUpdateSystem {
 	private SpatialHash createSpatialHash(int entity, int x, int y) {
 		SpatialHash spatialHash = new SpatialHash(x, y);
 
-		Set<Integer> entitiesInHash = spatialHashes.get(spatialHash.getUniqueKey());
+		IntBag entitiesInHash = spatialHashes.get(spatialHash.getUniqueKey());
 		if (entitiesInHash == null) {
-			entitiesInHash = new HashSet<>();
+			entitiesInHash = new IntBag();
 			spatialHashes.put(spatialHash.getUniqueKey(), entitiesInHash);
 		}
 		entitiesInHash.add(entity);

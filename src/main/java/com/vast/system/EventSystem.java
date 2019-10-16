@@ -9,14 +9,11 @@ import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.component.Active;
 import com.vast.component.Event;
-import com.vast.component.Know;
 import com.vast.component.Player;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 public class EventSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(EventSystem.class);
@@ -24,9 +21,8 @@ public class EventSystem extends IteratingSystem {
 	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
-	private ComponentMapper<Know> knowMapper;
 
-	@All({Player.class, Active.class, Know.class})
+	@All({Player.class, Active.class})
 	private EntitySubscription interestedSubscription;
 
 	private EventMessage reusableEventMessage;
@@ -62,10 +58,10 @@ public class EventSystem extends IteratingSystem {
 			IntBag interestedEntities = interestedSubscription.getEntities();
 			for (int i = 0; i < interestedEntities.size(); i++) {
 				int interestedEntity = interestedEntities.get(i);
-				Know interestedKnow = knowMapper.get(interestedEntity);
-				if (interestedKnow.knowEntities.contains(eventEntity)) {
-					VastPeer nearbyPeer = activeMapper.get(interestedEntity).peer;
-					nearbyPeer.send(reusableEventMessage);
+				Active interestedActive = activeMapper.get(interestedEntity);
+				if (interestedActive.knowEntities.contains(eventEntity)) {
+					VastPeer interestedPeer = interestedActive.peer;
+					interestedPeer.send(reusableEventMessage);
 				}
 			}
 		}

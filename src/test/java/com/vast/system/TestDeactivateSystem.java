@@ -4,7 +4,6 @@ import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.vast.component.Active;
-import com.vast.component.Know;
 import com.vast.component.Known;
 import com.vast.component.Player;
 import com.vast.network.VastPeer;
@@ -22,7 +21,6 @@ public class TestDeactivateSystem {
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
 		ComponentMapper<Active> activeMapper = world.getMapper(Active.class);
-		ComponentMapper<Know> knowMapper = world.getMapper(Know.class);
 		ComponentMapper<Known> knownMapper = world.getMapper(Known.class);
 
 		int playerEntity = world.create();
@@ -30,8 +28,7 @@ public class TestDeactivateSystem {
 
 		playerMapper.create(playerEntity).name = "TestName";
 		playerMapper.create(playerEntity).id = 123;
-		activeMapper.create(playerEntity);
-		knowMapper.create(playerEntity).knowEntities.add(knownEntity);
+		activeMapper.create(playerEntity).knowEntities.add(knownEntity);
 
 		knownMapper.create(knownEntity).knownByEntities.add(playerEntity);
 
