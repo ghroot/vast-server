@@ -231,7 +231,7 @@ public class TerminalSystem extends IntervalSystem {
 				if (showSystemTimesMode == 1) {
 					systemMetricsToShow = metrics.getSystemMetrics().entrySet()
 							.stream()
-							.sorted(Map.Entry.comparingByValue(Comparator.comparingInt(SystemMetrics::getProcessingTime)))
+							.sorted(Map.Entry.comparingByValue(Comparator.comparingInt(SystemMetrics::getProcessingTime).reversed()))
 							.collect(Collectors.toMap(
 									Map.Entry::getKey,
 									Map.Entry::getValue,
