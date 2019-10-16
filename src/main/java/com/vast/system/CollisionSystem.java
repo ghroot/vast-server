@@ -4,8 +4,8 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.data.Metrics;
 import com.vast.component.*;
+import com.vast.data.Metrics;
 import com.vast.data.Properties;
 import com.vast.data.SpatialHash;
 import com.vast.data.WorldConfiguration;
@@ -14,9 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class CollisionSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem.class);
@@ -27,13 +25,14 @@ public class CollisionSystem extends IteratingSystem {
 	private ComponentMapper<Static> staticMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Sync> syncMapper;
+	private ComponentMapper<Scan> scanMapper;
 
 	private WorldConfiguration worldConfiguration;
 	private Map<Integer, IntBag> spatialHashes;
 	private Metrics metrics;
 
 	private SpatialHash reusableHash;
-	private IntBag reusableAdjacentEntities;
+	private IntBag reusableNearbyEntities;
 	private Vector2f reusableVector;
 	private int numberOfCollisionChecks;
 
@@ -44,7 +43,7 @@ public class CollisionSystem extends IteratingSystem {
 		this.metrics = metrics;
 
 		reusableHash = new SpatialHash();
-		reusableAdjacentEntities = new IntBag();
+		reusableNearbyEntities = new IntBag();
 		reusableVector = new Vector2f();
 	}
 
@@ -81,24 +80,24 @@ public class CollisionSystem extends IteratingSystem {
 			} else {
 				collision.lastCheckedPosition.set(transform.position);
 			}
-			IntBag adjacentEntitiesBag = getAdjacentEntities(entity);
-			int[] adjacentEntities = adjacentEntitiesBag.getData();
-			for (int i = 0, size = adjacentEntitiesBag.size(); i < size; ++i) {
-				int adjacentEntity = adjacentEntities[i];
-				if (adjacentEntity != entity) {
-					if (!collisionMapper.has(adjacentEntity) || deleteMapper.has(adjacentEntity)) {
+			IntBag nearbyEntitiesBag = getNearbyEntities(entity);
+			int[] nearbyEntities = nearbyEntitiesBag.getData();
+			for (int i = 0, size = nearbyEntitiesBag.size(); i < size; ++i) {
+				int nearbyEntity = nearbyEntities[i];
+				if (nearbyEntity != entity) {
+					if (!collisionMapper.has(nearbyEntity) || deleteMapper.has(nearbyEntity)) {
 						continue;
 					}
 
-					Transform nearbyTransform = transformMapper.get(adjacentEntity);
-					Collision nearbyCollision = collisionMapper.get(adjacentEntity);
+					Transform nearbyTransform = transformMapper.get(nearbyEntity);
+					Collision nearbyCollision = collisionMapper.get(nearbyEntity);
 					reusableVector.set(nearbyTransform.position.x - transform.position.x, nearbyTransform.position.y - transform.position.y);
 					float overlap = (collision.radius + nearbyCollision.radius) - reusableVector.length();
 					if (overlap > 0.0f) {
 						if (reusableVector.lengthSquared() == 0.0f) {
 							reusableVector.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
 						}
-						if (staticMapper.has(adjacentEntity)) {
+						if (staticMapper.has(nearbyEntity)) {
 							reusableVector.normalize();
 							reusableVector.scale(-overlap);
 							transform.position.add(reusableVector);
@@ -112,7 +111,7 @@ public class CollisionSystem extends IteratingSystem {
 							reusableVector.normalize();
 							reusableVector.scale(-overlap * 0.5f);
 							nearbyTransform.position.add(reusableVector);
-							syncMapper.create(adjacentEntity).markPropertyAsDirty(Properties.POSITION);
+							syncMapper.create(nearbyEntity).markPropertyAsDirty(Properties.POSITION);
 						}
 					}
 
@@ -122,20 +121,31 @@ public class CollisionSystem extends IteratingSystem {
 		}
 	}
 
-	private IntBag getAdjacentEntities(int entity) {
-		reusableAdjacentEntities.clear();
-		Spatial spatial = spatialMapper.get(entity);
-		if (spatial.memberOfSpatialHash != null) {
-			for (int x = spatial.memberOfSpatialHash.getX() - worldConfiguration.sectionSize; x <= spatial.memberOfSpatialHash.getX() + worldConfiguration.sectionSize; x += worldConfiguration.sectionSize) {
-				for (int y = spatial.memberOfSpatialHash.getY() - worldConfiguration.sectionSize; y <= spatial.memberOfSpatialHash.getY() + worldConfiguration.sectionSize; y += worldConfiguration.sectionSize) {
-					reusableHash.setXY(x, y);
-					IntBag entitiesInHash = spatialHashes.get(reusableHash.getUniqueKey());
-					if (entitiesInHash != null) {
-						reusableAdjacentEntities.addAll(entitiesInHash);
+	private IntBag getNearbyEntities(int entity) {
+		reusableNearbyEntities.clear();
+		if (scanMapper.has(entity)) {
+			return scanMapper.get(entity).nearbyEntities;
+		} else {
+			Spatial spatial = spatialMapper.get(entity);
+			if (spatial.memberOfSpatialHash != null) {
+				int sectionSize = worldConfiguration.sectionSize;
+				int spatialX = spatial.memberOfSpatialHash.getX();
+				int spatialY = spatial.memberOfSpatialHash.getY();
+				int startX = spatialX - sectionSize;
+				int endX = spatialX + sectionSize;
+				int startY = spatialY - sectionSize;
+				int endY = spatialY + sectionSize;
+				for (int x = startX; x <= endX; x += sectionSize) {
+					for (int y = startY; y <= endY; y += sectionSize) {
+						reusableHash.setXY(x, y);
+						IntBag entitiesInHash = spatialHashes.get(reusableHash.getUniqueKey());
+						if (entitiesInHash != null) {
+							reusableNearbyEntities.addAll(entitiesInHash);
+						}
 					}
 				}
 			}
 		}
-		return reusableAdjacentEntities;
+		return reusableNearbyEntities;
 	}
 }
