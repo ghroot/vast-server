@@ -2,13 +2,12 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.EntitySubscription;
-import com.artemis.annotations.All;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.component.Active;
 import com.vast.component.Event;
+import com.vast.component.Known;
 import com.vast.component.Player;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
@@ -21,9 +20,7 @@ public class EventSystem extends IteratingSystem {
 	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
-
-	@All({Player.class, Active.class})
-	private EntitySubscription interestedSubscription;
+	private ComponentMapper<Known> knownMapper;
 
 	private EventMessage reusableEventMessage;
 
@@ -54,14 +51,14 @@ public class EventSystem extends IteratingSystem {
 				VastPeer ownerPeer = activeMapper.get(eventEntity).peer;
 				ownerPeer.send(reusableEventMessage);
 			}
-		} else {
-			IntBag interestedEntities = interestedSubscription.getEntities();
-			for (int i = 0; i < interestedEntities.size(); i++) {
-				int interestedEntity = interestedEntities.get(i);
-				Active interestedActive = activeMapper.get(interestedEntity);
-				if (interestedActive.knowEntities.contains(eventEntity)) {
-					VastPeer interestedPeer = interestedActive.peer;
-					interestedPeer.send(reusableEventMessage);
+		} else if (knownMapper.has(eventEntity)) {
+			IntBag knownByEntitiesBag = knownMapper.get(eventEntity).knownByEntities;
+			int[] knownByEntities = knownByEntitiesBag.getData();
+			for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
+				int knownByEntity = knownByEntities[i];
+				if (activeMapper.has(knownByEntity)) {
+					VastPeer knownByPeer = activeMapper.get(knownByEntity).peer;
+					knownByPeer.send(reusableEventMessage);
 				}
 			}
 		}
