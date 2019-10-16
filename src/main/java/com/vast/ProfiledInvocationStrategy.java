@@ -20,7 +20,7 @@ public class ProfiledInvocationStrategy extends SystemInvocationStrategy {
 				updateEntityStates();
 				int numberOfEntitiesInSystem;
 				if (system instanceof BaseEntitySystem) {
-					numberOfEntitiesInSystem = ((BaseEntitySystem) system).getSubscription().getActiveEntityIds().length();
+					numberOfEntitiesInSystem = ((BaseEntitySystem) system).getSubscription().getEntities().size();
 				} else {
 					numberOfEntitiesInSystem = -1;
 				}
