@@ -339,7 +339,6 @@ public class CreationManager extends BaseSystem {
 		subTypeMapper.get(pickupEntity).subType = subType;
 		transformMapper.get(pickupEntity).position.set(position);
 		transformMapper.get(pickupEntity).rotation = (float) Math.random() * 360.0f;
-		collisionMapper.get(pickupEntity).radius = 0.1f;
 		inventoryMapper.get(pickupEntity).add(items);
 		syncPropagationMapper.get(pickupEntity).setOwnerPropagation(Properties.INVENTORY);
 		return pickupEntity;
