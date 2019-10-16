@@ -19,7 +19,6 @@ public class ActivateSystem extends IteratingSystem {
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Scan> scanMapper;
-	private ComponentMapper<Know> knowMapper;
 
 	private Map<String, VastPeer> peers;
 
@@ -46,7 +45,6 @@ public class ActivateSystem extends IteratingSystem {
 			activeMapper.create(inactivePlayerEntity).peer = peer;
 			syncMapper.create(inactivePlayerEntity).markPropertyAsDirty(Properties.ACTIVE);
 			scanMapper.create(inactivePlayerEntity);
-			knowMapper.create(inactivePlayerEntity);
 		}
 	}
 }

@@ -23,14 +23,13 @@ public class CreateSystem extends IteratingSystem {
 	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
-	private ComponentMapper<Know> knowMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<SubType> subTypeMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 
-	@All({Know.class, Scan.class})
+	@All({Active.class, Scan.class})
 	private EntitySubscription interestedSubscription;
 
 	private Set<PropertyHandler> propertyHandlers;
@@ -51,33 +50,31 @@ public class CreateSystem extends IteratingSystem {
 		IntBag interestedEntities = interestedSubscription.getEntities();
 		for (int i = 0; i < interestedEntities.size(); i++) {
 			int interestedEntity = interestedEntities.get(i);
-			Know interestedKnow = knowMapper.get(interestedEntity);
+			Active interestedActive = activeMapper.get(interestedEntity);
 			Scan interestedScan = scanMapper.get(interestedEntity);
 			if (interestedScan.nearbyEntities.contains(createEntity)) {
-				if (playerMapper.has(interestedEntity) && activeMapper.has(interestedEntity)) {
-					VastPeer peer = activeMapper.get(interestedEntity).peer;
-					String reason = createMapper.get(createEntity).reason;
-					logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);
-					reusableEventMessage.getDataObject().clear();
-					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, createEntity);
-					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(createEntity).type);
-					if (subTypeMapper.has(createEntity)) {
-						reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_SUB_TYPE, subTypeMapper.get(createEntity).subType);
-					}
-					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, reason);
-					if (playerMapper.has(createEntity)) {
-						reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(createEntity).name));
-					}
-					DataObject propertiesDataObject = new DataObject();
-					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, propertiesDataObject);
-					for (PropertyHandler propertyHandler : propertyHandlers) {
-						if (interestedEntity == createEntity || syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
-							propertyHandler.decorateDataObject(createEntity, propertiesDataObject, true);
-						}
-					}
-					peer.send(reusableEventMessage);
+				VastPeer peer = interestedActive.peer;
+				String reason = createMapper.get(createEntity).reason;
+				logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);
+				reusableEventMessage.getDataObject().clear();
+				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, createEntity);
+				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(createEntity).type);
+				if (subTypeMapper.has(createEntity)) {
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_SUB_TYPE, subTypeMapper.get(createEntity).subType);
 				}
-				interestedKnow.knowEntities.add(createEntity);
+				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, reason);
+				if (playerMapper.has(createEntity)) {
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(createEntity).name));
+				}
+				DataObject propertiesDataObject = new DataObject();
+				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, propertiesDataObject);
+				for (PropertyHandler propertyHandler : propertyHandlers) {
+					if (interestedEntity == createEntity || syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
+						propertyHandler.decorateDataObject(createEntity, propertiesDataObject, true);
+					}
+				}
+				peer.send(reusableEventMessage);
+				interestedActive.knowEntities.add(createEntity);
 				if (known != null) {
 					known.knownByEntities.add(interestedEntity);
 				}

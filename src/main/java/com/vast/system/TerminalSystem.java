@@ -343,8 +343,6 @@ public class TerminalSystem extends IntervalSystem {
 						detail = "" + ((Interact) component).phase;
 					} else if (component instanceof Scan) {
 						detail = "" + ((Scan) component).nearbyEntities.size();
-					} else if (component instanceof Know) {
-						detail = "" + ((Know) component).knowEntities.size();
 					} else if (component instanceof Known) {
 						detail = "" + ((Known) component).knownByEntities.size();
 					} else if (component instanceof AI) {
@@ -366,6 +364,8 @@ public class TerminalSystem extends IntervalSystem {
 						detail = ((Owner) component).name;
 					} else if (component instanceof Player) {
 						detail = ((Player) component).name;
+					} else if (component instanceof  Active) {
+						detail = Integer.toString(((Active) component).knowEntities.size());
 					} else if (component instanceof Follow) {
 						detail = "" + ((Follow) component).entity;
 					} else if (component instanceof Group) {

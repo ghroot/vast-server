@@ -19,7 +19,6 @@ public class DeactivateSystem extends IteratingSystem {
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Scan> scanMapper;
-	private ComponentMapper<Know> knowMapper;
 	private ComponentMapper<Known> knownMapper;
 
 	private Map<String, VastPeer> peers;
@@ -43,16 +42,17 @@ public class DeactivateSystem extends IteratingSystem {
 		if (!peers.containsKey(player.name) || peers.get(player.name).getId() != player.id) {
 			logger.info("Deactivating peer entity: {} for {} ({})", activePlayerEntity, player.name, player.id);
 			player.id = 0;
-			activeMapper.remove(activePlayerEntity);
-			syncMapper.create(activePlayerEntity).markPropertyAsDirty(Properties.ACTIVE);
-			scanMapper.remove(activePlayerEntity);
-			IntBag knowEntitiesBag = knowMapper.get(activePlayerEntity).knowEntities;
+
+			IntBag knowEntitiesBag = activeMapper.get(activePlayerEntity).knowEntities;
 			int[] knowEntities = knowEntitiesBag.getData();
 			for (int i = 0, size = knowEntitiesBag.size(); i < size; ++i) {
 				int knowEntity = knowEntities[i];
 				knownMapper.get(knowEntity).knownByEntities.removeValue(activePlayerEntity);
 			}
-			knowMapper.remove(activePlayerEntity);
+
+			activeMapper.remove(activePlayerEntity);
+			syncMapper.create(activePlayerEntity).markPropertyAsDirty(Properties.ACTIVE);
+			scanMapper.remove(activePlayerEntity);
 		}
 	}
 }

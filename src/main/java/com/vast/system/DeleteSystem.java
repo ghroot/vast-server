@@ -19,7 +19,6 @@ public class DeleteSystem extends IteratingSystem {
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Delete> deleteMapper;
-	private ComponentMapper<Know> knowMapper;
 	private ComponentMapper<Known> knownMapper;
 
 	private Map<String, VastPeer> peers;
@@ -53,8 +52,8 @@ public class DeleteSystem extends IteratingSystem {
 				if (playerMapper.has(entityToNotify) && activeMapper.has(entityToNotify)) {
 					VastPeer peer = activeMapper.get(entityToNotify).peer;
 					notifyAboutRemovedEntity(peer, deleteEntity, reason);
+					activeMapper.get(entityToNotify).knowEntities.removeValue(deleteEntity);
 				}
-				knowMapper.get(entityToNotify).knowEntities.removeValue(deleteEntity);
 			}
 		}
 

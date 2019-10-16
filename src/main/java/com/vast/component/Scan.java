@@ -6,8 +6,7 @@ import com.artemis.utils.IntBag;
 
 public class Scan extends PooledComponent {
 	public float distance = 10.0f;
-	@EntityId
-	public transient IntBag nearbyEntities = new IntBag();
+	@EntityId public transient IntBag nearbyEntities = new IntBag();
 
 	@Override
 	protected void reset() {
