@@ -178,7 +178,7 @@ public class CreationManager extends BaseSystem {
 		subTypeMapper.get(treeEntity).subType = (int) (Math.random() * 6);
 		transformMapper.get(treeEntity).position.set(position);
 		transformMapper.get(treeEntity).rotation = (float) Math.random() * 360;
-		collisionMapper.get(treeEntity).radius = 0.1f;
+		collisionMapper.get(treeEntity).radius = 0.4f;
 		harvestableMapper.get(treeEntity).requiredItemId = items.getItem("axe").getId();
 		harvestableMapper.get(treeEntity).harvestEventName = "chopping";
 		harvestableMapper.get(treeEntity).durability = 300.0f;
@@ -198,7 +198,7 @@ public class CreationManager extends BaseSystem {
 		subTypeMapper.get(rockEntity).subType = (int) (Math.random() * 3);
 		transformMapper.get(rockEntity).position.set(position);
 		transformMapper.get(rockEntity).rotation = (float) Math.random() * 360;
-		collisionMapper.get(rockEntity).radius = 0.2f;
+		collisionMapper.get(rockEntity).radius = 0.4f;
 		harvestableMapper.get(rockEntity).requiredItemId = items.getItem("pickaxe").getId();
 		harvestableMapper.get(rockEntity).harvestEventName = "picking";
 		harvestableMapper.get(rockEntity).durability = 300.0f;
@@ -268,7 +268,7 @@ public class CreationManager extends BaseSystem {
 			transformMapper.get(playerEntity).position.set(getRandomPositionInWorld());
 		}
 		speedMapper.get(playerEntity).baseSpeed = 4.0f;
-		collisionMapper.get(playerEntity).radius = 0.3f;
+		collisionMapper.get(playerEntity).radius = 0.5f;
 		inventoryMapper.get(playerEntity).capacity = 50;
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.POSITION);
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.ROTATION);
