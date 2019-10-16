@@ -38,7 +38,6 @@ public class TestDeleteSystem {
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
 		ComponentMapper<Active> activeMapper = world.getMapper(Active.class);
 		ComponentMapper<Delete> deleteMapper = world.getMapper(Delete.class);
-		ComponentMapper<Know> knowMapper = world.getMapper(Know.class);
 		ComponentMapper<Known> knownMapper = world.getMapper(Known.class);
 
 		int entityToDelete = world.create();
@@ -49,11 +48,11 @@ public class TestDeleteSystem {
 
 		playerMapper.create(playerEntity).name = "TestName";
 		activeMapper.create(playerEntity).peer = peer;
-		knowMapper.create(playerEntity).knowEntities.add(entityToDelete);
+		activeMapper.get(playerEntity).knowEntities.add(entityToDelete);
 
 		world.process();
 
-		Assert.assertFalse(knowMapper.get(playerEntity).knowEntities.contains(entityToDelete));
+		Assert.assertFalse(activeMapper.get(playerEntity).knowEntities.contains(entityToDelete));
 		Mockito.verify(peer).send(Mockito.any());
 	}
 }
