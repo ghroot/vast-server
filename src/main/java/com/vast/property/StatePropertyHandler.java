@@ -19,8 +19,10 @@ public class StatePropertyHandler implements PropertyHandler {
 	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
 		if (stateMapper.has(entity)) {
 			String stateName = stateMapper.get(entity).name;
-			dataObject.set(Properties.STATE, stateName != null ? stateName : "");
-			return true;
+			if (stateName != null) {
+				dataObject.set(Properties.STATE, stateName);
+				return true;
+			}
 		}
 		return false;
 	}

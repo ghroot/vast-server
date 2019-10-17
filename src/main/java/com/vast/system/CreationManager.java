@@ -35,6 +35,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Growing> growingMapper;
 	private ComponentMapper<Plantable> plantableMapper;
 	private ComponentMapper<Group> groupMapper;
+	private ComponentMapper<SkillEmission> skillEmissionMapper;
 
 	private WorldConfiguration worldConfiguration;
 	private Items items;
@@ -76,6 +77,8 @@ public class CreationManager extends BaseSystem {
 			.add(Spatial.class)
 			.add(Known.class)
 			.add(Collision.class)
+			.add(Learn.class)
+			.add(SkillEmission.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -91,6 +94,7 @@ public class CreationManager extends BaseSystem {
 			.add(Static.class)
 			.add(Harvestable.class)
 			.add(Inventory.class)
+			.add(SkillEmission.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -106,6 +110,7 @@ public class CreationManager extends BaseSystem {
 			.add(Static.class)
 			.add(Harvestable.class)
 			.add(Inventory.class)
+			.add(SkillEmission.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -171,6 +176,36 @@ public class CreationManager extends BaseSystem {
 		}
 	}
 
+	public int createPlayer(String name, int subType, Point2f position, boolean fakePlayer) {
+		int playerEntity = world.create(playerArchetype);
+		playerMapper.get(playerEntity).name = name;
+		typeMapper.get(playerEntity).type = "player";
+		subTypeMapper.get(playerEntity).subType = subType;
+		if (position != null) {
+			transformMapper.get(playerEntity).position.set(position);
+		} else {
+			transformMapper.get(playerEntity).position.set(getRandomPositionInWorld());
+		}
+		speedMapper.get(playerEntity).baseSpeed = 4.0f;
+		collisionMapper.get(playerEntity).radius = 0.5f;
+		inventoryMapper.get(playerEntity).capacity = 50;
+		skillEmissionMapper.get(playerEntity).addWord("me");
+		skillEmissionMapper.get(playerEntity).addWord("you");
+		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.POSITION);
+		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.ROTATION);
+		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.INVENTORY);
+		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.HOME);
+		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.CONFIGURATION);
+		if (fakePlayer) {
+			aiMapper.create(playerEntity).behaviourName = "human";
+		}
+		return playerEntity;
+	}
+
+	public int createPlayer(String name, int subType, boolean fakePlayer) {
+		return createPlayer(name, subType, null, fakePlayer);
+	}
+
 	// TODO: Move to json somehow?
 	public int createTree(Point2f position, boolean growing) {
 		int treeEntity = world.create(treeArchetype);
@@ -184,6 +219,7 @@ public class CreationManager extends BaseSystem {
 		harvestableMapper.get(treeEntity).durability = 300.0f;
 		inventoryMapper.get(treeEntity).add(items.getItem("wood").getId(), 3);
 		inventoryMapper.get(treeEntity).add(items.getItem("seed").getId(), 1);
+		skillEmissionMapper.get(treeEntity).addWord("tree");
 		if (growing) {
 			growingMapper.create(treeEntity).timeLeft = 60.0f;
 		}
@@ -203,6 +239,7 @@ public class CreationManager extends BaseSystem {
 		harvestableMapper.get(rockEntity).harvestEventName = "picking";
 		harvestableMapper.get(rockEntity).durability = 300.0f;
 		inventoryMapper.get(rockEntity).add(items.getItem("stone").getId(), 2);
+		skillEmissionMapper.get(rockEntity).addWord("rock");
 		syncPropagationMapper.get(rockEntity).setOwnerPropagation(Properties.INVENTORY);
 		return rockEntity;
 	}
@@ -255,34 +292,6 @@ public class CreationManager extends BaseSystem {
 		syncPropagationMapper.get(animalEntity).setUnreliable(Properties.ROTATION);
 		syncPropagationMapper.get(animalEntity).setOwnerPropagation(Properties.INVENTORY);
 		return animalEntity;
-	}
-
-	public int createPlayer(String name, int subType, Point2f position, boolean fakePlayer) {
-		int playerEntity = world.create(playerArchetype);
-		playerMapper.get(playerEntity).name = name;
-		typeMapper.get(playerEntity).type = "player";
-		subTypeMapper.get(playerEntity).subType = subType;
-		if (position != null) {
-			transformMapper.get(playerEntity).position.set(position);
-		} else {
-			transformMapper.get(playerEntity).position.set(getRandomPositionInWorld());
-		}
-		speedMapper.get(playerEntity).baseSpeed = 4.0f;
-		collisionMapper.get(playerEntity).radius = 0.5f;
-		inventoryMapper.get(playerEntity).capacity = 50;
-		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.POSITION);
-		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.ROTATION);
-		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.INVENTORY);
-		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.HOME);
-		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.CONFIGURATION);
-		if (fakePlayer) {
-			aiMapper.create(playerEntity).behaviourName = "human";
-		}
-		return playerEntity;
-	}
-
-	public int createPlayer(String name, int subType, boolean fakePlayer) {
-		return createPlayer(name, subType, null, fakePlayer);
 	}
 
 	public int createBuilding(Point2f position, int buildingId) {
