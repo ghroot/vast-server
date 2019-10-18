@@ -198,6 +198,7 @@ public class CreationManager extends BaseSystem {
 		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.INVENTORY);
 		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.HOME);
 		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.CONFIGURATION);
+		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.SKILL);
 		if (fakePlayer) {
 			aiMapper.create(playerEntity).behaviourName = "human";
 		}
