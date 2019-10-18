@@ -21,7 +21,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Message> messageMapper;
 	private ComponentMapper<State> stateMapper;
-	private ComponentMapper<SkillEmission> skillEmissionMapper;
+	private ComponentMapper<Teach> teachMapper;
 
 	private CreationManager creationManager;
 
@@ -55,7 +55,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
 			stateMapper.get(harvestableEntity).name = harvestable.harvestEventName;
 			syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.STATE);
-			skillEmissionMapper.create(playerEntity).addWord("chop");
+			teachMapper.create(playerEntity).addWord("chop");
 			return true;
 		}
 	}
@@ -83,6 +83,6 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 			stateMapper.get(harvestableEntity).name = null;
 			syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.STATE);
 		}
-		skillEmissionMapper.create(playerEntity).removeWord("chop");
+		teachMapper.create(playerEntity).removeWord("chop");
 	}
 }

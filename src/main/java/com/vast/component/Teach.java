@@ -4,7 +4,7 @@ import com.artemis.PooledComponent;
 
 import java.util.Arrays;
 
-public class SkillEmission extends PooledComponent {
+public class Teach extends PooledComponent {
 	public String[] words = new String[0];
 
 	@Override

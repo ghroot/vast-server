@@ -35,7 +35,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Growing> growingMapper;
 	private ComponentMapper<Plantable> plantableMapper;
 	private ComponentMapper<Group> groupMapper;
-	private ComponentMapper<SkillEmission> skillEmissionMapper;
+	private ComponentMapper<Teach> teachMapper;
 
 	private WorldConfiguration worldConfiguration;
 	private Items items;
@@ -77,8 +77,8 @@ public class CreationManager extends BaseSystem {
 			.add(Spatial.class)
 			.add(Known.class)
 			.add(Collision.class)
-			.add(Learn.class)
-			.add(SkillEmission.class)
+			.add(Skill.class)
+			.add(Teach.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -94,7 +94,7 @@ public class CreationManager extends BaseSystem {
 			.add(Static.class)
 			.add(Harvestable.class)
 			.add(Inventory.class)
-			.add(SkillEmission.class)
+			.add(Teach.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -110,7 +110,7 @@ public class CreationManager extends BaseSystem {
 			.add(Static.class)
 			.add(Harvestable.class)
 			.add(Inventory.class)
-			.add(SkillEmission.class)
+			.add(Teach.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -189,8 +189,8 @@ public class CreationManager extends BaseSystem {
 		speedMapper.get(playerEntity).baseSpeed = 4.0f;
 		collisionMapper.get(playerEntity).radius = 0.5f;
 		inventoryMapper.get(playerEntity).capacity = 50;
-		skillEmissionMapper.get(playerEntity).addWord("me");
-		skillEmissionMapper.get(playerEntity).addWord("you");
+		teachMapper.get(playerEntity).addWord("me");
+		teachMapper.get(playerEntity).addWord("you");
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.POSITION);
 		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.ROTATION);
 		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.INVENTORY);
@@ -219,7 +219,7 @@ public class CreationManager extends BaseSystem {
 		harvestableMapper.get(treeEntity).durability = 300.0f;
 		inventoryMapper.get(treeEntity).add(items.getItem("wood").getId(), 3);
 		inventoryMapper.get(treeEntity).add(items.getItem("seed").getId(), 1);
-		skillEmissionMapper.get(treeEntity).addWord("tree");
+		teachMapper.get(treeEntity).addWord("tree");
 		if (growing) {
 			growingMapper.create(treeEntity).timeLeft = 60.0f;
 		}
@@ -239,7 +239,7 @@ public class CreationManager extends BaseSystem {
 		harvestableMapper.get(rockEntity).harvestEventName = "picking";
 		harvestableMapper.get(rockEntity).durability = 300.0f;
 		inventoryMapper.get(rockEntity).add(items.getItem("stone").getId(), 2);
-		skillEmissionMapper.get(rockEntity).addWord("rock");
+		teachMapper.get(rockEntity).addWord("rock");
 		syncPropagationMapper.get(rockEntity).setOwnerPropagation(Properties.INVENTORY);
 		return rockEntity;
 	}
