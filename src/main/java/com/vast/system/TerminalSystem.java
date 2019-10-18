@@ -19,7 +19,7 @@ import com.googlecode.lanterna.terminal.Terminal;
 import com.nhnent.haste.transport.QoS;
 import com.vast.data.Metrics;
 import com.vast.component.*;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 import com.vast.data.SystemMetrics;
 import com.vast.data.WorldConfiguration;
 import com.vast.network.MessageCodes;
@@ -54,6 +54,7 @@ public class TerminalSystem extends IntervalSystem {
 	private boolean showIds = false;
 	private int showSystemTimesMode = 0;
 	private boolean showSentMessages = false;
+	private boolean showSentBytes = false;
 	private Map<Short, String> messageNames = new HashMap<Short, String>();
 	private boolean showSyncedProperties = false;
 	private Map<Byte, String> propertyNames = new HashMap<Byte, String>();
@@ -83,6 +84,7 @@ public class TerminalSystem extends IntervalSystem {
 		propertyNames.put(Properties.GROWING, "Growing");
 		propertyNames.put(Properties.STATE, "State");
 		propertyNames.put(Properties.CONFIGURATION, "Configuration");
+		propertyNames.put(Properties.SKILL, "Skill");
 	}
 
 	@Override
@@ -302,6 +304,19 @@ public class TerminalSystem extends IntervalSystem {
 				}
 			}
 
+			if (showSentBytes) {
+				long bytesSent = metrics.getBytesSent();
+				if (bytesSent > 1000000000L) {
+					textGraphics.putString(0, 11, "Sent (GB): " + (bytesSent / 1000000000L));
+				} else if (bytesSent > 1000000L) {
+					textGraphics.putString(0, 11, "Sent (MB): " + (bytesSent / 1000000L));
+				} else if (bytesSent > 1000L) {
+					textGraphics.putString(0, 11, "Sent (KB): " + (bytesSent / 1000L));
+				} else {
+					textGraphics.putString(0, 11, "Sent (B): " + bytesSent);
+				}
+			}
+
 			if (showSyncedProperties) {
 				int longestLength = 0;
 				for (byte property : metrics.getSyncedProperties().keySet()) {
@@ -503,9 +518,15 @@ public class TerminalSystem extends IntervalSystem {
 						}
 					} else if (keyStroke.getCharacter().toString().equals("y")) {
 						showSyncedProperties = !showSyncedProperties;
+						showSentBytes = false;
 						showSentMessages = false;
 					} else if (keyStroke.getCharacter().toString().equals("m")) {
 						showSentMessages = !showSentMessages;
+						showSentBytes = false;
+						showSyncedProperties = false;
+					} else if (keyStroke.getCharacter().toString().equals("b")) {
+						showSentBytes = !showSentBytes;
+						showSentMessages = false;
 						showSyncedProperties = false;
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {

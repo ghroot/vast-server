@@ -3,7 +3,7 @@ package com.vast.interact;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.component.*;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 import com.vast.system.CreationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +21,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Message> messageMapper;
 	private ComponentMapper<State> stateMapper;
+	private ComponentMapper<Teach> teachMapper;
 
 	private CreationManager creationManager;
 
@@ -54,6 +55,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
 			stateMapper.get(harvestableEntity).name = harvestable.harvestEventName;
 			syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.STATE);
+			teachMapper.create(playerEntity).addWord("chop");
 			return true;
 		}
 	}
@@ -81,5 +83,6 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 			stateMapper.get(harvestableEntity).name = null;
 			syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.STATE);
 		}
+		teachMapper.create(playerEntity).removeWord("chop");
 	}
 }

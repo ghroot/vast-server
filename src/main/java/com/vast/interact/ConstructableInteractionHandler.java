@@ -6,7 +6,7 @@ import com.vast.component.Constructable;
 import com.vast.component.Player;
 import com.vast.component.State;
 import com.vast.component.Sync;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

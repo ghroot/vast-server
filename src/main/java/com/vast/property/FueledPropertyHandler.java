@@ -3,7 +3,7 @@ package com.vast.property;
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Fueled;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 
 public class FueledPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Fueled> fueledMapper;

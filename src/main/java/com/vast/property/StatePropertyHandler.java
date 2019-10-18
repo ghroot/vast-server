@@ -4,7 +4,7 @@ import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Player;
 import com.vast.component.State;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 
 public class StatePropertyHandler implements PropertyHandler {
 	private ComponentMapper<Player> playerMapper;
@@ -19,8 +19,10 @@ public class StatePropertyHandler implements PropertyHandler {
 	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
 		if (stateMapper.has(entity)) {
 			String stateName = stateMapper.get(entity).name;
-			dataObject.set(Properties.STATE, stateName != null ? stateName : "");
-			return true;
+			if (stateName != null) {
+				dataObject.set(Properties.STATE, stateName);
+				return true;
+			}
 		}
 		return false;
 	}

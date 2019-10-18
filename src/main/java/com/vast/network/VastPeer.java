@@ -52,16 +52,13 @@ public class VastPeer extends ClientPeer {
 
 	public boolean send(Message message) {
 		metrics.messageSent(message.getCode(), QoS.RELIABLE_SEQUENCED);
+		metrics.bytesSent(message.getDataObject().serialize().length);
 		return send(message, SendOptions.ReliableSend);
 	}
 
 	public boolean sendUnreliable(Message message) {
 		metrics.messageSent(message.getCode(), QoS.UNRELIABLE_SEQUENCED);
+		metrics.bytesSent(message.getDataObject().serialize().length);
 		return send(message, UNRELIABLE);
-	}
-
-	@Override
-	protected boolean send(byte[] payload, int payloadLength, byte channel, boolean encrypt, QoS qos) {
-		return super.send(payload, payloadLength, channel, encrypt, qos);
 	}
 }

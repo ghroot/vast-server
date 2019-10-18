@@ -4,7 +4,7 @@ import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Constructable;
 import com.vast.component.SyncHistory;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 
 public class ProgressPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Constructable> constructableMapper;

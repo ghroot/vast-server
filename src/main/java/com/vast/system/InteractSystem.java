@@ -5,7 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.component.*;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 import com.vast.interact.InteractionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

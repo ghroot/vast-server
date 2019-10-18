@@ -4,14 +4,12 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.component.*;
 import com.vast.data.Items;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PlantableInteractionHandler extends AbstractInteractionHandler {
 	private static final Logger logger = LoggerFactory.getLogger(PlantableInteractionHandler.class);
-
-	private final float HARVEST_SPEED = 50.0f;
 
 	private ComponentMapper<Plantable> plantableMapper;
 	private ComponentMapper<Growing> growingMapper;

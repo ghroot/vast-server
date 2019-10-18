@@ -6,7 +6,7 @@ import com.vast.component.Home;
 import com.vast.component.Message;
 import com.vast.component.Sync;
 import com.vast.component.Transform;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 import com.vast.network.MessageCodes;
 
 public class SetHomeOrderHandler implements OrderHandler {

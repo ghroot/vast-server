@@ -5,7 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.vast.component.Growing;
 import com.vast.component.Sync;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 
 public class GrowSystem extends IteratingSystem {
 	private ComponentMapper<Growing> growingMapper;

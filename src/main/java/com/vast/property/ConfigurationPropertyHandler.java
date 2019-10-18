@@ -5,6 +5,7 @@ import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Configuration;
 import com.vast.component.SyncHistory;
 import com.vast.data.*;
+import com.vast.network.Properties;
 
 import java.util.List;
 

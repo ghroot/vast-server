@@ -12,6 +12,7 @@ public class Metrics {
 	private int numberOfCollisionChecks;
 	private double meanOfRoundTripTime;
 	private Map<Short, Map<QoS, Integer>> sentMessages = new HashMap<Short, Map<QoS, Integer>>();
+	private long bytesSent;
 	private long lastSerializeTime;
 	private Map<Byte, Integer> syncedProperties = new HashMap<Byte, Integer>();
 
@@ -70,6 +71,14 @@ public class Metrics {
 
 	public Map<Short, Map<QoS, Integer>> getSentMessages() {
 		return sentMessages;
+	}
+
+	public void bytesSent(int size) {
+		bytesSent += size;
+	}
+
+	public long getBytesSent() {
+		return bytesSent;
 	}
 
 	public int getTimeSinceLastSerialization() {
