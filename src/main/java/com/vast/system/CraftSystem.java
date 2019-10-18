@@ -6,7 +6,7 @@ import com.artemis.systems.IteratingSystem;
 import com.vast.component.*;
 import com.vast.data.CraftableItem;
 import com.vast.data.Items;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 
 public class CraftSystem extends IteratingSystem {
 	private ComponentMapper<Inventory> inventoryMapper;

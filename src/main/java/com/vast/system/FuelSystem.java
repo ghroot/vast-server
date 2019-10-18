@@ -8,7 +8,7 @@ import com.vast.component.Fueled;
 import com.vast.component.Scan;
 import com.vast.component.Sync;
 import com.vast.component.Transform;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

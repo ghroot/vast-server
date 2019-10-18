@@ -1,4 +1,4 @@
-package com.vast.data;
+package com.vast.network;
 
 public class Properties {
 	public static byte POSITION = 0;
@@ -11,4 +11,5 @@ public class Properties {
 	public static byte HOME = 7;
 	public static byte GROWING = 8;
 	public static byte CONFIGURATION = 9;
+	public static byte SKILL = 10;
 }

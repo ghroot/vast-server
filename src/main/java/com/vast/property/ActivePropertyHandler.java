@@ -4,7 +4,7 @@ import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Active;
 import com.vast.component.Player;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 
 public class ActivePropertyHandler implements PropertyHandler {
 	private ComponentMapper<Player> playerMapper;

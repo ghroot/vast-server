@@ -19,7 +19,7 @@ import com.googlecode.lanterna.terminal.Terminal;
 import com.nhnent.haste.transport.QoS;
 import com.vast.data.Metrics;
 import com.vast.component.*;
-import com.vast.data.Properties;
+import com.vast.network.Properties;
 import com.vast.data.SystemMetrics;
 import com.vast.data.WorldConfiguration;
 import com.vast.network.MessageCodes;

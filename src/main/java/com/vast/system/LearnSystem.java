@@ -4,10 +4,8 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.component.Active;
-import com.vast.component.Player;
-import com.vast.component.Skill;
-import com.vast.component.Teach;
+import com.vast.component.*;
+import com.vast.network.Properties;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -17,6 +15,7 @@ public class LearnSystem extends IteratingSystem {
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Skill> skillMapper;
 	private ComponentMapper<Teach> teachMapper;
+	private ComponentMapper<Sync> syncMapper;
 
 	private Set<String> reusableWords = new HashSet<>();
 	private Random random = new Random();
@@ -57,6 +56,10 @@ public class LearnSystem extends IteratingSystem {
 
 			for (String word : reusableWords) {
 				skill.increaseWordLevel(word);
+			}
+
+			if (reusableWords.size() > 0) {
+				syncMapper.create(skillEntity).markPropertyAsDirty(Properties.SKILL);
 			}
 
 			skill.countdown = skill.interval;

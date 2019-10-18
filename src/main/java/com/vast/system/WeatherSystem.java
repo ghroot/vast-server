@@ -11,8 +11,8 @@ import com.vast.component.Player;
 import com.vast.component.Weather;
 
 public class WeatherSystem extends IteratingSystem {
-	public ComponentMapper<Weather> weatherMapper;
-	public ComponentMapper<Event> eventMapper;
+	private ComponentMapper<Weather> weatherMapper;
+	private ComponentMapper<Event> eventMapper;
 
 	private EntitySubscription weatherSubscription;
 	private boolean changed;

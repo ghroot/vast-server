@@ -6,6 +6,7 @@ import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.vast.component.*;
 import com.vast.data.*;
+import com.vast.network.Properties;
 import fastnoise.FastNoise;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -122,6 +123,7 @@ public class CreationManager extends BaseSystem {
 			.add(Transform.class)
 			.add(Spatial.class)
 			.add(Known.class)
+			.add(Teach.class)
 			.add(SyncPropagation.class)
 			.add(SyncHistory.class)
 			.build(world);
@@ -260,6 +262,7 @@ public class CreationManager extends BaseSystem {
 		subTypeMapper.get(animalEntity).subType = animalId;
 		transformMapper.get(animalEntity).position.set(position);
 		groupMapper.get(animalEntity).id = groupId;
+		teachMapper.get(animalEntity).addWord("animal");
 
 		if (animal.hasAspect("collision")) {
 			JSONObject collisionAspect = animal.getAspect("collision");

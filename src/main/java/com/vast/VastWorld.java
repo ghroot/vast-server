@@ -72,7 +72,8 @@ public class VastWorld implements Runnable {
 			new HomePropertyHandler(),
 			new GrowingPropertyHandler(),
 			new StatePropertyHandler(),
-			new ConfigurationPropertyHandler(items, buildings)
+			new ConfigurationPropertyHandler(items, buildings),
+			new SkillPropertyHandler()
 		));
 		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
 		behaviours.put("human", new HumanBehaviour(interactionHandlers, incomingRequestsByPeer, items, buildings));
