@@ -119,7 +119,7 @@ public class VastWorld implements Runnable {
 		).with(
 			new WorldSerializationManager(),
 			new EntityLinkManager()
-		).alwaysDelayComponentRemoval(true);
+		);
 		if (showMonitor) {
 			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, spatialHashes));
 			worldConfigurationBuilder.register(new ProfiledInvocationStrategy(metrics));
@@ -139,7 +139,9 @@ public class VastWorld implements Runnable {
 		while (alive) {
 			long frameStartTime = System.currentTimeMillis();
 			int timeSinceLastFrame = (int) (frameStartTime - lastFrameStartTime);
-			metrics.setTimePerFrameMs(timeSinceLastFrame);
+			if (metrics != null) {
+				metrics.setTimePerFrameMs(timeSinceLastFrame);
+			}
 			float delta = (float) timeSinceLastFrame / 1000;
 			world.setDelta(delta);
 			long processStartTime = System.currentTimeMillis();

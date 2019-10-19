@@ -21,7 +21,6 @@ public class SyncSystem extends IteratingSystem {
 
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
-	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Known> knownMapper;
 
@@ -56,7 +55,7 @@ public class SyncSystem extends IteratingSystem {
 
 		syncNearbyPropagationProperties(syncEntity, sync);
 
-		if (playerMapper.has(syncEntity) && activeMapper.has(syncEntity)) {
+		if (activeMapper.has(syncEntity)) {
 			syncOwnerPropagationProperties(syncEntity, sync);
 		}
 
@@ -73,7 +72,7 @@ public class SyncSystem extends IteratingSystem {
 			int[] knownByEntities = knownByEntitiesBag.getData();
 			for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
 				int knownByEntity = knownByEntities[i];
-				if (playerMapper.has(knownByEntity) && activeMapper.has(knownByEntity)) {
+				if (activeMapper.has(knownByEntity)) {
 					VastPeer knownByPeer = activeMapper.get(knownByEntity).peer;
 					if (changedProperties.reliable) {
 						knownByPeer.send(reusableMessage);

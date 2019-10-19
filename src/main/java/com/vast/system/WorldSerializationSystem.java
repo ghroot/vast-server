@@ -98,13 +98,17 @@ public class WorldSerializationSystem extends IntervalSystem {
 			logger.info("Loading world from snapshot file {}, size: {} bytes", snapshotFileName, fileInputStream.getChannel().size());
 			fileInputStream.close();
 			logger.debug("Loaded {} entities", saveFileFormat.entities.size());
-			metrics.setLastSerializeTime(System.currentTimeMillis());
+			if (metrics != null) {
+				metrics.setLastSerializeTime(System.currentTimeMillis());
+			}
 		} catch (Exception exception) {
 			if (exception instanceof FileNotFoundException) {
 				logger.info("No snapshot file found, creating a new world");
 				CreationManager creationManager = world.getSystem(CreationManager.class);
 				creationManager.createWorld();
-				metrics.setLastSerializeTime(System.currentTimeMillis());
+				if (metrics != null) {
+					metrics.setLastSerializeTime(System.currentTimeMillis());
+				}
 			} else {
 				logger.error("Error loading world", exception);
 			}

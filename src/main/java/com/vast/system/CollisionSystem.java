@@ -23,7 +23,6 @@ public class CollisionSystem extends IteratingSystem {
 	private ComponentMapper<Spatial> spatialMapper;
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Static> staticMapper;
-	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Scan> scanMapper;
 
@@ -54,7 +53,9 @@ public class CollisionSystem extends IteratingSystem {
 
 	@Override
 	protected void end() {
-		metrics.setNumberOfCollisionChecks(numberOfCollisionChecks);
+		if (metrics != null) {
+			metrics.setNumberOfCollisionChecks(numberOfCollisionChecks);
+		}
 	}
 
 	@Override
@@ -67,10 +68,6 @@ public class CollisionSystem extends IteratingSystem {
 
 	@Override
 	protected void process(int entity) {
-		if (deleteMapper.has(entity)) {
-			return;
-		}
-
 		Transform transform = transformMapper.get(entity);
 		Collision collision = collisionMapper.get(entity);
 
@@ -85,7 +82,7 @@ public class CollisionSystem extends IteratingSystem {
 			for (int i = 0, size = nearbyEntitiesBag.size(); i < size; ++i) {
 				int nearbyEntity = nearbyEntities[i];
 				if (nearbyEntity != entity) {
-					if (!collisionMapper.has(nearbyEntity) || deleteMapper.has(nearbyEntity)) {
+					if (!collisionMapper.has(nearbyEntity)) {
 						continue;
 					}
 

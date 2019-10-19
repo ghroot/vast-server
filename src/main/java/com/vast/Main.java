@@ -40,12 +40,13 @@ public class Main {
 		} catch (Exception ignored) {
 		}
 
-		final Metrics metrics = new Metrics();
+		final Metrics metrics = showMonitor ? new Metrics() : null;
 
 		GameServerBootstrap bootstrap = new GameServerBootstrap();
-		bootstrap.application(new VastServerApplication(snapshotFormat, numberOfPeersToSimulate, showMonitor, metrics))
-			.option(UDPOption.THREAD_COUNT, 4)
-			.metricListener(new MetricListener() {
+		VastServerApplication serverApplication = new VastServerApplication(snapshotFormat, numberOfPeersToSimulate, showMonitor, metrics);
+		bootstrap.application(serverApplication).option(UDPOption.THREAD_COUNT, 4).bind(PORT);
+		if (showMonitor) {
+			bootstrap.metricListener(new MetricListener() {
 				@Override
 				public long periodMilliseconds() {
 					return TimeUnit.SECONDS.toMillis(20);
@@ -55,7 +56,8 @@ public class Main {
 				public void onReceive(int peerCount, double meanOfRoundTripTime, double meanOfRoundTripTimeDeviation) {
 					metrics.setRoundTripTime(meanOfRoundTripTime);
 				}
-			})
-			.bind(PORT).start();
+			});
+		}
+		bootstrap.start();
 	}
 }

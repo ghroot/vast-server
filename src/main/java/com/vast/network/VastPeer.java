@@ -52,12 +52,16 @@ public class VastPeer extends ClientPeer {
 	}
 
 	public boolean send(EventMessage message) {
-		metrics.messageSent(message, QoS.RELIABLE_SEQUENCED);
+		if (metrics != null) {
+			metrics.messageSent(message, QoS.RELIABLE_SEQUENCED);
+		}
 		return send(message, SendOptions.ReliableSend);
 	}
 
 	public boolean sendUnreliable(EventMessage message) {
-		metrics.messageSent(message, QoS.UNRELIABLE_SEQUENCED);
+		if (metrics != null) {
+			metrics.messageSent(message, QoS.UNRELIABLE_SEQUENCED);
+		}
 		return send(message, UNRELIABLE);
 	}
 }

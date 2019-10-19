@@ -13,7 +13,6 @@ import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.Set;
 
 public class CullingSystem extends IteratingSystem {
@@ -27,7 +26,6 @@ public class CullingSystem extends IteratingSystem {
 	private ComponentMapper<SubType> subTypeMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 
-	private Map<String, VastPeer> peers;
 	private Set<PropertyHandler> propertyHandlers;
 
 	private IntBag reusableRemovedEntities;
@@ -56,13 +54,8 @@ public class CullingSystem extends IteratingSystem {
 		Scan scan = scanMapper.get(entity);
 		Active active = activeMapper.get(entity);
 
-		VastPeer peer = null;
-		if (playerMapper.has(entity) && activeMapper.has(entity)) {
-			peer = activeMapper.get(entity).peer;
-		}
-
-		notifyAboutRemovedEntities(peer, entity, scan, active);
-		notifyAboutNewEntities(peer, entity, scan, active);
+		notifyAboutRemovedEntities(active.peer, entity, scan, active);
+		notifyAboutNewEntities(active.peer, entity, scan, active);
 	}
 
 	private void notifyAboutRemovedEntities(VastPeer peer, int entity, Scan scan, Active active) {
@@ -71,9 +64,7 @@ public class CullingSystem extends IteratingSystem {
 		for (int i = 0, size = active.knowEntities.size(); i < size; ++i) {
 			int knowEntity = knowEntities[i];
 			if (!scan.nearbyEntities.contains(knowEntity)) {
-				if (peer != null) {
-					notifyAboutRemovedEntity(peer, knowEntity);
-				}
+				notifyAboutRemovedEntity(peer, knowEntity);
 				reusableRemovedEntities.add(knowEntity);
 				if (knownMapper.has(knowEntity)) {
 					knownMapper.get(knowEntity).knownByEntities.removeValue(entity);
@@ -99,10 +90,8 @@ public class CullingSystem extends IteratingSystem {
 		int[] nearbyEntities = scan.nearbyEntities.getData();
 		for (int i = 0, size = scan.nearbyEntities.size(); i < size; ++i) {
 			int nearbyEntity = nearbyEntities[i];
-			if (!active.knowEntities.contains(nearbyEntity) && typeMapper.has(nearbyEntity)) {
-				if (peer != null) {
-					notifyAboutNewEntity(peer, entity, nearbyEntity);
-				}
+			if (!active.knowEntities.contains(nearbyEntity)) {
+				notifyAboutNewEntity(peer, entity, nearbyEntity);
 				active.knowEntities.add(nearbyEntity);
 				if (knownMapper.has(nearbyEntity)) {
 					knownMapper.get(nearbyEntity).knownByEntities.add(entity);
