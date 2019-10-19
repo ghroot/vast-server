@@ -1,7 +1,9 @@
 package com.vast.data;
 
 import com.artemis.BaseSystem;
+import com.nhnent.haste.protocol.messages.EventMessage;
 import com.nhnent.haste.transport.QoS;
+import com.vast.component.Message;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,8 +13,7 @@ public class Metrics {
 	private Map<String, SystemMetrics> systemMetrics = new HashMap<>();
 	private int numberOfCollisionChecks;
 	private double meanOfRoundTripTime;
-	private Map<Short, Map<QoS, Integer>> sentMessages = new HashMap<Short, Map<QoS, Integer>>();
-	private long bytesSent;
+	private Map<Short, Map<QoS, int[]>> sentMessages = new HashMap<Short, Map<QoS, int[]>>();
 	private long lastSerializeTime;
 	private Map<Byte, Integer> syncedProperties = new HashMap<Byte, Integer>();
 
@@ -56,29 +57,21 @@ public class Metrics {
 		return meanOfRoundTripTime;
 	}
 
-	public void messageSent(short messageCode, QoS qos) {
-		Map<QoS, Integer> sentMessagesWithCode = sentMessages.get(messageCode);
+	public void messageSent(EventMessage message, QoS qos) {
+		Map<QoS, int[]> sentMessagesWithCode = sentMessages.get(message.getCode());
 		if (sentMessagesWithCode == null) {
-			sentMessagesWithCode = new HashMap<QoS, Integer>();
-			sentMessages.put(messageCode, sentMessagesWithCode);
+			sentMessagesWithCode = new HashMap<QoS, int[]>();
+			sentMessages.put(message.getCode(), sentMessagesWithCode);
 		}
 		if (sentMessagesWithCode.containsKey(qos)) {
-			sentMessagesWithCode.put(qos, sentMessagesWithCode.get(qos) + 1);
+			sentMessagesWithCode.put(qos, new int[] {sentMessagesWithCode.get(qos)[0] + 1, sentMessagesWithCode.get(qos)[1] + message.getDataObject().serialize().length});
 		} else {
-			sentMessagesWithCode.put(qos, 1);
+			sentMessagesWithCode.put(qos, new int[] {1, message.getDataObject().serialize().length});
 		}
 	}
 
-	public Map<Short, Map<QoS, Integer>> getSentMessages() {
+	public Map<Short, Map<QoS, int[]>> getSentMessages() {
 		return sentMessages;
-	}
-
-	public void bytesSent(int size) {
-		bytesSent += size;
-	}
-
-	public long getBytesSent() {
-		return bytesSent;
 	}
 
 	public int getTimeSinceLastSerialization() {

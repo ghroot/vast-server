@@ -54,7 +54,6 @@ public class TerminalSystem extends IntervalSystem {
 	private boolean showIds = false;
 	private int showSystemTimesMode = 0;
 	private boolean showSentMessages = false;
-	private boolean showSentBytes = false;
 	private Map<Short, String> messageNames = new HashMap<Short, String>();
 	private boolean showSyncedProperties = false;
 	private Map<Byte, String> propertyNames = new HashMap<Byte, String>();
@@ -287,33 +286,33 @@ public class TerminalSystem extends IntervalSystem {
 
 			if (showSentMessages) {
 				int row = 11;
-				Map<Short, Map<QoS, Integer>> sentMessages = metrics.getSentMessages();
+				Map<Short, Map<QoS, int[]>> sentMessages = metrics.getSentMessages();
 				for (short messageCode : sentMessages.keySet()) {
 					String messageName = messageNames.get(messageCode);
-					Map<QoS, Integer> sentMessagesWithCode = sentMessages.get(messageCode);
+					Map<QoS, int[]> sentMessagesWithCode = sentMessages.get(messageCode);
+					int bytesSent = 0;
 					int numberOfReliableMessages = 0;
 					if (sentMessagesWithCode.containsKey(QoS.RELIABLE_SEQUENCED)) {
-						numberOfReliableMessages = sentMessagesWithCode.get(QoS.RELIABLE_SEQUENCED);
+						numberOfReliableMessages = sentMessagesWithCode.get(QoS.RELIABLE_SEQUENCED)[0];
+						bytesSent += sentMessagesWithCode.get(QoS.RELIABLE_SEQUENCED)[1];
 					}
 					int numberOfUnreliableMessages = 0;
 					if (sentMessagesWithCode.containsKey(QoS.UNRELIABLE_SEQUENCED)) {
-						numberOfUnreliableMessages = sentMessagesWithCode.get(QoS.UNRELIABLE_SEQUENCED);
+						numberOfUnreliableMessages = sentMessagesWithCode.get(QoS.UNRELIABLE_SEQUENCED)[0];
+						bytesSent += sentMessagesWithCode.get(QoS.UNRELIABLE_SEQUENCED)[1];
 					}
-					textGraphics.putString(0, row, messageName + ": " + numberOfReliableMessages + "/" + numberOfUnreliableMessages);
+					String bytesSentString = "";
+					if (bytesSent > 1000000000L) {
+						bytesSentString = (bytesSent / 1000000000L) + " GB";
+					} else if (bytesSent > 1000000L) {
+						bytesSentString = (bytesSent / 1000000L) + " MB";
+					} else if (bytesSent > 1000L) {
+						bytesSentString = (bytesSent / 1000L) + " KB";
+					} else {
+						bytesSentString = bytesSent + " B";
+					}
+					textGraphics.putString(0, row, messageName + ": " + numberOfReliableMessages + "/" + numberOfUnreliableMessages + " (" + bytesSentString + ")");
 					row++;
-				}
-			}
-
-			if (showSentBytes) {
-				long bytesSent = metrics.getBytesSent();
-				if (bytesSent > 1000000000L) {
-					textGraphics.putString(0, 11, "Sent (GB): " + (bytesSent / 1000000000L));
-				} else if (bytesSent > 1000000L) {
-					textGraphics.putString(0, 11, "Sent (MB): " + (bytesSent / 1000000L));
-				} else if (bytesSent > 1000L) {
-					textGraphics.putString(0, 11, "Sent (KB): " + (bytesSent / 1000L));
-				} else {
-					textGraphics.putString(0, 11, "Sent (B): " + bytesSent);
 				}
 			}
 
@@ -518,15 +517,9 @@ public class TerminalSystem extends IntervalSystem {
 						}
 					} else if (keyStroke.getCharacter().toString().equals("y")) {
 						showSyncedProperties = !showSyncedProperties;
-						showSentBytes = false;
 						showSentMessages = false;
 					} else if (keyStroke.getCharacter().toString().equals("m")) {
 						showSentMessages = !showSentMessages;
-						showSentBytes = false;
-						showSyncedProperties = false;
-					} else if (keyStroke.getCharacter().toString().equals("b")) {
-						showSentBytes = !showSentBytes;
-						showSentMessages = false;
 						showSyncedProperties = false;
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {

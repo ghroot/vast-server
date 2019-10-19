@@ -2,6 +2,7 @@ package com.vast.network;
 
 import com.nhnent.haste.framework.ClientPeer;
 import com.nhnent.haste.framework.SendOptions;
+import com.nhnent.haste.protocol.messages.EventMessage;
 import com.nhnent.haste.protocol.messages.InitialRequest;
 import com.nhnent.haste.protocol.messages.Message;
 import com.nhnent.haste.protocol.messages.RequestMessage;
@@ -50,15 +51,13 @@ public class VastPeer extends ClientPeer {
 		serverApplication.onPeerDisconnected(this, disconnectReason, detail);
 	}
 
-	public boolean send(Message message) {
-		metrics.messageSent(message.getCode(), QoS.RELIABLE_SEQUENCED);
-		metrics.bytesSent(message.getDataObject().serialize().length);
+	public boolean send(EventMessage message) {
+		metrics.messageSent(message, QoS.RELIABLE_SEQUENCED);
 		return send(message, SendOptions.ReliableSend);
 	}
 
-	public boolean sendUnreliable(Message message) {
-		metrics.messageSent(message.getCode(), QoS.UNRELIABLE_SEQUENCED);
-		metrics.bytesSent(message.getDataObject().serialize().length);
+	public boolean sendUnreliable(EventMessage message) {
+		metrics.messageSent(message, QoS.UNRELIABLE_SEQUENCED);
 		return send(message, UNRELIABLE);
 	}
 }
