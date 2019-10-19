@@ -8,7 +8,6 @@ import com.vast.component.*;
 import com.vast.network.Properties;
 
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 
 public class LearnSystem extends IteratingSystem {
@@ -18,10 +17,9 @@ public class LearnSystem extends IteratingSystem {
 	private ComponentMapper<Sync> syncMapper;
 
 	private Set<String> reusableWords = new HashSet<>();
-	private Random random = new Random();
 
 	public LearnSystem() {
-		super(Aspect.all(Player.class, Active.class, Skill.class));
+		super(Aspect.all(Active.class, Skill.class));
 	}
 
 	@Override
