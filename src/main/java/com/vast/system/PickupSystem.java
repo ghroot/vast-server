@@ -2,13 +2,13 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.systems.IteratingSystem;
+import com.artemis.systems.IntervalIteratingSystem;
 import com.vast.component.*;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
 
-public class PickupSystem extends IteratingSystem {
+public class PickupSystem extends IntervalIteratingSystem {
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<Transform> transformMapper;
@@ -21,7 +21,7 @@ public class PickupSystem extends IteratingSystem {
 	private Point2f reusablePosition;
 
 	public PickupSystem() {
-		super(Aspect.all(Player.class, Active.class, Scan.class));
+		super(Aspect.all(Player.class, Active.class, Scan.class), 2.5f);
 
 		reusableVector = new Vector2f();
 		reusablePosition = new Point2f();
