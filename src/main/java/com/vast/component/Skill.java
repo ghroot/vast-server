@@ -18,20 +18,29 @@ public class Skill extends PooledComponent {
 		countdown = 0f;
 	}
 
-	public void increaseWordLevel(String word) {
+	public boolean increaseWordLevel(String word) {
+		boolean didIncrease = false;
 		boolean handled = false;
+
 		for (int i = 0; i < words.length; i++) {
 			if (word.equals(words[i])) {
-				wordLevels[i] = (byte) Math.min(100, wordLevels[i] + 1);
+				if (wordLevels[i] < 100) {
+					wordLevels[i]++;
+					didIncrease = true;
+				}
 				handled = true;
 				break;
 			}
 		}
+
 		if (!handled) {
 			words = Arrays.copyOf(words, words.length + 1);
 			words[words.length - 1] = word;
 			wordLevels = Arrays.copyOf(wordLevels, wordLevels.length + 1);
 			wordLevels[wordLevels.length - 1] = (byte) 1;
+			didIncrease = true;
 		}
+
+		return didIncrease;
 	}
 }

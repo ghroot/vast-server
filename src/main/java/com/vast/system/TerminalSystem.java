@@ -409,6 +409,20 @@ public class TerminalSystem extends IntervalSystem {
 						detail = s.toString();
 					} else if (component instanceof Lifetime) {
 						detail = "" + (Math.round(((Lifetime) component).timeLeft * 100.0f) / 100.0f);
+					} else if (component instanceof Skill) {
+						Skill skill = (Skill) component;
+						StringBuilder wordsString = new StringBuilder();
+						for (int j = 0; j < skill.words.length; j++) {
+							if (skill.wordLevels[j] >= 100) {
+								wordsString.append(skill.words[j].toUpperCase());
+							} else {
+								wordsString.append(skill.words[j]);
+							}
+							if (j < skill.words.length - 1) {
+								wordsString.append(", ");
+							}
+						}
+						detail = wordsString.toString();
 					}
 					if (detail != null) {
 						textGraphics.putString(0, row, componentName + " (" + detail + ")");

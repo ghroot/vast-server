@@ -52,11 +52,12 @@ public class LearnSystem extends IteratingSystem {
 				}
 			}
 
+			boolean didIncrease = false;
 			for (String word : reusableWords) {
-				skill.increaseWordLevel(word);
+				didIncrease = skill.increaseWordLevel(word) || didIncrease;
 			}
 
-			if (reusableWords.size() > 0) {
+			if (didIncrease) {
 				syncMapper.create(skillEntity).markPropertyAsDirty(Properties.SKILL);
 			}
 
