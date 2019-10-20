@@ -1,9 +1,6 @@
 package com.vast.system;
 
-import com.artemis.Aspect;
-import com.artemis.Component;
-import com.artemis.ComponentMapper;
-import com.artemis.systems.IntervalSystem;
+import com.artemis.*;
 import com.artemis.utils.Bag;
 import com.artemis.utils.IntBag;
 import com.googlecode.lanterna.TerminalPosition;
@@ -31,7 +28,7 @@ import javax.vecmath.Point2f;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TerminalSystem extends IntervalSystem {
+public class TerminalSystem extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(TerminalSystem.class);
 
 	private ComponentMapper<Player> playerMapper;
@@ -47,6 +44,9 @@ public class TerminalSystem extends IntervalSystem {
 	private WorldConfiguration worldConfiguration;
 	private Map<Integer, IntBag> spatialHashes;
 
+	private float acc;
+	private final float interval = 0.1f;
+
 	private Screen screen;
 	private float scale = 0.15f;//3.0f;
 	private Point2f cameraPosition = new Point2f();
@@ -61,7 +61,6 @@ public class TerminalSystem extends IntervalSystem {
 	private int processDuration = 0;
 
 	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldConfiguration worldConfiguration, Map<Integer, IntBag> spatialHashes) {
-		super(Aspect.all(), 0.1f);
 		this.peers = peers;
 		this.metrics = metrics;
 		this.worldConfiguration = worldConfiguration;
@@ -103,6 +102,16 @@ public class TerminalSystem extends IntervalSystem {
 			screen.stopScreen();
 		} catch (Exception ignored) {
 		}
+	}
+
+	@Override
+	protected boolean checkProcessing() {
+		acc += world.getDelta();
+		if (acc >= interval) {
+			acc -= interval;
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -228,7 +237,7 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 6, collisionsString);
 
 			if (showSystemTimesMode > 0 && metrics.getSystemMetrics().size() > 0) {
-				Map<String, SystemMetrics> systemMetricsToShow;
+				Map<BaseSystem, SystemMetrics> systemMetricsToShow;
 				if (showSystemTimesMode == 1) {
 					systemMetricsToShow = metrics.getSystemMetrics().entrySet()
 							.stream()
@@ -242,7 +251,7 @@ public class TerminalSystem extends IntervalSystem {
 				} else if (showSystemTimesMode == 2) {
 					systemMetricsToShow = metrics.getSystemMetrics().entrySet()
 							.stream()
-							.sorted(Map.Entry.comparingByKey())
+							.sorted(Map.Entry.comparingByKey(Comparator.comparing((BaseSystem system) -> system.getClass().getSimpleName())))
 							.collect(Collectors.toMap(
 									Map.Entry::getKey,
 									Map.Entry::getValue,
@@ -263,12 +272,25 @@ public class TerminalSystem extends IntervalSystem {
 				}
 
 				int longestSystemNameLength = 0;
-				for (String systemName : metrics.getSystemMetrics().keySet()) {
+				for (BaseSystem system : metrics.getSystemMetrics().keySet()) {
+					String systemName = system.getClass().getSimpleName();
 					longestSystemNameLength = Math.max(systemName.length(), longestSystemNameLength);
 				}
 				int row = 8;
-				for (String systemName : systemMetricsToShow.keySet()) {
-					SystemMetrics systemMetrics = systemMetricsToShow.get(systemName);
+				for (BaseSystem system : systemMetricsToShow.keySet()) {
+					SystemMetrics systemMetrics = systemMetricsToShow.get(system);
+					String systemName = system.getClass().getSimpleName();
+					TextColor systemColor = TextColor.ANSI.WHITE;
+					if (focusedEntity >= 0) {
+						if (system instanceof BaseEntitySystem) {
+							if (!((BaseEntitySystem) system).getSubscription().getEntities().contains(focusedEntity)) {
+								systemColor = TextColor.Indexed.fromRGB(100, 100, 100);
+							}
+						} else {
+							systemColor = TextColor.Indexed.fromRGB(100, 100, 100);
+						}
+					}
+					textGraphics.setForegroundColor(systemColor);
 					if (showSystemTimesMode == 3) {
 						textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestSystemNameLength - 1, row, systemName);
 						String numberOfEntitiesString = Integer.toString(systemMetrics.getNumberOfEntitiesInSystem());

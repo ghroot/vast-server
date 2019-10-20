@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class Metrics {
 	private int timePerFrameMs;
-	private Map<String, SystemMetrics> systemMetrics = new HashMap<>();
+	private Map<BaseSystem, SystemMetrics> systemMetrics = new HashMap<>();
 	private int numberOfCollisionChecks;
 	private double meanOfRoundTripTime;
 	private Map<Short, Map<QoS, int[]>> sentMessages = new HashMap<Short, Map<QoS, int[]>>();
@@ -34,10 +34,10 @@ public class Metrics {
 	}
 
 	public void setSystemMetrics(BaseSystem system, int processingTime, int numberOfEntitiesInSystem) {
-		systemMetrics.put(system.getClass().getSimpleName(), new SystemMetrics(processingTime, numberOfEntitiesInSystem));
+		systemMetrics.put(system, new SystemMetrics(processingTime, numberOfEntitiesInSystem));
 	}
 
-	public Map<String, SystemMetrics> getSystemMetrics() {
+	public Map<BaseSystem, SystemMetrics> getSystemMetrics() {
 		return systemMetrics;
 	}
 
