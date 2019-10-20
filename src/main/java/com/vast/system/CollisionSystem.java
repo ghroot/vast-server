@@ -7,41 +7,37 @@ import com.artemis.utils.IntBag;
 import com.vast.component.*;
 import com.vast.data.Metrics;
 import com.vast.network.Properties;
-import com.vast.data.SpatialHash;
 import com.vast.data.WorldConfiguration;
+import net.mostlyoriginal.api.utils.QuadTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
-import java.util.Map;
 
 public class CollisionSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem.class);
 
 	private ComponentMapper<Transform> transformMapper;
-	private ComponentMapper<Spatial> spatialMapper;
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Static> staticMapper;
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Scan> scanMapper;
 
 	private WorldConfiguration worldConfiguration;
-	private Map<Integer, IntBag> spatialHashes;
+	private QuadTree quadTree;
 	private Metrics metrics;
 
-	private SpatialHash reusableHash;
 	private IntBag reusableNearbyEntities;
 	private Vector2f reusableVector;
 	private int numberOfCollisionChecks;
 
-	public CollisionSystem(WorldConfiguration worldConfiguration, Map<Integer, IntBag> spatialHashes, Metrics metrics) {
-		super(Aspect.all(Transform.class, Spatial.class, Collision.class).exclude(Static.class));
+	public CollisionSystem(WorldConfiguration worldConfiguration, QuadTree quadTree, Metrics metrics) {
+		super(Aspect.all(Transform.class, Collision.class).exclude(Static.class));
 		this.worldConfiguration = worldConfiguration;
-		this.spatialHashes = spatialHashes;
+		this.quadTree = quadTree;
 		this.metrics = metrics;
 
-		reusableHash = new SpatialHash();
 		reusableNearbyEntities = new IntBag();
 		reusableVector = new Vector2f();
 	}
@@ -123,25 +119,13 @@ public class CollisionSystem extends IteratingSystem {
 		if (scanMapper.has(entity)) {
 			return scanMapper.get(entity).nearbyEntities;
 		} else {
-			Spatial spatial = spatialMapper.get(entity);
-			if (spatial.memberOfSpatialHash != null) {
-				int sectionSize = worldConfiguration.sectionSize;
-				int spatialX = spatial.memberOfSpatialHash.getX();
-				int spatialY = spatial.memberOfSpatialHash.getY();
-				int startX = spatialX - sectionSize;
-				int endX = spatialX + sectionSize;
-				int startY = spatialY - sectionSize;
-				int endY = spatialY + sectionSize;
-				for (int x = startX; x <= endX; x += sectionSize) {
-					for (int y = startY; y <= endY; y += sectionSize) {
-						reusableHash.setXY(x, y);
-						IntBag entitiesInHash = spatialHashes.get(reusableHash.getUniqueKey());
-						if (entitiesInHash != null) {
-							reusableNearbyEntities.addAll(entitiesInHash);
-						}
-					}
-				}
-			}
+			Transform transform = transformMapper.get(entity);
+
+			float distance = 2f;
+
+			reusableNearbyEntities.clear();
+			quadTree.get(reusableNearbyEntities, transform.position.x + worldConfiguration.width / 2f - distance,
+				transform.position.y + worldConfiguration.height / 2f - distance, 2f * distance, 2f * distance);
 		}
 		return reusableNearbyEntities;
 	}

@@ -413,8 +413,6 @@ public class TerminalSystem extends BaseSystem {
 						}
 					} else if (component instanceof Speed) {
 						detail = "" + (Math.round(((Speed) component).getModifiedSpeed() * 100.0f) / 100.0f);
-					} else if (component instanceof Spatial) {
-						detail = "" + ((Spatial) component).memberOfSpatialHash.getX() + ", " + ((Spatial) component).memberOfSpatialHash.getY();
 					} else if (component instanceof Transform) {
 						detail = "" + (Math.round(((Transform) component).position.x * 100.0f) / 100.0f) + ", " + (Math.round(((Transform) component).position.y * 100.0f) / 100.0f);
 					} else if (component instanceof Path) {
