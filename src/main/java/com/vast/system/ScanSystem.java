@@ -5,31 +5,25 @@ import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.component.Scan;
-import com.vast.component.Spatial;
-import com.vast.data.SpatialHash;
+import com.vast.component.Transform;
 import com.vast.data.WorldConfiguration;
+import net.mostlyoriginal.api.utils.QuadTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 public class ScanSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(ScanSystem.class);
 
+	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Scan> scanMapper;
-	private ComponentMapper<Spatial> spatialMapper;
 
+	private QuadTree quadTree;
 	private WorldConfiguration worldConfiguration;
-	private Map<Integer, IntBag> spatialHashes;
 
-	private SpatialHash reusableHash;
-
-	public ScanSystem(WorldConfiguration worldConfiguration, Map<Integer, IntBag> spatialHashes) {
-		super(Aspect.all(Scan.class, Spatial.class));
+	public ScanSystem(QuadTree quadTree, WorldConfiguration worldConfiguration) {
+		super(Aspect.all(Transform.class, Scan.class));
+		this.quadTree = quadTree;
 		this.worldConfiguration = worldConfiguration;
-		this.spatialHashes = spatialHashes;
-
-		reusableHash = new SpatialHash();
 	}
 
 	@Override
@@ -42,31 +36,11 @@ public class ScanSystem extends IteratingSystem {
 
 	@Override
 	protected void process(int scanEntity) {
+		Transform transform = transformMapper.get(scanEntity);
 		Scan scan = scanMapper.get(scanEntity);
-		Spatial spatial = spatialMapper.get(scanEntity);
 
-		IntBag nearbyEntities = scan.nearbyEntities;
-		nearbyEntities.clear();
-
-		if (spatial.memberOfSpatialHash != null) {
-			int sectionSize = worldConfiguration.sectionSize;
-			int sectionsInEachDirection = (int) Math.ceil(scan.distance / sectionSize);
-			int distanceInEachDirection = sectionsInEachDirection * sectionSize;
-			int spatialX = spatial.memberOfSpatialHash.getX();
-			int spatialY = spatial.memberOfSpatialHash.getY();
-			int startX = spatialX - distanceInEachDirection;
-			int endX = spatialX + distanceInEachDirection;
-			int startY = spatialY - distanceInEachDirection;
-			int endY = spatialY + distanceInEachDirection;
-			for (int x = startX; x <= endX; x += sectionSize) {
-				for (int y = startY; y <= endY; y += sectionSize) {
-					reusableHash.setXY(x, y);
-					IntBag entitiesInHash = spatialHashes.get(reusableHash.getUniqueKey());
-					if (entitiesInHash != null) {
-						nearbyEntities.addAll(entitiesInHash);
-					}
-				}
-			}
-		}
+		scan.nearbyEntities.clear();
+		quadTree.get(scan.nearbyEntities, transform.position.x + worldConfiguration.width / 2f - scan.distance,
+			transform.position.y + worldConfiguration.height / 2f - scan.distance, 2f * scan.distance, 2f * scan.distance);
 	}
 }

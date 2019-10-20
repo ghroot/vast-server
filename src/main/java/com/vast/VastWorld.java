@@ -17,6 +17,7 @@ import com.vast.network.VastServerApplication;
 import com.vast.order.*;
 import com.vast.property.*;
 import com.vast.system.*;
+import net.mostlyoriginal.api.utils.QuadTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,7 @@ public class VastWorld implements Runnable {
 		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<String, List<IncomingRequest>>();
 		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
 		Map<Integer, IntBag> spatialHashes = new HashMap<Integer, IntBag>();
+		QuadTree quadTree = new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height);
 		List<InteractionHandler> interactionHandlers = new ArrayList<InteractionHandler>(Arrays.asList(
 			new GrowingInteractionHandler(),
 			new HarvestableInteractionHandler(),
@@ -91,9 +93,11 @@ public class VastWorld implements Runnable {
 			new DeactivateSystem(peers),
 			new ActivateSystem(peers),
 			new ConfigurationSystem(),
-			new SpatialAddRemoveSystem(worldConfiguration, spatialHashes),
-			new SpatialUpdateSystem(worldConfiguration, spatialHashes),
-			new ScanSystem(worldConfiguration, spatialHashes),
+//			new SpatialAddRemoveSystem(worldConfiguration, spatialHashes),
+//			new SpatialUpdateSystem(worldConfiguration, spatialHashes),
+			new QuadTreeAddRemoveSystem(quadTree, worldConfiguration),
+			new QuadTreeUpdateSystem(quadTree, worldConfiguration),
+			new ScanSystem(quadTree, worldConfiguration),
 			new CreateSystem(propertyHandlers),
 			new CullingSystem(propertyHandlers),
 			new OrderSystem(orderHandlers, incomingRequestsByPeer),
