@@ -3,7 +3,6 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.BaseEntitySystem;
 import com.artemis.ComponentMapper;
-import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.component.Spatial;
 import com.vast.component.Transform;
