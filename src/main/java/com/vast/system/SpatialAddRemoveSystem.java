@@ -1,6 +1,7 @@
 package com.vast.system;
 
 import com.artemis.Aspect;
+import com.artemis.BaseEntitySystem;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import javax.vecmath.Point2f;
 import java.util.Map;
 
-public class SpatialAddRemoveSystem extends IteratingSystem {
+public class SpatialAddRemoveSystem extends BaseEntitySystem {
 	private static final Logger logger = LoggerFactory.getLogger(SpatialAddRemoveSystem.class);
 
 	private ComponentMapper<Transform> transformMapper;
@@ -76,6 +77,6 @@ public class SpatialAddRemoveSystem extends IteratingSystem {
 	}
 
 	@Override
-	protected void process(int entity) {
+	protected void processSystem() {
 	}
 }
