@@ -206,20 +206,10 @@ public class TerminalSystem extends BaseSystem {
 			textGraphics.putString(0, 0, "World size: " + worldConfiguration.width + " x " + worldConfiguration.height);
 			textGraphics.putString(0, 1, "Scale: x" + (Math.round(scale * 100.0f) / 100.0f));
 			textGraphics.putString(0, 2, "Camera position: " + (Math.round(cameraPosition.x * 100.0f) / 100.0f) + ", " + (Math.round(cameraPosition.y * 100.0f) / 100.0f));
-			textGraphics.putString(0, 3, "Spatial hash size: " + worldConfiguration.sectionSize);
-			int numberOfSpatialHashes = 0;
-			int numberOfActiveSpatialHashes = 0;
-			for (IntBag entitiesInSpatialHash : spatialHashes.values()) {
-				numberOfSpatialHashes++;
-				if (entitiesInSpatialHash.size() > 0) {
-					numberOfActiveSpatialHashes++;
-				}
-			}
-			textGraphics.putString(0, 4, "Active spatial hashes: " + numberOfActiveSpatialHashes + " (of " + numberOfSpatialHashes + " total)");
-			textGraphics.putString(0, 5, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
-			textGraphics.putString(0, 6, "Moving / static entities: " + (entities.size() - staticEntities.size()) + " / " + staticEntities.size());
-			textGraphics.putString(0, 7, "Player entities: " + playerEntities.size() + " (" + activePlayerEntities.size() + " active)");
-			textGraphics.putString(0, 8, "Scanning entities: " + scanEntities.size());
+			textGraphics.putString(0, 3, "Total entities: " + entities.size() + " (" + numberOfEntitiesOnScreen + " on screen)");
+			textGraphics.putString(0, 4, "Moving / static entities: " + (entities.size() - staticEntities.size()) + " / " + staticEntities.size());
+			textGraphics.putString(0, 5, "Player entities: " + playerEntities.size() + " (" + activePlayerEntities.size() + " active)");
+			textGraphics.putString(0, 6, "Scanning entities: " + scanEntities.size());
 
 			String fpsString = "FPS: " + metrics.getFps();
 			textGraphics.putString(screen.getTerminalSize().getColumns() - fpsString.length(), 0, fpsString);
