@@ -16,7 +16,6 @@ import java.util.Map;
 public class DeleteSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(DeleteSystem.class);
 
-	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Known> knownMapper;
@@ -49,7 +48,7 @@ public class DeleteSystem extends IteratingSystem {
 			int[] knownByEntities = knownByEntitiesBag.getData();
 			for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
 				int entityToNotify = knownByEntities[i];
-				if (playerMapper.has(entityToNotify) && activeMapper.has(entityToNotify)) {
+				if (activeMapper.has(entityToNotify)) {
 					VastPeer peer = activeMapper.get(entityToNotify).peer;
 					notifyAboutRemovedEntity(peer, deleteEntity, reason);
 					activeMapper.get(entityToNotify).knowEntities.removeValue(deleteEntity);

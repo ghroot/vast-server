@@ -8,7 +8,6 @@ import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.component.Active;
 import com.vast.component.Event;
 import com.vast.component.Known;
-import com.vast.component.Player;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
 import org.slf4j.Logger;
@@ -18,7 +17,6 @@ public class EventSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(EventSystem.class);
 
 	private ComponentMapper<Event> eventMapper;
-	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Known> knownMapper;
 
@@ -47,7 +45,7 @@ public class EventSystem extends IteratingSystem {
 		reusableEventMessage.getDataObject().set(MessageCodes.EVENT_NAME, event.name);
 
 		if (event.ownerOnly) {
-			if (playerMapper.has(eventEntity) && activeMapper.has(eventEntity)) {
+			if (activeMapper.has(eventEntity)) {
 				VastPeer ownerPeer = activeMapper.get(eventEntity).peer;
 				ownerPeer.send(reusableEventMessage);
 			}
