@@ -14,6 +14,7 @@ import com.vast.network.VastPeer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class HumanBehaviour extends AbstractBehaviour {
 	private ComponentMapper<Interact> interactMapper;
@@ -23,12 +24,14 @@ public class HumanBehaviour extends AbstractBehaviour {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Craft> craftMapper;
 
+	private Random random;
 	private Map<String, List<IncomingRequest>> incomingRequestsByPeer;
 	private Items items;
 	private Buildings buildings;
 
-	public HumanBehaviour(List<InteractionHandler> interactionHandlers, Map<String, List<IncomingRequest>> incomingRequestsByPeer, Items items, Buildings buildings) {
+	public HumanBehaviour(List<InteractionHandler> interactionHandlers, Random random, Map<String, List<IncomingRequest>> incomingRequestsByPeer, Items items, Buildings buildings) {
 		super(interactionHandlers);
+		this.random = random;
 		this.incomingRequestsByPeer = incomingRequestsByPeer;
 		this.items = items;
 		this.buildings = buildings;
@@ -41,12 +44,12 @@ public class HumanBehaviour extends AbstractBehaviour {
 		}
 
 		VastPeer peer = activeMapper.get(entity).peer;
-		int roll = (int) (Math.random() * 100);
+		int roll = (int) (random.nextFloat() * 100);
 		if (roll <= 1) {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.SET_HOME)));
 		} else if (roll <= 3) {
 			int itemId;
-			if (Math.random() <= 0.5f) {
+			if (random.nextFloat() <= 0.5f) {
 				itemId = items.getItem("axe").getId();
 			} else {
 				itemId = items.getItem("pickaxe").getId();
@@ -57,11 +60,11 @@ public class HumanBehaviour extends AbstractBehaviour {
 		} else if (roll <= 15) {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.PLANT)));
 		} else if (roll <= 20) {
-			byte buildingId = (byte) (Math.random() * 3);
+			byte buildingId = (byte) (random.nextFloat() * 3);
 			float x = transformMapper.get(entity).position.x;
 			float y = transformMapper.get(entity).position.y - 1.0f;
 			float[] position = new float[] {x, y};
-			float rotation = (float) Math.random() * 360.0f;
+			float rotation = random.nextFloat() * 360f;
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD, new DataObject()
 				.set(MessageCodes.BUILD_TYPE, buildingId)
 				.set(MessageCodes.BUILD_POSITION, position)
@@ -69,15 +72,15 @@ public class HumanBehaviour extends AbstractBehaviour {
 		} else if (roll <= 55) {
 			List<Integer> nearbyInteractableEntities = getNearbyInteractableEntities(entity);
 			if (nearbyInteractableEntities.size() > 0) {
-				int randomIndex = (int) (Math.random() * nearbyInteractableEntities.size());
+				int randomIndex = (int) (random.nextFloat() * nearbyInteractableEntities.size());
 				int randomNearbyInteractableEntity = nearbyInteractableEntities.get(randomIndex);
 				if (!playerMapper.has(randomNearbyInteractableEntity)) {
 					addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.INTERACT, new DataObject().set(MessageCodes.INTERACT_ENTITY_ID, randomNearbyInteractableEntity))));
 				}
 			}
 		} else {
-			float x = transformMapper.get(entity).position.x - 2.0f + (float) Math.random() * 4.0f;
-			float y = transformMapper.get(entity).position.y - 2.0f + (float) Math.random() * 4.0f;
+			float x = transformMapper.get(entity).position.x - 2f + random.nextFloat() * 4f;
+			float y = transformMapper.get(entity).position.y - 2f + random.nextFloat() * 4f;
 			float[] position = new float[] {x, y};
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.MOVE, new DataObject().set(MessageCodes.MOVE_POSITION, position))));
 		}

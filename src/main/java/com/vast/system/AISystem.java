@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Random;
 
 public class AISystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(AISystem.class);
@@ -17,10 +18,12 @@ public class AISystem extends IteratingSystem {
 	private ComponentMapper<AI> aiMapper;
 
 	private Map<String, Behaviour> behaviours;
+	private Random random;
 
-	public AISystem(Map<String, Behaviour> behaviours) {
+	public AISystem(Map<String, Behaviour> behaviours, Random random) {
 		super(Aspect.all(AI.class));
 		this.behaviours = behaviours;
+		this.random = random;
 	}
 
 	@Override
@@ -36,7 +39,7 @@ public class AISystem extends IteratingSystem {
 
 		ai.behaviour = behaviours.get(ai.behaviourName);
 		ai.state = "idling";
-		ai.countdown = (float) Math.random() * 3.0f;
+		ai.countdown = random.nextFloat() * 3f;
 	}
 
 	@Override

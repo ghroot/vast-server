@@ -20,6 +20,7 @@ public class VastServerApplication extends ServerApplication {
 
 	private String snapshotFormat;
 	private int numberOfPeersToSimulate;
+	private long randomSeed;
 	private boolean showMonitor;
 	private Metrics metrics;
 
@@ -29,9 +30,10 @@ public class VastServerApplication extends ServerApplication {
 	private VastWorld world;
 	private Thread worldThread;
 
-	public VastServerApplication(String snapshotFormat, int numberOfPeersToSimulate, boolean showMonitor, Metrics metrics) {
+	public VastServerApplication(String snapshotFormat, int numberOfPeersToSimulate, long randomSeed, boolean showMonitor, Metrics metrics) {
 		this.snapshotFormat = snapshotFormat;
 		this.numberOfPeersToSimulate = numberOfPeersToSimulate;
+		this.randomSeed = randomSeed;
 		this.showMonitor = showMonitor;
 		this.metrics = metrics;
 	}
@@ -41,7 +43,7 @@ public class VastServerApplication extends ServerApplication {
 		peers = new ArrayList<VastPeer>();
 		incomingRequests = new ArrayList<IncomingRequest>();
 
-		world = new VastWorld(this, snapshotFormat, showMonitor, metrics);
+		world = new VastWorld(this, snapshotFormat, randomSeed, showMonitor, metrics);
 		worldThread = new Thread(world, "World");
 		worldThread.start();
 

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Point2f;
+import java.util.Random;
 
 public class CreationManager extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CreationManager.class);
@@ -38,6 +39,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Teach> teachMapper;
 
 	private WorldConfiguration worldConfiguration;
+	private Random random;
 	private Items items;
 	private Buildings buildings;
 	private Animals animals;
@@ -52,8 +54,9 @@ public class CreationManager extends BaseSystem {
 
 	private int nextAnimalGroupId = 0;
 
-	public CreationManager(WorldConfiguration worldConfiguration, Items items, Buildings buildings, Animals animals) {
+	public CreationManager(WorldConfiguration worldConfiguration, Random random, Items items, Buildings buildings, Animals animals) {
 		this.worldConfiguration = worldConfiguration;
+		this.random = random;
 		this.items = items;
 		this.buildings = buildings;
 		this.animals = animals;
@@ -154,18 +157,18 @@ public class CreationManager extends BaseSystem {
 	public void createWorld() {
 		world.create(worldArchetype);
 
-		FastNoise noise1 = new FastNoise((int) (Math.random() * 10000000));
-		FastNoise noise2 = new FastNoise((int) (Math.random() * 10000000));
-		for (float x = -worldConfiguration.width / 2.0f; x < worldConfiguration.width / 2.0f; x += 3.0f) {
-			for (float y = -worldConfiguration.height / 2.0f; y < worldConfiguration.height / 2.0f; y += 3.0f) {
+		FastNoise noise1 = new FastNoise((int) (random.nextDouble() * 10000000));
+		FastNoise noise2 = new FastNoise((int) (random.nextDouble() * 10000000));
+		for (float x = -worldConfiguration.width / 2f; x < worldConfiguration.width / 2f; x += 3f) {
+			for (float y = -worldConfiguration.height / 2f; y < worldConfiguration.height / 2f; y += 3f) {
 				if (noise1.GetSimplex(x, y) > 0.35f) {
-					createTree(new Point2f(x - 1.0f + (float) Math.random() * 2.0f, y - 1.0f + (float) Math.random() * 2.0f), false);
+					createTree(new Point2f(x - 1f + random.nextFloat() * 2f, y - 1f + random.nextFloat() * 2f), false);
 				}
 				if (noise1.GetWhiteNoise(x, y) > 0.9f) {
 					createRock(new Point2f(x, y));
 				}
 				if (noise2.GetWhiteNoise(x, y) > 0.99f) {
-					createAnimalGroup(new Point2f(x, y), Math.random() < 0.5f ? 0 : 2);
+					createAnimalGroup(new Point2f(x, y), random.nextFloat() < 0.5f ? 0 : 2);
 				}
 			}
 		}
@@ -181,7 +184,7 @@ public class CreationManager extends BaseSystem {
 		} else {
 			transformMapper.get(playerEntity).position.set(getRandomPositionInWorld());
 		}
-		speedMapper.get(playerEntity).baseSpeed = 4.0f;
+		speedMapper.get(playerEntity).baseSpeed = 4f;
 		collisionMapper.get(playerEntity).radius = 0.5f;
 		inventoryMapper.get(playerEntity).capacity = 50;
 		teachMapper.get(playerEntity).addWord("me");
@@ -206,18 +209,18 @@ public class CreationManager extends BaseSystem {
 	public int createTree(Point2f position, boolean growing) {
 		int treeEntity = world.create(treeArchetype);
 		typeMapper.get(treeEntity).type = "tree";
-		subTypeMapper.get(treeEntity).subType = (int) (Math.random() * 6);
+		subTypeMapper.get(treeEntity).subType = (int) (random.nextFloat() * 6);
 		transformMapper.get(treeEntity).position.set(position);
-		transformMapper.get(treeEntity).rotation = (float) Math.random() * 360;
+		transformMapper.get(treeEntity).rotation = random.nextFloat() * 360;
 		collisionMapper.get(treeEntity).radius = 0.4f;
 		harvestableMapper.get(treeEntity).requiredItemId = items.getItem("axe").getId();
 		harvestableMapper.get(treeEntity).harvestEventName = "chopping";
-		harvestableMapper.get(treeEntity).durability = 300.0f;
+		harvestableMapper.get(treeEntity).durability = 300f;
 		inventoryMapper.get(treeEntity).add(items.getItem("wood").getId(), 3);
 		inventoryMapper.get(treeEntity).add(items.getItem("seed").getId(), 1);
 		teachMapper.get(treeEntity).addWord("tree");
 		if (growing) {
-			growingMapper.create(treeEntity).timeLeft = 60.0f;
+			growingMapper.create(treeEntity).timeLeft = 60f;
 		}
 		syncPropagationMapper.get(treeEntity).setOwnerPropagation(Properties.INVENTORY);
 		return treeEntity;
@@ -227,13 +230,13 @@ public class CreationManager extends BaseSystem {
 	public int createRock(Point2f position) {
 		int rockEntity = world.create(rockArchetype);
 		typeMapper.get(rockEntity).type = "rock";
-		subTypeMapper.get(rockEntity).subType = (int) (Math.random() * 3);
+		subTypeMapper.get(rockEntity).subType = (int) (random.nextFloat() * 3);
 		transformMapper.get(rockEntity).position.set(position);
-		transformMapper.get(rockEntity).rotation = (float) Math.random() * 360;
+		transformMapper.get(rockEntity).rotation = random.nextFloat() * 360;
 		collisionMapper.get(rockEntity).radius = 0.4f;
 		harvestableMapper.get(rockEntity).requiredItemId = items.getItem("pickaxe").getId();
 		harvestableMapper.get(rockEntity).harvestEventName = "picking";
-		harvestableMapper.get(rockEntity).durability = 300.0f;
+		harvestableMapper.get(rockEntity).durability = 300f;
 		inventoryMapper.get(rockEntity).add(items.getItem("stone").getId(), 2);
 		teachMapper.get(rockEntity).addWord("rock");
 		syncPropagationMapper.get(rockEntity).setOwnerPropagation(Properties.INVENTORY);
@@ -244,9 +247,9 @@ public class CreationManager extends BaseSystem {
 		int adultAnimalId = animalId;
 		int youngAnimalId = animalId + 1;
 		int groupId = nextAnimalGroupId++;
-		createAnimal(new Point2f(position.x - 1.0f + 2.0f * (float) Math.random(), position.y - 1.0f + 2.0f * (float) Math.random()), adultAnimalId, groupId);
-		createAnimal(new Point2f(position.x - 1.0f + 2.0f * (float) Math.random(), position.y - 1.0f + 2.0f * (float) Math.random()), youngAnimalId, groupId);
-		createAnimal(new Point2f(position.x - 1.0f + 2.0f * (float) Math.random(), position.y - 1.0f + 2.0f * (float) Math.random()), youngAnimalId, groupId);
+		createAnimal(new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), adultAnimalId, groupId);
+		createAnimal(new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), youngAnimalId, groupId);
+		createAnimal(new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), youngAnimalId, groupId);
 	}
 
 	public int createAnimal(Point2f position, int animalId, int groupId) {
@@ -344,7 +347,7 @@ public class CreationManager extends BaseSystem {
 		typeMapper.get(pickupEntity).type = "pickup";
 		subTypeMapper.get(pickupEntity).subType = subType;
 		transformMapper.get(pickupEntity).position.set(position);
-		transformMapper.get(pickupEntity).rotation = (float) Math.random() * 360.0f;
+		transformMapper.get(pickupEntity).rotation = random.nextFloat() * 360f;
 		inventoryMapper.get(pickupEntity).add(items);
 		syncPropagationMapper.get(pickupEntity).setOwnerPropagation(Properties.INVENTORY);
 		return pickupEntity;
@@ -355,6 +358,6 @@ public class CreationManager extends BaseSystem {
 	}
 
 	private Point2f getRandomPositionInWorld() {
-		return new Point2f(-worldConfiguration.width / 2.0f + (float) Math.random() * worldConfiguration.width, -worldConfiguration.height / 2.0f + (float) Math.random() * worldConfiguration.height);
+		return new Point2f(-worldConfiguration.width / 2f + random.nextFloat() * worldConfiguration.width, -worldConfiguration.height / 2f + random.nextFloat() * worldConfiguration.height);
 	}
 }
