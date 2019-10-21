@@ -23,7 +23,6 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<SubType> subTypeMapper;
 	private ComponentMapper<Scan> scanMapper;
-	private ComponentMapper<Spatial> spatialMapper;
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Harvestable> harvestableMapper;
@@ -78,7 +77,6 @@ public class CreationManager extends BaseSystem {
 			.add(Inventory.class)
 			.add(Transform.class)
 			.add(Speed.class)
-			.add(Spatial.class)
 			.add(Known.class)
 			.add(Collision.class)
 			.add(Skill.class)
@@ -92,7 +90,6 @@ public class CreationManager extends BaseSystem {
 			.add(SubType.class)
 			.add(State.class)
 			.add(Transform.class)
-			.add(Spatial.class)
 			.add(Known.class)
 			.add(Collision.class)
 			.add(Static.class)
@@ -108,7 +105,6 @@ public class CreationManager extends BaseSystem {
 			.add(SubType.class)
 			.add(State.class)
 			.add(Transform.class)
-			.add(Spatial.class)
 			.add(Known.class)
 			.add(Collision.class)
 			.add(Static.class)
@@ -124,7 +120,6 @@ public class CreationManager extends BaseSystem {
 			.add(SubType.class)
 			.add(Group.class)
 			.add(Transform.class)
-			.add(Spatial.class)
 			.add(Known.class)
 			.add(Teach.class)
 			.add(SyncPropagation.class)
@@ -136,7 +131,6 @@ public class CreationManager extends BaseSystem {
 			.add(SubType.class)
 			.add(Owner.class)
 			.add(Transform.class)
-			.add(Spatial.class)
 			.add(Known.class)
 			.add(Static.class)
 			.add(SyncPropagation.class)
@@ -147,7 +141,6 @@ public class CreationManager extends BaseSystem {
 			.add(Type.class)
 			.add(SubType.class)
 			.add(Transform.class)
-			.add(Spatial.class)
 			.add(Known.class)
 			.add(Collision.class)
 			.add(Static.class)

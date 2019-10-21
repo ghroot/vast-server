@@ -7,7 +7,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'net.onedaybeard.artemis:artemis-odb-gradle-plugin:2.1.0'
+        classpath 'net.onedaybeard.artemis:artemis-odb-gradle-plugin:2.2.0'
     }
 }
 
@@ -19,9 +19,11 @@ repositories {
 }
 
 dependencies {
-    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer', version: '2.1.0'
-    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer-json', version: '2.1.0'
-    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer-kryo', version: '2.1.0'
+    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb', version: '2.2.0'
+    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer', version: '2.2.0'
+    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer-json', version: '2.2.0'
+    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer-kryo', version: '2.2.0'
+    compile group: 'net.mostlyoriginal.artemis-odb', name: 'contrib-core', version: '2.4.0'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
     compile group: 'org.jetlang', name: 'jetlang', version: '0.2.12'
@@ -31,7 +33,6 @@ dependencies {
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
     compile group: 'org.json', name: 'json', version: '20171018'
-    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb', version: '2.2.0'
     compile name: 'haste-all-1.0.0'
 
     testCompile 'junit:junit:4.12'
