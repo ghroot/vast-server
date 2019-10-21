@@ -132,7 +132,7 @@ public class CollisionSystem extends IteratingSystem {
 			float distance = 2f;
 
 			reusableNearbyEntities.clear();
-			quadTree.get(reusableNearbyEntities, transform.position.x + worldConfiguration.width / 2f - distance,
+			quadTree.getExact(reusableNearbyEntities, transform.position.x + worldConfiguration.width / 2f - distance,
 				transform.position.y + worldConfiguration.height / 2f - distance, 2f * distance, 2f * distance);
 		}
 		return reusableNearbyEntities;
