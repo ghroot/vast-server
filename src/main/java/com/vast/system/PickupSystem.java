@@ -7,6 +7,7 @@ import com.vast.component.*;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
+import java.util.Random;
 
 public class PickupSystem extends IteratingSystem {
 	private ComponentMapper<Scan> scanMapper;
@@ -14,14 +15,18 @@ public class PickupSystem extends IteratingSystem {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Lifetime> lifetimeMapper;
 
-	private final float PICKUP_LIFETIME = 3.0f;
+	private final float PICKUP_LIFETIME = 3f;
+
+	private Random random;
 
 	private CreationManager creationManager;
 	private Vector2f reusableVector;
 	private Point2f reusablePosition;
 
-	public PickupSystem() {
+
+	public PickupSystem(Random random) {
 		super(Aspect.all(Player.class, Active.class, Scan.class));
+		this.random = random;
 
 		reusableVector = new Vector2f();
 		reusablePosition = new Point2f();
@@ -48,7 +53,7 @@ public class PickupSystem extends IteratingSystem {
 		if (!hasPickupNearby) {
 			Transform transform = transformMapper.get(playerEntity);
 
-			double randomAngle = Math.toRadians(Math.random() * 360.0f);
+			double randomAngle = Math.toRadians(random.nextDouble() * 360f);
 			reusableVector.set(
 				(float) Math.cos(randomAngle) * scan.distance,
 				(float) Math.sin(randomAngle) * scan.distance
@@ -59,7 +64,7 @@ public class PickupSystem extends IteratingSystem {
 			);
 
 			int pickupEntity;
-			if (Math.random() < 0.55) {
+			if (random.nextFloat() < 0.55f) {
 				pickupEntity = creationManager.createPickup(reusablePosition, 1, new short[] {1});
 			} else {
 				pickupEntity = creationManager.createPickup(reusablePosition, 2, new short[] {0, 1});

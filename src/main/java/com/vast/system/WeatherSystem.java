@@ -10,15 +10,20 @@ import com.vast.component.Event;
 import com.vast.component.Player;
 import com.vast.component.Weather;
 
+import java.util.Random;
+
 public class WeatherSystem extends IteratingSystem {
 	private ComponentMapper<Weather> weatherMapper;
 	private ComponentMapper<Event> eventMapper;
 
+	private Random random;
+
 	private EntitySubscription weatherSubscription;
 	private boolean changed;
 
-	public WeatherSystem() {
+	public WeatherSystem(Random random) {
 		super(Aspect.all(Player.class, Active.class));
+		this.random = random;
 	}
 
 	@Override
@@ -51,7 +56,7 @@ public class WeatherSystem extends IteratingSystem {
 		weather.countdown -= world.getDelta();
 		if (weather.countdown <= 0.0f) {
 			boolean wasRaining = weather.isRaining;
-			weather.isRaining = Math.random() < 0.25f;
+			weather.isRaining = random.nextFloat() < 0.25f;
 			weather.countdown = 60.0f;
 
 			changed = weather.isRaining != wasRaining;

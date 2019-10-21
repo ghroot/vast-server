@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
 import java.util.Map;
+import java.util.Random;
 
 public class CollisionSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem.class);
@@ -27,6 +28,7 @@ public class CollisionSystem extends IteratingSystem {
 	private ComponentMapper<Scan> scanMapper;
 
 	private WorldConfiguration worldConfiguration;
+	private Random random;
 	private Map<Integer, IntBag> spatialHashes;
 	private Metrics metrics;
 
@@ -35,9 +37,10 @@ public class CollisionSystem extends IteratingSystem {
 	private Vector2f reusableVector;
 	private int numberOfCollisionChecks;
 
-	public CollisionSystem(WorldConfiguration worldConfiguration, Map<Integer, IntBag> spatialHashes, Metrics metrics) {
+	public CollisionSystem(WorldConfiguration worldConfiguration, Random random, Map<Integer, IntBag> spatialHashes, Metrics metrics) {
 		super(Aspect.all(Transform.class, Spatial.class, Collision.class).exclude(Static.class));
 		this.worldConfiguration = worldConfiguration;
+		this.random = random;
 		this.spatialHashes = spatialHashes;
 		this.metrics = metrics;
 
@@ -90,9 +93,9 @@ public class CollisionSystem extends IteratingSystem {
 					Collision nearbyCollision = collisionMapper.get(nearbyEntity);
 					reusableVector.set(nearbyTransform.position.x - transform.position.x, nearbyTransform.position.y - transform.position.y);
 					float overlap = (collision.radius + nearbyCollision.radius) - reusableVector.length();
-					if (overlap > 0.0f) {
-						if (reusableVector.lengthSquared() == 0.0f) {
-							reusableVector.set(-1.0f + (float) Math.random() * 2.0f, -1.0f + (float) Math.random() * 2.0f);
+					if (overlap > 0f) {
+						if (reusableVector.lengthSquared() == 0f) {
+							reusableVector.set(-1f + random.nextFloat() * 2f, -1f + random.nextFloat() * 2f);
 						}
 						if (staticMapper.has(nearbyEntity)) {
 							reusableVector.normalize();

@@ -6,6 +6,7 @@ import com.vast.interact.InteractionHandler;
 
 import javax.vecmath.Vector2f;
 import java.util.List;
+import java.util.Random;
 
 public class AdultAnimalBehaviour extends AbstractBehaviour {
 	private ComponentMapper<Path> pathMapper;
@@ -17,10 +18,13 @@ public class AdultAnimalBehaviour extends AbstractBehaviour {
 	private final float SCARED_DISTANCE = 2.5f;
 	private final float FLEE_DISTANCE = 4.0f;
 
+	private Random random;
+
 	private Vector2f reusableVector;
 
-	public AdultAnimalBehaviour(List<InteractionHandler> interactionHandlers) {
+	public AdultAnimalBehaviour(List<InteractionHandler> interactionHandlers, Random random) {
 		super(interactionHandlers);
+		this.random = random;
 
 		reusableVector = new Vector2f();
 	}
@@ -50,14 +54,14 @@ public class AdultAnimalBehaviour extends AbstractBehaviour {
 					}
 				}
 				if (ai.state.equals("none")) {
-					if (Math.random() <= 0.2f) {
+					if (random.nextFloat() <= 0.2f) {
 						pathMapper.create(entity).targetPosition.set(
-							transformMapper.get(entity).position.x - 2.0f + (float) Math.random() * 4.0f,
-							transformMapper.get(entity).position.y - 2.0f + (float) Math.random() * 4.0f
+							transformMapper.get(entity).position.x - 2f + random.nextFloat() * 4f,
+							transformMapper.get(entity).position.y - 2f + random.nextFloat() * 4f
 						);
 						ai.state = "moving";
 					} else {
-						ai.countdown = 2.0f + (float) Math.random() * 2.0f;
+						ai.countdown = 2f + random.nextFloat() * 2f;
 						ai.state = "idling";
 					}
 				}
@@ -72,7 +76,7 @@ public class AdultAnimalBehaviour extends AbstractBehaviour {
 			}
 		} else if (ai.state.equals("moving")) {
 			if (!pathMapper.has(entity)) {
-				ai.countdown = 2.0f + (float) Math.random() * 2.0f;
+				ai.countdown = 2f + random.nextFloat() * 2f;
 				ai.state = "idling";
 			}
 		} else if (ai.state.equals("idling")) {

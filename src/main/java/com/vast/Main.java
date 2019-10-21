@@ -18,6 +18,7 @@ public class Main {
 	public static void main(String[] args) {
 		String snapshotFormat = "json";
 		int numberOfPeersToSimulate = 0;
+		long randomSeed = -1;
 		boolean showMonitor = false;
 
 		try {
@@ -25,6 +26,7 @@ public class Main {
 			options.addOption("log", true, "Logging level");
 			options.addOption("format", true, "Snapshot format (json or bin)");
 			options.addOption("simulate", true, "Number of peers to simulate");
+			options.addOption("seed", true, "Random seed");
 			options.addOption("monitor", "Show monitor");
 			CommandLineParser parser = new DefaultParser();
 			CommandLine cmd = parser.parse(options, args);
@@ -36,6 +38,7 @@ public class Main {
 			}
 			snapshotFormat = cmd.getOptionValue("format", "json");
 			numberOfPeersToSimulate = cmd.hasOption("simulate") ? Integer.parseInt(cmd.getOptionValue("simulate", "0")) : 0;
+			randomSeed = cmd.hasOption("seed") ? Long.parseLong(cmd.getOptionValue("seed", "-1")) : -1;
 			showMonitor = cmd.hasOption("monitor");
 		} catch (Exception ignored) {
 		}
@@ -43,7 +46,7 @@ public class Main {
 		final Metrics metrics = showMonitor ? new Metrics() : null;
 
 		GameServerBootstrap bootstrap = new GameServerBootstrap();
-		VastServerApplication serverApplication = new VastServerApplication(snapshotFormat, numberOfPeersToSimulate, showMonitor, metrics);
+		VastServerApplication serverApplication = new VastServerApplication(snapshotFormat, numberOfPeersToSimulate, randomSeed, showMonitor, metrics);
 		bootstrap.application(serverApplication).option(UDPOption.THREAD_COUNT, 4).bind(PORT);
 		if (showMonitor) {
 			bootstrap.metricListener(new MetricListener() {

@@ -33,9 +33,15 @@ public class VastWorld implements Runnable {
 	private long lastFrameStartTime;
 	private Metrics metrics;
 
-	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, boolean showMonitor, Metrics metrics) {
+	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, long randomSeed, boolean showMonitor, Metrics metrics) {
 		this.metrics = metrics;
 
+		Random random;
+		if (randomSeed >= 0) {
+			random = new Random(randomSeed);
+		} else {
+			random = new Random();
+		}
 		WorldConfiguration worldConfiguration = new WorldConfiguration();
 		Items items = new Items();
 		Buildings buildings = new Buildings(items);
@@ -76,12 +82,12 @@ public class VastWorld implements Runnable {
 			new SkillPropertyHandler()
 		));
 		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
-		behaviours.put("human", new HumanBehaviour(interactionHandlers, incomingRequestsByPeer, items, buildings));
-		behaviours.put("adultAnimal", new AdultAnimalBehaviour(interactionHandlers));
-		behaviours.put("youngAnimal", new YoungAnimalBehaviour(interactionHandlers));
+		behaviours.put("human", new HumanBehaviour(interactionHandlers, random, incomingRequestsByPeer, items, buildings));
+		behaviours.put("adultAnimal", new AdultAnimalBehaviour(interactionHandlers, random));
+		behaviours.put("youngAnimal", new YoungAnimalBehaviour(interactionHandlers, random));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
-			new CreationManager(worldConfiguration, items, buildings, animals),
+			new CreationManager(worldConfiguration, random, items, buildings, animals),
 			new TimeManager(),
 
 			new WorldSerializationSystem(snapshotFormat, metrics),
@@ -98,19 +104,19 @@ public class VastWorld implements Runnable {
 			new CullingSystem(propertyHandlers),
 			new OrderSystem(orderHandlers, incomingRequestsByPeer),
 			new InteractSystem(interactionHandlers),
-			new AISystem(behaviours),
+			new AISystem(behaviours, random),
 			new SpeedSystem(),
 			new PathMoveSystem(),
-			new CollisionSystem(worldConfiguration, spatialHashes, metrics),
+			new CollisionSystem(worldConfiguration, random, spatialHashes, metrics),
 			new FollowSystem(),
 			new FuelSystem(),
 			new CraftSystem(items),
 			new GrowSystem(),
 			new LifetimeSystem(),
 			new LearnSystem(),
-			new PickupSystem(),
+			new PickupSystem(random),
 			new DayNightCycleSystem(worldConfiguration),
-			new WeatherSystem(),
+			new WeatherSystem(random),
 			new ParentSystem(),
 			new DeleteSystem(),
 			new EventSystem(),
