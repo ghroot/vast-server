@@ -12,6 +12,7 @@ public class Metrics {
 	private int timePerFrameMs;
 	private Map<BaseSystem, SystemMetrics> systemMetrics = new HashMap<>();
 	private int numberOfCollisionChecks;
+	private int numberOfCollisions;
 	private double meanOfRoundTripTime;
 	private Map<Short, Map<QoS, int[]>> sentMessages = new HashMap<Short, Map<QoS, int[]>>();
 	private long lastSerializeTime;
@@ -47,6 +48,14 @@ public class Metrics {
 
 	public int getNumberOfCollisionChecks() {
 		return numberOfCollisionChecks;
+	}
+
+	public int getNumberOfCollisions() {
+		return numberOfCollisions;
+	}
+
+	public void setNumberOfCollisions(int numberOfCollisions) {
+		this.numberOfCollisions = numberOfCollisions;
 	}
 
 	public void setRoundTripTime(double meanOfRoundTripTime) {

@@ -223,7 +223,8 @@ public class TerminalSystem extends BaseSystem {
 			textGraphics.putString(screen.getTerminalSize().getColumns() - roundTripString.length(), 4, roundTripString);
 			String timeSinceSave = "Time since save: " + (metrics.getTimeSinceLastSerialization() / 1000) + " s";
 			textGraphics.putString(screen.getTerminalSize().getColumns() - timeSinceSave.length(), 5, timeSinceSave);
-			String collisionsString = "Collision checks: " + metrics.getNumberOfCollisionChecks();
+			float percentCollisionHits = Math.round((100f * metrics.getNumberOfCollisions() / metrics.getNumberOfCollisionChecks()) * 10f) / 10f;
+			String collisionsString = "Collision checks: " + metrics.getNumberOfCollisionChecks() + " (" + percentCollisionHits + "% hits)";
 			textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 6, collisionsString);
 
 			if (showSystemTimesMode > 0 && metrics.getSystemMetrics().size() > 0) {

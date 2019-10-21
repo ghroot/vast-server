@@ -33,6 +33,7 @@ public class CollisionSystem extends IteratingSystem {
 	private IntBag reusableNearbyEntities;
 	private Vector2f reusableVector;
 	private int numberOfCollisionChecks;
+	private int numberOfCollisions;
 
 	public CollisionSystem(WorldConfiguration worldConfiguration, QuadTree quadTree, Random random, Metrics metrics) {
 		super(Aspect.all(Transform.class, Collision.class).exclude(Static.class));
@@ -48,12 +49,14 @@ public class CollisionSystem extends IteratingSystem {
 	@Override
 	protected void begin() {
 		numberOfCollisionChecks = 0;
+		numberOfCollisions = 0;
 	}
 
 	@Override
 	protected void end() {
 		if (metrics != null) {
 			metrics.setNumberOfCollisionChecks(numberOfCollisionChecks);
+			metrics.setNumberOfCollisions(numberOfCollisions);
 		}
 	}
 
@@ -109,6 +112,8 @@ public class CollisionSystem extends IteratingSystem {
 							nearbyTransform.position.add(reusableVector);
 							syncMapper.create(nearbyEntity).markPropertyAsDirty(Properties.POSITION);
 						}
+
+						numberOfCollisions++;
 					}
 
 					numberOfCollisionChecks++;
