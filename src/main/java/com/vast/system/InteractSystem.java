@@ -24,6 +24,7 @@ public class InteractSystem extends IteratingSystem {
 	private ComponentMapper<Collision> collisionMapper;
 	private ComponentMapper<Message> messageMapper;
 	private ComponentMapper<Sync> syncMapper;
+	private ComponentMapper<Used> usedMapper;
 
 	private List<InteractionHandler> interactionHandlers;
 
@@ -76,10 +77,12 @@ public class InteractSystem extends IteratingSystem {
 
 						if (interact.handler.process(entity, interact.entity)) {
 							logger.debug("Entity {} completed interaction with entity {}", entity, interact.entity);
+							usedMapper.remove(interact.entity);
 							interactMapper.remove(entity);
 						}
 					} else {
 						logger.debug("Entity {} can no longer interact with entity {}", entity, interact.entity);
+						usedMapper.remove(interact.entity);
 						interactMapper.remove(entity);
 					}
 				} else {
@@ -95,6 +98,7 @@ public class InteractSystem extends IteratingSystem {
 							interact.handler = handler;
 							logger.debug("Entity {} started interacting with entity {}", entity, interact.entity);
 							interact.phase = Interact.Phase.INTERACTING;
+							usedMapper.create(interact.entity).usedByEntity = interact.entity;
 						} else {
 							logger.debug("Entity {} can not interact with entity {}", entity, interact.entity);
 							interactMapper.remove(entity);
@@ -135,15 +139,7 @@ public class InteractSystem extends IteratingSystem {
 	}
 
 	private boolean isBeingInteractedWith(int entity) {
-		IntBag interactEntities = world.getAspectSubscriptionManager().get(Aspect.all(Interact.class)).getEntities();
-		for (int i = 0; i < interactEntities.size(); i++) {
-			int interactEntity = interactEntities.get(i);
-			Interact interact = interactMapper.get(interactEntity);
-			if (interact != null && interact.phase == Interact.Phase.INTERACTING && interact.entity == entity) {
-				return true;
-			}
-		}
-		return false;
+		return usedMapper.has(entity);
 	}
 
 	private InteractionHandler findInteractionHandler(int entity, int otherEntity) {
