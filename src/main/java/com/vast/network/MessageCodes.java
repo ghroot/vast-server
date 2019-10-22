@@ -61,4 +61,8 @@ public class MessageCodes {
 	// Client -> Server
 	public static short FOLLOW = 57;
 	public static byte FOLLOW_ENTITY_ID = 0;
+
+	// Client -> Server
+	public static short CHAT = 58;
+	public static byte CHAT_WORD = 0;
 }
