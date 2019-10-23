@@ -24,7 +24,7 @@ public class Teach extends PooledComponent {
 			if (!skipped && words[i].equals(word)) {
 				skipped = true;
 			} else {
-				newWords[skipped ? i - 1 : i] = word;
+				newWords[skipped ? i - 1 : i] = words[i];
 			}
 		}
 		words = newWords;
