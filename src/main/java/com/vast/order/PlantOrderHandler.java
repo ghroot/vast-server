@@ -18,7 +18,7 @@ public class PlantOrderHandler implements OrderHandler {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Sync> syncMapper;
-	private ComponentMapper<Message> messageMapper;
+	private ComponentMapper<Event> eventMapper;
 
 	private final float PLANT_DISTANCE = 1.0f;
 
@@ -65,7 +65,7 @@ public class PlantOrderHandler implements OrderHandler {
 
 			return true;
 		} else {
-			messageMapper.create(orderEntity).text = "I need a seed...";
+			eventMapper.create(orderEntity).setType("message").setData("I need a seed...").setOwnerOnly(true);
 			return false;
 		}
 	}

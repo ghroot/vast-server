@@ -13,7 +13,7 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Fueled> fueledMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Sync> syncMapper;
-	private ComponentMapper<Message> messageMapper;
+	private ComponentMapper<Event> eventMapper;
 
 	public FueledInteractionHandler() {
 		super(Aspect.all(Player.class, Inventory.class), Aspect.all(Fueled.class));
@@ -30,7 +30,7 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 		Fueled fueled = fueledMapper.get(fueledEntity);
 
 		if (!inventory.has(fueled.cost)) {
-			messageMapper.create(playerEntity).text = "I don't have the required materials...";
+			eventMapper.create(playerEntity).setType("message").setData("I don't have the required materials...").setOwnerOnly(true);
 			return false;
 		} else {
 			return true;

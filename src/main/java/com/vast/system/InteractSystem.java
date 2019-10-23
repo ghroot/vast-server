@@ -22,7 +22,7 @@ public class InteractSystem extends IteratingSystem {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Collision> collisionMapper;
-	private ComponentMapper<Message> messageMapper;
+	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Used> usedMapper;
 
@@ -91,7 +91,7 @@ public class InteractSystem extends IteratingSystem {
 					if (isBeingInteractedWith(interact.entity)) {
 						logger.debug("Entity {} can not interact with entity {} because it is already being interacted with", entity, interact.entity);
 						interactMapper.remove(entity);
-						messageMapper.create(entity).text = "Someone is already using this...";
+						eventMapper.create(entity).setType("message").setData("Someone is already using this...").setOwnerOnly(true);
 					} else {
 						InteractionHandler handler = findInteractionHandler(entity, interact.entity);
 						if (handler != null && handler.attemptStart(entity, interact.entity)) {

@@ -13,7 +13,7 @@ public class SkillPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Skill> skillMapper;
 	private ComponentMapper<SyncHistory> syncHistoryMapper;
 
-	private final int WORD_LEVEL_THRESHOLD = 20;
+	private final int WORD_LEVEL_THRESHOLD = 1;
 
 	@Override
 	public byte getProperty() {

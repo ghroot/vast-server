@@ -23,12 +23,8 @@ public class MessageCodes {
 	// Server -> Client
 	public static short EVENT = 3;
 	public static byte EVENT_ENTITY_ID = 0;
-	public static byte EVENT_NAME = 1;
-
-	// Server -> Client
-	public static short MESSAGE = 4;
-	public static byte MESSAGE_TEXT = 0;
-	public static byte MESSAGE_TYPE = 1;
+	public static byte EVENT_TYPE = 1;
+	public static byte EVENT_VALUE = 2;
 
 	// Client -> Server
 	public static short MOVE = 50;
@@ -61,4 +57,8 @@ public class MessageCodes {
 	// Client -> Server
 	public static short FOLLOW = 57;
 	public static byte FOLLOW_ENTITY_ID = 0;
+
+	// Client -> Server
+	public static short CHAT = 58;
+	public static byte CHAT_WORD = 0;
 }

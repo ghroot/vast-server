@@ -68,7 +68,8 @@ public class VastWorld implements Runnable {
 			new SetHomeOrderHandler(),
 			new CraftOrderHandler(items),
 			new PlantOrderHandler(items),
-			new FollowOrderHandler()
+			new FollowOrderHandler(),
+			new ChatOrderHandler()
 		));
 		Set<PropertyHandler> propertyHandlers = new HashSet<PropertyHandler>(Arrays.asList(
 			new PositionPropertyHandler(),
@@ -122,7 +123,6 @@ public class VastWorld implements Runnable {
 			new ParentSystem(),
 			new DeleteSystem(),
 			new EventSystem(),
-			new MessageSystem(),
 			new SyncSystem(propertyHandlers, metrics)
 		).with(
 			new WorldSerializationManager(),

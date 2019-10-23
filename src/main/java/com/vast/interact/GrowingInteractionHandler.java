@@ -2,8 +2,8 @@ package com.vast.interact;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.vast.component.Event;
 import com.vast.component.Growing;
-import com.vast.component.Message;
 import com.vast.component.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 public class GrowingInteractionHandler extends AbstractInteractionHandler {
 	private static final Logger logger = LoggerFactory.getLogger(GrowingInteractionHandler.class);
 
-	private ComponentMapper<Message> messageMapper;
+	private ComponentMapper<Event> eventMapper;
 
 	public GrowingInteractionHandler() {
 		super(Aspect.all(Player.class), Aspect.all(Growing.class));
@@ -24,7 +24,7 @@ public class GrowingInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public boolean attemptStart(int playerEntity, int growEntity) {
-		messageMapper.create(playerEntity).text = "It is still growing...";
+		eventMapper.create(playerEntity).setType("message").setData("It is still growing...").setOwnerOnly(true);
 		return false;
 	}
 

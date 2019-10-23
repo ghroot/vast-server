@@ -12,7 +12,7 @@ public class CraftSystem extends IteratingSystem {
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Craft> craftMapper;
 	private ComponentMapper<Sync> syncMapper;
-	private ComponentMapper<Message> messageMapper;
+	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<State> stateMapper;
 
 	private Items items;
@@ -47,8 +47,7 @@ public class CraftSystem extends IteratingSystem {
 				inventory.add(itemToCraft.getId(), 1);
 				syncMapper.create(craftEntity).markPropertyAsDirty(Properties.INVENTORY);
 				String capitalizedItemName = itemToCraft.getName().substring(0, 1).toUpperCase() + itemToCraft.getName().substring(1);
-				messageMapper.create(craftEntity).text = "Crafted Item: " + capitalizedItemName;
-				messageMapper.get(craftEntity).type = 1;
+				eventMapper.create(craftEntity).setType("message").setData("Crafted Item: " + capitalizedItemName).setOwnerOnly(true);
 			}
 			craftMapper.remove(craftEntity);
 		}
