@@ -122,7 +122,7 @@ public class VastWorld implements Runnable {
 			new WeatherSystem(random),
 			new ParentSystem(),
 			new DeleteSystem(),
-			new EventSystem(),
+			new EventSystem(metrics),
 			new SyncSystem(propertyHandlers, metrics)
 		).with(
 			new WorldSerializationManager(),

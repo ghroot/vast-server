@@ -54,6 +54,7 @@ public class TerminalSystem extends BaseSystem {
 	private boolean showIds = false;
 	private int showSystemTimesMode = 0;
 	private boolean showSentMessages = false;
+	private boolean showSentEvents = false;
 	private Map<Short, String> messageNames = new HashMap<Short, String>();
 	private boolean showSyncedProperties = false;
 	private Map<Byte, String> propertyNames = new HashMap<Byte, String>();
@@ -328,6 +329,16 @@ public class TerminalSystem extends BaseSystem {
 				}
 			}
 
+			if (showSentEvents) {
+				int row = 11;
+				Map<String, Integer> sentEvents = metrics.getSentEvents();
+				for (String eventType : sentEvents.keySet()) {
+					int numberOfEvents = sentEvents.get(eventType);
+					textGraphics.putString(0, row, eventType + ": " + numberOfEvents);
+					row++;
+				}
+			}
+
 			if (showSyncedProperties) {
 				int longestLength = 0;
 				for (byte property : metrics.getSyncedProperties().keySet()) {
@@ -542,8 +553,14 @@ public class TerminalSystem extends BaseSystem {
 					} else if (keyStroke.getCharacter().toString().equals("y")) {
 						showSyncedProperties = !showSyncedProperties;
 						showSentMessages = false;
+						showSentEvents = false;
 					} else if (keyStroke.getCharacter().toString().equals("m")) {
 						showSentMessages = !showSentMessages;
+						showSyncedProperties = false;
+						showSentEvents = false;
+					} else if (keyStroke.getCharacter().toString().equals("e")) {
+						showSentEvents = !showSentEvents;
+						showSentMessages = false;
 						showSyncedProperties = false;
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {

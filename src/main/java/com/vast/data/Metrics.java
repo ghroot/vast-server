@@ -14,6 +14,7 @@ public class Metrics {
 	private int numberOfCollisions;
 	private double meanOfRoundTripTime;
 	private Map<Short, Map<QoS, int[]>> sentMessages = new HashMap<Short, Map<QoS, int[]>>();
+	private Map<String, Integer> sentEvents = new HashMap<>();
 	private long lastSerializeTime;
 	private Map<Byte, Integer> syncedProperties = new HashMap<Byte, Integer>();
 
@@ -80,6 +81,18 @@ public class Metrics {
 
 	public Map<Short, Map<QoS, int[]>> getSentMessages() {
 		return sentMessages;
+	}
+
+	public void eventSent(String type) {
+		if (sentEvents.containsKey(type)) {
+			sentEvents.put(type, sentEvents.get(type) + 1);
+		} else {
+			sentEvents.put(type, 1);
+		}
+	}
+
+	public Map<String, Integer> getSentEvents() {
+		return sentEvents;
 	}
 
 	public int getTimeSinceLastSerialization() {

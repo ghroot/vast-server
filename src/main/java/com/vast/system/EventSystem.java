@@ -8,6 +8,7 @@ import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.component.Active;
 import com.vast.component.Event;
 import com.vast.component.Known;
+import com.vast.data.Metrics;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
 import org.slf4j.Logger;
@@ -20,10 +21,13 @@ public class EventSystem extends IteratingSystem {
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Known> knownMapper;
 
+	private Metrics metrics;
+
 	private EventMessage reusableEventMessage;
 
-	public EventSystem() {
+	public EventSystem(Metrics metrics) {
 		super(Aspect.all(Event.class));
+		this.metrics = metrics;
 
 		reusableEventMessage = new EventMessage(MessageCodes.EVENT);
 	}
@@ -63,6 +67,10 @@ public class EventSystem extends IteratingSystem {
 						knownByPeer.send(reusableEventMessage);
 					}
 				}
+			}
+
+			if (metrics != null) {
+				metrics.eventSent(entry.type);
 			}
 		}
 
