@@ -77,7 +77,9 @@ public class WorldSerializationSystem extends IntervalSystem {
 		} catch (Exception exception) {
 			logger.error("Error saving world", exception);
 		}
-		metrics.setLastSerializeTime(System.currentTimeMillis());
+		if (metrics != null) {
+			metrics.setLastSerializeTime(System.currentTimeMillis());
+		}
 	}
 
 	private void loadWorld() {
