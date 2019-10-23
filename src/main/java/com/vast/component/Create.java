@@ -7,5 +7,5 @@ import com.artemis.annotations.Transient;
 @Transient
 @PooledWeaver
 public class Create extends Component {
-	public String reason;
+	public String reason = "unknown";
 }

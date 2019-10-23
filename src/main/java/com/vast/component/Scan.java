@@ -11,6 +11,6 @@ public class Scan extends PooledComponent {
 	@Override
 	protected void reset() {
 		distance = 10f;
-		nearbyEntities = new IntBag();
+		nearbyEntities.clear();
 	}
 }

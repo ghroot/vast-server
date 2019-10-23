@@ -10,7 +10,7 @@ public class Transform extends PooledComponent {
 
 	@Override
 	protected void reset() {
-		position = new Point2f();
-		rotation = 0.0f;
+		position.set(0f, 0f);
+		rotation = 0f;
 	}
 }

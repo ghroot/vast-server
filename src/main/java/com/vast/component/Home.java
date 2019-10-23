@@ -9,6 +9,6 @@ public class Home extends PooledComponent {
 
 	@Override
 	protected void reset() {
-		position = new Point2f();
+		position.set(0f, 0f);
 	}
 }

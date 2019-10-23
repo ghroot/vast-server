@@ -10,6 +10,6 @@ public class SyncHistory extends PooledComponent {
 
 	@Override
 	protected void reset() {
-		syncedValues = new HashMap<Byte, Object>();
+		syncedValues.clear();
 	}
 }

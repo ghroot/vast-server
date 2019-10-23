@@ -8,5 +8,5 @@ import com.artemis.annotations.Transient;
 @PooledWeaver
 public class Craft extends Component {
 	public int itemId = -1;
-	public float countdown = 0.0f;
+	public float countdown = 0f;
 }

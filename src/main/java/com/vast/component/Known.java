@@ -9,6 +9,6 @@ public class Known extends PooledComponent {
 
 	@Override
 	protected void reset() {
-		knownByEntities = new IntBag();
+		knownByEntities.clear();
 	}
 }

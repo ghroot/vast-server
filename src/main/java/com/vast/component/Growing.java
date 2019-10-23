@@ -5,5 +5,5 @@ import com.artemis.annotations.PooledWeaver;
 
 @PooledWeaver
 public class Growing extends Component {
-	public float timeLeft = 0.0f;
+	public float timeLeft = 0f;
 }

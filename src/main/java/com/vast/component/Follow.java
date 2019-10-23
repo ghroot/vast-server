@@ -9,5 +9,5 @@ import com.artemis.annotations.Transient;
 @PooledWeaver
 public class Follow extends Component {
 	@EntityId public int entity = -1;
-	public float distance = 2.0f;
+	public float distance = 2f;
 }

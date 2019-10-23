@@ -11,6 +11,6 @@ public class Path extends PooledComponent {
 
 	@Override
 	protected void reset() {
-		targetPosition = new Point2f();
+		targetPosition.set(0f, 0f);
 	}
 }
