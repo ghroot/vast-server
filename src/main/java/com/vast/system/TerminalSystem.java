@@ -359,9 +359,9 @@ public class TerminalSystem extends BaseSystem {
 				Point2f position = transformMapper.get(focusedEntity).position;
 				cameraPosition.set(position.x, -position.y);
 				if (playerMapper.has(focusedEntity)) {
-					textGraphics.putString(0, 9, "Following entity: " + focusedEntity + " (" + playerMapper.get(focusedEntity).name + ")");
+					textGraphics.putString(0, 8, "Following entity: " + focusedEntity + " (" + playerMapper.get(focusedEntity).name + ")");
 				} else {
-					textGraphics.putString(0, 9, "Following entity: " + focusedEntity);
+					textGraphics.putString(0, 8, "Following entity: " + focusedEntity);
 				}
 
 				Bag<Component> components = new Bag<Component>();
