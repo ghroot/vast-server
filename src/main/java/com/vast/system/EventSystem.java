@@ -42,12 +42,15 @@ public class EventSystem extends IteratingSystem {
 
 		reusableEventMessage.getDataObject().clear();
 		reusableEventMessage.getDataObject().set(MessageCodes.EVENT_ENTITY_ID, eventEntity);
-		reusableEventMessage.getDataObject().set(MessageCodes.EVENT_NAME, event.name);
+		reusableEventMessage.getDataObject().set(MessageCodes.EVENT_TYPE, event.type);
+		if (event.data != null) {
+			reusableEventMessage.getDataObject().set(MessageCodes.EVENT_VALUE, event.data);
+		}
 
 		if (event.ownerOnly) {
-			if (activeMapper.has(eventEntity)) {
-				VastPeer ownerPeer = activeMapper.get(eventEntity).peer;
-				ownerPeer.send(reusableEventMessage);
+			Active ownerActive = activeMapper.get(eventEntity);
+			if (ownerActive != null) {
+				ownerActive.peer.send(reusableEventMessage);
 			}
 		} else if (knownMapper.has(eventEntity)) {
 			IntBag knownByEntitiesBag = knownMapper.get(eventEntity).knownByEntities;

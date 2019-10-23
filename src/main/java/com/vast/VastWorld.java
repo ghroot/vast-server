@@ -123,7 +123,6 @@ public class VastWorld implements Runnable {
 			new ParentSystem(),
 			new DeleteSystem(),
 			new EventSystem(),
-			new MessageSystem(),
 			new SyncSystem(propertyHandlers, metrics)
 		).with(
 			new WorldSerializationManager(),

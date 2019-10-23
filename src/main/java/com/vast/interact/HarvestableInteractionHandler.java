@@ -19,7 +19,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Sync> syncMapper;
-	private ComponentMapper<Message> messageMapper;
+	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<State> stateMapper;
 	private ComponentMapper<Teach> teachMapper;
 
@@ -48,7 +48,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
 		if (harvestable.requiredItemId != -1 && !inventory.has(harvestable.requiredItemId)) {
-			messageMapper.create(playerEntity).text = "I don't have the required tool...";
+			eventMapper.create(playerEntity).setType("message").setData("I don't have the required tool...").setOwnerOnly(true);
 			return false;
 		} else {
 			stateMapper.get(playerEntity).name = harvestable.harvestEventName;

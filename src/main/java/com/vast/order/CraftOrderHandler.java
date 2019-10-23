@@ -3,8 +3,8 @@ package com.vast.order;
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Craft;
+import com.vast.component.Event;
 import com.vast.component.Inventory;
-import com.vast.component.Message;
 import com.vast.data.CraftableItem;
 import com.vast.data.Items;
 import com.vast.network.MessageCodes;
@@ -12,7 +12,7 @@ import com.vast.network.MessageCodes;
 public class CraftOrderHandler implements OrderHandler {
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Craft> craftMapper;
-	private ComponentMapper<Message> messageMapper;
+	private ComponentMapper<Event> eventMapper;
 
 	private Items items;
 
@@ -50,7 +50,7 @@ public class CraftOrderHandler implements OrderHandler {
 			craftMapper.get(orderEntity).itemId = itemId;
 			return true;
 		} else {
-			messageMapper.create(orderEntity).text = "I don't have the required materials...";
+			eventMapper.create(orderEntity).setType("message").setData("I don't have the required materials...").setOwnerOnly(true);
 			return false;
 		}
 	}

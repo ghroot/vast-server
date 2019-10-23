@@ -15,7 +15,6 @@ public class PlantableInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Growing> growingMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Sync> syncMapper;
-	private ComponentMapper<Message> messageMapper;
 	private ComponentMapper<Event> eventMapper;
 
 	private Items items;
@@ -36,7 +35,7 @@ public class PlantableInteractionHandler extends AbstractInteractionHandler {
 		Plantable plantable = plantableMapper.get(plantableEntity);
 
 		if (!plantable.planted && !inventory.has(items.getItem("seed"))) {
-			messageMapper.create(playerEntity).text = "I need a seed...";
+			eventMapper.create(plantableEntity).setType("message").setData("I need a seed...").setOwnerOnly(true);
 			return false;
 		} else {
 			return true;
@@ -51,12 +50,12 @@ public class PlantableInteractionHandler extends AbstractInteractionHandler {
 		if (plantable.planted) {
 			inventory.add(items.getItem("food"), 3);
 			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
-			eventMapper.create(playerEntity).name = "pickedUp";
+			eventMapper.create(playerEntity).setType("action").setData("pickedUp");
 			plantable.planted = false;
 		} else {
 			inventory.remove(items.getItem("seed"));
 			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
-			eventMapper.create(playerEntity).name = "pickedUp";
+			eventMapper.create(playerEntity).setType("action").setData("pickedUp");
 			plantable.planted = true;
 			growingMapper.create(plantableEntity).timeLeft = 5.0f;
 			syncMapper.create(plantableEntity).markPropertyAsDirty(Properties.GROWING);

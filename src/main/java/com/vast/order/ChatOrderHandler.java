@@ -3,17 +3,15 @@ package com.vast.order;
 import com.artemis.ComponentMapper;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.component.Active;
+import com.vast.component.Event;
 import com.vast.component.Known;
-import com.vast.component.Message;
 import com.vast.component.Player;
 import com.vast.network.MessageCodes;
-import com.vast.network.VastPeer;
 
 public class ChatOrderHandler implements OrderHandler {
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Known> knownMapper;
-	private ComponentMapper<Message> messageMapper;
+	private ComponentMapper<Event> eventMapper;
 
 	@Override
 	public void initialize() {
@@ -40,7 +38,7 @@ public class ChatOrderHandler implements OrderHandler {
 		int[] knownByEntities = knownByEntitiesBag.getData();
 		for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
 			int knownByEntity = knownByEntities[i];
-			messageMapper.create(knownByEntity).text = playerMapper.get(orderEntity).name + " says: " + word;
+			eventMapper.create(knownByEntity).setType("message").setData(playerMapper.get(orderEntity).name + " says: " + word);
 		}
 		return true;
 	}

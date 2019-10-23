@@ -3,7 +3,6 @@ package com.vast.data;
 import com.artemis.BaseSystem;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.nhnent.haste.transport.QoS;
-import com.vast.component.Message;
 
 import java.util.HashMap;
 import java.util.Map;

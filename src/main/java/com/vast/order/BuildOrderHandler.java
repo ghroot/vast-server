@@ -23,7 +23,7 @@ public class BuildOrderHandler implements OrderHandler {
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Sync> syncMapper;
-	private ComponentMapper<Message> messageMapper;
+	private ComponentMapper<Event> eventMapper;
 
 	private Buildings buildings;
 
@@ -75,7 +75,7 @@ public class BuildOrderHandler implements OrderHandler {
 
 			return true;
 		} else {
-			messageMapper.create(orderEntity).text = "I don't have the required materials...";
+			eventMapper.create(orderEntity).setType("message").setData("I don't have the required materials...").setOwnerOnly(true);
 			return false;
 		}
 	}

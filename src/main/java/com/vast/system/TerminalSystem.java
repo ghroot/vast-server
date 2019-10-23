@@ -70,7 +70,6 @@ public class TerminalSystem extends BaseSystem {
 		messageNames.put(MessageCodes.ENTITY_DESTROYED, "EntityDestroyed");
 		messageNames.put(MessageCodes.UPDATE_PROPERTIES, "UpdateProperties");
 		messageNames.put(MessageCodes.EVENT, "Event");
-		messageNames.put(MessageCodes.MESSAGE, "Message");
 
 		propertyNames.put(Properties.POSITION, "Position");
 		propertyNames.put(Properties.ROTATION, "Rotation");

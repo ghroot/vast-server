@@ -2,15 +2,15 @@ package com.vast.order;
 
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
+import com.vast.component.Event;
 import com.vast.component.Follow;
-import com.vast.component.Message;
 import com.vast.component.Type;
 import com.vast.network.MessageCodes;
 
 public class FollowOrderHandler implements OrderHandler {
 	private ComponentMapper<Follow> followMapper;
 	private ComponentMapper<Type> typeMapper;
-	private ComponentMapper<Message> messageMapper;
+	private ComponentMapper<Event> eventMapper;
 
 	public FollowOrderHandler() {
 	}
@@ -40,11 +40,10 @@ public class FollowOrderHandler implements OrderHandler {
 		followMapper.create(orderEntity).entity = followEntity;
 		if (typeMapper.has(followEntity) && typeMapper.get(followEntity).type.equals("animal")) {
 			followMapper.get(orderEntity).distance = 3.0f;
-			messageMapper.create(orderEntity).text = "Easy, I'm not going to hurt you...";
+			eventMapper.create(orderEntity).setType("message").setData("Easy, I'm not going to hurt you...").setOwnerOnly(true);
 		} else {
-			messageMapper.create(orderEntity).text = "I wonder where they are going...";
+			eventMapper.create(orderEntity).setType("message").setData("I wonder where they are going...").setOwnerOnly(true);
 		}
-		messageMapper.get(orderEntity).type = 1;
 		return true;
 	}
 }
