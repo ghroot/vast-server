@@ -40,7 +40,7 @@ public abstract class AbstractBehaviour implements Behaviour {
 		return reusableNearbyEntities;
 	}
 
-	protected boolean hasInteractionHandler(int entity, int otherEntity) {
+	protected boolean canInteract(int entity, int otherEntity) {
 		for (InteractionHandler interactionHandler : interactionHandlers) {
 			if (interactionHandler.getAspect1().isInterested(world.getEntity(entity)) &&
 					interactionHandler.getAspect2().isInterested(world.getEntity(otherEntity)) &&

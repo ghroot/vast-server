@@ -74,7 +74,7 @@ public class HumanBehaviour extends AbstractBehaviour {
 			if (nearbyEntities.size() > 0) {
 				int randomIndex = (int) (random.nextFloat() * nearbyEntities.size());
 				int randomNearbyEntity = nearbyEntities.get(randomIndex);
-				if (hasInteractionHandler(entity, randomNearbyEntity)) {
+				if (canInteract(entity, randomNearbyEntity)) {
 					addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.INTERACT, new DataObject().set(MessageCodes.INTERACT_ENTITY_ID, randomNearbyEntity))));
 				}
 			}
