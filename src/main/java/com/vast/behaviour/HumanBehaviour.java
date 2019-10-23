@@ -70,13 +70,11 @@ public class HumanBehaviour extends AbstractBehaviour {
 				.set(MessageCodes.BUILD_POSITION, position)
 				.set(MessageCodes.BUILD_ROTATION, rotation))));
 		} else if (roll <= 55) {
-			List<Integer> nearbyInteractableEntities = getNearbyInteractableEntities(entity);
-			if (nearbyInteractableEntities.size() > 0) {
-				int randomIndex = (int) (random.nextFloat() * nearbyInteractableEntities.size());
-				int randomNearbyInteractableEntity = nearbyInteractableEntities.get(randomIndex);
-				if (!playerMapper.has(randomNearbyInteractableEntity)) {
-					addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.INTERACT, new DataObject().set(MessageCodes.INTERACT_ENTITY_ID, randomNearbyInteractableEntity))));
-				}
+			List<Integer> nearbyEntities = getNearbyEntities(entity);
+			if (nearbyEntities.size() > 0) {
+				int randomIndex = (int) (random.nextFloat() * nearbyEntities.size());
+				int randomNearbyEntity = nearbyEntities.get(randomIndex);
+				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.INTERACT, new DataObject().set(MessageCodes.INTERACT_ENTITY_ID, randomNearbyEntity))));
 			}
 		} else {
 			float x = transformMapper.get(entity).position.x - 2f + random.nextFloat() * 4f;

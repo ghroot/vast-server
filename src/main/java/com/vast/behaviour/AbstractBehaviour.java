@@ -40,20 +40,6 @@ public abstract class AbstractBehaviour implements Behaviour {
 		return reusableNearbyEntities;
 	}
 
-	protected List<Integer> getNearbyInteractableEntities(int entity) {
-		Scan scan = scanMapper.get(entity);
-		reusableNearbyInteractableEntities.clear();
-
-		int[] nearbyEntities = scan.nearbyEntities.getData();
-		for (int i = 0, size = scan.nearbyEntities.size(); i < size; ++i) {
-			int nearbyEntity = nearbyEntities[i];
-			if (nearbyEntity != entity && hasInteractionHandler(entity, nearbyEntity)) {
-				reusableNearbyInteractableEntities.add(nearbyEntity);
-			}
-		}
-		return reusableNearbyInteractableEntities;
-	}
-
 	private boolean hasInteractionHandler(int entity, int otherEntity) {
 		for (InteractionHandler interactionHandler : interactionHandlers) {
 			if (interactionHandler.getAspect1().isInterested(world.getEntity(entity)) &&

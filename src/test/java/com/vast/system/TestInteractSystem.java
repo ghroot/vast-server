@@ -4,10 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
-import com.vast.component.Collision;
-import com.vast.component.Interact;
-import com.vast.component.Path;
-import com.vast.component.Transform;
+import com.vast.component.*;
 import com.vast.interact.AbstractInteractionHandler;
 import com.vast.interact.InteractionHandler;
 import org.junit.Assert;
@@ -22,6 +19,7 @@ public class TestInteractSystem {
 	private World world;
 	private ComponentMapper<Interact> interactMapper;
 	private ComponentMapper<Transform> transformMapper;
+	private ComponentMapper<Used> usedMapper;
 
 	private void setupWorld(InteractionHandler interactionHandler) {
 		world = new World(new WorldConfigurationBuilder().with(
@@ -31,6 +29,7 @@ public class TestInteractSystem {
 
 		interactMapper = world.getMapper(Interact.class);
 		transformMapper = world.getMapper(Transform.class);
+		usedMapper = world.getMapper(Used.class);
 	}
 
 	private void setupWorld() {
@@ -117,11 +116,7 @@ public class TestInteractSystem {
 		interactMapper.create(interactEntity).entity = otherEntity;
 
 		transformMapper.create(otherEntity);
-
-		transformMapper.create(otherInteractEntity);
-		interactMapper.create(otherInteractEntity).entity = otherEntity;
-		interactMapper.get(otherInteractEntity).handler = interactionHandler;
-		interactMapper.get(otherInteractEntity).phase = Interact.Phase.INTERACTING;
+		usedMapper.create(otherEntity).usedByEntity = otherInteractEntity;
 
 		world.process();
 
