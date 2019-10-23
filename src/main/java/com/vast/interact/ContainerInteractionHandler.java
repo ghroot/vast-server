@@ -37,10 +37,10 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 		Inventory playerInventory = inventoryMapper.get(playerEntity);
 
 		if (ownerMapper.has(containerEntity) && !playerMapper.get(playerEntity).name.equals(ownerMapper.get(containerEntity).name)) {
-			eventMapper.create(playerEntity).setType("message").setData("This is not mine...").setOwnerOnly(true);
+			eventMapper.create(playerEntity).addEntry("message").setData("This is not mine...").setOwnerOnly(true);
 			return false;
 		} else if (!containerMapper.get(containerEntity).persistent && playerInventory.isFull()) {
-			eventMapper.create(playerEntity).setType("message").setData("My backpack is full...").setOwnerOnly(true);
+			eventMapper.create(playerEntity).addEntry("message").setData("My backpack is full...").setOwnerOnly(true);
 			return false;
 		} else {
 			return true;
@@ -57,19 +57,19 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 				if (transferAllOrUntilFull(playerInventory, containerInventory, "basic")) {
 					syncMapper.create(containerEntity).markPropertyAsDirty(Properties.INVENTORY);
 					syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
-					eventMapper.create(playerEntity).setType("action").setData("pickedUp");
+					eventMapper.create(playerEntity).addEntry("action").setData("pickedUp");
 				}
 			} else {
 				if (transferAllOrUntilFull(containerInventory, playerInventory)) {
 					syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
 					syncMapper.create(containerEntity).markPropertyAsDirty(Properties.INVENTORY);
-					eventMapper.create(playerEntity).setType("action").setData("pickedUp");
+					eventMapper.create(playerEntity).addEntry("action").setData("pickedUp");
 				}
 			}
 		} else {
 			if (transferAllOrUntilFull(containerInventory, playerInventory)) {
 				syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
-				eventMapper.create(playerEntity).setType("action").setData("pickedUp");
+				eventMapper.create(playerEntity).addEntry("action").setData("pickedUp");
 				deleteMapper.create(containerEntity).reason = "collected";
 			}
 		}

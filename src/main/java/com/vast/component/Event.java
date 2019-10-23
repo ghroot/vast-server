@@ -3,32 +3,41 @@ package com.vast.component;
 import com.artemis.PooledComponent;
 import com.artemis.annotations.Transient;
 
-// TODO: Add ability to hve more than one event name/data/ownerOnly in the same update
+import java.util.ArrayList;
+import java.util.List;
+
 @Transient
 public class Event extends PooledComponent {
-	public String type = null;
-	public Object data = null;
-	public boolean ownerOnly = false;
+	public List<EventEntry> entries = new ArrayList<>();
 
 	@Override
 	protected void reset() {
-		type = null;
-		data = null;
-		ownerOnly = false;
+		entries.clear();
 	}
 
-	public Event setType(String type) {
-		this.type = type;
-		return this;
+	public EventEntry addEntry(String type) {
+		EventEntry entry = new EventEntry(type);
+		entries.add(entry);
+		return entry;
 	}
 
-	public Event setData(Object data) {
-		this.data = data;
-		return this;
-	}
+	public static class EventEntry {
+		public String type;
+		public Object data = null;
+		public boolean ownerOnly = false;
 
-	public Event setOwnerOnly(boolean ownerOnly) {
-		this.ownerOnly = ownerOnly;
-		return this;
+		private EventEntry(String type) {
+			this.type = type;
+		}
+
+		public EventEntry setData(Object data) {
+			this.data = data;
+			return this;
+		}
+
+		public EventEntry setOwnerOnly(boolean ownerOnly) {
+			this.ownerOnly = ownerOnly;
+			return this;
+		}
 	}
 }

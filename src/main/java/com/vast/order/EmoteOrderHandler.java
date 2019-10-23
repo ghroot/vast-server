@@ -29,7 +29,7 @@ public class EmoteOrderHandler implements OrderHandler {
 	@Override
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
 		byte emoteType = (byte) dataObject.get(MessageCodes.EMOTE_TYPE).value;
-		eventMapper.create(orderEntity).setType("emoted").setData(emoteType);
+		eventMapper.create(orderEntity).addEntry("emoted").setData(emoteType);
 		return true;
 	}
 }

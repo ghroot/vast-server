@@ -24,7 +24,7 @@ public class GrowingInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public boolean attemptStart(int playerEntity, int growEntity) {
-		eventMapper.create(playerEntity).setType("message").setData("It is still growing...").setOwnerOnly(true);
+		eventMapper.create(playerEntity).addEntry("message").setData("It is still growing...").setOwnerOnly(true);
 		return false;
 	}
 

@@ -38,7 +38,7 @@ public class ChatOrderHandler implements OrderHandler {
 		int[] knownByEntities = knownByEntitiesBag.getData();
 		for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
 			int knownByEntity = knownByEntities[i];
-			eventMapper.create(knownByEntity).setType("message").setData(playerMapper.get(orderEntity).name + " says: " + word);
+			eventMapper.create(knownByEntity).addEntry("message").setData(playerMapper.get(orderEntity).name + " says: " + word);
 		}
 		return true;
 	}

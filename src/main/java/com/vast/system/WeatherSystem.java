@@ -40,7 +40,7 @@ public class WeatherSystem extends IteratingSystem {
 		Weather weather = weatherMapper.get(weatherSubscription.getEntities().get(0));
 
 		if (weather.isRaining) {
-			eventMapper.create(playerEntity).setType("startedRaining").setOwnerOnly(true);
+			eventMapper.create(playerEntity).addEntry("startedRaining").setOwnerOnly(true);
 		}
 	}
 
@@ -70,11 +70,10 @@ public class WeatherSystem extends IteratingSystem {
 			Weather weather = weatherMapper.get(weatherSubscription.getEntities().get(0));
 
 			if (weather.isRaining) {
-				eventMapper.create(playerEntity).setType("startedRaining").setOwnerOnly(true);
+				eventMapper.create(playerEntity).addEntry("startedRaining").setOwnerOnly(true);
 			} else {
-				eventMapper.create(playerEntity).setType("stoppedRaining").setOwnerOnly(true);
+				eventMapper.create(playerEntity).addEntry("stoppedRaining").setOwnerOnly(true);
 			}
-			eventMapper.get(playerEntity).ownerOnly = true;
 		}
 	}
 }

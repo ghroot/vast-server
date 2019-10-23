@@ -48,7 +48,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
 		if (harvestable.requiredItemId != -1 && !inventory.has(harvestable.requiredItemId)) {
-			eventMapper.create(playerEntity).setType("message").setData("I don't have the required tool...").setOwnerOnly(true);
+			eventMapper.create(playerEntity).addEntry("message").setData("I don't have the required tool...").setOwnerOnly(true);
 			return false;
 		} else {
 			stateMapper.get(playerEntity).name = harvestable.harvestEventName;

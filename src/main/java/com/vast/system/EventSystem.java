@@ -40,26 +40,28 @@ public class EventSystem extends IteratingSystem {
 	protected void process(int eventEntity) {
 		Event event = eventMapper.get(eventEntity);
 
-		reusableEventMessage.getDataObject().clear();
-		reusableEventMessage.getDataObject().set(MessageCodes.EVENT_ENTITY_ID, eventEntity);
-		reusableEventMessage.getDataObject().set(MessageCodes.EVENT_TYPE, event.type);
-		if (event.data != null) {
-			reusableEventMessage.getDataObject().set(MessageCodes.EVENT_VALUE, event.data);
-		}
-
-		if (event.ownerOnly) {
-			Active ownerActive = activeMapper.get(eventEntity);
-			if (ownerActive != null) {
-				ownerActive.peer.send(reusableEventMessage);
+		for (Event.EventEntry entry : event.entries) {
+			reusableEventMessage.getDataObject().clear();
+			reusableEventMessage.getDataObject().set(MessageCodes.EVENT_ENTITY_ID, eventEntity);
+			reusableEventMessage.getDataObject().set(MessageCodes.EVENT_TYPE, entry.type);
+			if (entry.data != null) {
+				reusableEventMessage.getDataObject().set(MessageCodes.EVENT_VALUE, entry.data);
 			}
-		} else if (knownMapper.has(eventEntity)) {
-			IntBag knownByEntitiesBag = knownMapper.get(eventEntity).knownByEntities;
-			int[] knownByEntities = knownByEntitiesBag.getData();
-			for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
-				int knownByEntity = knownByEntities[i];
-				if (activeMapper.has(knownByEntity)) {
-					VastPeer knownByPeer = activeMapper.get(knownByEntity).peer;
-					knownByPeer.send(reusableEventMessage);
+
+			if (entry.ownerOnly) {
+				Active ownerActive = activeMapper.get(eventEntity);
+				if (ownerActive != null) {
+					ownerActive.peer.send(reusableEventMessage);
+				}
+			} else if (knownMapper.has(eventEntity)) {
+				IntBag knownByEntitiesBag = knownMapper.get(eventEntity).knownByEntities;
+				int[] knownByEntities = knownByEntitiesBag.getData();
+				for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
+					int knownByEntity = knownByEntities[i];
+					if (activeMapper.has(knownByEntity)) {
+						VastPeer knownByPeer = activeMapper.get(knownByEntity).peer;
+						knownByPeer.send(reusableEventMessage);
+					}
 				}
 			}
 		}

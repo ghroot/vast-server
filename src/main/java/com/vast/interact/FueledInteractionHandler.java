@@ -30,7 +30,7 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 		Fueled fueled = fueledMapper.get(fueledEntity);
 
 		if (!inventory.has(fueled.cost)) {
-			eventMapper.create(playerEntity).setType("message").setData("I don't have the required materials...").setOwnerOnly(true);
+			eventMapper.create(playerEntity).addEntry("message").setData("I don't have the required materials...").setOwnerOnly(true);
 			return false;
 		} else {
 			return true;
