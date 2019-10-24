@@ -20,6 +20,7 @@ public class SkillPropertyHandler implements PropertyHandler {
 		return Properties.SKILL;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
 		if (skillMapper.has(entity)) {
