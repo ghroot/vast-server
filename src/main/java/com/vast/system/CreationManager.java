@@ -213,11 +213,11 @@ public class CreationManager extends BaseSystem {
 		transformMapper.get(treeEntity).position.set(position);
 		transformMapper.get(treeEntity).rotation = random.nextFloat() * 360;
 		collisionMapper.get(treeEntity).radius = 0.4f;
-		harvestableMapper.get(treeEntity).requiredItemId = items.getItem("axe").getId();
+		harvestableMapper.get(treeEntity).requiredItemTag = "axe";
 		harvestableMapper.get(treeEntity).harvestEventName = "chopping";
 		harvestableMapper.get(treeEntity).durability = 300f;
-		inventoryMapper.get(treeEntity).add(items.getItem("wood").getId(), 3);
-		inventoryMapper.get(treeEntity).add(items.getItem("seed").getId(), 1);
+		inventoryMapper.get(treeEntity).add(items.getItem("Wood").getId(), 3);
+		inventoryMapper.get(treeEntity).add(items.getItem("Seed").getId(), 1);
 		teachMapper.get(treeEntity).addWord("tree");
 		if (growing) {
 			growingMapper.create(treeEntity).timeLeft = 60f;
@@ -234,10 +234,10 @@ public class CreationManager extends BaseSystem {
 		transformMapper.get(rockEntity).position.set(position);
 		transformMapper.get(rockEntity).rotation = random.nextFloat() * 360;
 		collisionMapper.get(rockEntity).radius = 0.4f;
-		harvestableMapper.get(rockEntity).requiredItemId = items.getItem("pickaxe").getId();
+		harvestableMapper.get(rockEntity).requiredItemTag = "pickaxe";
 		harvestableMapper.get(rockEntity).harvestEventName = "picking";
 		harvestableMapper.get(rockEntity).durability = 300f;
-		inventoryMapper.get(rockEntity).add(items.getItem("stone").getId(), 2);
+		inventoryMapper.get(rockEntity).add(items.getItem("Stone").getId(), 2);
 		teachMapper.get(rockEntity).addWord("rock");
 		syncPropagationMapper.get(rockEntity).setOwnerPropagation(Properties.INVENTORY);
 		return rockEntity;

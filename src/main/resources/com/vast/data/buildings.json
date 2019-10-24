@@ -1,15 +1,15 @@
 [
   {
     "id": 0,
-    "name": "chest",
+    "name": "Chest",
     "collision": {
       "radius": 0.8
     },
     "constructable": {
       "duration": 10,
       "cost": {
-        "wood": 10,
-        "stone": 0
+        "Wood": 10,
+        "Stone": 0
       }
     },
     "inventory": {
@@ -21,61 +21,61 @@
   },
   {
     "id": 1,
-    "name": "wall",
+    "name": "Wall",
     "collision": {
       "radius": 0.5
     },
     "constructable": {
       "duration": 5,
       "cost": {
-        "wood": 3
+        "Wood": 3
       }
     }
   },
   {
     "id": 2,
-    "name": "fireplace",
+    "name": "Fireplace",
     "collision": {
       "radius": 0.8
     },
     "constructable": {
       "duration": 10,
       "cost": {
-        "wood": 4,
-        "stone": 3
+        "Wood": 4,
+        "Stone": 3
       }
     },
     "fueled": {
       "cost": {
-        "wood": 1
+        "Wood": 1
       }
     }
   },
   {
     "id": 3,
-    "name": "torch",
+    "name": "Torch",
     "collision": {
       "radius": 0.2
     },
     "constructable": {
       "duration": 5,
       "cost": {
-        "wood": 2,
-        "stone": 1
+        "Wood": 2,
+        "Stone": 1
       }
     }
   },
   {
     "id": 4,
-    "name": "planter",
+    "name": "Planter",
     "collision": {
       "radius": 0.4
     },
     "constructable": {
       "duration": 5,
       "cost": {
-        "wood": 5,
-        "stone": 1
+        "Wood": 5,
+        "Stone": 1
       }
     },
     "plantable": {

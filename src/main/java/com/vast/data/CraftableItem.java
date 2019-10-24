@@ -6,8 +6,8 @@ public class CraftableItem extends Item {
 	private Set<Cost> costs;
 	private float craftDuration;
 
-	public CraftableItem(int id, String type, String name, Set<Cost> costs, float craftDuration) {
-		super(id, type, name);
+	public CraftableItem(int id, String[] tags, String name, Set<Cost> costs, float craftDuration) {
+		super(id, tags, name);
 		this.costs = costs;
 		this.craftDuration = craftDuration;
 	}

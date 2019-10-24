@@ -21,7 +21,11 @@ public class Items {
 			for (Iterator<Object> it = itemsData.iterator(); it.hasNext();) {
 				JSONObject itemData = (JSONObject) it.next();
 				int id = itemData.getInt("id");
-				String type = itemData.getString("type");
+				JSONArray tagsArray = itemData.getJSONArray("tags");
+				String[] tags = new String[tagsArray.length()];
+				for (int i = 0; i < tags.length; i++) {
+					tags[i] = tagsArray.optString(i);
+				}
 				String name = itemData.getString("name");
 				Item item;
 				if (itemData.has("craftable")) {
@@ -32,9 +36,9 @@ public class Items {
 						int amount = costData.getInt(itemName);
 						costs.add(new Cost(getItem(itemName).getId(), amount));
 					}
-					item = new CraftableItem(id, type, name, costs, craftDuration);
+					item = new CraftableItem(id, tags, name, costs, craftDuration);
 				} else {
-					item = new Item(id, type, name);
+					item = new Item(id, tags, name);
 				}
 				items.put(id, item);
 			}

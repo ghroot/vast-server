@@ -54,7 +54,7 @@ public class VastWorld implements Runnable {
 		QuadTree quadTree = new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height);
 		List<InteractionHandler> interactionHandlers = new ArrayList<InteractionHandler>(Arrays.asList(
 			new GrowingInteractionHandler(),
-			new HarvestableInteractionHandler(),
+			new HarvestableInteractionHandler(items),
 			new ConstructableInteractionHandler(),
 			new PlantableInteractionHandler(items),
 			new ContainerInteractionHandler(items),

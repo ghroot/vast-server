@@ -48,7 +48,6 @@ public class ConfigurationPropertyHandler implements PropertyHandler {
 					Item item = allItems.get(i);
 					StringBuilder itemStringBuilder = new StringBuilder();
 					itemStringBuilder.append(item.getId());
-					itemStringBuilder.append(DATA_FIELD_DELIMITER).append(item.getType());
 					itemStringBuilder.append(DATA_FIELD_DELIMITER).append(item.getName());
 					if (item instanceof CraftableItem) {
 						CraftableItem craftableItem = (CraftableItem) item;

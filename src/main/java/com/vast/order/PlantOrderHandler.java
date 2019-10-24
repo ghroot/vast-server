@@ -52,8 +52,8 @@ public class PlantOrderHandler implements OrderHandler {
 	@Override
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
 		Inventory inventory = inventoryMapper.get(orderEntity);
-		if (inventory.has(items.getItem("seed").getId())) {
-			inventory.remove(items.getItem("seed").getId(), 1);
+		if (inventory.has(items.getItem("Seed").getId())) {
+			inventory.remove(items.getItem("Seed").getId(), 1);
 			syncMapper.create(orderEntity).markPropertyAsDirty(Properties.INVENTORY);
 
 			Transform transform = transformMapper.get(orderEntity);

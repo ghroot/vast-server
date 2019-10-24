@@ -34,7 +34,7 @@ public class PlantableInteractionHandler extends AbstractInteractionHandler {
 		Inventory inventory = inventoryMapper.get(playerEntity);
 		Plantable plantable = plantableMapper.get(plantableEntity);
 
-		if (!plantable.planted && !inventory.has(items.getItem("seed"))) {
+		if (!plantable.planted && !inventory.has(items.getItem("Seed"))) {
 			eventMapper.create(plantableEntity).addEntry("message").setData("I need a seed...").setOwnerOnly(true);
 			return false;
 		} else {
@@ -48,12 +48,12 @@ public class PlantableInteractionHandler extends AbstractInteractionHandler {
 		Plantable plantable = plantableMapper.get(plantableEntity);
 
 		if (plantable.planted) {
-			inventory.add(items.getItem("food"), 3);
+			inventory.add(items.getItem("Vegetables"), 3);
 			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
 			eventMapper.create(playerEntity).addEntry("action").setData("pickedUp");
 			plantable.planted = false;
 		} else {
-			inventory.remove(items.getItem("seed"));
+			inventory.remove(items.getItem("Seed"));
 			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
 			eventMapper.create(playerEntity).addEntry("action").setData("pickedUp");
 			plantable.planted = true;

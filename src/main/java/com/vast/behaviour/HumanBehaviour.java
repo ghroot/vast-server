@@ -4,10 +4,7 @@ import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.RequestMessage;
 import com.vast.component.*;
-import com.vast.data.Building;
-import com.vast.data.Buildings;
-import com.vast.data.CraftableItem;
-import com.vast.data.Items;
+import com.vast.data.*;
 import com.vast.interact.InteractionHandler;
 import com.vast.network.IncomingRequest;
 import com.vast.network.MessageCodes;
@@ -54,9 +51,9 @@ public class HumanBehaviour extends AbstractBehaviour {
 		} else if (roll <= 2f) {
 			CraftableItem item;
 			if (random.nextFloat() <= 0.5f) {
-				item = (CraftableItem) items.getItem("axe");
+				item = (CraftableItem) items.getItem("Axe");
 			} else {
-				item = (CraftableItem) items.getItem("pickaxe");
+				item = (CraftableItem) items.getItem("Pickaxe");
 			}
 			Inventory inventory = inventoryMapper.get(entity);
 			if (inventory.has(item.getCosts())) {
@@ -66,7 +63,7 @@ public class HumanBehaviour extends AbstractBehaviour {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.EMOTE, new DataObject().set(MessageCodes.EMOTE_TYPE, (byte) 0))));
 		} else if (roll <= 10f) {
 			Inventory inventory = inventoryMapper.get(entity);
-			if (inventory.has(items.getItem("seed"))) {
+			if (inventory.has(items.getItem("Seed"))) {
 				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.PLANT)));
 			}
 		} else if (roll <= 30f) {
@@ -91,9 +88,9 @@ public class HumanBehaviour extends AbstractBehaviour {
 				Inventory inventory = inventoryMapper.get(entity);
 				boolean skip = false;
 				if (typeMapper.has(randomNearbyEntity)) {
-					if (typeMapper.get(randomNearbyEntity).type.equals("tree") && !inventory.has(items.getItem("axe"))) {
+					if (typeMapper.get(randomNearbyEntity).type.equals("tree") && !hasItemWithTag(inventory, "axe")) {
 						skip = true;
-					} else if (typeMapper.get(randomNearbyEntity).type.equals("rock") && !inventory.has(items.getItem("pickaxe"))) {
+					} else if (typeMapper.get(randomNearbyEntity).type.equals("rock") && !hasItemWithTag(inventory, "pickaxe")) {
 						skip = true;
 					}
 				}
@@ -107,6 +104,18 @@ public class HumanBehaviour extends AbstractBehaviour {
 			float[] position = new float[] {x, y};
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.MOVE, new DataObject().set(MessageCodes.MOVE_POSITION, position))));
 		}
+	}
+
+	private boolean hasItemWithTag(Inventory inventory, String tag) {
+		for (int itemId = 0; itemId < inventory.items.length; itemId++) {
+			if (inventory.items[itemId] > 0) {
+				Item item = items.getItem(itemId);
+				if (item.hasTag(tag)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private void addIncomingRequest(IncomingRequest incomingRequest) {

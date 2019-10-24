@@ -81,13 +81,13 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 	public void stop(int playerEntity, int containerEntity) {
 	}
 
-	private boolean transferAllOrUntilFull(Inventory from, Inventory to, String onlyItemType) {
+	private boolean transferAllOrUntilFull(Inventory from, Inventory to, String onlyItemTag) {
 		boolean atLeastOneItemWasTransferred = false;
-		while (!from.isEmpty() && !to.isFull() && (onlyItemType == null || hasAnyItemWithType(from, onlyItemType))) {
+		while (!from.isEmpty() && !to.isFull() && (onlyItemTag == null || hasItemWithTag(from, onlyItemTag))) {
 			for (int itemId = 0; itemId < from.items.length; itemId++) {
 				Item item = items.getItem(itemId);
 				if (item != null) {
-					if ((onlyItemType == null || item.getType().equals(onlyItemType)) && from.items[itemId] > 0) {
+					if ((onlyItemTag == null || item.hasTag(onlyItemTag)) && from.items[itemId] > 0) {
 						from.remove(itemId, 1);
 						to.add(itemId, 1);
 						atLeastOneItemWasTransferred = true;
@@ -103,10 +103,13 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 		return transferAllOrUntilFull(from, to, null);
 	}
 
-	private boolean hasAnyItemWithType(Inventory inventory, String type) {
+	private boolean hasItemWithTag(Inventory inventory, String tag) {
 		for (int itemId = 0; itemId < inventory.items.length; itemId++) {
-			if (inventory.items[itemId] > 0 && items.getItem(itemId).getType().equals(type)) {
-				return true;
+			if (inventory.items[itemId] > 0) {
+				Item item = items.getItem(itemId);
+				if (item.hasTag(tag)) {
+					return true;
+				}
 			}
 		}
 		return false;

@@ -1,51 +1,51 @@
 [
   {
     "id": 0,
-    "type": "basic",
-    "name": "wood"
+    "tags": ["basic"],
+    "name": "Wood"
   },
   {
     "id": 1,
-    "type": "basic",
-    "name": "stone"
+    "tags": ["basic"],
+    "name": "Stone"
   },
   {
     "id": 2,
-    "type": "basic",
-    "name": "iron"
+    "tags": ["basic"],
+    "name": "Iron"
   },
   {
     "id": 3,
-    "type": "basic",
-    "name": "seed"
+    "tags": ["basic"],
+    "name": "Seed"
   },
   {
     "id": 4,
-    "type": "tool",
-    "name": "axe",
+    "tags": ["tool", "axe"],
+    "name": "Axe",
     "craftable": {
       "duration": 3,
       "cost": {
-        "wood": 2,
-        "stone": 1
+        "Wood": 2,
+        "Stone": 1
       }
     }
   },
   {
     "id": 5,
-    "type": "tool",
-    "name": "pickaxe",
+    "tags": ["tool", "pickaxe"],
+    "name": "Pickaxe",
     "craftable": {
       "duration": 5,
       "cost": {
-        "wood": 2,
-        "stone": 2
+        "Wood": 2,
+        "Stone": 2
       }
     }
   },
   {
     "id": 6,
-    "type": "food",
-    "name": "food"
+    "tags": ["food"],
+    "name": "Vegetables"
   }
 ]

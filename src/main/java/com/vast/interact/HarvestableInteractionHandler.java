@@ -3,6 +3,8 @@ package com.vast.interact;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.component.*;
+import com.vast.data.Item;
+import com.vast.data.Items;
 import com.vast.network.Properties;
 import com.vast.system.CreationManager;
 import org.slf4j.Logger;
@@ -25,8 +27,11 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 
 	private CreationManager creationManager;
 
-	public HarvestableInteractionHandler() {
+	private Items items;
+
+	public HarvestableInteractionHandler(Items items) {
 		super(Aspect.all(Inventory.class), Aspect.all(Harvestable.class, Inventory.class));
+		this.items = items;
 	}
 
 	@Override
@@ -47,7 +52,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		Inventory inventory = inventoryMapper.get(playerEntity);
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
-		if (harvestable.requiredItemId != -1 && !inventory.has(harvestable.requiredItemId)) {
+		if (harvestable.requiredItemTag != null && !hasItemWithTag(inventory, harvestable.requiredItemTag)) {
 			eventMapper.create(playerEntity).addEntry("message").setData("I don't have the required tool...").setOwnerOnly(true);
 			return false;
 		} else {
@@ -58,6 +63,18 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 			teachMapper.create(playerEntity).addWord("chop");
 			return true;
 		}
+	}
+
+	private boolean hasItemWithTag(Inventory inventory, String tag) {
+		for (int itemId = 0; itemId < inventory.items.length; itemId++) {
+			if (inventory.items[itemId] > 0) {
+				Item item = items.getItem(itemId);
+				if (item.hasTag(tag)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override
