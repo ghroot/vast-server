@@ -45,6 +45,7 @@ public class VastServerApplication extends ServerApplication {
 
 		world = new VastWorld(this, snapshotFormat, randomSeed, showMonitor, metrics);
 		worldThread = new Thread(world, "World");
+		worldThread.setPriority(Thread.MAX_PRIORITY);
 		worldThread.start();
 
 		if (numberOfPeersToSimulate > 0) {
