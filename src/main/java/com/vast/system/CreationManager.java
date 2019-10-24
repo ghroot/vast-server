@@ -142,7 +142,6 @@ public class CreationManager extends BaseSystem {
 			.add(SubType.class)
 			.add(Transform.class)
 			.add(Known.class)
-			.add(Collision.class)
 			.add(Static.class)
 			.add(Inventory.class)
 			.add(Container.class)
