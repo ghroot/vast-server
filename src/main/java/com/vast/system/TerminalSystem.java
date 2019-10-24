@@ -356,17 +356,22 @@ public class TerminalSystem extends BaseSystem {
 			}
 
 			if (focusedEntity >= 0) {
+				textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
+
 				Point2f position = transformMapper.get(focusedEntity).position;
 				cameraPosition.set(position.x, -position.y);
+
+				Bag<Component> components = new Bag<>();
+				world.getEntity(focusedEntity).getComponents(components);
+
+				int row = screen.getTerminalSize().getRows() - components.size() - 2;
 				if (playerMapper.has(focusedEntity)) {
-					textGraphics.putString(0, 8, "Following entity: " + focusedEntity + " (" + playerMapper.get(focusedEntity).name + ")");
+					textGraphics.putString(0, row, "Following entity: " + focusedEntity + " (" + playerMapper.get(focusedEntity).name + ")");
 				} else {
-					textGraphics.putString(0, 8, "Following entity: " + focusedEntity);
+					textGraphics.putString(0, row, "Following entity: " + focusedEntity);
 				}
 
-				Bag<Component> components = new Bag<Component>();
-				world.getEntity(focusedEntity).getComponents(components);
-				int row = screen.getTerminalSize().getRows() - components.size();
+				row = screen.getTerminalSize().getRows() - components.size();
 				for (int i = 0; i < components.size(); i++) {
 					Component component = components.get(i);
 					String componentName = component.getClass().toString();
