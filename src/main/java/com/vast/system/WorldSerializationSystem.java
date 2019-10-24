@@ -63,7 +63,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 		}
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		IntBag entitiesToSerialize = world.getAspectSubscriptionManager().get(Aspect.all()).getEntities();
-		logger.debug("Serializing world ({} entities) to snapshot file {}", entitiesToSerialize.size(), snapshotFileName);
+		logger.info("Serializing world ({} entities) to snapshot file {}", entitiesToSerialize.size(), snapshotFileName);
 		worldSerializationManager.save(byteArrayOutputStream, new SaveFileFormat(entitiesToSerialize));
 		int generateDuration = (int) (System.currentTimeMillis() - startTime);
 		startTime = System.currentTimeMillis();
@@ -73,7 +73,7 @@ public class WorldSerializationSystem extends IntervalSystem {
 			fileOutputStream.close();
 			byteArrayOutputStream.close();
 			int saveDuration = (int) (System.currentTimeMillis() - startTime);
-			logger.debug("Serialization completed successfully, size: {} bytes (generate: {} ms, save: {} ms)", byteArrayOutputStream.size(), generateDuration, saveDuration);
+			logger.info("Serialization completed successfully, size: {} bytes (generate: {} ms, save: {} ms)", byteArrayOutputStream.size(), generateDuration, saveDuration);
 		} catch (Exception exception) {
 			logger.error("Error saving world", exception);
 		}
