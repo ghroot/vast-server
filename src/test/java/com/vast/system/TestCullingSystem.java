@@ -19,7 +19,7 @@ public class TestCullingSystem {
 		Mockito.when(peer.getId()).thenReturn(123L);
 
 		World world = new World(new WorldConfigurationBuilder().with(
-			new CullingSystem(new HashSet<PropertyHandler>())
+			new CullingSystem(new HashSet<>())
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
@@ -51,7 +51,7 @@ public class TestCullingSystem {
 		Mockito.when(peer.getId()).thenReturn(123L);
 
 		World world = new World(new WorldConfigurationBuilder().with(
-			new CullingSystem(new HashSet<PropertyHandler>())
+			new CullingSystem(new HashSet<>())
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);

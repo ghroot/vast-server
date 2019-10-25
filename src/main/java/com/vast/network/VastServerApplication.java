@@ -40,8 +40,8 @@ public class VastServerApplication extends ServerApplication {
 
 	@Override
 	protected void setup() {
-		peers = new ArrayList<VastPeer>();
-		incomingRequests = new ArrayList<IncomingRequest>();
+		peers = new ArrayList<>();
+		incomingRequests = new ArrayList<>();
 
 		world = new VastWorld(this, snapshotFormat, randomSeed, showMonitor, metrics);
 		worldThread = new Thread(world, "World");

@@ -23,7 +23,7 @@ public class IncomingRequestTransferSystem extends BaseSystem {
 			for (IncomingRequest incomingRequest : serverApplication.getIncomingRequests()) {
 				List<IncomingRequest> incomingRequests = incomingRequestsByPeer.get(incomingRequest.getPeer().getName());
 				if (incomingRequests == null) {
-					incomingRequests = new ArrayList<IncomingRequest>();
+					incomingRequests = new ArrayList<>();
 					incomingRequestsByPeer.put(incomingRequest.getPeer().getName(), incomingRequests);
 				}
 				incomingRequests.add(incomingRequest);

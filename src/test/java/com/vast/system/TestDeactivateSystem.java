@@ -16,7 +16,7 @@ public class TestDeactivateSystem {
 	@Test
 	public void deactivatesPlayerEntity() {
 		World world = new World(new WorldConfigurationBuilder().with(
-			new DeactivateSystem(new HashMap<String, VastPeer>())
+			new DeactivateSystem(new HashMap<>())
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);

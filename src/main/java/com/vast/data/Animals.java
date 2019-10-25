@@ -18,13 +18,13 @@ public class Animals {
 
 	public Animals(Items items) {
 		try {
-			animals = new HashMap<Integer, Animal>();
+			animals = new HashMap<>();
 			JSONArray animalsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream("animals.json"), Charset.defaultCharset()));
 			for (Iterator<Object> it = animalsData.iterator(); it.hasNext();) {
 				JSONObject animalData = (JSONObject) it.next();
 				int id = -1;
 				String name = null;
-				Map<String, JSONObject> aspects = new HashMap<String, JSONObject>();
+				Map<String, JSONObject> aspects = new HashMap<>();
 				for (String key : animalData.keySet()) {
 					Object value = animalData.get(key);
 					if (key.equals("id")) {

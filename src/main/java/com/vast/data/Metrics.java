@@ -13,10 +13,10 @@ public class Metrics {
 	private int numberOfCollisionChecks;
 	private int numberOfCollisions;
 	private double meanOfRoundTripTime;
-	private Map<Short, Map<QoS, int[]>> sentMessages = new HashMap<Short, Map<QoS, int[]>>();
+	private Map<Short, Map<QoS, int[]>> sentMessages = new HashMap<>();
 	private Map<String, Integer> sentEvents = new HashMap<>();
 	private long lastSerializeTime;
-	private Map<Byte, Integer> syncedProperties = new HashMap<Byte, Integer>();
+	private Map<Byte, Integer> syncedProperties = new HashMap<>();
 
 	public int getTimePerFrameMs() {
 		return timePerFrameMs;
@@ -69,7 +69,7 @@ public class Metrics {
 	public void messageSent(EventMessage message, QoS qos) {
 		Map<QoS, int[]> sentMessagesWithCode = sentMessages.get(message.getCode());
 		if (sentMessagesWithCode == null) {
-			sentMessagesWithCode = new HashMap<QoS, int[]>();
+			sentMessagesWithCode = new HashMap<>();
 			sentMessages.put(message.getCode(), sentMessagesWithCode);
 		}
 		if (sentMessagesWithCode.containsKey(qos)) {

@@ -16,14 +16,14 @@ public class Buildings {
 
 	public Buildings(Items items) {
 		try {
-			buildings = new HashMap<Integer, Building>();
+			buildings = new HashMap<>();
 			JSONArray buildingsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream("buildings.json"), Charset.defaultCharset()));
 			for (Iterator<Object> it = buildingsData.iterator(); it.hasNext();) {
 				JSONObject buildingData = (JSONObject) it.next();
 				int id = -1;
 				String name = null;
-				Set<Cost> costs = new HashSet<Cost>();
-				Map<String, JSONObject> aspects = new HashMap<String, JSONObject>();
+				Set<Cost> costs = new HashSet<>();
+				Map<String, JSONObject> aspects = new HashMap<>();
 				for (String key : buildingData.keySet()) {
 					Object value = buildingData.get(key);
 					if (key.equals("id")) {
@@ -50,7 +50,7 @@ public class Buildings {
 	}
 
 	public List<Building> getAllBuildings() {
-		return new ArrayList<Building>(buildings.values());
+		return new ArrayList<>(buildings.values());
 	}
 
 	public Building getBuilding(int id) {

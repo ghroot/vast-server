@@ -121,7 +121,7 @@ public class HumanBehaviour extends AbstractBehaviour {
 	private void addIncomingRequest(IncomingRequest incomingRequest) {
 		List<IncomingRequest> incomingRequests = incomingRequestsByPeer.get(incomingRequest.getPeer().getName());
 		if (incomingRequests == null) {
-			incomingRequests = new ArrayList<IncomingRequest>();
+			incomingRequests = new ArrayList<>();
 			incomingRequestsByPeer.put(incomingRequest.getPeer().getName(), incomingRequests);
 		}
 		incomingRequests.add(incomingRequest);

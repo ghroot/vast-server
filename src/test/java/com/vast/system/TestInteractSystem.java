@@ -24,7 +24,7 @@ public class TestInteractSystem {
 	private void setupWorld(InteractionHandler interactionHandler) {
 		world = new World(new WorldConfigurationBuilder().with(
 			new InteractSystem(interactionHandler != null ?
-				Arrays.asList(interactionHandler) : new ArrayList<InteractionHandler>())
+				Arrays.asList(interactionHandler) : new ArrayList<>())
 		).build());
 
 		interactMapper = world.getMapper(Interact.class);

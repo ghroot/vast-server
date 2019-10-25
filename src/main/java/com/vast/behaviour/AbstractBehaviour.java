@@ -23,8 +23,8 @@ public abstract class AbstractBehaviour implements Behaviour {
 	public AbstractBehaviour(List<InteractionHandler> interactionHandlers) {
 		this.interactionHandlers = interactionHandlers;
 
-		reusableNearbyEntities = new ArrayList<Integer>();
-		reusableNearbyInteractableEntities = new ArrayList<Integer>();
+		reusableNearbyEntities = new ArrayList<>();
+		reusableNearbyInteractableEntities = new ArrayList<>();
 	}
 
 	protected List<Integer> getNearbyEntities(int entity) {

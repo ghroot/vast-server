@@ -16,7 +16,7 @@ public class Items {
 
 	public Items() {
 		try {
-			items = new HashMap<Integer, Item>();
+			items = new HashMap<>();
 			JSONArray itemsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream("items.json"), Charset.defaultCharset()));
 			for (Iterator<Object> it = itemsData.iterator(); it.hasNext();) {
 				JSONObject itemData = (JSONObject) it.next();
@@ -29,7 +29,7 @@ public class Items {
 				String name = itemData.getString("name");
 				Item item;
 				if (itemData.has("craftable")) {
-					Set<Cost> costs = new HashSet<Cost>();
+					Set<Cost> costs = new HashSet<>();
 					float craftDuration = itemData.getJSONObject("craftable").getFloat("duration");
 					JSONObject costData = itemData.getJSONObject("craftable").getJSONObject("cost");
 					for (String itemName : costData.keySet()) {
@@ -48,7 +48,7 @@ public class Items {
 	}
 
 	public List<Item> getAllItems() {
-		return new ArrayList<Item>(items.values());
+		return new ArrayList<>(items.values());
 	}
 
 	public Item getItem(int id) {

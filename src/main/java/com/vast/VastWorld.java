@@ -47,44 +47,44 @@ public class VastWorld implements Runnable {
 		Items items = new Items();
 		Buildings buildings = new Buildings(items);
 		Animals animals = new Animals(items);
-		Map<String, VastPeer> peers = new HashMap<String, VastPeer>();
-		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<String, List<IncomingRequest>>();
-		Map<String, Integer> entitiesByPeer = new HashMap<String, Integer>();
-		Map<Integer, IntBag> spatialHashes = new HashMap<Integer, IntBag>();
+		Map<String, VastPeer> peers = new HashMap<>();
+		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<>();
+		Map<String, Integer> entitiesByPeer = new HashMap<>();
+		Map<Integer, IntBag> spatialHashes = new HashMap<>();
 		QuadTree quadTree = new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height);
-		List<InteractionHandler> interactionHandlers = new ArrayList<InteractionHandler>(Arrays.asList(
-			new GrowingInteractionHandler(),
-			new HarvestableInteractionHandler(items),
-			new ConstructableInteractionHandler(),
-			new PlantableInteractionHandler(items),
-			new ContainerInteractionHandler(items),
-			new FueledInteractionHandler()
+		List<InteractionHandler> interactionHandlers = new ArrayList<>(Arrays.asList(
+				new GrowingInteractionHandler(),
+				new HarvestableInteractionHandler(items),
+				new ConstructableInteractionHandler(),
+				new PlantableInteractionHandler(items),
+				new ContainerInteractionHandler(items),
+				new FueledInteractionHandler()
 		));
-		Set<OrderHandler> orderHandlers = new HashSet<OrderHandler>(Arrays.asList(
-			new MoveOrderHandler(),
-			new InteractOrderHandler(interactionHandlers),
-			new BuildOrderHandler(buildings),
-			new EmoteOrderHandler(),
-			new SetHomeOrderHandler(),
-			new CraftOrderHandler(items),
-			new PlantOrderHandler(items),
-			new FollowOrderHandler(),
-			new ChatOrderHandler()
+		Set<OrderHandler> orderHandlers = new HashSet<>(Arrays.asList(
+				new MoveOrderHandler(),
+				new InteractOrderHandler(interactionHandlers),
+				new BuildOrderHandler(buildings),
+				new EmoteOrderHandler(),
+				new SetHomeOrderHandler(),
+				new CraftOrderHandler(items),
+				new PlantOrderHandler(items),
+				new FollowOrderHandler(),
+				new ChatOrderHandler()
 		));
-		Set<PropertyHandler> propertyHandlers = new HashSet<PropertyHandler>(Arrays.asList(
-			new PositionPropertyHandler(),
-			new RotationPropertyHandler(),
-			new ActivePropertyHandler(),
-			new ProgressPropertyHandler(),
-			new InventoryPropertyHandler(),
-			new FueledPropertyHandler(),
-			new HomePropertyHandler(),
-			new GrowingPropertyHandler(),
-			new StatePropertyHandler(),
-			new ConfigurationPropertyHandler(items, buildings),
-			new SkillPropertyHandler()
+		Set<PropertyHandler> propertyHandlers = new HashSet<>(Arrays.asList(
+				new PositionPropertyHandler(),
+				new RotationPropertyHandler(),
+				new ActivePropertyHandler(),
+				new ProgressPropertyHandler(),
+				new InventoryPropertyHandler(),
+				new FueledPropertyHandler(),
+				new HomePropertyHandler(),
+				new GrowingPropertyHandler(),
+				new StatePropertyHandler(),
+				new ConfigurationPropertyHandler(items, buildings),
+				new SkillPropertyHandler()
 		));
-		Map<String, Behaviour> behaviours = new HashMap<String, Behaviour>();
+		Map<String, Behaviour> behaviours = new HashMap<>();
 		behaviours.put("human", new HumanBehaviour(interactionHandlers, random, incomingRequestsByPeer, items, buildings));
 		behaviours.put("adultAnimal", new AdultAnimalBehaviour(interactionHandlers, random));
 		behaviours.put("youngAnimal", new YoungAnimalBehaviour(interactionHandlers, random));

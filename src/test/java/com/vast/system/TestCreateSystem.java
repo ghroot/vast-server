@@ -18,7 +18,7 @@ public class TestCreateSystem {
 	@Test
 	public void removesCreateComponent() {
 		World world = new World(new WorldConfigurationBuilder().with(
-			new CreateSystem(new HashSet<PropertyHandler>())
+			new CreateSystem(new HashSet<>())
 		).build());
 
 		ComponentMapper<Create> createMapper = world.getMapper(Create.class);
@@ -38,7 +38,7 @@ public class TestCreateSystem {
 		VastPeer peer = Mockito.mock(VastPeer.class);
 		Mockito.when(peer.getId()).thenReturn(123L);
 		World world = new World(new WorldConfigurationBuilder().with(
-			new CreateSystem(new HashSet<PropertyHandler>())
+			new CreateSystem(new HashSet<>())
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);

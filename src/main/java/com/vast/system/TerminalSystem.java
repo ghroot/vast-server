@@ -55,9 +55,9 @@ public class TerminalSystem extends BaseSystem {
 	private int showSystemTimesMode = 0;
 	private boolean showSentMessages = false;
 	private boolean showSentEvents = false;
-	private Map<Short, String> messageNames = new HashMap<Short, String>();
+	private Map<Short, String> messageNames = new HashMap<>();
 	private boolean showSyncedProperties = false;
-	private Map<Byte, String> propertyNames = new HashMap<Byte, String>();
+	private Map<Byte, String> propertyNames = new HashMap<>();
 	private int focusedEntity = -1;
 	private int processDuration = 0;
 
