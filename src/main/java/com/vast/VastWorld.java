@@ -4,7 +4,6 @@ import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
-import com.artemis.utils.IntBag;
 import com.vast.behaviour.AdultAnimalBehaviour;
 import com.vast.behaviour.Behaviour;
 import com.vast.behaviour.HumanBehaviour;
@@ -30,8 +29,9 @@ public class VastWorld implements Runnable {
 	private final int FRAME_DURATION_MILLIS = 1000 / FRAME_RATE;
 
 	private World world;
-	private boolean alive;
+	private boolean isAlive;
 	private long lastFrameStartTime;
+	private boolean isPaused;
 	private Metrics metrics;
 
 	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, long randomSeed, boolean showMonitor, Metrics metrics) {
@@ -50,7 +50,6 @@ public class VastWorld implements Runnable {
 		Map<String, VastPeer> peers = new HashMap<>();
 		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<>();
 		Map<String, Integer> entitiesByPeer = new HashMap<>();
-		Map<Integer, IntBag> spatialHashes = new HashMap<>();
 		QuadTree quadTree = new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height);
 		List<InteractionHandler> interactionHandlers = new ArrayList<>(Arrays.asList(
 				new GrowingInteractionHandler(),
@@ -129,7 +128,7 @@ public class VastWorld implements Runnable {
 			new EntityLinkManager()
 		);
 		if (showMonitor) {
-			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, spatialHashes));
+			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, this));
 			worldConfigurationBuilder.register(new ProfiledInvocationStrategy(metrics));
 		}
 		world = new World(worldConfigurationBuilder.build());
@@ -138,20 +137,24 @@ public class VastWorld implements Runnable {
 			world.inject(propertyHandler);
 		}
 
-		alive = true;
+		isAlive = true;
 	}
 
 	@Override
 	public void run() {
 		lastFrameStartTime = System.currentTimeMillis();
-		while (alive) {
+		while (isAlive) {
 			long frameStartTime = System.currentTimeMillis();
 			int timeSinceLastFrame = (int) (frameStartTime - lastFrameStartTime);
 			if (metrics != null) {
 				metrics.setTimePerFrameMs(timeSinceLastFrame);
 			}
-			float delta = (float) timeSinceLastFrame / 1000;
-			world.setDelta(delta);
+			if (isPaused) {
+				world.setDelta(0f);
+			} else {
+				float delta = (float) timeSinceLastFrame / 1000;
+				world.setDelta(delta);
+			}
 			long processStartTime = System.currentTimeMillis();
 			world.process();
 			long processEndTime = System.currentTimeMillis();
@@ -170,6 +173,18 @@ public class VastWorld implements Runnable {
 
 	public void destroy() {
 		world.dispose();
-		alive = false;
+		isAlive = false;
+	}
+
+	public void pause() {
+		isPaused = true;
+	}
+
+	public boolean isPaused() {
+		return isPaused;
+	}
+
+	public void resume() {
+		isPaused = false;
 	}
 }

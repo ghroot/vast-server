@@ -55,8 +55,8 @@ public class PickupSystem extends IteratingSystem {
 
 			double randomAngle = Math.toRadians(random.nextDouble() * 360f);
 			reusableVector.set(
-				(float) Math.cos(randomAngle) * scan.distance,
-				(float) Math.sin(randomAngle) * scan.distance
+				(float) Math.cos(randomAngle) * scan.distance * 0.95f,
+				(float) Math.sin(randomAngle) * scan.distance * 0.95f
 			);
 			reusablePosition.set(
 				transform.position.x + reusableVector.x,

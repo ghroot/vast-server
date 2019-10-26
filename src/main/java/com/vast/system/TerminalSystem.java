@@ -1,6 +1,7 @@
 package com.vast.system;
 
 import com.artemis.*;
+import com.artemis.systems.IntervalSystem;
 import com.artemis.utils.Bag;
 import com.artemis.utils.IntBag;
 import com.googlecode.lanterna.TerminalPosition;
@@ -14,6 +15,7 @@ import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.nhnent.haste.transport.QoS;
+import com.vast.VastWorld;
 import com.vast.data.Metrics;
 import com.vast.component.*;
 import com.vast.network.Properties;
@@ -28,7 +30,7 @@ import javax.vecmath.Point2f;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TerminalSystem extends BaseSystem {
+public class TerminalSystem extends IntervalSystem {
 	private static final Logger logger = LoggerFactory.getLogger(TerminalSystem.class);
 
 	private ComponentMapper<Player> playerMapper;
@@ -42,13 +44,10 @@ public class TerminalSystem extends BaseSystem {
 	private Map<String, VastPeer> peers;
 	private Metrics metrics;
 	private WorldConfiguration worldConfiguration;
-	private Map<Integer, IntBag> spatialHashes;
-
-	private float acc;
-	private final float interval = 0.1f;
+	private VastWorld vastWorld;
 
 	private Screen screen;
-	private float scale = 0.15f;//3.0f;
+	private float scale = 0.15f;
 	private Point2f cameraPosition = new Point2f();
 	private boolean showPlayerNames = false;
 	private boolean showIds = false;
@@ -61,11 +60,12 @@ public class TerminalSystem extends BaseSystem {
 	private int focusedEntity = -1;
 	private int processDuration = 0;
 
-	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldConfiguration worldConfiguration, Map<Integer, IntBag> spatialHashes) {
+	public TerminalSystem(Map<String, VastPeer> peers, Metrics metrics, WorldConfiguration worldConfiguration, VastWorld vastWorld) {
+		super(Aspect.all(), 0.1f);
 		this.peers = peers;
 		this.metrics = metrics;
 		this.worldConfiguration = worldConfiguration;
-		this.spatialHashes = spatialHashes;
+		this.vastWorld = vastWorld;
 
 		messageNames.put(MessageCodes.ENTITY_CREATED, "EntityCreated");
 		messageNames.put(MessageCodes.ENTITY_DESTROYED, "EntityDestroyed");
@@ -105,13 +105,12 @@ public class TerminalSystem extends BaseSystem {
 	}
 
 	@Override
-	protected boolean checkProcessing() {
-		acc += world.getDelta();
-		if (acc >= interval) {
-			acc -= interval;
-			return true;
+	protected float getTimeDelta() {
+		if (vastWorld.isPaused()) {
+			return 1f / 30f;
+		} else {
+			return super.getTimeDelta();
 		}
-		return false;
 	}
 
 	@Override
@@ -210,6 +209,10 @@ public class TerminalSystem extends BaseSystem {
 			textGraphics.putString(0, 4, "Moving / static entities: " + (entities.size() - staticEntities.size()) + " / " + staticEntities.size());
 			textGraphics.putString(0, 5, "Player entities: " + playerEntities.size() + " (" + activePlayerEntities.size() + " active)");
 			textGraphics.putString(0, 6, "Scanning entities: " + scanEntities.size());
+
+			if (vastWorld.isPaused()) {
+				textGraphics.putString(screen.getTerminalSize().getColumns() / 2 - 3, 1, "PAUSED");
+			}
 
 			String fpsString = "FPS: " + metrics.getFps();
 			textGraphics.putString(screen.getTerminalSize().getColumns() - fpsString.length(), 0, fpsString);
@@ -567,6 +570,12 @@ public class TerminalSystem extends BaseSystem {
 						showSentEvents = !showSentEvents;
 						showSentMessages = false;
 						showSyncedProperties = false;
+					} else if (keyStroke.getCharacter().toString().equals("u")) {
+						if (vastWorld.isPaused()) {
+							vastWorld.resume();
+						} else {
+							vastWorld.pause();
+						}
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
 					cameraPosition.add(new Point2f(0.0f, ((keyStroke.isShiftDown() ? 5.0f : 1.0f) / scale)));
