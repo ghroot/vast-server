@@ -18,10 +18,12 @@ import com.nhnent.haste.transport.QoS;
 import com.vast.VastWorld;
 import com.vast.data.Metrics;
 import com.vast.component.*;
+import com.vast.component.Terrain;
 import com.vast.network.Properties;
 import com.vast.data.SystemMetrics;
 import com.vast.data.WorldConfiguration;
 import com.vast.network.MessageCodes;
+import com.vast.network.TerrainTypes;
 import com.vast.network.VastPeer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +42,7 @@ public class TerminalSystem extends IntervalSystem {
 	private ComponentMapper<Path> pathMapper;
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Constructable> constructableMapper;
+	private ComponentMapper<Terrain> terrainMapper;
 
 	private Map<String, VastPeer> peers;
 	private Metrics metrics;
@@ -49,6 +52,7 @@ public class TerminalSystem extends IntervalSystem {
 	private Screen screen;
 	private float scale = 0.15f;
 	private Point2f cameraPosition = new Point2f();
+	private TextColor[][] backgroundColors;
 	private boolean showPlayerNames = false;
 	private boolean showIds = false;
 	private int showSystemTimesMode = 0;
@@ -92,6 +96,10 @@ public class TerminalSystem extends IntervalSystem {
 			screen = new TerminalScreen(terminal);
 			screen.setCursorPosition(null);
 			screen.startScreen();
+
+			cameraPosition.set(worldConfiguration.width / 2f, -worldConfiguration.height / 2f);
+
+			backgroundColors = new TextColor[worldConfiguration.width / worldConfiguration.cellSize][worldConfiguration.height / worldConfiguration.cellSize];
 		} catch (Exception ignored) {
 		}
 	}
@@ -122,6 +130,31 @@ public class TerminalSystem extends IntervalSystem {
 			screen.doResizeIfNecessary();
 			screen.clear();
 
+			TextGraphics textGraphics = screen.newTextGraphics();
+
+			int terrainEntity = world.getAspectSubscriptionManager().get(Aspect.all(Terrain.class)).getEntities().get(0);
+			Terrain terrain = terrainMapper.get(terrainEntity);
+			for (int column = 0; column < screen.getTerminalSize().getColumns(); column++) {
+				for (int row = 0; row < screen.getTerminalSize().getRows(); row++) {
+					Point2f position = getWorldPositionFromTerminalPosition(column, row);
+					if (position.x >= 0f && position.x < worldConfiguration.width && position.y >= 0f && position.y < worldConfiguration.height) {
+						int terrainType = terrain.cells[(int) Math.floor(position.x / worldConfiguration.cellSize)]
+							[(int) Math.floor(position.y / worldConfiguration.cellSize)];
+						if (terrainType == TerrainTypes.TREE) {
+							backgroundColors[column][row] = TextColor.ANSI.GREEN;
+							textGraphics.setBackgroundColor(TextColor.ANSI.GREEN);
+							textGraphics.setCharacter(new TerminalPosition(column, row), ' ');
+						} else if (terrainType == TerrainTypes.ROCK) {
+							backgroundColors[column][row] = TextColor.ANSI.Indexed.fromRGB(100, 100, 100);
+							textGraphics.setBackgroundColor(TextColor.ANSI.Indexed.fromRGB(100, 100, 100));
+							textGraphics.setCharacter(new TerminalPosition(column, row), ' ');
+						} else {
+							backgroundColors[column][row] = TextColor.ANSI.DEFAULT;
+						}
+					}
+				}
+			}
+
 			IntBag entities = world.getAspectSubscriptionManager().get(Aspect.all(Transform.class)).getEntities();
 			IntBag staticEntities = world.getAspectSubscriptionManager().get(Aspect.all(Static.class)).getEntities();
 			IntBag playerEntities = world.getAspectSubscriptionManager().get(Aspect.all(Player.class)).getEntities();
@@ -146,62 +179,63 @@ public class TerminalSystem extends IntervalSystem {
 				TerminalPosition terminalPosition = getTerminalPositionFromWorldPosition(transform.position);
 				if (terminalPosition.getColumn() >= 0 && terminalPosition.getColumn() < screen.getTerminalSize().getColumns() &&
 						terminalPosition.getRow() >= 0 && terminalPosition.getRow() < screen.getTerminalSize().getRows()) {
+
+					TextColor backgroundColor = backgroundColors[terminalPosition.getColumn()][terminalPosition.getRow()];
+					textGraphics.setBackgroundColor(backgroundColor);
+
 					if (playerMapper.has(entity)) {
-						TextGraphics textGraphics = screen.newTextGraphics();
 						if (activeMapper.has(entity)) {
-							screen.setCharacter(terminalPosition, new TextCharacter('O', colored ? TextColor.ANSI.BLUE : gray, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('O', colored ? TextColor.ANSI.BLUE : gray, backgroundColor));
 							textGraphics.setForegroundColor(TextColor.ANSI.BLUE);
 						} else {
-							screen.setCharacter(terminalPosition, new TextCharacter('O', colored ? TextColor.ANSI.YELLOW : gray, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('O', colored ? TextColor.ANSI.YELLOW : gray, backgroundColor));
 							textGraphics.setForegroundColor(TextColor.ANSI.YELLOW);
 						}
 						if (showPlayerNames) {
+							textGraphics.setBackgroundColor(TextColor.ANSI.DEFAULT);
 							textGraphics.putString(terminalPosition.getColumn() + 2, terminalPosition.getRow(), playerMapper.get(entity).name);
+							textGraphics.setBackgroundColor(backgroundColor);
 						} else if (showIds) {
+							textGraphics.setBackgroundColor(TextColor.ANSI.DEFAULT);
 							textGraphics.putString(terminalPosition.getColumn() + 2, terminalPosition.getRow(), "" + entity);
+							textGraphics.setBackgroundColor(backgroundColor);
 						}
 					} else if (typeMapper.has(entity)) {
-						TextGraphics textGraphics = screen.newTextGraphics();
 						if (typeMapper.get(entity).type.equals("ai")) {
-							screen.setCharacter(terminalPosition, new TextCharacter('o', colored ? TextColor.ANSI.CYAN : gray, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('o', colored ? TextColor.ANSI.CYAN : gray, backgroundColor));
 							textGraphics.setForegroundColor(TextColor.ANSI.CYAN);
-						} else if (typeMapper.get(entity).type.equals("tree")) {
-							screen.setCharacter(terminalPosition, new TextCharacter('+', colored ? TextColor.ANSI.GREEN : gray, TextColor.ANSI.DEFAULT));
-							textGraphics.setForegroundColor(TextColor.ANSI.GREEN);
-						} else if (typeMapper.get(entity).type.equals("rock")) {
-							screen.setCharacter(terminalPosition, new TextCharacter('^', colored ? TextColor.ANSI.Indexed.fromRGB(100, 100, 100) : gray, TextColor.ANSI.DEFAULT));
-							textGraphics.setForegroundColor(TextColor.ANSI.GREEN);
 						} else if (typeMapper.get(entity).type.equals("animal")) {
-							screen.setCharacter(terminalPosition, new TextCharacter('*', colored ? TextColor.ANSI.Indexed.fromRGB(111, 90, 72) : gray, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('*', colored ? TextColor.ANSI.Indexed.fromRGB(111, 90, 72) : gray, backgroundColor));
 						} else if (typeMapper.get(entity).type.equals("pickup")) {
-							screen.setCharacter(terminalPosition, new TextCharacter('.', colored ? TextColor.ANSI.RED : gray, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('.', colored ? TextColor.ANSI.RED : gray, backgroundColor));
 							textGraphics.setForegroundColor(TextColor.ANSI.RED);
 						} else if (typeMapper.get(entity).type.equals("building")) {
 							Constructable constructable = constructableMapper.get(entity);
 							if (constructable == null || constructable.isComplete()) {
-								screen.setCharacter(terminalPosition, new TextCharacter('#', colored ? TextColor.ANSI.WHITE : gray, TextColor.ANSI.DEFAULT));
+								screen.setCharacter(terminalPosition, new TextCharacter('#', colored ? TextColor.ANSI.WHITE : gray, backgroundColor));
 							} else {
-								screen.setCharacter(terminalPosition, new TextCharacter('#', colored ? TextColor.ANSI.Indexed.fromRGB(100, 100, 100) : gray, TextColor.ANSI.DEFAULT));
+								screen.setCharacter(terminalPosition, new TextCharacter('#', colored ? TextColor.ANSI.Indexed.fromRGB(100, 100, 100) : gray, backgroundColor));
 							}
 							textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
 						} else if (typeMapper.get(entity).type.equals("home")) {
-							screen.setCharacter(terminalPosition, new TextCharacter('X', colored ? TextColor.ANSI.RED : gray, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('X', colored ? TextColor.ANSI.RED : gray, backgroundColor));
 							textGraphics.setForegroundColor(TextColor.ANSI.RED);
 						} else {
-							screen.setCharacter(terminalPosition, new TextCharacter('?', colored ? TextColor.ANSI.MAGENTA : gray, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('?', colored ? TextColor.ANSI.MAGENTA : gray, backgroundColor));
 							textGraphics.setForegroundColor(TextColor.ANSI.MAGENTA);
 						}
 						if (showIds) {
+							textGraphics.setBackgroundColor(TextColor.ANSI.DEFAULT);
 							textGraphics.putString(terminalPosition.getColumn() + 2, terminalPosition.getRow(), "" + entity);
+							textGraphics.setBackgroundColor(backgroundColor);
 						}
 					}
 					numberOfEntitiesOnScreen++;
 				}
 			}
 
-			TextGraphics textGraphics = screen.newTextGraphics();
-
 			textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
+			textGraphics.setBackgroundColor(TextColor.ANSI.DEFAULT);
 			textGraphics.putString(0, 0, "World size: " + worldConfiguration.width + " x " + worldConfiguration.height);
 			textGraphics.putString(0, 1, "Scale: x" + (Math.round(scale * 100.0f) / 100.0f));
 			textGraphics.putString(0, 2, "Camera position: " + (Math.round(cameraPosition.x * 100.0f) / 100.0f) + ", " + (Math.round(cameraPosition.y * 100.0f) / 100.0f));
@@ -540,7 +574,7 @@ public class TerminalSystem extends IntervalSystem {
 							focusedEntity = closestEntity;
 						}
 					} else if (keyStroke.getCharacter().toString().equals("r")) {
-						cameraPosition.set(0.0f, 0.0f);
+						cameraPosition.set(worldConfiguration.width / 2f, -worldConfiguration.height / 2f);
 						focusedEntity = -1;
 					} else if (keyStroke.getCharacter().toString().equals("n")) {
 						showPlayerNames = !showPlayerNames;
@@ -596,9 +630,20 @@ public class TerminalSystem extends IntervalSystem {
 	}
 
 	private TerminalPosition getTerminalPositionFromWorldPosition(Point2f position) {
+		return getTerminalPositionFromWorldPosition(position.x, position.y);
+	}
+
+	private TerminalPosition getTerminalPositionFromWorldPosition(float x, float y) {
 		return new TerminalPosition(
-				screen.getTerminalSize().getColumns() / 2 + (int) (position.x * scale) - (int) (cameraPosition.x * scale),
-				screen.getTerminalSize().getRows() / 2 - (int) (position.y * scale) - (int) (cameraPosition.y * scale)
+			screen.getTerminalSize().getColumns() / 2 + (int) (x * scale) - (int) (cameraPosition.x * scale),
+			screen.getTerminalSize().getRows() / 2 - (int) (y * scale) - (int) (cameraPosition.y * scale)
+		);
+	}
+
+	private Point2f getWorldPositionFromTerminalPosition(int column, int row) {
+		return new Point2f(
+			(column - screen.getTerminalSize().getColumns() / 2f + cameraPosition.x * scale) / scale,
+			-(row - screen.getTerminalSize().getRows() / 2f + cameraPosition.y * scale) / scale
 		);
 	}
 }

@@ -12,6 +12,7 @@ public class WorldConfiguration {
 
 	public int width;
 	public int height;
+	public int cellSize;
 	public int dayDuration;
 	public int nightDuration;
 
@@ -20,6 +21,7 @@ public class WorldConfiguration {
 			JSONObject worldData = new JSONObject(IOUtils.toString(getClass().getResourceAsStream("world.json"), Charset.defaultCharset()));
 			width = worldData.getInt("width");
 			height = worldData.getInt("height");
+			cellSize = worldData.getInt("cellSize");
 			dayDuration = worldData.getInt("dayDuration");
 			nightDuration = worldData.getInt("nightDuration");
 		} catch (Exception exception) {

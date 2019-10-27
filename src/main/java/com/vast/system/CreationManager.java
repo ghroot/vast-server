@@ -7,6 +7,7 @@ import com.artemis.ComponentMapper;
 import com.vast.component.*;
 import com.vast.data.*;
 import com.vast.network.Properties;
+import com.vast.network.TerrainTypes;
 import fastnoise.FastNoise;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -37,6 +38,7 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Plantable> plantableMapper;
 	private ComponentMapper<Group> groupMapper;
 	private ComponentMapper<Teach> teachMapper;
+	private ComponentMapper<Terrain> terrainMapper;
 
 	private WorldConfiguration worldConfiguration;
 	private Random random;
@@ -67,6 +69,7 @@ public class CreationManager extends BaseSystem {
 		worldArchetype = new ArchetypeBuilder()
 			.add(Time.class)
 			.add(Weather.class)
+			.add(Terrain.class)
 			.build(world);
 
 		playerArchetype = new ArchetypeBuilder()
@@ -154,20 +157,20 @@ public class CreationManager extends BaseSystem {
 	}
 
 	public void createWorld() {
-		world.create(worldArchetype);
+		int worldEntity = world.create(worldArchetype);
 
-		FastNoise noise1 = new FastNoise((int) (random.nextDouble() * 10000000));
-		FastNoise noise2 = new FastNoise((int) (random.nextDouble() * 10000000));
-		for (float x = -worldConfiguration.width / 2f; x < worldConfiguration.width / 2f; x += 3f) {
-			for (float y = -worldConfiguration.height / 2f; y < worldConfiguration.height / 2f; y += 3f) {
-				if (noise1.GetSimplex(x, y) > 0.35f) {
-					createTree(new Point2f(x - 1f + random.nextFloat() * 2f, y - 1f + random.nextFloat() * 2f), false);
+		Terrain terrain = terrainMapper.get(worldEntity);
+		terrain.cells = new byte[worldConfiguration.width / worldConfiguration.cellSize]
+			[worldConfiguration.height / worldConfiguration.cellSize];
+
+		FastNoise noise = new FastNoise((int) (random.nextDouble() * 10000000));
+		for (int x = 0; x < worldConfiguration.width; x += worldConfiguration.cellSize) {
+			for (int y = 0; y < worldConfiguration.height; y += worldConfiguration.cellSize) {
+				if (noise.GetSimplex(x, y) > 0.35f) {
+					terrain.cells[x / worldConfiguration.cellSize][y / worldConfiguration.cellSize] = TerrainTypes.TREE;
 				}
-				if (noise1.GetWhiteNoise(x, y) > 0.9f) {
-					createRock(new Point2f(x, y));
-				}
-				if (noise2.GetWhiteNoise(x, y) > 0.99f) {
-					createAnimalGroup(new Point2f(x, y), random.nextFloat() < 0.5f ? 0 : 2);
+				if (noise.GetWhiteNoise(x, y) > 0.95f) {
+					terrain.cells[x / worldConfiguration.cellSize][y / worldConfiguration.cellSize] = TerrainTypes.ROCK;
 				}
 			}
 		}
@@ -357,6 +360,6 @@ public class CreationManager extends BaseSystem {
 	}
 
 	private Point2f getRandomPositionInWorld() {
-		return new Point2f(-worldConfiguration.width / 2f + random.nextFloat() * worldConfiguration.width, -worldConfiguration.height / 2f + random.nextFloat() * worldConfiguration.height);
+		return new Point2f(random.nextFloat() * worldConfiguration.width, random.nextFloat() * worldConfiguration.height);
 	}
 }
