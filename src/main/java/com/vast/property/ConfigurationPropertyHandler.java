@@ -17,10 +17,12 @@ public class ConfigurationPropertyHandler implements PropertyHandler {
 
 	private Items items;
 	private Buildings buildings;
+	private WorldConfiguration worldConfiguration;
 
-	public ConfigurationPropertyHandler(Items items, Buildings buildings) {
+	public ConfigurationPropertyHandler(Items items, Buildings buildings, WorldConfiguration worldConfiguration) {
 		this.items = items;
 		this.buildings = buildings;
+		this.worldConfiguration = worldConfiguration;
 	}
 
 	@Override
@@ -75,6 +77,7 @@ public class ConfigurationPropertyHandler implements PropertyHandler {
 					buildingStrings[i] = buildingStringBuilder.toString();
 				}
 				configurationData.set((byte) 1, buildingStrings);
+				configurationData.set((byte) 2, (byte) worldConfiguration.cellSize);
 
 				dataObject.set(Properties.CONFIGURATION, configurationData);
 				if (syncHistory != null) {

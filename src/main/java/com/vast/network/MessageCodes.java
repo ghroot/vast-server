@@ -26,6 +26,11 @@ public class MessageCodes {
 	public static byte EVENT_TYPE = 1;
 	public static byte EVENT_VALUE = 2;
 
+	// Server -> Client
+	public static short TERRAIN = 4;
+	public static byte TERRAIN_ANCHOR_POSITION = 0;
+	public static byte TERRAIN_DATA = 1;
+
 	// Client -> Server
 	public static short MOVE = 50;
 	public static byte MOVE_POSITION = 0;

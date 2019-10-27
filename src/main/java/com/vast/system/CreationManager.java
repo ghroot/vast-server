@@ -166,11 +166,10 @@ public class CreationManager extends BaseSystem {
 		FastNoise noise = new FastNoise((int) (random.nextDouble() * 10000000));
 		for (int x = 0; x < worldConfiguration.width; x += worldConfiguration.cellSize) {
 			for (int y = 0; y < worldConfiguration.height; y += worldConfiguration.cellSize) {
-				if (noise.GetSimplex(x, y) > 0.35f) {
-					terrain.cells[x / worldConfiguration.cellSize][y / worldConfiguration.cellSize] = TerrainTypes.TREE;
-				}
 				if (noise.GetWhiteNoise(x, y) > 0.95f) {
 					terrain.cells[x / worldConfiguration.cellSize][y / worldConfiguration.cellSize] = TerrainTypes.ROCK;
+				} else if (noise.GetSimplex(x, y) > 0.35f) {
+					terrain.cells[x / worldConfiguration.cellSize][y / worldConfiguration.cellSize] = TerrainTypes.TREE;
 				}
 			}
 		}

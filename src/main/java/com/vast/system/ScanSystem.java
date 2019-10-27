@@ -40,7 +40,7 @@ public class ScanSystem extends IteratingSystem {
 		Scan scan = scanMapper.get(scanEntity);
 
 		scan.nearbyEntities.clear();
-		quadTree.getExact(scan.nearbyEntities, transform.position.x + worldConfiguration.width / 2f - scan.distance,
-			transform.position.y + worldConfiguration.height / 2f - scan.distance, 2f * scan.distance, 2f * scan.distance);
+		quadTree.getExact(scan.nearbyEntities, transform.position.x - scan.distance,
+			transform.position.y - scan.distance, 2 * scan.distance, 2 * scan.distance);
 	}
 }

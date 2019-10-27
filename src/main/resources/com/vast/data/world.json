@@ -1,7 +1,7 @@
 {
   "width": 1000,
   "height": 1000,
-  "cellSize": 2,
+  "cellSize": 1,
   "dayDuration": 8,
   "nightDuration": 2
 }

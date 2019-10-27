@@ -25,7 +25,6 @@ public class CollisionSystem extends IteratingSystem {
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Scan> scanMapper;
 
-	private WorldConfiguration worldConfiguration;
 	private QuadTree quadTree;
 	private Random random;
 	private Metrics metrics;
@@ -35,9 +34,8 @@ public class CollisionSystem extends IteratingSystem {
 	private int numberOfCollisionChecks;
 	private int numberOfCollisions;
 
-	public CollisionSystem(WorldConfiguration worldConfiguration, QuadTree quadTree, Random random, Metrics metrics) {
+	public CollisionSystem(QuadTree quadTree, Random random, Metrics metrics) {
 		super(Aspect.all(Transform.class, Collision.class).exclude(Static.class));
-		this.worldConfiguration = worldConfiguration;
 		this.quadTree = quadTree;
 		this.random = random;
 		this.metrics = metrics;
@@ -132,8 +130,8 @@ public class CollisionSystem extends IteratingSystem {
 			float distance = 2f;
 
 			reusableNearbyEntities.clear();
-			quadTree.getExact(reusableNearbyEntities, transform.position.x + worldConfiguration.width / 2f - distance,
-				transform.position.y + worldConfiguration.height / 2f - distance, 2f * distance, 2f * distance);
+			quadTree.getExact(reusableNearbyEntities, transform.position.x - distance,
+				transform.position.y - distance, 2 * distance, 2 * distance);
 		}
 		return reusableNearbyEntities;
 	}
