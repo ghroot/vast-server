@@ -37,12 +37,7 @@ public class VastWorld implements Runnable {
 	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, long randomSeed, boolean showMonitor, Metrics metrics) {
 		this.metrics = metrics;
 
-		Random random;
-		if (randomSeed >= 0) {
-			random = new Random(randomSeed);
-		} else {
-			random = new Random();
-		}
+		Random random = randomSeed >= 0 ? new Random(randomSeed) : new Random();
 		WorldConfiguration worldConfiguration = new WorldConfiguration();
 		Items items = new Items();
 		Buildings buildings = new Buildings(items);
