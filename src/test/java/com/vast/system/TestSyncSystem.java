@@ -22,7 +22,7 @@ public class TestSyncSystem {
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 	private ComponentMapper<Sync> syncMapper;
 
-	private void setupWorld(Set<PropertyHandler> propertyHandlers) {
+	private void setupWorld(PropertyHandler[] propertyHandlers) {
 		world = new World(new WorldConfigurationBuilder().with(
 			new SyncSystem(propertyHandlers, null)
 		).build());
@@ -57,10 +57,10 @@ public class TestSyncSystem {
 	@Test
 	public void notifiesOwnerOnceEvenIfSeveralPropertiesChanged() {
 		VastPeer ownerPeer = createPeer(123);
-		setupWorld(new HashSet<>(Arrays.asList(
-				createPropertyHandler(1, true),
-				createPropertyHandler(2, true)
-		)));
+		setupWorld(new PropertyHandler[]{
+			createPropertyHandler(1, true),
+			createPropertyHandler(2, true)
+		});
 
 		int playerEntity = world.create();
 		playerMapper.create(playerEntity);
@@ -79,9 +79,9 @@ public class TestSyncSystem {
 	@Test
 	public void doesNotNotifyOwnerIfPropertyDidNotChange() {
 		VastPeer ownerPeer = createPeer(123);
-		setupWorld(new HashSet<>(Arrays.asList(
-				createPropertyHandler(1, false)
-		)));
+		setupWorld(new PropertyHandler[]{
+			createPropertyHandler(1, false)
+		});
 
 		int playerEntity = world.create();
 		playerMapper.create(playerEntity);
@@ -98,9 +98,9 @@ public class TestSyncSystem {
 	@Test
 	public void doesNotNotifyOwnerIfPropertyWasNotMarkedAsDirty() {
 		VastPeer ownerPeer = createPeer(123);
-		setupWorld(new HashSet<>(Arrays.asList(
-				createPropertyHandler(1, true)
-		)));
+		setupWorld(new PropertyHandler[]{
+			createPropertyHandler(1, true)
+		});
 
 		int playerEntity = world.create();
 		playerMapper.create(playerEntity);
@@ -116,10 +116,10 @@ public class TestSyncSystem {
 	@Test
 	public void notifiesWithReliableWhenPropertiesHaveMixedReliability() {
 		VastPeer ownerPeer = createPeer(123);
-		setupWorld(new HashSet<>(Arrays.asList(
-				createPropertyHandler(1, true),
-				createPropertyHandler(2, true)
-		)));
+		setupWorld(new PropertyHandler[]{
+			createPropertyHandler(1, true),
+			createPropertyHandler(2, true)
+		});
 
 		int playerEntity = world.create();
 		playerMapper.create(playerEntity);
@@ -138,10 +138,10 @@ public class TestSyncSystem {
 	@Test
 	public void notifiesWithUnreliableWhenAllPropertiesAreUnreliable() {
 		VastPeer ownerPeer = createPeer(123);
-		setupWorld(new HashSet<>(Arrays.asList(
-				createPropertyHandler(1, true),
-				createPropertyHandler(2, true)
-		)));
+		setupWorld(new PropertyHandler[]{
+			createPropertyHandler(1, true),
+			createPropertyHandler(2, true)
+		});
 
 		int playerEntity = world.create();
 		playerMapper.create(playerEntity);
@@ -163,10 +163,10 @@ public class TestSyncSystem {
 		VastPeer ownerPeer = createPeer(123);
 		VastPeer nearbyPeer = createPeer(321);
 		VastPeer farPeer = createPeer(213);
-		setupWorld(new HashSet<>(Arrays.asList(
-				createPropertyHandler(1, true),
-				createPropertyHandler(2, true)
-		)));
+		setupWorld(new PropertyHandler[]{
+			createPropertyHandler(1, true),
+			createPropertyHandler(2, true)
+		});
 
 		int playerEntity = world.create();
 		int nearbyEntity = world.create();

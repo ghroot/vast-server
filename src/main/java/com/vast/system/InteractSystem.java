@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.vecmath.Vector2f;
-import java.util.List;
 
 public class InteractSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(InteractSystem.class);
@@ -26,11 +25,11 @@ public class InteractSystem extends IteratingSystem {
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Used> usedMapper;
 
-	private List<InteractionHandler> interactionHandlers;
+	private InteractionHandler[] interactionHandlers;
 
 	private Vector2f reusableVector;
 
-	public InteractSystem(List<InteractionHandler> interactionHandlers) {
+	public InteractSystem(InteractionHandler[] interactionHandlers) {
 		super(Aspect.all(Interact.class));
 		this.interactionHandlers = interactionHandlers;
 

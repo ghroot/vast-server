@@ -21,7 +21,7 @@ public class TestOrderSystem {
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Order> orderMapper;
 
-	private void setupWorld(Set<OrderHandler> orderHandlers, IncomingRequest incomingRequest) {
+	private void setupWorld(OrderHandler[] orderHandlers, IncomingRequest incomingRequest) {
 		Map<String, List<IncomingRequest>> incomingRequests = new HashMap<>();
 		if (incomingRequest != null) {
 			incomingRequests.put(incomingRequest.getPeer().getName(), new ArrayList<>(Arrays.asList(incomingRequest)));
@@ -35,7 +35,7 @@ public class TestOrderSystem {
 		orderMapper = world.getMapper(Order.class);
 	}
 
-	private void setupWorld(Set<OrderHandler> orderHandlers) {
+	private void setupWorld(OrderHandler[] orderHandlers) {
 		setupWorld(orderHandlers, null);
 	}
 
@@ -48,7 +48,7 @@ public class TestOrderSystem {
 	@Test
 	public void cancelsOrderIfNotActive() {
 		OrderHandler orderHandler = Mockito.mock(OrderHandler.class);
-		setupWorld(new HashSet<>(Arrays.asList(orderHandler)));
+		setupWorld(new OrderHandler[] {orderHandler});
 
 		int playerEntityId = world.create();
 		playerMapper.create(playerEntityId);
@@ -63,7 +63,7 @@ public class TestOrderSystem {
 	@Test
 	public void removesOrderIfComplete() {
 		OrderHandler orderHandler = Mockito.mock(OrderHandler.class);
-		setupWorld(new HashSet<>(Arrays.asList(orderHandler)));
+		setupWorld(new OrderHandler[] {orderHandler});
 
 		int playerEntityId = world.create();
 		playerMapper.create(playerEntityId);
@@ -88,7 +88,7 @@ public class TestOrderSystem {
 		RequestMessage message = new RequestMessage((short) 1, dataObject);
 		IncomingRequest incomingRequest = new IncomingRequest(peer, message);
 
-		setupWorld(new HashSet<>(Arrays.asList(orderHandler)), incomingRequest);
+		setupWorld(new OrderHandler[] {orderHandler}, incomingRequest);
 
 		int playerEntityId = world.create();
 		playerMapper.create(playerEntityId).name = "TestPeer";

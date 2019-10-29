@@ -30,7 +30,7 @@ public class HumanBehaviour extends AbstractBehaviour {
 	private Items items;
 	private Buildings buildings;
 
-	public HumanBehaviour(List<InteractionHandler> interactionHandlers, Random random, Map<String, List<IncomingRequest>> incomingRequestsByPeer, Items items, Buildings buildings) {
+	public HumanBehaviour(InteractionHandler[] interactionHandlers, Random random, Map<String, List<IncomingRequest>> incomingRequestsByPeer, Items items, Buildings buildings) {
 		super(interactionHandlers);
 		this.random = random;
 		this.incomingRequestsByPeer = incomingRequestsByPeer;

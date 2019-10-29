@@ -4,14 +4,13 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
-import com.vast.component.*;
+import com.vast.component.Interact;
+import com.vast.component.Transform;
+import com.vast.component.Used;
 import com.vast.interact.AbstractInteractionHandler;
 import com.vast.interact.InteractionHandler;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 import static org.mockito.Mockito.*;
 
@@ -24,7 +23,7 @@ public class TestInteractSystem {
 	private void setupWorld(InteractionHandler interactionHandler) {
 		world = new World(new WorldConfigurationBuilder().with(
 			new InteractSystem(interactionHandler != null ?
-				Arrays.asList(interactionHandler) : new ArrayList<>())
+				new InteractionHandler[] {interactionHandler} : new InteractionHandler[0])
 		).build());
 
 		interactMapper = world.getMapper(Interact.class);

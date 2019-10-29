@@ -6,7 +6,6 @@ import com.vast.component.Follow;
 import com.vast.component.Group;
 import com.vast.interact.InteractionHandler;
 
-import java.util.List;
 import java.util.Random;
 
 public class YoungAnimalBehaviour extends AbstractBehaviour {
@@ -15,7 +14,7 @@ public class YoungAnimalBehaviour extends AbstractBehaviour {
 
 	private Random random;
 
-	public YoungAnimalBehaviour(List<InteractionHandler> interactionHandlers, Random random) {
+	public YoungAnimalBehaviour(InteractionHandler[] interactionHandlers, Random random) {
 		super(interactionHandlers);
 		this.random = random;
 	}

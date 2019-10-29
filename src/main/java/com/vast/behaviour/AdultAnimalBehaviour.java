@@ -5,7 +5,6 @@ import com.vast.component.*;
 import com.vast.interact.InteractionHandler;
 
 import javax.vecmath.Vector2f;
-import java.util.List;
 import java.util.Random;
 
 public class AdultAnimalBehaviour extends AbstractBehaviour {
@@ -22,7 +21,7 @@ public class AdultAnimalBehaviour extends AbstractBehaviour {
 
 	private Vector2f reusableVector;
 
-	public AdultAnimalBehaviour(List<InteractionHandler> interactionHandlers, Random random) {
+	public AdultAnimalBehaviour(InteractionHandler[] interactionHandlers, Random random) {
 		super(interactionHandlers);
 		this.random = random;
 

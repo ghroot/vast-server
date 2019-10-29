@@ -10,8 +10,6 @@ import com.vast.network.MessageCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
 public class InteractOrderHandler implements OrderHandler {
 	private static final Logger logger = LoggerFactory.getLogger(InteractOrderHandler.class);
 
@@ -20,9 +18,9 @@ public class InteractOrderHandler implements OrderHandler {
 	private ComponentMapper<Interact> interactMapper;
 	private ComponentMapper<Path> pathMapper;
 
-	private List<InteractionHandler> interactionHandlers;
+	private InteractionHandler[] interactionHandlers;
 
-	public InteractOrderHandler(List<InteractionHandler> interactionHandlers) {
+	public InteractOrderHandler(InteractionHandler[] interactionHandlers) {
 		this.interactionHandlers = interactionHandlers;
 	}
 

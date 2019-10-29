@@ -10,8 +10,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.HashSet;
-
 public class TestCullingSystem {
 	@Test
 	public void newEntityIsKnownFromBothSides() {
@@ -19,7 +17,7 @@ public class TestCullingSystem {
 		Mockito.when(peer.getId()).thenReturn(123L);
 
 		World world = new World(new WorldConfigurationBuilder().with(
-			new CullingSystem(new HashSet<>())
+			new CullingSystem(new PropertyHandler[0])
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
@@ -51,7 +49,7 @@ public class TestCullingSystem {
 		Mockito.when(peer.getId()).thenReturn(123L);
 
 		World world = new World(new WorldConfigurationBuilder().with(
-			new CullingSystem(new HashSet<>())
+			new CullingSystem(new PropertyHandler[0])
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);

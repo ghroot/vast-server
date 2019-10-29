@@ -15,6 +15,12 @@ public class SkillPropertyHandler implements PropertyHandler {
 
 	private final int WORD_LEVEL_THRESHOLD = 1;
 
+	private DataObject reusableSkillDataObject;
+
+	public SkillPropertyHandler() {
+		reusableSkillDataObject = new DataObject();
+	}
+
 	@Override
 	public byte getProperty() {
 		return Properties.SKILL;
@@ -47,12 +53,19 @@ public class SkillPropertyHandler implements PropertyHandler {
 				}
 			}
 			if (force || sync) {
-				DataObject skillDataObject = new DataObject();
-				skillDataObject.set((byte) 0, skill.words);
-				skillDataObject.set((byte) 1, skill.wordLevels);
-				dataObject.set(Properties.SKILL, skillDataObject);
+				reusableSkillDataObject.clear();
+				reusableSkillDataObject.set((byte) 0, skill.words);
+				reusableSkillDataObject.set((byte) 1, skill.wordLevels);
+				dataObject.set(Properties.SKILL, reusableSkillDataObject);
 				if (syncHistory != null) {
-					Map<String, Byte> syncedSkillWords = new HashMap<>();
+					Map<String, Byte> syncedSkillWords;
+					if (syncHistory.syncedValues.containsKey(Properties.SKILL)) {
+						syncedSkillWords = (Map<String, Byte>) syncHistory.syncedValues.get(Properties.SKILL);
+						syncedSkillWords.clear();
+					} else {
+						syncedSkillWords = new HashMap<>();
+						syncHistory.syncedValues.put(Properties.SKILL, syncedSkillWords);
+					}
 					for (int i = 0; i < skill.words.length; i++) {
 						syncedSkillWords.put(skill.words[i], skill.wordLevels[i]);
 					}

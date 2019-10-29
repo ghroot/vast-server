@@ -46,38 +46,38 @@ public class VastWorld implements Runnable {
 		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<>();
 		Map<String, Integer> entitiesByPeer = new HashMap<>();
 		QuadTree quadTree = new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height);
-		List<InteractionHandler> interactionHandlers = new ArrayList<>(Arrays.asList(
-				new GrowingInteractionHandler(),
-				new HarvestableInteractionHandler(items),
-				new ConstructableInteractionHandler(),
-				new PlantableInteractionHandler(items),
-				new ContainerInteractionHandler(items),
-				new FueledInteractionHandler()
-		));
-		Set<OrderHandler> orderHandlers = new HashSet<>(Arrays.asList(
-				new MoveOrderHandler(),
-				new InteractOrderHandler(interactionHandlers),
-				new BuildOrderHandler(buildings),
-				new EmoteOrderHandler(),
-				new SetHomeOrderHandler(),
-				new CraftOrderHandler(items),
-				new PlantOrderHandler(items),
-				new FollowOrderHandler(),
-				new ChatOrderHandler()
-		));
-		Set<PropertyHandler> propertyHandlers = new HashSet<>(Arrays.asList(
-				new PositionPropertyHandler(),
-				new RotationPropertyHandler(),
-				new ActivePropertyHandler(),
-				new ProgressPropertyHandler(),
-				new InventoryPropertyHandler(),
-				new FueledPropertyHandler(),
-				new HomePropertyHandler(),
-				new GrowingPropertyHandler(),
-				new StatePropertyHandler(),
-				new ConfigurationPropertyHandler(items, buildings),
-				new SkillPropertyHandler()
-		));
+		InteractionHandler[] interactionHandlers = {
+			new GrowingInteractionHandler(),
+			new HarvestableInteractionHandler(items),
+			new ConstructableInteractionHandler(),
+			new PlantableInteractionHandler(items),
+			new ContainerInteractionHandler(items),
+			new FueledInteractionHandler()
+		};
+		OrderHandler[] orderHandlers = {
+			new MoveOrderHandler(),
+			new InteractOrderHandler(interactionHandlers),
+			new BuildOrderHandler(buildings),
+			new EmoteOrderHandler(),
+			new SetHomeOrderHandler(),
+			new CraftOrderHandler(items),
+			new PlantOrderHandler(items),
+			new FollowOrderHandler(),
+			new ChatOrderHandler()
+		};
+		PropertyHandler[] propertyHandlers = {
+			new PositionPropertyHandler(),
+			new RotationPropertyHandler(),
+			new ActivePropertyHandler(),
+			new ProgressPropertyHandler(),
+			new InventoryPropertyHandler(),
+			new FueledPropertyHandler(),
+			new HomePropertyHandler(),
+			new GrowingPropertyHandler(),
+			new StatePropertyHandler(),
+			new ConfigurationPropertyHandler(items, buildings),
+			new SkillPropertyHandler()
+		};
 		Map<String, Behaviour> behaviours = new HashMap<>();
 		behaviours.put("human", new HumanBehaviour(interactionHandlers, random, incomingRequestsByPeer, items, buildings));
 		behaviours.put("adultAnimal", new AdultAnimalBehaviour(interactionHandlers, random));

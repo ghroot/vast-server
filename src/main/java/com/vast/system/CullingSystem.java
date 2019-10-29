@@ -13,8 +13,6 @@ import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Set;
-
 public class CullingSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CullingSystem.class);
 
@@ -26,19 +24,21 @@ public class CullingSystem extends IteratingSystem {
 	private ComponentMapper<SubType> subTypeMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 
-	private Set<PropertyHandler> propertyHandlers;
+	private PropertyHandler[] propertyHandlers;
 
 	private IntBag reusableRemovedEntities;
 	private EventMessage reusableDestroyedEventMessage;
 	private EventMessage reusableCreatedEventMessage;
+	private DataObject reusablePropertiesDataObject;
 
-	public CullingSystem(Set<PropertyHandler> propertyHandlers) {
+	public CullingSystem(PropertyHandler[] propertyHandlers) {
 		super(Aspect.all(Scan.class, Active.class));
 		this.propertyHandlers = propertyHandlers;
 
 		reusableRemovedEntities = new IntBag();
 		reusableDestroyedEventMessage = new EventMessage(MessageCodes.ENTITY_DESTROYED);
 		reusableCreatedEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
+		reusablePropertiesDataObject = new DataObject();
 	}
 
 	@Override
@@ -113,11 +113,11 @@ public class CullingSystem extends IteratingSystem {
 		if (playerMapper.has(newEntity)) {
 			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(newEntity).name));
 		}
-		DataObject propertiesDataObject = new DataObject();
-		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, propertiesDataObject);
+		reusablePropertiesDataObject.clear();
+		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, reusablePropertiesDataObject);
 		for (PropertyHandler propertyHandler : propertyHandlers) {
 			if (newEntity == entity || syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
-				propertyHandler.decorateDataObject(newEntity, propertiesDataObject, true);
+				propertyHandler.decorateDataObject(newEntity, reusablePropertiesDataObject, true);
 			}
 		}
 		peer.send(reusableCreatedEventMessage);
