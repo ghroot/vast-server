@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class OrderSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(OrderSystem.class);
@@ -24,10 +23,10 @@ public class OrderSystem extends IteratingSystem {
 	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
 
-	private Set<OrderHandler> orderHandlers;
+	private OrderHandler[] orderHandlers;
 	private Map<String, List<IncomingRequest>> incomingRequestsByPeer;
 
-	public OrderSystem(Set<OrderHandler> orderHandlers, Map<String, List<IncomingRequest>> incomingRequestsByPeer) {
+	public OrderSystem(OrderHandler[] orderHandlers, Map<String, List<IncomingRequest>> incomingRequestsByPeer) {
 		super(Aspect.all(Player.class));
 		this.orderHandlers = orderHandlers;
 		this.incomingRequestsByPeer = incomingRequestsByPeer;

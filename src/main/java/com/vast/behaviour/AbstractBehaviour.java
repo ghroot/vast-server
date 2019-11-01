@@ -15,12 +15,12 @@ public abstract class AbstractBehaviour implements Behaviour {
 	protected ComponentMapper<AI> aiMapper;
 	protected ComponentMapper<Scan> scanMapper;
 
-	private List<InteractionHandler> interactionHandlers;
+	private InteractionHandler[] interactionHandlers;
 
 	private List<Integer> reusableNearbyEntities;
 	private List<Integer> reusableNearbyInteractableEntities;
 
-	public AbstractBehaviour(List<InteractionHandler> interactionHandlers) {
+	public AbstractBehaviour(InteractionHandler[] interactionHandlers) {
 		this.interactionHandlers = interactionHandlers;
 
 		reusableNearbyEntities = new ArrayList<>();

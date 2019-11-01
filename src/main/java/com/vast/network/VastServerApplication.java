@@ -24,8 +24,8 @@ public class VastServerApplication extends ServerApplication {
 	private boolean showMonitor;
 	private Metrics metrics;
 
-	private List<VastPeer> peers;
 	private List<IncomingRequest> incomingRequests;
+	private List<PeerListener> peerListeners;
 
 	private VastWorld world;
 	private Thread worldThread;
@@ -40,8 +40,8 @@ public class VastServerApplication extends ServerApplication {
 
 	@Override
 	protected void setup() {
-		peers = new ArrayList<>();
 		incomingRequests = new ArrayList<>();
+		peerListeners = new ArrayList<>();
 
 		world = new VastWorld(this, snapshotFormat, randomSeed, showMonitor, metrics);
 		worldThread = new Thread(world, "World");
@@ -49,18 +49,15 @@ public class VastServerApplication extends ServerApplication {
 		worldThread.start();
 
 		if (numberOfPeersToSimulate > 0) {
-			synchronized (peers) {
-				for (int i = 0; i < numberOfPeersToSimulate; i++) {
-					String name = "fakePeer" + (i + 1);
-					peers.add(new FakePeer(this, name, metrics));
-					logger.info("Added fake peer: {}", name);
+			for (int i = 0; i < numberOfPeersToSimulate; i++) {
+				String name = "fakePeer" + (i + 1);
+				VastPeer fakePeer = new FakePeer(this, name, metrics);
+				for (PeerListener peerListener : peerListeners) {
+					peerListener.peerAdded(fakePeer);
 				}
+				logger.info("Added fake peer: {}", name);
 			}
 		}
-	}
-
-	public List<VastPeer> getPeers() {
-		return peers;
 	}
 
 	public List<IncomingRequest> getIncomingRequests() {
@@ -76,16 +73,16 @@ public class VastServerApplication extends ServerApplication {
 	protected ClientPeer createPeer(InitialRequest initialRequest, NetworkPeer networkPeer) {
 		String name = new String(initialRequest.getCustomData(), StandardCharsets.UTF_8);
 		VastPeer peer = new VastPeer(initialRequest, networkPeer, this, name, metrics);
-		synchronized (peers) {
-			peers.add(peer);
+		for (PeerListener peerListener : peerListeners) {
+			peerListener.peerAdded(peer);
 		}
 		logger.info("Added peer: {} ({})", peer.getName(), peer.getId());
 		return peer;
 	}
 
 	public void onPeerDisconnected(VastPeer peer, DisconnectReason disconnectReason, String detail) {
-		synchronized (peers) {
-			peers.remove(peer);
+		for (PeerListener peerListener : peerListeners) {
+			peerListener.peerRemoved(peer);
 		}
 		logger.info("Removed peer: {} ({}) (reason: {}, detail: {})", peer.getName(), peer.getId(), disconnectReason, detail);
 	}
@@ -95,5 +92,13 @@ public class VastServerApplication extends ServerApplication {
 			incomingRequests.add(new IncomingRequest(peer, requestMessage));
 		}
 		logger.debug("Got request message from peer: {} from {} ({})", requestMessage, peer.getName(), peer.getId());
+	}
+
+	public void addPeerListener(PeerListener peerListener) {
+		peerListeners.add(peerListener);
+	}
+
+	public void removePeerListener(PeerListener peerListener) {
+		peerListeners.remove(peerListener);
 	}
 }

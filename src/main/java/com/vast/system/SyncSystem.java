@@ -24,14 +24,14 @@ public class SyncSystem extends IteratingSystem {
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Known> knownMapper;
 
-	private Set<PropertyHandler> propertyHandlers;
+	private PropertyHandler[] propertyHandlers;
 	private Metrics metrics;
 
 	private DataObject reusablePropertiesDataObject;
 	private ChangedProperties reusableChangedProperties;
 	private EventMessage reusableMessage;
 
-	public SyncSystem(Set<PropertyHandler> propertyHandlers, Metrics metrics) {
+	public SyncSystem(PropertyHandler[] propertyHandlers, Metrics metrics) {
 		super(Aspect.all(Sync.class, SyncPropagation.class, Known.class));
 		this.propertyHandlers = propertyHandlers;
 		this.metrics = metrics;

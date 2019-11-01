@@ -10,15 +10,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
 public class TestCreateSystem {
 	@Test
 	public void removesCreateComponent() {
 		World world = new World(new WorldConfigurationBuilder().with(
-			new CreateSystem(new HashSet<>())
+			new CreateSystem(new PropertyHandler[0])
 		).build());
 
 		ComponentMapper<Create> createMapper = world.getMapper(Create.class);
@@ -38,7 +34,7 @@ public class TestCreateSystem {
 		VastPeer peer = Mockito.mock(VastPeer.class);
 		Mockito.when(peer.getId()).thenReturn(123L);
 		World world = new World(new WorldConfigurationBuilder().with(
-			new CreateSystem(new HashSet<>())
+			new CreateSystem(new PropertyHandler[0])
 		).build());
 
 		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
