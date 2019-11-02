@@ -13,7 +13,7 @@ public class SkillPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Skill> skillMapper;
 	private ComponentMapper<SyncHistory> syncHistoryMapper;
 
-	private final int WORD_LEVEL_THRESHOLD = 1;
+	private final int WORD_LEVEL_THRESHOLD = 5;
 
 	private DataObject reusableSkillDataObject;
 
