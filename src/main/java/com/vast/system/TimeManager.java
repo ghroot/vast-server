@@ -1,20 +1,16 @@
 package com.vast.system;
 
-import com.artemis.Aspect;
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.artemis.EntitySubscription;
+import com.artemis.annotations.All;
 import com.vast.component.Time;
 
 public class TimeManager extends BaseSystem {
 	private ComponentMapper<Time> timeMapper;
 
+	@All(Time.class)
 	private EntitySubscription timeSubscription;
-
-	@Override
-	protected void initialize() {
-		timeSubscription = world.getAspectSubscriptionManager().get(Aspect.all(Time.class));
-	}
 
 	public float getTime() {
 		Time time = timeMapper.get(timeSubscription.getEntities().get(0));
