@@ -31,7 +31,7 @@ public class VastWorld implements Runnable {
 	private World world;
 	private boolean isAlive;
 	private long lastFrameStartTime;
-	private boolean isPaused;
+	private int timeModifier = 1;
 	private Metrics metrics;
 
 	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, long randomSeed, boolean showMonitor, Metrics metrics) {
@@ -144,12 +144,8 @@ public class VastWorld implements Runnable {
 			if (metrics != null) {
 				metrics.setTimePerFrameMs(timeSinceLastFrame);
 			}
-			if (isPaused) {
-				world.setDelta(0f);
-			} else {
-				float delta = (float) timeSinceLastFrame / 1000;
-				world.setDelta(delta);
-			}
+			float delta = (timeSinceLastFrame / 1000f) * timeModifier;
+			world.setDelta(delta);
 			long processStartTime = System.currentTimeMillis();
 			world.process();
 			long processEndTime = System.currentTimeMillis();
@@ -171,15 +167,11 @@ public class VastWorld implements Runnable {
 		isAlive = false;
 	}
 
-	public void pause() {
-		isPaused = true;
+	public void setTimeModifier(int timeModifier) {
+		this.timeModifier = timeModifier;
 	}
 
-	public boolean isPaused() {
-		return isPaused;
-	}
-
-	public void resume() {
-		isPaused = false;
+	public int getTimeModifier() {
+		return timeModifier;
 	}
 }

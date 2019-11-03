@@ -106,11 +106,7 @@ public class TerminalSystem extends IntervalSystem {
 
 	@Override
 	protected float getTimeDelta() {
-		if (vastWorld.isPaused()) {
-			return 1f / 30f;
-		} else {
-			return super.getTimeDelta();
-		}
+		return 1f / 30f;
 	}
 
 	@Override
@@ -210,8 +206,10 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.putString(0, 5, "Player entities: " + playerEntities.size() + " (" + activePlayerEntities.size() + " active)");
 			textGraphics.putString(0, 6, "Scanning entities: " + scanEntities.size());
 
-			if (vastWorld.isPaused()) {
+			if (vastWorld.getTimeModifier() == 0) {
 				textGraphics.putString(screen.getTerminalSize().getColumns() / 2 - 3, 1, "PAUSED");
+			} else if (vastWorld.getTimeModifier() > 1) {
+				textGraphics.putString(screen.getTerminalSize().getColumns() / 2 - 7, 1, "FAST FORWARD " + vastWorld.getTimeModifier() + "X");
 			}
 
 			String fpsString = "FPS: " + metrics.getFps();
@@ -570,11 +568,11 @@ public class TerminalSystem extends IntervalSystem {
 						showSentEvents = !showSentEvents;
 						showSentMessages = false;
 						showSyncedProperties = false;
-					} else if (keyStroke.getCharacter().toString().equals("u")) {
-						if (vastWorld.isPaused()) {
-							vastWorld.resume();
-						} else {
-							vastWorld.pause();
+					} else if (keyStroke.getCharacter().toString().equals(">")) {
+						vastWorld.setTimeModifier(vastWorld.getTimeModifier() + 1);
+					} else if (keyStroke.getCharacter().toString().equals("<")) {
+						if (vastWorld.getTimeModifier() > 0) {
+							vastWorld.setTimeModifier(vastWorld.getTimeModifier() - 1);
 						}
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
