@@ -56,11 +56,15 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 			eventMapper.create(playerEntity).addEntry("message").setData("I don't have the required tool...").setOwnerOnly(true);
 			return false;
 		} else {
-			stateMapper.get(playerEntity).name = harvestable.harvestEventName;
-			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
-			stateMapper.get(harvestableEntity).name = harvestable.harvestEventName;
-			syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.STATE);
-			teachMapper.create(playerEntity).addWord("chop");
+			if (harvestable.stateName != null) {
+				stateMapper.get(playerEntity).name = harvestable.stateName;
+				syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
+				stateMapper.get(harvestableEntity).name = harvestable.stateName;
+				syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.STATE);
+			}
+			if (harvestable.teachWord != null) {
+				teachMapper.create(playerEntity).addWord(harvestable.teachWord);
+			}
 			return true;
 		}
 	}
@@ -82,7 +86,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
 		harvestable.durability -= world.getDelta() * HARVEST_SPEED;
-		if (harvestable.durability <= 0.0f) {
+		if (harvestable.durability <= 0f) {
 			int pickupEntity = creationManager.createPickup(transformMapper.get(harvestableEntity).position, 0, inventoryMapper.get(harvestableEntity));
 			createMapper.create(pickupEntity).reason = "harvested";
 			deleteMapper.create(harvestableEntity).reason = "harvested";
@@ -94,12 +98,18 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public void stop(int playerEntity, int harvestableEntity) {
-		stateMapper.get(playerEntity).name = null;
-		syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
-		if (harvestableEntity != -1) {
-			stateMapper.get(harvestableEntity).name = null;
-			syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.STATE);
+		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
+
+		if (harvestable.stateName != null) {
+			stateMapper.get(playerEntity).name = null;
+			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
+			if (harvestableEntity != -1) {
+				stateMapper.get(harvestableEntity).name = null;
+				syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.STATE);
+			}
 		}
-		teachMapper.create(playerEntity).removeWord("chop");
+		if (harvestable.teachWord != null) {
+			teachMapper.create(playerEntity).removeWord(harvestable.teachWord);
+		}
 	}
 }
