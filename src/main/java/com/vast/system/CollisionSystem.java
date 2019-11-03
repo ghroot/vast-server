@@ -123,7 +123,6 @@ public class CollisionSystem extends IteratingSystem {
 	}
 
 	private IntBag getNearbyEntities(int entity) {
-		reusableNearbyEntities.clear();
 		if (scanMapper.has(entity)) {
 			return scanMapper.get(entity).nearbyEntities;
 		} else {
@@ -134,7 +133,7 @@ public class CollisionSystem extends IteratingSystem {
 			reusableNearbyEntities.clear();
 			quadTree.getExact(reusableNearbyEntities, transform.position.x + worldConfiguration.width / 2f - distance,
 				transform.position.y + worldConfiguration.height / 2f - distance, 2f * distance, 2f * distance);
+			return reusableNearbyEntities;
 		}
-		return reusableNearbyEntities;
 	}
 }
