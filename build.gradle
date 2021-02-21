@@ -63,7 +63,7 @@ jar {
 task fatJar(type: Jar) {
     dependsOn weave
     manifest.from jar.manifest
-    baseName = project.name + '-all'
+    baseName = 'vast-server-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
