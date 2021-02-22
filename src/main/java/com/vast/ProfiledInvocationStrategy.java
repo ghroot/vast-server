@@ -14,7 +14,7 @@ public class ProfiledInvocationStrategy extends SystemInvocationStrategy {
 
 	protected void process() {
 		BaseSystem[] systemsData = systems.getData();
-		for(int i = 0, s = systems.size(); s > i; ++i) {
+		for (int i = 0, s = systems.size(); s > i; ++i) {
 			if (!disabled.get(i)) {
 				BaseSystem system = systemsData[i];
 				updateEntityStates();
