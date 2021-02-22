@@ -3,6 +3,7 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.EntitySubscription;
+import com.artemis.annotations.All;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.component.Active;
@@ -16,23 +17,16 @@ public class WeatherSystem extends IteratingSystem {
 	private ComponentMapper<Weather> weatherMapper;
 	private ComponentMapper<Event> eventMapper;
 
+	@All(Weather.class)
+	private EntitySubscription weatherSubscription;
+
 	private Random random;
 
-	private EntitySubscription weatherSubscription;
 	private boolean changed;
 
 	public WeatherSystem(Random random) {
 		super(Aspect.all(Player.class, Active.class));
 		this.random = random;
-	}
-
-	@Override
-	protected void initialize() {
-		weatherSubscription = world.getAspectSubscriptionManager().get(Aspect.all(Weather.class));
-
-		Weather weather = weatherMapper.get(weatherSubscription.getEntities().get(0));
-		weather.isRaining = false;
-		weather.countdown = 60.0f;
 	}
 
 	@Override
