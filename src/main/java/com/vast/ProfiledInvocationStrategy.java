@@ -28,7 +28,9 @@ public class ProfiledInvocationStrategy extends SystemInvocationStrategy {
 				system.process();
 				long endTime = System.currentTimeMillis();
 				int processingTime = (int) (endTime - startTime);
-				metrics.setSystemMetrics(systemsData[i], processingTime, numberOfEntitiesInSystem);
+				if (metrics != null) {
+					metrics.setSystemMetrics(systemsData[i], processingTime, numberOfEntitiesInSystem);
+				}
 			}
 		}
 		updateEntityStates();
