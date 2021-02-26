@@ -52,6 +52,7 @@ public class InteractSystem extends IteratingSystem {
 	protected void removed(int entity) {
 		Interact interact = interactMapper.get(entity);
 		if (interact != null && interact.phase == Interact.Phase.INTERACTING) {
+			usedMapper.remove(interact.entity);
 			if (interact.handler != null) {
 				interact.handler.stop(entity, interact.entity);
 			}
@@ -76,12 +77,10 @@ public class InteractSystem extends IteratingSystem {
 
 						if (interact.handler.process(entity, interact.entity)) {
 							logger.debug("Entity {} completed interaction with entity {}", entity, interact.entity);
-							usedMapper.remove(interact.entity);
 							interactMapper.remove(entity);
 						}
 					} else {
 						logger.debug("Entity {} can no longer interact with entity {}", entity, interact.entity);
-						usedMapper.remove(interact.entity);
 						interactMapper.remove(entity);
 					}
 				} else {
