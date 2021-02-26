@@ -105,6 +105,8 @@ public class OrderSystem extends IteratingSystem {
 		if (handler.startOrder(playerEntity, dataObject)) {
 			orderMapper.create(playerEntity).handler = handler;
 			logger.debug("Starting order for entity {} with handler {}", playerEntity, handler.getClass().getSimpleName());
+		} else {
+			logger.debug("Could not start order for entity {} with handler {}", playerEntity, handler.getClass().getSimpleName());
 		}
 	}
 
