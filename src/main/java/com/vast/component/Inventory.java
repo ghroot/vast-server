@@ -25,6 +25,10 @@ public class Inventory extends PooledComponent {
 		items[itemId] += amountToAdd;
 	}
 
+	public void add(int itemId) {
+		add(itemId, 1);
+	}
+
 	public void add(Item item, int amount) {
 		add(item.getId(), amount);
 	}

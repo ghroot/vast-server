@@ -88,8 +88,8 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 				Item item = items.getItem(itemId);
 				if (item != null) {
 					if ((onlyItemTag == null || item.hasTag(onlyItemTag)) && from.items[itemId] > 0) {
-						from.remove(itemId, 1);
-						to.add(itemId, 1);
+						from.remove(itemId);
+						to.add(itemId);
 						atLeastOneItemWasTransferred = true;
 						break;
 					}
