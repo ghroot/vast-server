@@ -3,6 +3,7 @@ package com.vast;
 import com.artemis.*;
 import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
+import com.artemis.utils.IntBag;
 import com.vast.behaviour.AdultAnimalBehaviour;
 import com.vast.behaviour.Behaviour;
 import com.vast.behaviour.HumanBehaviour;
@@ -189,8 +190,14 @@ public class VastWorld implements Runnable {
 		return world.getMapper(type);
 	}
 
-	public EntitySubscription getAspectSubscription(Aspect.Builder builder) {
-		return world.getAspectSubscriptionManager().get(builder);
+	public int[] getEntities(Aspect.Builder builder) {
+		IntBag entitiesBag = world.getAspectSubscriptionManager().get(builder).getEntities();
+		int[] entities = new int[entitiesBag.size()];
+		for (int i = 0; i < entities.length; i++) {
+			entities[i] = entitiesBag.get(i);
+		}
+
+		return entities;
 	}
 
 	public boolean doesEntityExist(int entity) {

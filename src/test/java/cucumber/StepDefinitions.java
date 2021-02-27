@@ -130,9 +130,8 @@ public class StepDefinitions {
         ComponentMapper<Transform> transformMapper = world.getComponentMapper(Transform.class);
         int playerEntity = world.getPeerEntity(playerName);
         Point2f playerPosition = transformMapper.get(playerEntity).position;
-        IntBag entities = world.getAspectSubscription(Aspect.all(Type.class)).getEntities();
-        for (int i = 0; i < entities.size(); i++) {
-            int entity = entities.get(i);
+        int[] entities = world.getEntities(Aspect.all(Type.class));
+        for (int entity : entities) {
             if (entity != playerEntity && typeMapper.get(entity).type.equals(type)) {
                 Point2f position = transformMapper.get(entity).position;
                 float distance2 = playerPosition.distanceSquared(position);
@@ -178,7 +177,7 @@ public class StepDefinitions {
 
     @When("waiting {float} seconds")
     public void wait(float seconds) {
-        int timeEntity = world.getAspectSubscription(Aspect.all(Time.class)).getEntities().get(0);
+        int timeEntity = world.getEntities(Aspect.all(Time.class))[0];
         Time time = world.getComponentMapper(Time.class).get(timeEntity);
         float startTime = time.time;
         await().timeout(Duration.FIVE_MINUTES).until(() -> time.time >= startTime + seconds);
