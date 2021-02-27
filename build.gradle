@@ -7,7 +7,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'net.onedaybeard.artemis:artemis-odb-gradle-plugin:2.2.0'
+        classpath 'net.onedaybeard.artemis:artemis-odb-gradle-plugin:2.3.0'
     }
 }
 
@@ -19,10 +19,10 @@ repositories {
 }
 
 dependencies {
-    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb', version: '2.2.0'
-    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer', version: '2.2.0'
-    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer-json', version: '2.2.0'
-    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer-kryo', version: '2.2.0'
+    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb', version: '2.3.0'
+    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer', version: '2.3.0'
+    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer-json', version: '2.3.0'
+    compile group: 'net.onedaybeard.artemis', name: 'artemis-odb-serializer-kryo', version: '2.3.0'
     compile group: 'net.mostlyoriginal.artemis-odb', name: 'contrib-core', version: '2.4.0'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
@@ -37,12 +37,20 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '3.1.0'
+    testCompile 'org.awaitility:awaitility:3.0.0'
+    testCompile 'io.cucumber:cucumber-java:6.8.1'
 }
 
 compileJava {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
 }
 
 weave {
@@ -66,4 +74,15 @@ task fatJar(type: Jar) {
     baseName = 'vast-server-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
+}
+
+task cucumber() {
+    dependsOn assemble, testClasses
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin', 'pretty', 'src/test/resources']
+        }
+    }
 }
