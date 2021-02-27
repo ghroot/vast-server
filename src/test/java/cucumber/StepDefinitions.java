@@ -96,7 +96,7 @@ public class StepDefinitions {
         Buildings buildings = new Buildings("buildings.json", items);
         Animals animals = new Animals("animals.json", items);
 
-        world = new VastWorld(serverApplication, null, new Random(seed), true, new Metrics(),
+        world = new VastWorld(serverApplication, null, new Random(seed), true, null,
                 worldConfiguration, items, buildings, animals);
 
         worldThread = new Thread(world, "World");

@@ -212,89 +212,91 @@ public class TerminalSystem extends IntervalSystem {
 				textGraphics.putString(screen.getTerminalSize().getColumns() / 2 - 7, 1, "FAST FORWARD " + vastWorld.getTimeModifier() + "X");
 			}
 
-			String fpsString = "FPS: " + metrics.getFps();
-			textGraphics.putString(screen.getTerminalSize().getColumns() - fpsString.length(), 0, fpsString);
-			String frameTimeString = "Frame time: " + metrics.getTimePerFrameMs() + " ms";
-			textGraphics.putString(screen.getTerminalSize().getColumns() - frameTimeString.length(), 1, frameTimeString);
-			String monitorProcessDurationString = "Monitor overhead: " + (int) (processDuration / 5.8f) + " ms";
-			textGraphics.putString(screen.getTerminalSize().getColumns() - monitorProcessDurationString.length(), 2, monitorProcessDurationString);
-			String peersString = "Peers: " + peers.size();
-			textGraphics.putString(screen.getTerminalSize().getColumns() - peersString.length(), 3, peersString);
-			String roundTripString = "Roundtrip: " + (int) metrics.getMeanOfRoundTripTime();
-			textGraphics.putString(screen.getTerminalSize().getColumns() - roundTripString.length(), 4, roundTripString);
-			String timeSinceSave = "Time since save: " + (metrics.getTimeSinceLastSerialization() / 1000) + " s";
-			textGraphics.putString(screen.getTerminalSize().getColumns() - timeSinceSave.length(), 5, timeSinceSave);
-			float percentCollisionHits = Math.round((100f * metrics.getNumberOfCollisions() / metrics.getNumberOfCollisionChecks()) * 10f) / 10f;
-			String collisionsString = "Collision checks: " + metrics.getNumberOfCollisionChecks() + " (" + percentCollisionHits + "% hits)";
-			textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 6, collisionsString);
+			if (metrics != null) {
+				String fpsString = "FPS: " + metrics.getFps();
+				textGraphics.putString(screen.getTerminalSize().getColumns() - fpsString.length(), 0, fpsString);
+				String frameTimeString = "Frame time: " + metrics.getTimePerFrameMs() + " ms";
+				textGraphics.putString(screen.getTerminalSize().getColumns() - frameTimeString.length(), 1, frameTimeString);
+				String monitorProcessDurationString = "Monitor overhead: " + (int) (processDuration / 5.8f) + " ms";
+				textGraphics.putString(screen.getTerminalSize().getColumns() - monitorProcessDurationString.length(), 2, monitorProcessDurationString);
+				String peersString = "Peers: " + peers.size();
+				textGraphics.putString(screen.getTerminalSize().getColumns() - peersString.length(), 3, peersString);
+				String roundTripString = "Roundtrip: " + (int) metrics.getMeanOfRoundTripTime();
+				textGraphics.putString(screen.getTerminalSize().getColumns() - roundTripString.length(), 4, roundTripString);
+				String timeSinceSave = "Time since save: " + (metrics.getTimeSinceLastSerialization() / 1000) + " s";
+				textGraphics.putString(screen.getTerminalSize().getColumns() - timeSinceSave.length(), 5, timeSinceSave);
+				float percentCollisionHits = Math.round((100f * metrics.getNumberOfCollisions() / metrics.getNumberOfCollisionChecks()) * 10f) / 10f;
+				String collisionsString = "Collision checks: " + metrics.getNumberOfCollisionChecks() + " (" + percentCollisionHits + "% hits)";
+				textGraphics.putString(screen.getTerminalSize().getColumns() - collisionsString.length(), 6, collisionsString);
 
-			if (showSystemTimesMode > 0 && metrics.getSystemMetrics().size() > 0) {
-				Map<BaseSystem, SystemMetrics> systemMetricsToShow;
-				if (showSystemTimesMode == 1) {
-					systemMetricsToShow = metrics.getSystemMetrics().entrySet()
-							.stream()
-							.sorted(Map.Entry.comparingByValue(Comparator.comparingInt(SystemMetrics::getProcessingTime).reversed()))
-							.collect(Collectors.toMap(
-									Map.Entry::getKey,
-									Map.Entry::getValue,
-									(e1, e2) -> e1,
-									LinkedHashMap::new
-							));
-				} else if (showSystemTimesMode == 2) {
-					systemMetricsToShow = metrics.getSystemMetrics().entrySet()
-							.stream()
-							.sorted(Map.Entry.comparingByKey(Comparator.comparing((BaseSystem system) -> system.getClass().getSimpleName())))
-							.collect(Collectors.toMap(
-									Map.Entry::getKey,
-									Map.Entry::getValue,
-									(e1, e2) -> e1,
-									LinkedHashMap::new
-							));
-				} else {
-					systemMetricsToShow = metrics.getSystemMetrics().entrySet()
-							.stream()
-							.filter(entry -> entry.getValue().getNumberOfEntitiesInSystem() >= 0)
-							.sorted(Map.Entry.comparingByValue(Comparator.comparingInt(SystemMetrics::getNumberOfEntitiesInSystem).reversed()))
-							.collect(Collectors.toMap(
-									Map.Entry::getKey,
-									Map.Entry::getValue,
-									(e1, e2) -> e1,
-									LinkedHashMap::new
-							));
-				}
+				if (showSystemTimesMode > 0 && metrics.getSystemMetrics().size() > 0) {
+					Map<BaseSystem, SystemMetrics> systemMetricsToShow;
+					if (showSystemTimesMode == 1) {
+						systemMetricsToShow = metrics.getSystemMetrics().entrySet()
+								.stream()
+								.sorted(Map.Entry.comparingByValue(Comparator.comparingInt(SystemMetrics::getProcessingTime).reversed()))
+								.collect(Collectors.toMap(
+										Map.Entry::getKey,
+										Map.Entry::getValue,
+										(e1, e2) -> e1,
+										LinkedHashMap::new
+								));
+					} else if (showSystemTimesMode == 2) {
+						systemMetricsToShow = metrics.getSystemMetrics().entrySet()
+								.stream()
+								.sorted(Map.Entry.comparingByKey(Comparator.comparing((BaseSystem system) -> system.getClass().getSimpleName())))
+								.collect(Collectors.toMap(
+										Map.Entry::getKey,
+										Map.Entry::getValue,
+										(e1, e2) -> e1,
+										LinkedHashMap::new
+								));
+					} else {
+						systemMetricsToShow = metrics.getSystemMetrics().entrySet()
+								.stream()
+								.filter(entry -> entry.getValue().getNumberOfEntitiesInSystem() >= 0)
+								.sorted(Map.Entry.comparingByValue(Comparator.comparingInt(SystemMetrics::getNumberOfEntitiesInSystem).reversed()))
+								.collect(Collectors.toMap(
+										Map.Entry::getKey,
+										Map.Entry::getValue,
+										(e1, e2) -> e1,
+										LinkedHashMap::new
+								));
+					}
 
-				int longestSystemNameLength = 0;
-				for (BaseSystem system : metrics.getSystemMetrics().keySet()) {
-					String systemName = system.getClass().getSimpleName();
-					longestSystemNameLength = Math.max(systemName.length(), longestSystemNameLength);
-				}
-				int row = 8;
-				for (BaseSystem system : systemMetricsToShow.keySet()) {
-					SystemMetrics systemMetrics = systemMetricsToShow.get(system);
-					String systemName = system.getClass().getSimpleName();
-					TextColor systemColor = TextColor.ANSI.WHITE;
-					if (focusedEntity >= 0) {
-						if (system instanceof BaseEntitySystem) {
-							if (!((BaseEntitySystem) system).getSubscription().getEntities().contains(focusedEntity)) {
+					int longestSystemNameLength = 0;
+					for (BaseSystem system : metrics.getSystemMetrics().keySet()) {
+						String systemName = system.getClass().getSimpleName();
+						longestSystemNameLength = Math.max(systemName.length(), longestSystemNameLength);
+					}
+					int row = 8;
+					for (BaseSystem system : systemMetricsToShow.keySet()) {
+						SystemMetrics systemMetrics = systemMetricsToShow.get(system);
+						String systemName = system.getClass().getSimpleName();
+						TextColor systemColor = TextColor.ANSI.WHITE;
+						if (focusedEntity >= 0) {
+							if (system instanceof BaseEntitySystem) {
+								if (!((BaseEntitySystem) system).getSubscription().getEntities().contains(focusedEntity)) {
+									systemColor = TextColor.Indexed.fromRGB(100, 100, 100);
+								}
+							} else {
 								systemColor = TextColor.Indexed.fromRGB(100, 100, 100);
 							}
-						} else {
-							systemColor = TextColor.Indexed.fromRGB(100, 100, 100);
 						}
-					}
-					textGraphics.setForegroundColor(systemColor);
-					if (showSystemTimesMode == 3) {
-						textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestSystemNameLength - 1, row, systemName);
-						String numberOfEntitiesString = Integer.toString(systemMetrics.getNumberOfEntitiesInSystem());
-						textGraphics.putString(screen.getTerminalSize().getColumns() - 6 + (6 - numberOfEntitiesString.length()), row, numberOfEntitiesString);
-					} else {
-						textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestSystemNameLength - 1, row, systemName);
-						String processDurationString = Integer.toString(systemMetrics.getProcessingTime());
-						textGraphics.putString(screen.getTerminalSize().getColumns() - 6 + (3 - processDurationString.length()), row, processDurationString);
-						textGraphics.putString(screen.getTerminalSize().getColumns() - 2, row, "ms");
-					}
+						textGraphics.setForegroundColor(systemColor);
+						if (showSystemTimesMode == 3) {
+							textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestSystemNameLength - 1, row, systemName);
+							String numberOfEntitiesString = Integer.toString(systemMetrics.getNumberOfEntitiesInSystem());
+							textGraphics.putString(screen.getTerminalSize().getColumns() - 6 + (6 - numberOfEntitiesString.length()), row, numberOfEntitiesString);
+						} else {
+							textGraphics.putString(screen.getTerminalSize().getColumns() - 6 - longestSystemNameLength - 1, row, systemName);
+							String processDurationString = Integer.toString(systemMetrics.getProcessingTime());
+							textGraphics.putString(screen.getTerminalSize().getColumns() - 6 + (3 - processDurationString.length()), row, processDurationString);
+							textGraphics.putString(screen.getTerminalSize().getColumns() - 2, row, "ms");
+						}
 
-					row++;
+						row++;
+					}
 				}
 			}
 
