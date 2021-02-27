@@ -23,7 +23,7 @@ public class TestScanSystem {
 			nearbyEntities.add(123);
 			return nearbyEntities;
 		});
-		WorldConfiguration worldConfiguration = new WorldConfiguration();
+		WorldConfiguration worldConfiguration = new WorldConfiguration(30, 30);
 		ScanSystem scanSystem = new ScanSystem(quadTree, worldConfiguration);
 
 		World world = new World(new WorldConfigurationBuilder().with(

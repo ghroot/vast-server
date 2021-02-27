@@ -31,7 +31,7 @@ public class TestCollisionSystem {
 
 	@Before
 	public void setUp() {
-		WorldConfiguration worldConfiguration = new WorldConfiguration();
+		WorldConfiguration worldConfiguration = new WorldConfiguration(30, 30);
 		QuadTree quadTree = mock(QuadTree.class);
 		Random random = mock(Random.class);
 		when(random.nextFloat()).thenReturn(0f);
