@@ -20,12 +20,12 @@ import java.util.concurrent.TimeUnit;
 public class WorldSerializationSystem extends IntervalSystem {
 	private static final Logger logger = LoggerFactory.getLogger(WorldSerializationSystem.class);
 
-	private String format;
+	private String snapshotFile;
 	private Metrics metrics;
 
-	public WorldSerializationSystem(String format, Metrics metrics) {
+	public WorldSerializationSystem(String snapshotFile, Metrics metrics) {
 		super(Aspect.all(), TimeUnit.MINUTES.toSeconds(5));
-		this.format = format;
+		this.snapshotFile = snapshotFile;
 		this.metrics = metrics;
 	}
 
@@ -36,39 +36,30 @@ public class WorldSerializationSystem extends IntervalSystem {
 
 	@Override
 	protected void processSystem() {
-		saveWorld(format);
+		saveWorld();
 	}
 
 	// TODO: Can this be done in a thread?
-	private void saveWorld(final String format) {
-		final String snapshotFileName;
-		switch (format) {
-			case "json":
-				snapshotFileName = "snapshot.json";
-				break;
-			case "bin":
-			case "binary":
-				snapshotFileName = "snapshot.bin";
-				break;
-			default:
-				snapshotFileName = "snapshot";
-				break;
+	private void saveWorld() {
+		if (snapshotFile == null) {
+			return;
 		}
+
 		long startTime = System.currentTimeMillis();
 		WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
-		if (format.equals("json")) {
+		if (snapshotFile.endsWith(".json")) {
 			worldSerializationManager.setSerializer(new JsonArtemisSerializer(world));
-		} else if (format.equals("bin") || format.equals("binary")) {
+		} else {
 			worldSerializationManager.setSerializer(new KryoArtemisSerializer(world));
 		}
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		IntBag entitiesToSerialize = world.getAspectSubscriptionManager().get(Aspect.all()).getEntities();
-		logger.info("Serializing world ({} entities) to snapshot file {}", entitiesToSerialize.size(), snapshotFileName);
+		logger.info("Serializing world ({} entities) to snapshot file {}", entitiesToSerialize.size(), snapshotFile);
 		worldSerializationManager.save(byteArrayOutputStream, new SaveFileFormat(entitiesToSerialize));
 		int generateDuration = (int) (System.currentTimeMillis() - startTime);
 		startTime = System.currentTimeMillis();
 		try {
-			FileOutputStream fileOutputStream = new FileOutputStream(snapshotFileName);
+			FileOutputStream fileOutputStream = new FileOutputStream(snapshotFile);
 			byteArrayOutputStream.writeTo(fileOutputStream);
 			fileOutputStream.close();
 			byteArrayOutputStream.close();
@@ -84,20 +75,18 @@ public class WorldSerializationSystem extends IntervalSystem {
 
 	private void loadWorld() {
 		try {
+			if (snapshotFile == null) {
+				throw new FileNotFoundException();
+			}
 			WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
-			String snapshotFileName;
-			FileInputStream fileInputStream;
-			try {
-				snapshotFileName = "snapshot.json";
-				fileInputStream = new FileInputStream(snapshotFileName);
+			FileInputStream fileInputStream = new FileInputStream(snapshotFile);
+			if (snapshotFile.endsWith(".json")) {
 				worldSerializationManager.setSerializer(new JsonArtemisSerializer(world));
-			} catch (FileNotFoundException exception) {
-				snapshotFileName = "snapshot.bin";
-				fileInputStream = new FileInputStream(snapshotFileName);
+			} else {
 				worldSerializationManager.setSerializer(new KryoArtemisSerializer(world));
 			}
 			SaveFileFormat saveFileFormat = worldSerializationManager.load(fileInputStream, SaveFileFormat.class);
-			logger.info("Loading world from snapshot file {}, size: {} bytes", snapshotFileName, fileInputStream.getChannel().size());
+			logger.info("Loading world from snapshot file {}, size: {} bytes", snapshotFile, fileInputStream.getChannel().size());
 			fileInputStream.close();
 			logger.debug("Loaded {} entities", saveFileFormat.entities.size());
 			if (metrics != null) {

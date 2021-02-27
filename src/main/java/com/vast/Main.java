@@ -16,7 +16,7 @@ public class Main {
 	private static final int PORT = 5056;
 
 	public static void main(String[] args) {
-		String snapshotFormat = "json";
+		String snapshotFile = null;
 		int numberOfPeersToSimulate = 0;
 		long randomSeed = -1;
 		boolean showMonitor = false;
@@ -36,7 +36,7 @@ public class Main {
 			} else {
 				System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
 			}
-			snapshotFormat = cmd.getOptionValue("format", "json");
+			snapshotFile = cmd.getOptionValue("snapshot", "snapshot.json");
 			numberOfPeersToSimulate = cmd.hasOption("simulate") ? Integer.parseInt(cmd.getOptionValue("simulate", "0")) : 0;
 			randomSeed = cmd.hasOption("seed") ? Long.parseLong(cmd.getOptionValue("seed", "-1")) : -1;
 			showMonitor = cmd.hasOption("monitor");
@@ -46,7 +46,7 @@ public class Main {
 		final Metrics metrics = showMonitor ? new Metrics() : null;
 
 		GameServerBootstrap bootstrap = new GameServerBootstrap();
-		VastServerApplication serverApplication = new VastServerApplication(snapshotFormat, numberOfPeersToSimulate, randomSeed, showMonitor, metrics);
+		VastServerApplication serverApplication = new VastServerApplication(snapshotFile, numberOfPeersToSimulate, randomSeed, showMonitor, metrics);
 		bootstrap.application(serverApplication).option(UDPOption.THREAD_COUNT, 4).bind(PORT);
 		if (showMonitor) {
 			bootstrap.metricListener(new MetricListener() {

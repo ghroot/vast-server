@@ -1,0 +1,84 @@
+[
+  {
+    "id": 0,
+    "name": "Chest",
+    "collision": {
+      "radius": 0.8
+    },
+    "constructable": {
+      "duration": 10,
+      "cost": {
+        "Wood": 10,
+        "Stone": 0
+      }
+    },
+    "inventory": {
+      "capacity": 100
+    },
+    "container": {
+      "persistent": true
+    }
+  },
+  {
+    "id": 1,
+    "name": "Wall",
+    "collision": {
+      "radius": 0.5
+    },
+    "constructable": {
+      "duration": 5,
+      "cost": {
+        "Wood": 3
+      }
+    }
+  },
+  {
+    "id": 2,
+    "name": "Fireplace",
+    "collision": {
+      "radius": 0.8
+    },
+    "constructable": {
+      "duration": 10,
+      "cost": {
+        "Wood": 4,
+        "Stone": 3
+      }
+    },
+    "fueled": {
+      "cost": {
+        "Wood": 1
+      }
+    }
+  },
+  {
+    "id": 3,
+    "name": "Torch",
+    "collision": {
+      "radius": 0.2
+    },
+    "constructable": {
+      "duration": 5,
+      "cost": {
+        "Wood": 2,
+        "Stone": 1
+      }
+    }
+  },
+  {
+    "id": 4,
+    "name": "Planter",
+    "collision": {
+      "radius": 0.4
+    },
+    "constructable": {
+      "duration": 5,
+      "cost": {
+        "Wood": 5,
+        "Stone": 1
+      }
+    },
+    "plantable": {
+    }
+  }
+]

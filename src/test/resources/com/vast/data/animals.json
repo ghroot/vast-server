@@ -1,0 +1,54 @@
+[
+  {
+    "id": 0,
+    "name": "rabbitAdult",
+    "collision": {
+      "radius": 0.3
+    },
+    "speed": {
+      "baseSpeed": 1.5
+    },
+    "ai": {
+      "behaviour": "adultAnimal"
+    }
+  },
+  {
+    "id": 1,
+    "name": "rabbitYoung",
+    "collision": {
+      "radius": 0.2
+    },
+    "speed": {
+      "baseSpeed": 1.5
+    },
+    "ai": {
+      "behaviour": "youngAnimal"
+    }
+  },
+  {
+    "id": 2,
+    "name": "deerAdult",
+    "collision": {
+      "radius": 0.4
+    },
+    "speed": {
+      "baseSpeed": 1.5
+    },
+    "ai": {
+      "behaviour": "adultAnimal"
+    }
+  },
+  {
+    "id": 3,
+    "name": "deerYoung",
+    "collision": {
+      "radius": 0.2
+    },
+    "speed": {
+      "baseSpeed": 1.5
+    },
+    "ai": {
+      "behaviour": "youngAnimal"
+    }
+  }
+]

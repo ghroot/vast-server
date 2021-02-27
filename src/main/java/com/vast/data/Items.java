@@ -15,9 +15,13 @@ public class Items {
 	private Map<Integer, Item> items;
 
 	public Items() {
+		items = new HashMap<>();
+	}
+
+	public Items(String fileName) {
 		try {
 			items = new HashMap<>();
-			JSONArray itemsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream("items.json"), Charset.defaultCharset()));
+			JSONArray itemsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream(fileName), Charset.defaultCharset()));
 			for (Iterator<Object> it = itemsData.iterator(); it.hasNext();) {
 				JSONObject itemData = (JSONObject) it.next();
 				int id = itemData.getInt("id");
@@ -45,6 +49,10 @@ public class Items {
 		} catch (Exception exception) {
 			logger.error("Error parsing items", exception);
 		}
+	}
+
+	public void addItem(Item item) {
+		items.put(item.getId(), item);
 	}
 
 	public List<Item> getAllItems() {

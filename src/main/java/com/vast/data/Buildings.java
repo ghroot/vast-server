@@ -14,12 +14,17 @@ public class Buildings {
 
 	private Map<Integer, Building> buildings;
 
-	public Buildings(Items items) {
+	public Buildings() {
+		buildings = new HashMap<>();
+	}
+
+	public Buildings(String fileName, Items items) {
 		try {
 			buildings = new HashMap<>();
-			JSONArray buildingsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream("buildings.json"), Charset.defaultCharset()));
-			for (Iterator<Object> it = buildingsData.iterator(); it.hasNext();) {
-				JSONObject buildingData = (JSONObject) it.next();
+			JSONArray buildingsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream(fileName),
+					Charset.defaultCharset()));
+			for (Object buildingsDatum : buildingsData) {
+				JSONObject buildingData = (JSONObject) buildingsDatum;
 				int id = -1;
 				String name = null;
 				Set<Cost> costs = new HashSet<>();

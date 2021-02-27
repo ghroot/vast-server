@@ -1,0 +1,51 @@
+[
+  {
+    "id": 0,
+    "tags": ["basic"],
+    "name": "Wood"
+  },
+  {
+    "id": 1,
+    "tags": ["basic"],
+    "name": "Stone"
+  },
+  {
+    "id": 2,
+    "tags": ["basic"],
+    "name": "Iron"
+  },
+  {
+    "id": 3,
+    "tags": ["basic"],
+    "name": "Seed"
+  },
+  {
+    "id": 4,
+    "tags": ["tool", "axe"],
+    "name": "Axe",
+    "craftable": {
+      "duration": 3,
+      "cost": {
+        "Wood": 2,
+        "Stone": 1
+      }
+    }
+  },
+  {
+    "id": 5,
+    "tags": ["tool", "pickaxe"],
+    "name": "Pickaxe",
+    "craftable": {
+      "duration": 5,
+      "cost": {
+        "Wood": 2,
+        "Stone": 2
+      }
+    }
+  },
+  {
+    "id": 6,
+    "tags": ["food"],
+    "name": "Vegetables"
+  }
+]

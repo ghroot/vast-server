@@ -1,7 +1,6 @@
 package com.vast;
 
-import com.artemis.World;
-import com.artemis.WorldConfigurationBuilder;
+import com.artemis.*;
 import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
 import com.vast.behaviour.AdultAnimalBehaviour;
@@ -9,6 +8,7 @@ import com.vast.behaviour.Behaviour;
 import com.vast.behaviour.HumanBehaviour;
 import com.vast.behaviour.YoungAnimalBehaviour;
 import com.vast.data.*;
+import com.vast.data.WorldConfiguration;
 import com.vast.interact.*;
 import com.vast.network.IncomingRequest;
 import com.vast.network.VastPeer;
@@ -34,17 +34,19 @@ public class VastWorld implements Runnable {
 	private int timeModifier = 1;
 	private Metrics metrics;
 
-	public VastWorld(VastServerApplication serverApplication, String snapshotFormat, long randomSeed, boolean showMonitor, Metrics metrics) {
-		this.metrics = metrics;
+	private Map<String, VastPeer> peers;
+	private Map<String, Integer> entitiesByPeer;
+	private Items items;
 
-		Random random = randomSeed >= 0 ? new Random(randomSeed) : new Random();
-		WorldConfiguration worldConfiguration = new WorldConfiguration();
-		Items items = new Items();
-		Buildings buildings = new Buildings(items);
-		Animals animals = new Animals(items);
-		Map<String, VastPeer> peers = new HashMap<>();
+	public VastWorld(VastServerApplication serverApplication, String snapshotFile, Random random,
+					 boolean showMonitor, Metrics metrics, WorldConfiguration worldConfiguration,
+					 Items items, Buildings buildings, Animals animals) {
+		this.metrics = metrics;
+		this.items = items;
+
+		peers = new HashMap<>();
 		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<>();
-		Map<String, Integer> entitiesByPeer = new HashMap<>();
+		entitiesByPeer = new HashMap<>();
 		QuadTree quadTree = new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height);
 		InteractionHandler[] interactionHandlers = {
 			new GrowingInteractionHandler(),
@@ -87,7 +89,7 @@ public class VastWorld implements Runnable {
 			new CreationManager(worldConfiguration, random, items, buildings, animals),
 			new TimeManager(),
 
-			new WorldSerializationSystem(snapshotFormat, metrics),
+			new WorldSerializationSystem(snapshotFile, metrics),
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequestsByPeer),
 			new PeerEntitySystem(peers, entitiesByPeer),
@@ -173,5 +175,29 @@ public class VastWorld implements Runnable {
 
 	public int getTimeModifier() {
 		return timeModifier;
+	}
+
+	public VastPeer getPeer(String name) {
+		return peers.get(name);
+	}
+
+	public int getPeerEntity(String name) {
+		return entitiesByPeer.getOrDefault(name, -1);
+	}
+
+	public <T extends Component> ComponentMapper<T> getComponentMapper(Class<T> type) {
+		return world.getMapper(type);
+	}
+
+	public EntitySubscription getAspectSubscription(Aspect.Builder builder) {
+		return world.getAspectSubscriptionManager().get(builder);
+	}
+
+	public boolean doesEntityExist(int entity) {
+		return world.getEntityManager().isActive(entity);
+	}
+
+	public Items getItems() {
+		return items;
 	}
 }

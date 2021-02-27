@@ -16,10 +16,14 @@ public class Animals {
 
 	private Map<Integer, Animal> animals;
 
-	public Animals(Items items) {
+	public Animals() {
+		animals = new HashMap<>();
+	}
+
+	public Animals(String fileName, Items items) {
 		try {
 			animals = new HashMap<>();
-			JSONArray animalsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream("animals.json"), Charset.defaultCharset()));
+			JSONArray animalsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream(fileName), Charset.defaultCharset()));
 			for (Iterator<Object> it = animalsData.iterator(); it.hasNext();) {
 				JSONObject animalData = (JSONObject) it.next();
 				int id = -1;

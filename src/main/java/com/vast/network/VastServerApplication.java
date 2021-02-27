@@ -6,7 +6,7 @@ import com.nhnent.haste.protocol.messages.InitialRequest;
 import com.nhnent.haste.protocol.messages.RequestMessage;
 import com.nhnent.haste.transport.DisconnectReason;
 import com.nhnent.haste.transport.NetworkPeer;
-import com.vast.data.Metrics;
+import com.vast.data.*;
 import com.vast.VastWorld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +14,12 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class VastServerApplication extends ServerApplication {
 	private static final Logger logger = LoggerFactory.getLogger(VastServerApplication.class);
 
-	private String snapshotFormat;
+	private String snapshotFile;
 	private int numberOfPeersToSimulate;
 	private long randomSeed;
 	private boolean showMonitor;
@@ -30,8 +31,8 @@ public class VastServerApplication extends ServerApplication {
 	private VastWorld world;
 	private Thread worldThread;
 
-	public VastServerApplication(String snapshotFormat, int numberOfPeersToSimulate, long randomSeed, boolean showMonitor, Metrics metrics) {
-		this.snapshotFormat = snapshotFormat;
+	public VastServerApplication(String snapshotFile, int numberOfPeersToSimulate, long randomSeed, boolean showMonitor, Metrics metrics) {
+		this.snapshotFile = snapshotFile;
 		this.numberOfPeersToSimulate = numberOfPeersToSimulate;
 		this.randomSeed = randomSeed;
 		this.showMonitor = showMonitor;
@@ -43,7 +44,14 @@ public class VastServerApplication extends ServerApplication {
 		incomingRequests = new ArrayList<>();
 		peerListeners = new ArrayList<>();
 
-		world = new VastWorld(this, snapshotFormat, randomSeed, showMonitor, metrics);
+		Random random = randomSeed >= 0 ? new Random(randomSeed) : new Random();
+		WorldConfiguration worldConfiguration = new WorldConfiguration("world.json");
+		Items items = new Items("items.json");
+		Buildings buildings = new Buildings("buildings.json", items);
+		Animals animals = new Animals("animals.json", items);
+
+		world = new VastWorld(this, snapshotFile, random, showMonitor, metrics, worldConfiguration,
+				items, buildings, animals);
 		worldThread = new Thread(world, "World");
 		worldThread.setPriority(Thread.MAX_PRIORITY);
 		worldThread.start();
