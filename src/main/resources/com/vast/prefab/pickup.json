@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "0": {
+      "archetype": 0,
+      "key": "pickup",
+      "components": {
+        "SyncPropagation": {
+          "ownerPropagationProperties": 32
+        },
+        "Type": {
+          "type": "pickup"
+        }
+      }
+    }
+  },
+  "archetypes": {
+    "0": [
+      "Container",
+      "Inventory",
+      "Known",
+      "Lifetime",
+      "Static",
+      "SubType",
+      "SyncPropagation",
+      "Transform",
+      "Type"
+    ]
+  },
+  "componentIdentifiers": {
+    "com.vast.component.Container": "Container",
+    "com.vast.component.Inventory": "Inventory",
+    "com.vast.component.Known": "Known",
+    "com.vast.component.Lifetime": "Lifetime",
+    "com.vast.component.Static": "Static",
+    "com.vast.component.SubType": "SubType",
+    "com.vast.component.SyncPropagation": "SyncPropagation",
+    "com.vast.component.Transform": "Transform",
+    "com.vast.component.Type": "Type",
+  },
+  "metadata": {
+    "version": 1
+  }
+}

@@ -94,10 +94,9 @@ public class StepDefinitions {
         WorldConfiguration worldConfiguration = new WorldConfiguration(width, height);
         Items items = new Items("items.json");
         Buildings buildings = new Buildings("buildings.json", items);
-        Animals animals = new Animals("animals.json", items);
 
         world = new VastWorld(serverApplication, null, new Random(seed), true, null,
-                worldConfiguration, items, buildings, animals);
+                worldConfiguration, items, buildings);
 
         worldThread = new Thread(world, "World");
         worldThread.setPriority(Thread.MAX_PRIORITY);

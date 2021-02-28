@@ -48,10 +48,9 @@ public class VastServerApplication extends ServerApplication {
 		WorldConfiguration worldConfiguration = new WorldConfiguration("world.json");
 		Items items = new Items("items.json");
 		Buildings buildings = new Buildings("buildings.json", items);
-		Animals animals = new Animals("animals.json", items);
 
 		world = new VastWorld(this, snapshotFile, random, showMonitor, metrics, worldConfiguration,
-				items, buildings, animals);
+				items, buildings);
 		worldThread = new Thread(world, "World");
 		worldThread.setPriority(Thread.MAX_PRIORITY);
 		worldThread.start();

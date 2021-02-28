@@ -1,0 +1,155 @@
+{
+  "entities": {
+    "0": {
+      "archetype": 0,
+      "key": "rabbitAdult",
+      "components": {
+        "AI": {
+          "behaviourName": "adultAnimal"
+        },
+        "Collision": {
+          "radius": 0.3
+        },
+        "Speed": {
+          "baseSpeed": 1.5
+        },
+        "SubType": {
+          "subType": 0
+        },
+        "SyncPropagation": {
+          "ownerPropagationProperties": 32,
+          "unreliableProperties": 3
+        },
+        "Teach": {
+          "words": [
+            "animal"
+          ]
+        },
+        "Type": {
+          "type": "animal"
+        }
+      }
+    },
+    "1": {
+      "archetype": 0,
+      "key": "rabbitYoung",
+      "components": {
+        "AI": {
+          "behaviourName": "youngAnimal"
+        },
+        "Collision": {
+          "radius": 0.2
+        },
+        "Speed": {
+          "baseSpeed": 1
+        },
+        "SubType": {
+          "subType": 0
+        },
+        "SyncPropagation": {
+          "ownerPropagationProperties": 32,
+          "unreliableProperties": 3
+        },
+        "Teach": {
+          "words": [
+            "animal"
+          ]
+        },
+        "Type": {
+          "type": "animal"
+        }
+      }
+    },
+    "2": {
+      "archetype": 0,
+      "key": "deerAdult",
+      "components": {
+        "AI": {
+          "behaviourName": "adultAnimal"
+        },
+        "Collision": {
+          "radius": 0.4
+        },
+        "Speed": {
+          "baseSpeed": 1.2
+        },
+        "SubType": {
+          "subType": 1
+        },
+        "SyncPropagation": {
+          "ownerPropagationProperties": 32,
+          "unreliableProperties": 3
+        },
+        "Teach": {
+          "words": [
+            "animal"
+          ]
+        },
+        "Type": {
+          "type": "animal"
+        }
+      }
+    },
+    "3": {
+      "archetype": 0,
+      "key": "deerYoung",
+      "components": {
+        "AI": {
+          "behaviourName": "youngAnimal"
+        },
+        "Collision": {
+          "radius": 0.3
+        },
+        "Speed": {
+          "baseSpeed": 1
+        },
+        "SubType": {
+          "subType": 1
+        },
+        "SyncPropagation": {
+          "ownerPropagationProperties": 32,
+          "unreliableProperties": 3
+        },
+        "Teach": {
+          "words": [
+            "animal"
+          ]
+        },
+        "Type": {
+          "type": "animal"
+        }
+      }
+    }
+  },
+  "archetypes": {
+    "0": [
+      "Transform",
+      "Type",
+      "AI",
+      "Speed",
+      "Collision",
+      "SyncPropagation",
+      "Known",
+      "SubType",
+      "Group",
+      "Teach",
+      "SyncHistory"
+    ]
+  },
+  "componentIdentifiers": {
+    "com.vast.component.Transform": "Transform",
+    "com.vast.component.Type": "Type",
+    "com.vast.component.AI": "AI",
+    "com.vast.component.Speed": "Speed",
+    "com.vast.component.Collision": "Collision",
+    "com.vast.component.SyncPropagation": "SyncPropagation",
+    "com.vast.component.Known": "Known",
+    "com.vast.component.SubType": "SubType",
+    "com.vast.component.Group": "Group",
+    "com.vast.component.Teach": "Teach",
+    "com.vast.component.SyncHistory": "SyncHistory"
+  },
+  "metadata": {
+    "version": 1
+  }
+}

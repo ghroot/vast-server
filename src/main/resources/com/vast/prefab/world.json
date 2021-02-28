@@ -1,0 +1,23 @@
+{
+  "entities": {
+    "0": {
+      "archetype": 0,
+      "key": "world",
+      "components": {
+      }
+    }
+  },
+  "archetypes": {
+    "0": [
+      "Time",
+      "Weather"
+    ]
+  },
+  "componentIdentifiers": {
+    "com.vast.component.Time": "Time",
+    "com.vast.component.Weather": "Weather"
+  },
+  "metadata": {
+    "version": 1
+  }
+}

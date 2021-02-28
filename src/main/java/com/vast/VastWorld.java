@@ -41,7 +41,7 @@ public class VastWorld implements Runnable {
 
 	public VastWorld(VastServerApplication serverApplication, String snapshotFile, Random random,
 					 boolean showMonitor, Metrics metrics, WorldConfiguration worldConfiguration,
-					 Items items, Buildings buildings, Animals animals) {
+					 Items items, Buildings buildings) {
 		this.metrics = metrics;
 		this.items = items;
 
@@ -87,7 +87,7 @@ public class VastWorld implements Runnable {
 		behaviours.put("youngAnimal", new YoungAnimalBehaviour(interactionHandlers, random));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
-			new CreationManager(worldConfiguration, random, items, buildings, animals),
+			new CreationManager(worldConfiguration, random, items, buildings),
 			new TimeManager(),
 
 			new WorldSerializationSystem(snapshotFile, metrics),

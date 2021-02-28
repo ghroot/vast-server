@@ -1,0 +1,69 @@
+{
+  "entities": {
+    "0": {
+      "archetype": 0,
+      "key": "player",
+      "components": {
+        "Collision": {
+          "radius": 0.5
+        },
+        "Inventory": {
+          "capacity": 50
+        },
+        "Speed": {
+          "baseSpeed": 4
+        },
+        "SyncPropagation": {
+          "ownerPropagationProperties": 1696,
+          "unreliableProperties": 3
+        },
+        "Teach": {
+          "words": [
+            "me",
+            "you"
+          ]
+        },
+        "Type": {
+          "type": "player"
+        }
+      }
+    }
+  },
+  "archetypes": {
+    "0": [
+      "Player",
+      "Configuration",
+      "Transform",
+      "Type",
+      "Speed",
+      "Inventory",
+      "Collision",
+      "Skill",
+      "SyncPropagation",
+      "Known",
+      "SubType",
+      "Teach",
+      "State",
+      "SyncHistory"
+    ]
+  },
+  "componentIdentifiers": {
+    "com.vast.component.Known": "Known",
+    "com.vast.component.Type": "Type",
+    "com.vast.component.Player": "Player",
+    "com.vast.component.Collision": "Collision",
+    "com.vast.component.SyncPropagation": "SyncPropagation",
+    "com.vast.component.Configuration": "Configuration",
+    "com.vast.component.Inventory": "Inventory",
+    "com.vast.component.Transform": "Transform",
+    "com.vast.component.SubType": "SubType",
+    "com.vast.component.SyncHistory": "SyncHistory",
+    "com.vast.component.Speed": "Speed",
+    "com.vast.component.Skill": "Skill",
+    "com.vast.component.State": "State",
+    "com.vast.component.Teach": "Teach"
+  },
+  "metadata": {
+    "version": 1
+  }
+}

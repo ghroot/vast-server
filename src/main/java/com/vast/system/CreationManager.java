@@ -1,12 +1,14 @@
 package com.vast.system;
 
-import com.artemis.Archetype;
-import com.artemis.ArchetypeBuilder;
-import com.artemis.BaseSystem;
-import com.artemis.ComponentMapper;
+import com.artemis.*;
+import com.artemis.annotations.PrefabData;
+import com.artemis.io.JsonArtemisSerializer;
+import com.artemis.managers.WorldSerializationManager;
 import com.vast.component.*;
+import com.vast.data.WorldConfiguration;
 import com.vast.data.*;
 import com.vast.network.Properties;
+import com.vast.prefab.VastPrefab;
 import fastnoise.FastNoise;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -42,89 +44,39 @@ public class CreationManager extends BaseSystem {
 	private Random random;
 	private Items items;
 	private Buildings buildings;
-	private Animals animals;
 
 	private Archetype worldArchetype;
-	private Archetype playerArchetype;
-	private Archetype treeArchetype;
-	private Archetype rockArchetype;
-	private Archetype animalArchetype;
+	private PlayerTemplate playerTemplate;
+	private TreeTemplate treeTemplate;
+	private RockTemplate rockTemplate;
+	private AnimalTemplate animalTemplate;
 	private Archetype buildingArchetype;
-	private Archetype pickupArchetype;
+	private PickupTemplate pickupTemplate;
 
 	private int nextAnimalGroupId = 0;
 
-	public CreationManager(WorldConfiguration worldConfiguration, Random random, Items items, Buildings buildings, Animals animals) {
+	public CreationManager(WorldConfiguration worldConfiguration, Random random, Items items, Buildings buildings) {
 		this.worldConfiguration = worldConfiguration;
 		this.random = random;
 		this.items = items;
 		this.buildings = buildings;
-		this.animals = animals;
 	}
 
 	@Override
 	protected void initialize() {
+		// TODO: This will be overwritten by WorldSerializationSystem
+		WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
+		worldSerializationManager.setSerializer(new JsonArtemisSerializer(world));
+
 		worldArchetype = new ArchetypeBuilder()
 			.add(Time.class)
 			.add(Weather.class)
 			.build(world);
 
-		playerArchetype = new ArchetypeBuilder()
-			.add(Player.class)
-			.add(Type.class)
-			.add(SubType.class)
-			.add(State.class)
-			.add(Inventory.class)
-			.add(Transform.class)
-			.add(Speed.class)
-			.add(Known.class)
-			.add(Collision.class)
-			.add(Skill.class)
-			.add(Teach.class)
-			.add(SyncPropagation.class)
-			.add(SyncHistory.class)
-			.build(world);
-
-		treeArchetype = new ArchetypeBuilder()
-			.add(Type.class)
-			.add(SubType.class)
-			.add(State.class)
-			.add(Transform.class)
-			.add(Known.class)
-			.add(Collision.class)
-			.add(Static.class)
-			.add(Harvestable.class)
-			.add(Inventory.class)
-			.add(Teach.class)
-			.add(SyncPropagation.class)
-			.add(SyncHistory.class)
-			.build(world);
-
-		rockArchetype = new ArchetypeBuilder()
-			.add(Type.class)
-			.add(SubType.class)
-			.add(State.class)
-			.add(Transform.class)
-			.add(Known.class)
-			.add(Collision.class)
-			.add(Static.class)
-			.add(Harvestable.class)
-			.add(Inventory.class)
-			.add(Teach.class)
-			.add(SyncPropagation.class)
-			.add(SyncHistory.class)
-			.build(world);
-
-		animalArchetype = new ArchetypeBuilder()
-			.add(Type.class)
-			.add(SubType.class)
-			.add(Group.class)
-			.add(Transform.class)
-			.add(Known.class)
-			.add(Teach.class)
-			.add(SyncPropagation.class)
-			.add(SyncHistory.class)
-			.build(world);
+		playerTemplate = new PlayerTemplate(world);
+		treeTemplate = new TreeTemplate(world);
+		rockTemplate = new RockTemplate(world);
+		animalTemplate = new AnimalTemplate(world);
 
 		buildingArchetype = new ArchetypeBuilder()
 			.add(Type.class)
@@ -137,16 +89,7 @@ public class CreationManager extends BaseSystem {
 			.add(SyncHistory.class)
 			.build(world);
 
-		pickupArchetype = new ArchetypeBuilder()
-			.add(Type.class)
-			.add(SubType.class)
-			.add(Transform.class)
-			.add(Known.class)
-			.add(Static.class)
-			.add(Inventory.class)
-			.add(Container.class)
-			.add(SyncPropagation.class)
-			.build(world);
+		pickupTemplate = new PickupTemplate(world);
 	}
 
 	@Override
@@ -167,132 +110,106 @@ public class CreationManager extends BaseSystem {
 					createRock(new Point2f(x, y));
 				}
 				if (noise2.GetWhiteNoise(x, y) > 0.99f) {
-					createAnimalGroup(new Point2f(x, y), random.nextFloat() < 0.5f ? 0 : 2);
+					createAnimalGroup(new Point2f(x, y), random.nextFloat() < 0.5f ? "rabbit" : "deer");
 				}
 			}
 		}
-	}
-
-	public int createPlayer(String name, int subType, Point2f position, boolean fakePlayer) {
-		int playerEntity = world.create(playerArchetype);
-		playerMapper.get(playerEntity).name = name;
-		typeMapper.get(playerEntity).type = "player";
-		subTypeMapper.get(playerEntity).subType = subType;
-		if (position != null) {
-			transformMapper.get(playerEntity).position.set(position);
-		} else {
-			transformMapper.get(playerEntity).position.set(getRandomPositionInWorld());
-		}
-		speedMapper.get(playerEntity).baseSpeed = 4f;
-		collisionMapper.get(playerEntity).radius = 0.5f;
-		inventoryMapper.get(playerEntity).capacity = 50;
-		teachMapper.get(playerEntity).addWord("me");
-		teachMapper.get(playerEntity).addWord("you");
-		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.POSITION);
-		syncPropagationMapper.get(playerEntity).setUnreliable(Properties.ROTATION);
-		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.INVENTORY);
-		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.HOME);
-		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.CONFIGURATION);
-		syncPropagationMapper.get(playerEntity).setOwnerPropagation(Properties.SKILL);
-		if (fakePlayer) {
-			aiMapper.create(playerEntity).behaviourName = "human";
-		}
-		return playerEntity;
 	}
 
 	public int createPlayer(String name, int subType, boolean fakePlayer) {
 		return createPlayer(name, subType, null, fakePlayer);
 	}
 
-	// TODO: Move to json somehow?
-	public int createTree(Point2f position, boolean growing) {
-		int treeEntity = world.create(treeArchetype);
-		typeMapper.get(treeEntity).type = "tree";
-		subTypeMapper.get(treeEntity).subType = (int) (random.nextFloat() * 6);
-		transformMapper.get(treeEntity).position.set(position);
-		transformMapper.get(treeEntity).rotation = random.nextFloat() * 360;
-		collisionMapper.get(treeEntity).radius = 0.4f;
-		harvestableMapper.get(treeEntity).requiredItemTag = "axe";
-		harvestableMapper.get(treeEntity).stateName = "chopping";
-		harvestableMapper.get(treeEntity).teachWord = "chop";
-		harvestableMapper.get(treeEntity).durability = 300f;
-		inventoryMapper.get(treeEntity).add(items.getItem("Wood").getId(), 3);
-		inventoryMapper.get(treeEntity).add(items.getItem("Seed").getId(), 1);
-		teachMapper.get(treeEntity).addWord("tree");
-		if (growing) {
-			growingMapper.create(treeEntity).timeLeft = 60f;
-		}
-		syncPropagationMapper.get(treeEntity).setOwnerPropagation(Properties.INVENTORY);
-		return treeEntity;
+	public int createPlayer(String name, int subType, Point2f position, boolean fakePlayer) {
+		return playerTemplate.create(name, subType, position, fakePlayer);
 	}
 
-	// TODO: Move to json somehow?
-	public int createRock(Point2f position) {
-		int rockEntity = world.create(rockArchetype);
-		typeMapper.get(rockEntity).type = "rock";
-		subTypeMapper.get(rockEntity).subType = (int) (random.nextFloat() * 3);
-		transformMapper.get(rockEntity).position.set(position);
-		transformMapper.get(rockEntity).rotation = random.nextFloat() * 360;
-		collisionMapper.get(rockEntity).radius = 0.4f;
-		harvestableMapper.get(rockEntity).requiredItemTag = "pickaxe";
-		harvestableMapper.get(rockEntity).stateName = "picking";
-		harvestableMapper.get(rockEntity).teachWord = "pick";
-		harvestableMapper.get(rockEntity).durability = 300f;
-		inventoryMapper.get(rockEntity).add(items.getItem("Stone").getId(), 2);
-		teachMapper.get(rockEntity).addWord("rock");
-		syncPropagationMapper.get(rockEntity).setOwnerPropagation(Properties.INVENTORY);
-		return rockEntity;
-	}
-
-	private void createAnimalGroup(Point2f position, int animalId) {
-		int adultAnimalId = animalId;
-		int youngAnimalId = animalId + 1;
-		int groupId = nextAnimalGroupId++;
-		createAnimal(new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), adultAnimalId, groupId);
-		createAnimal(new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), youngAnimalId, groupId);
-		createAnimal(new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), youngAnimalId, groupId);
-	}
-
-	public int createAnimal(Point2f position, int animalId, int groupId) {
-		Animal animal = animals.getAnimal(animalId);
-		int animalEntity = world.create(animalArchetype);
-		typeMapper.get(animalEntity).type = "animal";
-		subTypeMapper.get(animalEntity).subType = animalId;
-		transformMapper.get(animalEntity).position.set(position);
-		groupMapper.get(animalEntity).id = groupId;
-		teachMapper.get(animalEntity).addWord("animal");
-
-		if (animal.hasAspect("collision")) {
-			JSONObject collisionAspect = animal.getAspect("collision");
-			Collision collision = collisionMapper.create(animalEntity);
-			collision.radius = collisionAspect.getFloat("radius");
+	@PrefabData("com/vast/prefab/player.json")
+	public class PlayerTemplate extends VastPrefab {
+		public PlayerTemplate(World world) {
+			super(world);
 		}
 
-		if (animal.hasAspect("inventory")) {
-			JSONObject inventoryAspect = animal.getAspect("inventory");
-			Inventory inventory = inventoryMapper.create(animalEntity);
-			for (String itemName : inventoryAspect.getJSONObject("items").keySet()) {
-				int amount = inventoryAspect.getJSONObject("items").getInt(itemName);
-				inventory.add(items.getItem(itemName).getId(), amount);
+		public int create(String name, int subType, Point2f position, boolean fakePlayer) {
+			int playerEntity = create().get("player").getId();
+			playerMapper.get(playerEntity).name = name;
+			subTypeMapper.get(playerEntity).subType = subType;
+			if (position != null) {
+				transformMapper.get(playerEntity).position.set(position);
+			} else {
+				transformMapper.get(playerEntity).position.set(getRandomPositionInWorld());
 			}
+			if (fakePlayer) {
+				aiMapper.create(playerEntity).behaviourName = "human";
+			}
+			return playerEntity;
+		}
+	}
+
+	public int createTree(Point2f position, boolean growing) {
+		return treeTemplate.create(position, growing);
+	}
+
+	@PrefabData("com/vast/prefab/tree.json")
+	public class TreeTemplate extends VastPrefab {
+		public TreeTemplate(World world) {
+			super(world);
 		}
 
-		if (animal.hasAspect("speed")) {
-			JSONObject speedAspect = animal.getAspect("speed");
-			Speed speed = speedMapper.create(animalEntity);
-			speed.baseSpeed = speedAspect.getFloat("baseSpeed");
+		public int create(Point2f position, boolean growing) {
+			int treeEntity = create().get("tree").getId();
+			subTypeMapper.get(treeEntity).subType = (int) (random.nextFloat() * 6);
+			transformMapper.get(treeEntity).position.set(position);
+			transformMapper.get(treeEntity).rotation = random.nextFloat() * 360;
+			if (growing) {
+				growingMapper.create(treeEntity).timeLeft = 60f;
+			}
+			return treeEntity;
+		}
+	}
+
+	public int createRock(Point2f position) {
+		return rockTemplate.create(position);
+	}
+
+	@PrefabData("com/vast/prefab/rock.json")
+	public class RockTemplate extends VastPrefab {
+		public RockTemplate(World world) {
+			super(world);
 		}
 
-		if (animal.hasAspect("ai")) {
-			JSONObject aiAspect = animal.getAspect("ai");
-			AI ai = aiMapper.create(animalEntity);
-			ai.behaviourName = aiAspect.getString("behaviour");
+		public int create(Point2f position) {
+			int rockEntity = create().get("rock").getId();
+			subTypeMapper.get(rockEntity).subType = (int) (random.nextFloat() * 3);
+			transformMapper.get(rockEntity).position.set(position);
+			transformMapper.get(rockEntity).rotation = random.nextFloat() * 360;
+			return rockEntity;
+		}
+	}
+
+	private void createAnimalGroup(Point2f position, String animalNamePrefix) {
+		int groupId = nextAnimalGroupId++;
+		createAnimal(new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), animalNamePrefix + "Adult", groupId);
+		createAnimal(new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), animalNamePrefix + "Young", groupId);
+		createAnimal(new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), animalNamePrefix + "Young", groupId);
+	}
+
+	public int createAnimal(Point2f position, String animalName, int groupId) {
+		return animalTemplate.create(position, animalName, groupId);
+	}
+
+	@PrefabData("com/vast/prefab/animal.json")
+	public class AnimalTemplate extends VastPrefab {
+		public AnimalTemplate(World world) {
+			super(world);
 		}
 
-		syncPropagationMapper.get(animalEntity).setUnreliable(Properties.POSITION);
-		syncPropagationMapper.get(animalEntity).setUnreliable(Properties.ROTATION);
-		syncPropagationMapper.get(animalEntity).setOwnerPropagation(Properties.INVENTORY);
-		return animalEntity;
+		public int create(Point2f position, String animalName, int groupId) {
+			int animalEntity = create().get(animalName).getId();
+			transformMapper.get(animalEntity).position.set(position);
+			groupMapper.get(animalEntity).id = groupId;
+			return animalEntity;
+		}
 	}
 
 	public int createBuilding(Point2f position, int buildingId) {
@@ -344,14 +261,23 @@ public class CreationManager extends BaseSystem {
 	}
 
 	public int createPickup(Point2f position, int subType, short[] items) {
-		int pickupEntity = world.create(pickupArchetype);
-		typeMapper.get(pickupEntity).type = "pickup";
-		subTypeMapper.get(pickupEntity).subType = subType;
-		transformMapper.get(pickupEntity).position.set(position);
-		transformMapper.get(pickupEntity).rotation = random.nextFloat() * 360f;
-		inventoryMapper.get(pickupEntity).add(items);
-		syncPropagationMapper.get(pickupEntity).setOwnerPropagation(Properties.INVENTORY);
-		return pickupEntity;
+		return pickupTemplate.create(position, subType, items);
+	}
+
+	@PrefabData("com/vast/prefab/pickup.json")
+	public class PickupTemplate extends VastPrefab {
+		public PickupTemplate(World world) {
+			super(world);
+		}
+
+		public int create(Point2f position, int subType, short[] items) {
+			int pickupEntity = create().get("pickup").getId();
+			subTypeMapper.get(pickupEntity).subType = subType;
+			transformMapper.get(pickupEntity).position.set(position);
+			transformMapper.get(pickupEntity).rotation = random.nextFloat() * 360f;
+			inventoryMapper.get(pickupEntity).add(items);
+			return pickupEntity;
+		}
 	}
 
 	public int createPickup(Point2f position, int subType, Inventory inventory) {

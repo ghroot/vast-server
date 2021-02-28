@@ -24,7 +24,7 @@ public class Main {
 		try {
 			Options options = new Options();
 			options.addOption("log", true, "Logging level");
-			options.addOption("format", true, "Snapshot format (json or bin)");
+			options.addOption("snapshot", true, "Snapshot file");
 			options.addOption("simulate", true, "Number of peers to simulate");
 			options.addOption("seed", true, "Random seed");
 			options.addOption("monitor", "Show monitor");
