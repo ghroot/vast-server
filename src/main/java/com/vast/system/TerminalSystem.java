@@ -1,6 +1,7 @@
 package com.vast.system;
 
 import com.artemis.*;
+import com.artemis.components.SerializationTag;
 import com.artemis.systems.IntervalSystem;
 import com.artemis.utils.Bag;
 import com.artemis.utils.IntBag;
@@ -142,6 +143,15 @@ public class TerminalSystem extends IntervalSystem {
 				TerminalPosition terminalPosition = getTerminalPositionFromWorldPosition(transform.position);
 				if (terminalPosition.getColumn() >= 0 && terminalPosition.getColumn() < screen.getTerminalSize().getColumns() &&
 						terminalPosition.getRow() >= 0 && terminalPosition.getRow() < screen.getTerminalSize().getRows()) {
+					if (entity == focusedEntity && pathMapper.has(entity)) {
+						TerminalPosition pathTerminalPosition = getTerminalPositionFromWorldPosition(pathMapper.get(entity).targetPosition);
+						if (pathTerminalPosition.getColumn() >= 0 && pathTerminalPosition.getColumn() < screen.getTerminalSize().getColumns() &&
+								pathTerminalPosition.getRow() >= 0 && pathTerminalPosition.getRow() < screen.getTerminalSize().getRows()) {
+							TextGraphics textGraphics = screen.newTextGraphics();
+							screen.setCharacter(pathTerminalPosition, new TextCharacter('x', gray, TextColor.ANSI.DEFAULT));
+							textGraphics.setForegroundColor(TextColor.ANSI.YELLOW);
+						}
+					}
 					if (playerMapper.has(entity)) {
 						TextGraphics textGraphics = screen.newTextGraphics();
 						if (activeMapper.has(entity)) {
@@ -181,7 +191,7 @@ public class TerminalSystem extends IntervalSystem {
 							}
 							textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
 						} else if (typeMapper.get(entity).type.equals("home")) {
-							screen.setCharacter(terminalPosition, new TextCharacter('X', colored ? TextColor.ANSI.RED : gray, TextColor.ANSI.DEFAULT));
+							screen.setCharacter(terminalPosition, new TextCharacter('H', colored ? TextColor.ANSI.RED : gray, TextColor.ANSI.DEFAULT));
 							textGraphics.setForegroundColor(TextColor.ANSI.RED);
 						} else {
 							screen.setCharacter(terminalPosition, new TextCharacter('?', colored ? TextColor.ANSI.MAGENTA : gray, TextColor.ANSI.DEFAULT));
@@ -452,6 +462,9 @@ public class TerminalSystem extends IntervalSystem {
 							}
 						}
 						detail = wordsString.toString();
+					} else if (component instanceof SerializationTag) {
+						SerializationTag serializationTag = (SerializationTag) component;
+						detail = serializationTag.tag;
 					}
 					if (detail != null) {
 						textGraphics.putString(0, row, componentName + " (" + detail + ")");
