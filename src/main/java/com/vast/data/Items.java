@@ -31,19 +31,7 @@ public class Items {
 					tags[i] = tagsArray.optString(i);
 				}
 				String name = itemData.getString("name");
-				Item item;
-				if (itemData.has("craftable")) {
-					Set<Cost> costs = new HashSet<>();
-					float craftDuration = itemData.getJSONObject("craftable").getFloat("duration");
-					JSONObject costData = itemData.getJSONObject("craftable").getJSONObject("cost");
-					for (String itemName : costData.keySet()) {
-						int amount = costData.getInt(itemName);
-						costs.add(new Cost(getItem(itemName).getId(), amount));
-					}
-					item = new CraftableItem(id, tags, name, costs, craftDuration);
-				} else {
-					item = new Item(id, tags, name);
-				}
+				Item item = new Item(id, tags, name);
 				items.put(id, item);
 			}
 		} catch (Exception exception) {

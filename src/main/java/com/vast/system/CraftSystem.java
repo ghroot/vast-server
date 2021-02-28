@@ -4,7 +4,6 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.vast.component.*;
-import com.vast.data.CraftableItem;
 import com.vast.data.Items;
 import com.vast.network.Properties;
 
@@ -38,16 +37,15 @@ public class CraftSystem extends IteratingSystem {
 	protected void process(int craftEntity) {
 		Craft craft = craftMapper.get(craftEntity);
 
-		craft.countdown -= world.getDelta();
-		if (craft.countdown <= 0.0f) {
+		craft.craftTime += world.getDelta();
+		if (craft.craftTime >= craft.recipe.getDuration()) {
 			Inventory inventory = inventoryMapper.get(craftEntity);
-			CraftableItem itemToCraft = (CraftableItem) items.getItem(craft.itemId);
-			if (inventory.has(itemToCraft.getCosts())) {
-				inventory.remove(itemToCraft.getCosts());
-				inventory.add(itemToCraft.getId(), 1);
+			if (inventory.has(craft.recipe.getCosts())) {
+				inventory.remove(craft.recipe.getCosts());
+				inventory.add(craft.recipe.getItemId());
 				syncMapper.create(craftEntity).markPropertyAsDirty(Properties.INVENTORY);
-				String capitalizedItemName = itemToCraft.getName().substring(0, 1).toUpperCase() + itemToCraft.getName().substring(1);
-				eventMapper.create(craftEntity).addEntry("message").setData("Crafted Item: " + capitalizedItemName).setOwnerOnly(true);
+				String itemName = items.getItem(craft.recipe.getItemId()).getName();
+				eventMapper.create(craftEntity).addEntry("message").setData("Crafted Item: " + itemName).setOwnerOnly(true);
 			}
 			craftMapper.remove(craftEntity);
 		}

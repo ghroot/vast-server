@@ -28,14 +28,15 @@ public class HumanBehaviour extends AbstractBehaviour {
 	private Random random;
 	private Map<String, List<IncomingRequest>> incomingRequestsByPeer;
 	private Items items;
-	private Buildings buildings;
+	private Recipes recipes;
 
-	public HumanBehaviour(InteractionHandler[] interactionHandlers, Random random, Map<String, List<IncomingRequest>> incomingRequestsByPeer, Items items, Buildings buildings) {
+	public HumanBehaviour(InteractionHandler[] interactionHandlers, Random random, Map<String,
+			List<IncomingRequest>> incomingRequestsByPeer, Items items, Recipes recipes) {
 		super(interactionHandlers);
 		this.random = random;
 		this.incomingRequestsByPeer = incomingRequestsByPeer;
 		this.items = items;
-		this.buildings = buildings;
+		this.recipes = recipes;
 	}
 
 	@Override
@@ -49,15 +50,15 @@ public class HumanBehaviour extends AbstractBehaviour {
 		if (roll <= 0.2f) {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.SET_HOME)));
 		} else if (roll <= 2f) {
-			CraftableItem item;
+			Recipe recipe;
 			if (random.nextFloat() <= 0.5f) {
-				item = (CraftableItem) items.getItem("Axe");
+				recipe = recipes.getRecipeByItemName("Axe");
 			} else {
-				item = (CraftableItem) items.getItem("Pickaxe");
+				recipe = recipes.getRecipeByItemName("Pickaxe");
 			}
 			Inventory inventory = inventoryMapper.get(entity);
-			if (inventory.has(item.getCosts())) {
-				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.CRAFT, new DataObject().set(MessageCodes.CRAFT_ITEM_TYPE, (byte) item.getId()))));
+			if (inventory.has(recipe.getCosts())) {
+				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.CRAFT, new DataObject().set(MessageCodes.CRAFT_RECIPE_ID, (byte) recipe.getId()))));
 			}
 		} else if (roll <= 5f) {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.EMOTE, new DataObject().set(MessageCodes.EMOTE_TYPE, (byte) 0))));
@@ -68,15 +69,15 @@ public class HumanBehaviour extends AbstractBehaviour {
 			}
 		} else if (roll <= 30f) {
 			Inventory inventory = inventoryMapper.get(entity);
-			List<Building> allBuildings = buildings.getAllBuildings();
-			Building randomBuilding = allBuildings.get((int) Math.floor(random.nextFloat() * allBuildings.size()));
-			if (inventory.has(randomBuilding.getCosts())) {
+			List<Recipe> entityRecipes = recipes.getEntityRecipes();
+			Recipe randomEntityRecipe = entityRecipes.get((int) Math.floor(random.nextFloat() * entityRecipes.size()));
+			if (inventory.has(randomEntityRecipe.getCosts())) {
 				float x = transformMapper.get(entity).position.x;
 				float y = transformMapper.get(entity).position.y - 1.0f;
 				float[] position = new float[]{x, y};
 				float rotation = random.nextFloat() * 360f;
 				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD, new DataObject()
-					.set(MessageCodes.BUILD_TYPE, (byte) randomBuilding.getId())
+					.set(MessageCodes.BUILD_RECIPE_ID, (byte) randomEntityRecipe.getId())
 					.set(MessageCodes.BUILD_POSITION, position)
 					.set(MessageCodes.BUILD_ROTATION, rotation))));
 			}

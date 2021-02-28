@@ -36,7 +36,7 @@ public class MessageCodes {
 
 	// Client -> Server
 	public static short BUILD = 52;
-	public static byte BUILD_TYPE = 0;
+	public static byte BUILD_RECIPE_ID = 0;
 	public static byte BUILD_POSITION = 1;
 	public static byte BUILD_ROTATION = 2;
 
@@ -49,7 +49,7 @@ public class MessageCodes {
 
 	// Client -> Server
 	public static short CRAFT = 55;
-	public static byte CRAFT_ITEM_TYPE = 0;
+	public static byte CRAFT_RECIPE_ID = 0;
 
 	// Client -> Server
 	public static short PLANT = 56;

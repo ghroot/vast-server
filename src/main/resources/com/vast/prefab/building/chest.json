@@ -2,48 +2,46 @@
   "entities": {
     "0": {
       "archetype": 0,
-      "key": "player",
+      "key": "chest",
       "components": {
         "Collision": {
-          "radius": 0.5
+          "radius": 0.8
+        },
+        "Constructable": {
+          "buildDuration": 10
+        },
+        "Container": {
+          "persistent": true
         },
         "Inventory": {
-          "capacity": 50
+          "capacity": 100
         },
-        "Speed": {
-          "baseSpeed": 4
+        "SubType": {
+          "subType": 0
         },
         "SyncPropagation": {
-          "ownerPropagationProperties": 1696,
-          "unreliableProperties": 3
-        },
-        "Teach": {
-          "words": [
-            "me",
-            "you"
-          ]
+          "ownerPropagationProperties": 32
         },
         "Type": {
-          "type": "player"
+          "type": "building"
         }
       }
     }
   },
   "archetypes": {
     "0": [
-      "Player",
-      "Transform",
-      "Type",
-      "Speed",
-      "Inventory",
       "Collision",
-      "Skill",
-      "SyncPropagation",
+      "Constructable",
+      "Container",
+      "Inventory",
       "Known",
+      "Owner",
+      "Static",
       "SubType",
-      "Teach",
-      "State",
-      "SyncHistory"
+      "SyncHistory",
+      "SyncPropagation",
+      "Transform",
+      "Type"
     ]
   },
   "componentIdentifiers": {
@@ -60,7 +58,6 @@
     "com.vast.component.Lifetime": "Lifetime",
     "com.vast.component.Owner": "Owner",
     "com.vast.component.Plantable": "Plantable",
-    "com.vast.component.Player": "Player",
     "com.vast.component.Skill": "Skill",
     "com.vast.component.Speed": "Speed",
     "com.vast.component.State": "State",

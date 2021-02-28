@@ -2,48 +2,48 @@
   "entities": {
     "0": {
       "archetype": 0,
-      "key": "player",
+      "key": "rabbitYoung",
       "components": {
-        "Collision": {
-          "radius": 0.5
+        "AI": {
+          "behaviourName": "youngAnimal"
         },
-        "Inventory": {
-          "capacity": 50
+        "Collision": {
+          "radius": 0.2
         },
         "Speed": {
-          "baseSpeed": 4
+          "baseSpeed": 1
+        },
+        "SubType": {
+          "subType": 0
         },
         "SyncPropagation": {
-          "ownerPropagationProperties": 1696,
+          "ownerPropagationProperties": 32,
           "unreliableProperties": 3
         },
         "Teach": {
           "words": [
-            "me",
-            "you"
+            "animal"
           ]
         },
         "Type": {
-          "type": "player"
+          "type": "animal"
         }
       }
     }
   },
   "archetypes": {
     "0": [
-      "Player",
-      "Transform",
-      "Type",
-      "Speed",
-      "Inventory",
+      "AI",
       "Collision",
-      "Skill",
-      "SyncPropagation",
+      "Group",
       "Known",
+      "Speed",
       "SubType",
+      "SyncHistory",
+      "SyncPropagation",
       "Teach",
-      "State",
-      "SyncHistory"
+      "Transform",
+      "Type"
     ]
   },
   "componentIdentifiers": {
@@ -60,7 +60,6 @@
     "com.vast.component.Lifetime": "Lifetime",
     "com.vast.component.Owner": "Owner",
     "com.vast.component.Plantable": "Plantable",
-    "com.vast.component.Player": "Player",
     "com.vast.component.Skill": "Skill",
     "com.vast.component.Speed": "Speed",
     "com.vast.component.State": "State",

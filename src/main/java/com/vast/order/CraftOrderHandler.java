@@ -5,8 +5,9 @@ import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Craft;
 import com.vast.component.Event;
 import com.vast.component.Inventory;
-import com.vast.data.CraftableItem;
 import com.vast.data.Items;
+import com.vast.data.Recipe;
+import com.vast.data.Recipes;
 import com.vast.network.MessageCodes;
 
 public class CraftOrderHandler implements OrderHandler {
@@ -14,9 +15,11 @@ public class CraftOrderHandler implements OrderHandler {
 	private ComponentMapper<Craft> craftMapper;
 	private ComponentMapper<Event> eventMapper;
 
+	private Recipes recipes;
 	private Items items;
 
-	public CraftOrderHandler(Items items) {
+	public CraftOrderHandler(Recipes recipes, Items items) {
+		this.recipes = recipes;
 		this.items = items;
 	}
 
@@ -42,12 +45,11 @@ public class CraftOrderHandler implements OrderHandler {
 
 	@Override
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
-		int itemId = (byte) dataObject.get(MessageCodes.CRAFT_ITEM_TYPE).value;
-		CraftableItem itemToCraft = (CraftableItem) items.getItem(itemId);
+		int recipeId = (byte) dataObject.get(MessageCodes.CRAFT_RECIPE_ID).value;
+		Recipe recipe = recipes.getRecipe(recipeId);
 		Inventory inventory = inventoryMapper.get(orderEntity);
-		if (inventory.has(itemToCraft.getCosts())) {
-			craftMapper.create(orderEntity).countdown = itemToCraft.getCraftDuration();
-			craftMapper.get(orderEntity).itemId = itemId;
+		if (inventory.has(recipe.getCosts())) {
+			craftMapper.create(orderEntity).recipe = recipe;
 			return true;
 		} else {
 			eventMapper.create(orderEntity).addEntry("message").setData("I don't have the required materials...").setOwnerOnly(true);

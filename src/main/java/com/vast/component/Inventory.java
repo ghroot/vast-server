@@ -17,6 +17,15 @@ public class Inventory extends PooledComponent {
 		capacity = Integer.MAX_VALUE;
 	}
 
+	public void set(short[] items) {
+		reset();
+		add(items);
+	}
+
+	public void set(Inventory inventory) {
+		set(inventory.items);
+	}
+
 	public void add(int itemId, int amount) {
 		if (itemId >= items.length) {
 			items = Arrays.copyOf(items, itemId + 1);

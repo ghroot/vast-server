@@ -4,8 +4,8 @@ import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.*;
-import com.vast.data.Building;
-import com.vast.data.Buildings;
+import com.vast.data.Recipe;
+import com.vast.data.Recipes;
 import com.vast.network.Properties;
 import com.vast.network.MessageCodes;
 import com.vast.system.CreationManager;
@@ -25,12 +25,12 @@ public class BuildOrderHandler implements OrderHandler {
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Event> eventMapper;
 
-	private Buildings buildings;
+	private Recipes recipes;
 
 	private CreationManager creationManager;
 
-	public BuildOrderHandler(Buildings buildings) {
-		this.buildings = buildings;
+	public BuildOrderHandler(Recipes recipes) {
+		this.recipes = recipes;
 	}
 
 	@Override
@@ -57,18 +57,17 @@ public class BuildOrderHandler implements OrderHandler {
 	@Override
 	public boolean startOrder(int orderEntity, DataObject dataObject) {
 		Inventory inventory = inventoryMapper.get(orderEntity);
-		int buildingId = (byte) dataObject.get(MessageCodes.BUILD_TYPE).value;
+		int recipeId = (byte) dataObject.get(MessageCodes.BUILD_RECIPE_ID).value;
 		float[] position = (float[]) dataObject.get(MessageCodes.BUILD_POSITION).value;
 		float rotation = (float) dataObject.get(MessageCodes.BUILD_ROTATION).value;
-		Building building = buildings.getBuilding(buildingId);
-		if (inventory.has(building.getCosts())) {
-			inventory.remove(building.getCosts());
+		Recipe recipe = recipes.getRecipe(recipeId);
+		if (inventory.has(recipe.getCosts())) {
+			inventory.remove(recipe.getCosts());
 			syncMapper.create(orderEntity).markPropertyAsDirty(Properties.INVENTORY);
 
 			Point2f buildPosition = new Point2f(position[0], position[1]);
-			int buildingEntity = creationManager.createBuilding(buildPosition, building.getId());
-			transformMapper.get(buildingEntity).rotation = rotation;
-			ownerMapper.get(buildingEntity).name = playerMapper.get(orderEntity).name;
+			int buildingEntity = creationManager.createBuilding(recipe.getEntityType(), buildPosition, rotation,
+					playerMapper.get(orderEntity).name);
 			createMapper.create(buildingEntity).reason = "built";
 
 			interactMapper.create(orderEntity).entity = buildingEntity;

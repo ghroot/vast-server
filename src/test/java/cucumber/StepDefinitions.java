@@ -2,7 +2,6 @@ package cucumber;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.RequestMessage;
 import com.vast.VastWorld;
@@ -93,10 +92,10 @@ public class StepDefinitions {
 
         WorldConfiguration worldConfiguration = new WorldConfiguration(width, height);
         Items items = new Items("items.json");
-        Buildings buildings = new Buildings("buildings.json", items);
+        Recipes recipes = new Recipes("recipes.json", items);
 
         world = new VastWorld(serverApplication, null, new Random(seed), true, null,
-                worldConfiguration, items, buildings);
+                worldConfiguration, items, recipes);
 
         worldThread = new Thread(world, "World");
         worldThread.setPriority(Thread.MAX_PRIORITY);

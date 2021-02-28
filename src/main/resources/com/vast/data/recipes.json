@@ -1,0 +1,58 @@
+[
+  {
+    "id": 0,
+    "itemName": "Axe",
+    "duration": 3,
+    "cost": {
+      "Wood": 2,
+      "Stone": 1
+    }
+  },
+  {
+    "id": 1,
+    "itemName": "Pickaxe",
+    "duration": 5,
+    "cost": {
+      "Wood": 2,
+      "Stone": 2
+    }
+  },
+  {
+    "id": 2,
+    "entityType": "chest",
+    "cost": {
+      "Wood": 10
+    }
+  },
+  {
+    "id": 3,
+    "entityType": "wall",
+    "cost": {
+      "Wood": 3
+    }
+  },
+  {
+    "id": 4,
+    "entityType": "fireplace",
+    "cost": {
+      "Wood": 4,
+      "Stone": 3
+    }
+  },
+  {
+    "id": 5,
+    "entityType": "torch",
+    "cost": {
+      "Wood": 2,
+      "Stone": 1
+    }
+  },
+  {
+    "id": 6,
+    "entityType": "planter",
+    "cost": {
+      "Wood": 5,
+      "Stone": 1
+    }
+  }
+]

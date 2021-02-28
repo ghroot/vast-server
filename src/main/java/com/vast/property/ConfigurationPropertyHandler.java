@@ -15,12 +15,58 @@ public class ConfigurationPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Configuration> configurationMapper;
 	private ComponentMapper<SyncHistory> syncHistoryMapper;
 
-	private Items items;
-	private Buildings buildings;
+	private DataObject configurationData;
 
-	public ConfigurationPropertyHandler(Items items, Buildings buildings) {
-		this.items = items;
-		this.buildings = buildings;
+	public ConfigurationPropertyHandler(Items items, Recipes recipes) {
+		createConfigurationData(items, recipes);
+	}
+
+	private void createConfigurationData(Items items, Recipes recipes) {
+		configurationData = new DataObject();
+
+		List<Item> allItems = items.getAllItems();
+		String[] itemStrings = new String[allItems.size()];
+		for (int i = 0; i < allItems.size(); i++) {
+			Item item = allItems.get(i);
+			StringBuilder itemStringBuilder = new StringBuilder();
+			itemStringBuilder.append(item.getId());
+			itemStringBuilder.append(DATA_FIELD_DELIMITER).append(item.getName());
+			itemStrings[i] = itemStringBuilder.toString();
+		}
+		configurationData.set((byte) 0, itemStrings);
+
+		List<Recipe> itemsRecipes = recipes.getItemRecipes();
+		String[] itemRecipeStrings = new String[itemsRecipes.size()];
+		for (int i = 0; i < itemsRecipes.size(); i++) {
+			Recipe itemRecipe = itemsRecipes.get(i);
+			StringBuilder recipeStringBuilder = new StringBuilder();
+			recipeStringBuilder.append(itemRecipe.getId());
+			recipeStringBuilder.append(DATA_FIELD_DELIMITER).append(itemRecipe.getItemId());
+			recipeStringBuilder.append(DATA_FIELD_DELIMITER).append(itemRecipe.getDuration());
+			recipeStringBuilder.append(DATA_FIELD_DELIMITER).append(itemRecipe.getCosts().size());
+			for (Cost cost : itemRecipe.getCosts()) {
+				recipeStringBuilder.append(DATA_FIELD_DELIMITER).append(cost.getItemId());
+				recipeStringBuilder.append(DATA_FIELD_DELIMITER).append(cost.getCount());
+			}
+			itemRecipeStrings[i] = recipeStringBuilder.toString();
+		}
+		configurationData.set((byte) 1, itemRecipeStrings);
+
+		List<Recipe> entityRecipes = recipes.getEntityRecipes();
+		String[] entityRecipeStrings = new String[entityRecipes.size()];
+		for (int i = 0; i < entityRecipes.size(); i++) {
+			Recipe entityRecipe = entityRecipes.get(i);
+			StringBuilder recipeStringBuilder = new StringBuilder();
+			recipeStringBuilder.append(entityRecipe.getId());
+			recipeStringBuilder.append(DATA_FIELD_DELIMITER).append(entityRecipe.getEntityType());
+			recipeStringBuilder.append(DATA_FIELD_DELIMITER).append(entityRecipe.getCosts().size());
+			for (Cost cost : entityRecipe.getCosts()) {
+				recipeStringBuilder.append(DATA_FIELD_DELIMITER).append(cost.getItemId());
+				recipeStringBuilder.append(DATA_FIELD_DELIMITER).append(cost.getCount());
+			}
+			entityRecipeStrings[i] = recipeStringBuilder.toString();
+		}
+		configurationData.set((byte) 2, entityRecipeStrings);
 	}
 
 	@Override
@@ -39,43 +85,6 @@ public class ConfigurationPropertyHandler implements PropertyHandler {
 				lastSyncedVersion = (short) syncHistory.syncedValues.get(Properties.CONFIGURATION);
 			}
 			if (force || configuration.version > lastSyncedVersion) {
-				DataObject configurationData = new DataObject();
-
-				// TODO: Cache this
-				List<Item> allItems = items.getAllItems();
-				String[] itemStrings = new String[allItems.size()];
-				for (int i = 0; i < allItems.size(); i++) {
-					Item item = allItems.get(i);
-					StringBuilder itemStringBuilder = new StringBuilder();
-					itemStringBuilder.append(item.getId());
-					itemStringBuilder.append(DATA_FIELD_DELIMITER).append(item.getName());
-					if (item instanceof CraftableItem) {
-						CraftableItem craftableItem = (CraftableItem) item;
-						itemStringBuilder.append(DATA_FIELD_DELIMITER).append(craftableItem.getCosts().size());
-						for (Cost cost : craftableItem.getCosts()) {
-							itemStringBuilder.append(DATA_FIELD_DELIMITER).append(cost.getItemId());
-							itemStringBuilder.append(DATA_FIELD_DELIMITER).append(cost.getCount());
-						}
-					}
-					itemStrings[i] = itemStringBuilder.toString();
-				}
-				configurationData.set((byte) 0, itemStrings);
-				List<Building> allBuildings = buildings.getAllBuildings();
-				String[] buildingStrings = new String[allBuildings.size()];
-				for (int i = 0; i < allBuildings.size(); i++) {
-					Building building = allBuildings.get(i);
-					StringBuilder buildingStringBuilder = new StringBuilder();
-					buildingStringBuilder.append(building.getId());
-					buildingStringBuilder.append(DATA_FIELD_DELIMITER).append(building.getName());
-					buildingStringBuilder.append(DATA_FIELD_DELIMITER).append(building.getCosts().size());
-					for (Cost cost : building.getCosts()) {
-						buildingStringBuilder.append(DATA_FIELD_DELIMITER).append(cost.getItemId());
-						buildingStringBuilder.append(DATA_FIELD_DELIMITER).append(cost.getCount());
-					}
-					buildingStrings[i] = buildingStringBuilder.toString();
-				}
-				configurationData.set((byte) 1, buildingStrings);
-
 				dataObject.set(Properties.CONFIGURATION, configurationData);
 				if (syncHistory != null) {
 					syncHistory.syncedValues.put(Properties.CONFIGURATION, configuration.version);

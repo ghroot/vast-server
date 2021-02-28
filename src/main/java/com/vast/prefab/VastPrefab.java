@@ -8,4 +8,8 @@ public class VastPrefab extends Prefab {
     public VastPrefab(World world) {
         super(world, new JsonValuePrefabReader());
     }
+
+    public int createEntity() {
+        return create().entities.get(0);
+    }
 }

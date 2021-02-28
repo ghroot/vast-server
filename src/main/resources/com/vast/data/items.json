@@ -22,26 +22,12 @@
   {
     "id": 4,
     "tags": ["tool", "axe"],
-    "name": "Axe",
-    "craftable": {
-      "duration": 3,
-      "cost": {
-        "Wood": 2,
-        "Stone": 1
-      }
-    }
+    "name": "Axe"
   },
   {
     "id": 5,
     "tags": ["tool", "pickaxe"],
-    "name": "Pickaxe",
-    "craftable": {
-      "duration": 5,
-      "cost": {
-        "Wood": 2,
-        "Stone": 2
-      }
-    }
+    "name": "Pickaxe"
   },
   {
     "id": 6,

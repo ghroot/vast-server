@@ -65,9 +65,9 @@ public class PickupSystem extends IteratingSystem {
 
 			int pickupEntity;
 			if (random.nextFloat() < 0.55f) {
-				pickupEntity = creationManager.createPickup(reusablePosition, 1, new short[] {1});
+				pickupEntity = creationManager.createPickup("woodPile", reusablePosition);
 			} else {
-				pickupEntity = creationManager.createPickup(reusablePosition, 2, new short[] {0, 1});
+				pickupEntity = creationManager.createPickup("stonePile", reusablePosition);
 			}
 			lifetimeMapper.create(pickupEntity).timeLeft = PICKUP_LIFETIME;
 		}

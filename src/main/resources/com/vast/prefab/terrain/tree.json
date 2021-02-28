@@ -2,48 +2,52 @@
   "entities": {
     "0": {
       "archetype": 0,
-      "key": "player",
+      "key": "tree",
       "components": {
         "Collision": {
-          "radius": 0.5
+          "radius": 0.4
+        },
+        "Harvestable": {
+          "requiredItemTag": "axe",
+          "durability": 300,
+          "stateName": "chopping",
+          "teachWord": "chop"
         },
         "Inventory": {
-          "capacity": 50
-        },
-        "Speed": {
-          "baseSpeed": 4
+          "items": [
+            3,
+            0,
+            0,
+            1
+          ]
         },
         "SyncPropagation": {
-          "ownerPropagationProperties": 1696,
-          "unreliableProperties": 3
+          "ownerPropagationProperties": 32
         },
         "Teach": {
           "words": [
-            "me",
-            "you"
+            "tree"
           ]
         },
         "Type": {
-          "type": "player"
+          "type": "tree"
         }
       }
     }
   },
   "archetypes": {
     "0": [
-      "Player",
-      "Transform",
-      "Type",
-      "Speed",
-      "Inventory",
       "Collision",
-      "Skill",
-      "SyncPropagation",
+      "Harvestable",
+      "Inventory",
       "Known",
-      "SubType",
-      "Teach",
       "State",
-      "SyncHistory"
+      "Static",
+      "SubType",
+      "SyncPropagation",
+      "Teach",
+      "Transform",
+      "Type"
     ]
   },
   "componentIdentifiers": {
@@ -60,7 +64,6 @@
     "com.vast.component.Lifetime": "Lifetime",
     "com.vast.component.Owner": "Owner",
     "com.vast.component.Plantable": "Plantable",
-    "com.vast.component.Player": "Player",
     "com.vast.component.Skill": "Skill",
     "com.vast.component.Speed": "Speed",
     "com.vast.component.State": "State",

@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 public class WorldSerializationSystem extends IntervalSystem {
 	private static final Logger logger = LoggerFactory.getLogger(WorldSerializationSystem.class);
 
+	private CreationManager creationManager;
+
 	private String snapshotFile;
 	private Metrics metrics;
 
@@ -95,7 +97,6 @@ public class WorldSerializationSystem extends IntervalSystem {
 		} catch (Exception exception) {
 			if (exception instanceof FileNotFoundException) {
 				logger.info("No snapshot file found, creating a new world");
-				CreationManager creationManager = world.getSystem(CreationManager.class);
 				creationManager.createWorld();
 				if (metrics != null) {
 					metrics.setLastSerializeTime(System.currentTimeMillis());

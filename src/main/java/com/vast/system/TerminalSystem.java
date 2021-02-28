@@ -465,6 +465,9 @@ public class TerminalSystem extends IntervalSystem {
 					} else if (component instanceof SerializationTag) {
 						SerializationTag serializationTag = (SerializationTag) component;
 						detail = serializationTag.tag;
+					} else if (component instanceof Configuration) {
+						Configuration configuration = (Configuration) component;
+						detail = "" + configuration.version;
 					}
 					if (detail != null) {
 						textGraphics.putString(0, row, componentName + " (" + detail + ")");

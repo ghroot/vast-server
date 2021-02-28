@@ -41,7 +41,7 @@ public class VastWorld implements Runnable {
 
 	public VastWorld(VastServerApplication serverApplication, String snapshotFile, Random random,
 					 boolean showMonitor, Metrics metrics, WorldConfiguration worldConfiguration,
-					 Items items, Buildings buildings) {
+					 Items items, Recipes recipes) {
 		this.metrics = metrics;
 		this.items = items;
 
@@ -60,10 +60,10 @@ public class VastWorld implements Runnable {
 		OrderHandler[] orderHandlers = {
 			new MoveOrderHandler(),
 			new InteractOrderHandler(interactionHandlers),
-			new BuildOrderHandler(buildings),
+			new BuildOrderHandler(recipes),
 			new EmoteOrderHandler(),
 			new SetHomeOrderHandler(),
-			new CraftOrderHandler(items),
+			new CraftOrderHandler(recipes, items),
 			new PlantOrderHandler(items),
 			new FollowOrderHandler(),
 			new ChatOrderHandler()
@@ -78,16 +78,16 @@ public class VastWorld implements Runnable {
 			new HomePropertyHandler(),
 			new GrowingPropertyHandler(),
 			new StatePropertyHandler(),
-			new ConfigurationPropertyHandler(items, buildings),
+			new ConfigurationPropertyHandler(items, recipes),
 			new SkillPropertyHandler()
 		};
 		Map<String, Behaviour> behaviours = new HashMap<>();
-		behaviours.put("human", new HumanBehaviour(interactionHandlers, random, incomingRequestsByPeer, items, buildings));
+		behaviours.put("human", new HumanBehaviour(interactionHandlers, random, incomingRequestsByPeer, items, recipes));
 		behaviours.put("adultAnimal", new AdultAnimalBehaviour(interactionHandlers, random));
 		behaviours.put("youngAnimal", new YoungAnimalBehaviour(interactionHandlers, random));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
-			new CreationManager(worldConfiguration, random, items, buildings),
+			new CreationManager(worldConfiguration, random),
 			new TimeManager(),
 
 			new WorldSerializationSystem(snapshotFile, metrics),

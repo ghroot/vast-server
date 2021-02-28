@@ -87,7 +87,8 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 
 		harvestable.durability -= world.getDelta() * HARVEST_SPEED;
 		if (harvestable.durability <= 0f) {
-			int pickupEntity = creationManager.createPickup(transformMapper.get(harvestableEntity).position, 0, inventoryMapper.get(harvestableEntity));
+			int pickupEntity = creationManager.createPickup("harvestedResources",
+					transformMapper.get(harvestableEntity).position, inventoryMapper.get(harvestableEntity));
 			createMapper.create(pickupEntity).reason = "harvested";
 			deleteMapper.create(harvestableEntity).reason = "harvested";
 			return true;

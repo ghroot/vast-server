@@ -2,48 +2,31 @@
   "entities": {
     "0": {
       "archetype": 0,
-      "key": "player",
+      "key": "harvestedResources",
       "components": {
-        "Collision": {
-          "radius": 0.5
-        },
-        "Inventory": {
-          "capacity": 50
-        },
-        "Speed": {
-          "baseSpeed": 4
+        "SubType": {
+          "subType": 0
         },
         "SyncPropagation": {
-          "ownerPropagationProperties": 1696,
-          "unreliableProperties": 3
-        },
-        "Teach": {
-          "words": [
-            "me",
-            "you"
-          ]
+          "ownerPropagationProperties": 32
         },
         "Type": {
-          "type": "player"
+          "type": "pickup"
         }
       }
     }
   },
   "archetypes": {
     "0": [
-      "Player",
-      "Transform",
-      "Type",
-      "Speed",
+      "Container",
       "Inventory",
-      "Collision",
-      "Skill",
-      "SyncPropagation",
       "Known",
+      "Lifetime",
+      "Static",
       "SubType",
-      "Teach",
-      "State",
-      "SyncHistory"
+      "SyncPropagation",
+      "Transform",
+      "Type"
     ]
   },
   "componentIdentifiers": {
@@ -60,7 +43,6 @@
     "com.vast.component.Lifetime": "Lifetime",
     "com.vast.component.Owner": "Owner",
     "com.vast.component.Plantable": "Plantable",
-    "com.vast.component.Player": "Player",
     "com.vast.component.Skill": "Skill",
     "com.vast.component.Speed": "Speed",
     "com.vast.component.State": "State",
