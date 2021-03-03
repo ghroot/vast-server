@@ -13,12 +13,14 @@ public class PositionPropertyHandler implements PropertyHandler {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<SyncHistory> syncHistoryMapper;
 
-	private final float POSITION_THRESHOLD = 0.3f;
+	private float positionThreshold = 0.3f;
 
 	private double[] reusablePosition;
 	private Vector2f reusableVector;
 
-	public PositionPropertyHandler() {
+	public PositionPropertyHandler(float positionThreshold) {
+		this.positionThreshold = positionThreshold;
+
 		reusablePosition = new double[2];
 		reusableVector = new Vector2f();
 	}
@@ -41,7 +43,7 @@ public class PositionPropertyHandler implements PropertyHandler {
 				reusableVector.set(lastSyncedPosition.x - transform.position.x, lastSyncedPosition.y - transform.position.y);
 				positionDifference = reusableVector.length();
 			}
-			if (force || positionDifference >= POSITION_THRESHOLD) {
+			if (force || positionDifference >= positionThreshold) {
 				reusablePosition[0] = transform.position.x;
 				reusablePosition[1] = transform.position.y;
 				dataObject.set(Properties.POSITION, reusablePosition);

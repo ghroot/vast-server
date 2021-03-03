@@ -69,7 +69,7 @@ public class VastWorld implements Runnable {
 			new ChatOrderHandler()
 		};
 		PropertyHandler[] propertyHandlers = {
-			new PositionPropertyHandler(),
+			new PositionPropertyHandler(0.3f),
 			new RotationPropertyHandler(),
 			new ActivePropertyHandler(),
 			new ProgressPropertyHandler(),
