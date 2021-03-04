@@ -4,6 +4,7 @@ import com.artemis.ComponentMapper;
 import com.vast.component.Growing;
 import com.vast.network.Properties;
 
+// TODO: Currently interested in all entities. Fix this by maybe changing to/introducing a new component, e.g. "Growable"
 public class GrowingPropertyHandler extends AbstractPropertyHandler<Boolean, Boolean> {
 	private ComponentMapper<Growing> growingMapper;
 

@@ -46,19 +46,19 @@ public abstract class AbstractPropertyHandler<TPropertyData, TDataObjectData> im
     }
 
     private void setDataObjectData(DataObject dataObject, TDataObjectData data) {
-        dataObject.set(getProperty(), data);
+        dataObject.set(property, data);
     }
 
     protected boolean hasSyncHistory(int entity) {
         SyncHistory syncHistory = syncHistoryMapper.get(entity);
-        return syncHistory != null && syncHistory.syncedValues.containsKey(getProperty());
+        return syncHistory != null && syncHistory.syncedValues.containsKey(property);
     }
 
     @SuppressWarnings("unchecked")
     protected TPropertyData getSyncHistoryData(int entity) {
         SyncHistory syncHistory = syncHistoryMapper.get(entity);
-        if (syncHistory != null && syncHistory.syncedValues.containsKey(getProperty())) {
-            return (TPropertyData) syncHistory.syncedValues.get(getProperty());
+        if (syncHistory != null && syncHistory.syncedValues.containsKey(property)) {
+            return (TPropertyData) syncHistory.syncedValues.get(property);
         } else {
             return null;
         }
@@ -67,7 +67,7 @@ public abstract class AbstractPropertyHandler<TPropertyData, TDataObjectData> im
     protected void setSyncHistoryData(int entity, TPropertyData syncHistoryData) {
         SyncHistory syncHistory = syncHistoryMapper.get(entity);
         if (syncHistory != null) {
-            syncHistory.syncedValues.put(getProperty(), syncHistoryData);
+            syncHistory.syncedValues.put(property, syncHistoryData);
         }
     }
 }

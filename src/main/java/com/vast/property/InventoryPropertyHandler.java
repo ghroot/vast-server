@@ -1,24 +1,29 @@
 package com.vast.property;
 
 import com.artemis.ComponentMapper;
-import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Inventory;
 import com.vast.network.Properties;
 
-public class InventoryPropertyHandler implements PropertyHandler {
+import java.util.Arrays;
+
+public class InventoryPropertyHandler extends AbstractPropertyHandler<short[], short[]> {
 	private ComponentMapper<Inventory> inventoryMapper;
 
-	@Override
-	public byte getProperty() {
-		return Properties.INVENTORY;
+	public InventoryPropertyHandler() {
+		super(Properties.INVENTORY);
 	}
 
 	@Override
-	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
-		if (inventoryMapper.has(entity)) {
-			dataObject.set(Properties.INVENTORY, inventoryMapper.get(entity).items);
-			return true;
-		}
-		return false;
+	protected boolean isInterestedIn(int entity) {
+		return inventoryMapper.has(entity);
+	}
+
+	@Override
+	protected short[] getPropertyData(int entity) {
+		return inventoryMapper.get(entity).items;
+	}
+
+	protected boolean passedThresholdForSync(int entity, short[] lastSyncedInventory) {
+		return !Arrays.equals(inventoryMapper.get(entity).items, lastSyncedInventory);
 	}
 }
