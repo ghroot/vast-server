@@ -1,45 +1,34 @@
 package com.vast.property;
 
 import com.artemis.ComponentMapper;
-import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.component.SyncHistory;
 import com.vast.component.Transform;
 import com.vast.network.Properties;
 
-public class RotationPropertyHandler implements PropertyHandler {
+public class RotationPropertyHandler extends AbstractPropertyHandler<Float, Float> {
 	private ComponentMapper<Transform> transformMapper;
-	private ComponentMapper<SyncHistory> syncHistoryMapper;
 
-	private final float ROTATION_THRESHOLD = 15.0f;
+	private float rotationThreshold;
 
-	public RotationPropertyHandler() {
+	public RotationPropertyHandler(float rotationThreshold) {
+		super(Properties.ROTATION);
+
+		this.rotationThreshold = rotationThreshold;
 	}
 
 	@Override
-	public byte getProperty() {
-		return Properties.ROTATION;
+	protected boolean isInterestedIn(int entity) {
+		return transformMapper.has(entity);
 	}
 
 	@Override
-	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
-		if (transformMapper.has(entity)) {
-			Transform transform = transformMapper.get(entity);
-			SyncHistory syncHistory = syncHistoryMapper.get(entity);
+	protected Float getPropertyData(int entity) {
+		return transformMapper.get(entity).rotation;
+	}
 
-			float rotationDifference = Float.MAX_VALUE;
-			if (!force && syncHistory != null && syncHistory.syncedValues.containsKey(Properties.ROTATION)) {
-				float lastSyncedRotation = (float) syncHistory.syncedValues.get(Properties.ROTATION);
-				rotationDifference = getAngleDifference(lastSyncedRotation, transform.rotation);
-			}
-			if (force || rotationDifference >= ROTATION_THRESHOLD) {
-				dataObject.set(Properties.ROTATION, transform.rotation);
-				if (syncHistory != null) {
-					syncHistory.syncedValues.put(Properties.ROTATION, transform.rotation);
-				}
-				return true;
-			}
-		}
-		return false;
+	@Override
+	protected boolean passedThresholdForSync(int entity, Float lastSyncedRotation) {
+		Transform transform = transformMapper.get(entity);
+		return getAngleDifference(lastSyncedRotation, transform.rotation) >= rotationThreshold;
 	}
 
 	private float getAngleDifference(float alpha, float beta) {

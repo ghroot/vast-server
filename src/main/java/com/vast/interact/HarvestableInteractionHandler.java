@@ -102,10 +102,10 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
 		if (harvestable.stateName != null) {
-			stateMapper.get(playerEntity).name = null;
+			stateMapper.get(playerEntity).name = "none";
 			syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
 			if (harvestableEntity != -1) {
-				stateMapper.get(harvestableEntity).name = null;
+				stateMapper.get(harvestableEntity).name = "none";
 				syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.STATE);
 			}
 		}

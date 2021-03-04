@@ -1,29 +1,23 @@
 package com.vast.property;
 
 import com.artemis.ComponentMapper;
-import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.component.Player;
 import com.vast.component.State;
 import com.vast.network.Properties;
 
-public class StatePropertyHandler implements PropertyHandler {
-	private ComponentMapper<Player> playerMapper;
+public class StatePropertyHandler extends AbstractPropertyHandler<String, String> {
 	private ComponentMapper<State> stateMapper;
 
-	@Override
-	public byte getProperty() {
-		return Properties.STATE;
+	public StatePropertyHandler() {
+		super(Properties.STATE);
 	}
 
 	@Override
-	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
-		if (stateMapper.has(entity)) {
-			String stateName = stateMapper.get(entity).name;
-			if (stateName != null) {
-				dataObject.set(Properties.STATE, stateName);
-				return true;
-			}
-		}
-		return false;
+	protected boolean isInterestedIn(int entity) {
+		return stateMapper.has(entity);
+	}
+
+	@Override
+	protected String getPropertyData(int entity) {
+		return stateMapper.get(entity).name;
 	}
 }

@@ -1,20 +1,26 @@
 package com.vast.property;
 
 import com.artemis.ComponentMapper;
-import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Active;
+import com.vast.component.Player;
 import com.vast.network.Properties;
 
-public class ActivePropertyHandler implements PropertyHandler {
+// TODO: Is this property handler even needed? The client doesn't listen for active property changes!
+public class ActivePropertyHandler extends AbstractPropertyHandler<Boolean, Boolean> {
+	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Active> activeMapper;
 
-	@Override
-	public byte getProperty() {
-		return Properties.ACTIVE;
+	public ActivePropertyHandler() {
+		super(Properties.ACTIVE);
 	}
 
 	@Override
-	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
+	protected boolean isInterestedIn(int entity) {
+		return playerMapper.has(entity);
+	}
+
+	@Override
+	protected Boolean getPropertyData(int entity) {
 		return activeMapper.has(entity);
 	}
 }

@@ -70,7 +70,7 @@ public class VastWorld implements Runnable {
 		};
 		PropertyHandler[] propertyHandlers = {
 			new PositionPropertyHandler(0.3f),
-			new RotationPropertyHandler(),
+			new RotationPropertyHandler(15f),
 			new ActivePropertyHandler(),
 			new ProgressPropertyHandler(),
 			new InventoryPropertyHandler(),

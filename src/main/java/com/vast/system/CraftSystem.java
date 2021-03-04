@@ -29,7 +29,7 @@ public class CraftSystem extends IteratingSystem {
 
 	@Override
 	protected void removed(int craftEntity) {
-		stateMapper.get(craftEntity).name = null;
+		stateMapper.get(craftEntity).name = "none";
 		syncMapper.create(craftEntity).markPropertyAsDirty(Properties.STATE);
 	}
 

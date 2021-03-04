@@ -3,21 +3,21 @@ package com.vast.property;
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Configuration;
-import com.vast.component.SyncHistory;
 import com.vast.data.*;
 import com.vast.network.Properties;
 
 import java.util.List;
 
-public class ConfigurationPropertyHandler implements PropertyHandler {
+public class ConfigurationPropertyHandler extends AbstractPropertyHandler<Short, DataObject> {
 	private static final char DATA_FIELD_DELIMITER = '|';
 
 	private ComponentMapper<Configuration> configurationMapper;
-	private ComponentMapper<SyncHistory> syncHistoryMapper;
 
 	private DataObject configurationData;
 
 	public ConfigurationPropertyHandler(Items items, Recipes recipes) {
+		super(Properties.CONFIGURATION);
+
 		createConfigurationData(items, recipes);
 	}
 
@@ -70,28 +70,17 @@ public class ConfigurationPropertyHandler implements PropertyHandler {
 	}
 
 	@Override
-	public byte getProperty() {
-		return Properties.CONFIGURATION;
+	protected boolean isInterestedIn(int entity) {
+		return configurationMapper.has(entity);
 	}
 
 	@Override
-	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
-		if (configurationMapper.has(entity)) {
-			Configuration configuration = configurationMapper.get(entity);
-			SyncHistory syncHistory = syncHistoryMapper.get(entity);
+	protected Short getPropertyData(int entity) {
+		return configurationMapper.get(entity).version;
+	}
 
-			short lastSyncedVersion = 0;
-			if (!force && syncHistory != null && syncHistory.syncedValues.containsKey(Properties.CONFIGURATION)) {
-				lastSyncedVersion = (short) syncHistory.syncedValues.get(Properties.CONFIGURATION);
-			}
-			if (force || configuration.version > lastSyncedVersion) {
-				dataObject.set(Properties.CONFIGURATION, configurationData);
-				if (syncHistory != null) {
-					syncHistory.syncedValues.put(Properties.CONFIGURATION, configuration.version);
-				}
-				return true;
-			}
-		}
-		return false;
+	@Override
+	protected DataObject convertPropertyDataToDataObjectData(Short version) {
+		return configurationData;
 	}
 }

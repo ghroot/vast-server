@@ -112,6 +112,13 @@ public class CreationManager extends BaseSystem {
 			aiMapper.create(playerEntity).behaviourName = "human";
 		}
 
+		// TEMP!
+		inventoryMapper.get(playerEntity).add(0, 20);
+		inventoryMapper.get(playerEntity).add(1, 20);
+		inventoryMapper.get(playerEntity).add(3, 20);
+		inventoryMapper.get(playerEntity).add(4);
+		inventoryMapper.get(playerEntity).add(5);
+
 		return playerEntity;
 	}
 
@@ -121,7 +128,7 @@ public class CreationManager extends BaseSystem {
 		transformMapper.get(treeEntity).position.set(position);
 		transformMapper.get(treeEntity).rotation = random.nextFloat() * 360;
 		if (growing) {
-			growingMapper.create(treeEntity).timeLeft = 60f;
+			growingMapper.create(treeEntity).timeLeft = /*60f*/10f;
 		}
 
 		return treeEntity;

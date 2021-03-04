@@ -16,6 +16,10 @@ public class Recipes {
 
 	private Map<Integer, Recipe> recipes;
 
+	public Recipes() {
+		recipes = new HashMap<>();
+	}
+
 	public Recipes(Items items) {
 		this.items = items;
 
