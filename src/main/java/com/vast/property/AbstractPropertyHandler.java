@@ -13,7 +13,6 @@ public abstract class AbstractPropertyHandler<TPropertyData, TDataObjectData> im
         this.property = property;
     }
 
-    // TODO: Protected? Private!?
     @Override
     public byte getProperty() {
         return property;
