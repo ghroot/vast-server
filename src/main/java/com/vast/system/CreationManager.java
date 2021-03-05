@@ -112,13 +112,6 @@ public class CreationManager extends BaseSystem {
 			aiMapper.create(playerEntity).behaviourName = "human";
 		}
 
-		// TEMP!
-		inventoryMapper.get(playerEntity).add(0, 20);
-		inventoryMapper.get(playerEntity).add(1, 20);
-		inventoryMapper.get(playerEntity).add(3, 20);
-		inventoryMapper.get(playerEntity).add(4);
-		inventoryMapper.get(playerEntity).add(5);
-
 		return playerEntity;
 	}
 
