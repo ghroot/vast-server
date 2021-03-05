@@ -4,9 +4,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.component.Active;
 import com.vast.component.Growing;
-import com.vast.component.Player;
 import com.vast.component.SyncHistory;
 import com.vast.network.Properties;
 import org.junit.Assert;
@@ -43,22 +41,22 @@ public class TestGrowingPropertyHandler {
     }
 
     @Test
-    public void givenGrowing_whenForced_decoratesDataObject() {
+    public void givenGrowing_decoratesDataObject() {
         growingMapper.create(entity).timeLeft = 1f;
 
         DataObject dataObject = new DataObject();
-        boolean decorated = growingPropertyHandler.decorateDataObject(entity, dataObject, true);
+        boolean decorated = growingPropertyHandler.decorateDataObject(entity, dataObject, false);
 
         Assert.assertTrue(decorated);
         Assert.assertTrue((Boolean) dataObject.get(Properties.GROWING).value);
     }
 
     @Test
-    public void givenNotGrowing_whenForced_decoratesDataObject() {
+    public void givenNotGrowing_decoratesDataObject() {
         growingMapper.create(entity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = growingPropertyHandler.decorateDataObject(entity, dataObject, true);
+        boolean decorated = growingPropertyHandler.decorateDataObject(entity, dataObject, false);
 
         Assert.assertTrue(decorated);
         Assert.assertFalse((Boolean) dataObject.get(Properties.GROWING).value);
@@ -115,14 +113,15 @@ public class TestGrowingPropertyHandler {
         boolean decorated = growingPropertyHandler.decorateDataObject(entity, dataObject, false);
 
         Assert.assertTrue(decorated);
+        Assert.assertTrue(dataObject.contains(Properties.GROWING));
     }
 
     @Test
-    public void givenEmptySyncHistory_whenForced_populatesSyncHistory() {
+    public void givenEmptySyncHistory_populatesSyncHistory() {
         growingMapper.create(entity);
         SyncHistory syncHistory = syncHistoryMapper.create(entity);
 
-        growingPropertyHandler.decorateDataObject(entity, new DataObject(), true);
+        growingPropertyHandler.decorateDataObject(entity, new DataObject(), false);
 
         Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.GROWING));
     }

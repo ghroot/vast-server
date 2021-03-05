@@ -9,7 +9,7 @@ import com.vast.network.VastPeer;
 @Transient
 public class Active extends PooledComponent {
 	public VastPeer peer;
-	@EntityId public transient IntBag knowEntities = new IntBag();
+	@EntityId public IntBag knowEntities = new IntBag();
 
 	@Override
 	protected void reset() {

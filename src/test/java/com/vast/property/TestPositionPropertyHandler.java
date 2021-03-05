@@ -41,11 +41,11 @@ public class TestPositionPropertyHandler {
     }
 
     @Test
-    public void whenForced_decoratesDataObject() {
+    public void givenHasTransform_decoratesDataObject() {
         transformMapper.create(entity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = positionPropertyHandler.decorateDataObject(entity, dataObject, true);
+        boolean decorated = positionPropertyHandler.decorateDataObject(entity, dataObject, false);
 
         Assert.assertTrue(decorated);
         Assert.assertArrayEquals(new double[] {0f, 0f}, (double[]) dataObject.get(Properties.POSITION).value, 0.001);
@@ -90,15 +90,15 @@ public class TestPositionPropertyHandler {
         boolean decorated = positionPropertyHandler.decorateDataObject(entity, dataObject, false);
 
         Assert.assertTrue(decorated);
-        Assert.assertArrayEquals(new double[] {0, 0}, (double[]) dataObject.get(Properties.POSITION).value, 0.001);
+        Assert.assertTrue(dataObject.contains(Properties.POSITION));
     }
 
     @Test
-    public void givenEmptySyncHistory_whenForced_populatesSyncHistory() {
+    public void givenEmptySyncHistory_populatesSyncHistory() {
         transformMapper.create(entity);
         SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
 
-        positionPropertyHandler.decorateDataObject(entity, new DataObject(), true);
+        positionPropertyHandler.decorateDataObject(entity, new DataObject(), false);
 
         Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.POSITION));
     }

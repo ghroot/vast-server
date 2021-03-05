@@ -39,11 +39,11 @@ public class TestStatePropertyHandler {
     }
 
     @Test
-    public void whenForced_decoratesDataObject() {
+    public void givenHasState_decoratesDataObject() {
         stateMapper.create(entity).name = "testState";
 
         DataObject dataObject = new DataObject();
-        boolean decorated = statePropertyHandler.decorateDataObject(entity, dataObject, true);
+        boolean decorated = statePropertyHandler.decorateDataObject(entity, dataObject, false);
 
         Assert.assertTrue(decorated);
         Assert.assertEquals("testState", dataObject.get(Properties.STATE).value);
@@ -92,11 +92,11 @@ public class TestStatePropertyHandler {
     }
 
     @Test
-    public void givenEmptySyncHistory_whenForced_populatesSyncHistory() {
+    public void givenEmptySyncHistory_populatesSyncHistory() {
         stateMapper.create(entity).name = "testState";
         SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
 
-        statePropertyHandler.decorateDataObject(entity, new DataObject(), true);
+        statePropertyHandler.decorateDataObject(entity, new DataObject(), false);
 
         Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.STATE));
     }

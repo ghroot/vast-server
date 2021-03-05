@@ -4,9 +4,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.component.Active;
 import com.vast.component.Configuration;
-import com.vast.component.Player;
 import com.vast.component.SyncHistory;
 import com.vast.data.Items;
 import com.vast.data.Recipes;
@@ -45,11 +43,11 @@ public class TestConfigurationPropertyHandler {
     }
 
     @Test
-    public void whenForced_decoratesDataObject() {
+    public void givenHasConfiguration_decoratesDataObject() {
         configurationMapper.create(entity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = configurationPropertyHandler.decorateDataObject(entity, dataObject, true);
+        boolean decorated = configurationPropertyHandler.decorateDataObject(entity, dataObject, false);
 
         Assert.assertTrue(decorated);
         Assert.assertNotNull(dataObject.get(Properties.CONFIGURATION).value);
@@ -94,14 +92,15 @@ public class TestConfigurationPropertyHandler {
         boolean decorated = configurationPropertyHandler.decorateDataObject(entity, dataObject, false);
 
         Assert.assertTrue(decorated);
+        Assert.assertTrue(dataObject.contains(Properties.CONFIGURATION));
     }
 
     @Test
-    public void givenEmptySyncHistory_whenForced_populatesSyncHistory() {
+    public void givenEmptySyncHistory_populatesSyncHistory() {
         configurationMapper.create(entity);
         SyncHistory syncHistory = syncHistoryMapper.create(entity);
 
-        configurationPropertyHandler.decorateDataObject(entity, new DataObject(), true);
+        configurationPropertyHandler.decorateDataObject(entity, new DataObject(), false);
 
         Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.CONFIGURATION));
     }

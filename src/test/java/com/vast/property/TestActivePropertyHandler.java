@@ -4,7 +4,9 @@ import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.component.*;
+import com.vast.component.Active;
+import com.vast.component.Player;
+import com.vast.component.SyncHistory;
 import com.vast.network.Properties;
 import org.junit.Assert;
 import org.junit.Before;
@@ -42,12 +44,12 @@ public class TestActivePropertyHandler {
     }
 
     @Test
-    public void whenForced_decoratesDataObject() {
+    public void givenPlayer_decoratesDataObject() {
         playerMapper.create(entity);
         activeMapper.create(entity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = activePropertyHandler.decorateDataObject(entity, dataObject, true);
+        boolean decorated = activePropertyHandler.decorateDataObject(entity, dataObject, false);
 
         Assert.assertTrue(decorated);
         Assert.assertTrue((Boolean) dataObject.get(Properties.ACTIVE).value);
@@ -92,15 +94,16 @@ public class TestActivePropertyHandler {
         boolean decorated = activePropertyHandler.decorateDataObject(entity, dataObject, false);
 
         Assert.assertTrue(decorated);
+        Assert.assertTrue(dataObject.contains(Properties.ACTIVE));
     }
 
     @Test
-    public void givenEmptySyncHistory_whenForced_populatesSyncHistory() {
+    public void givenEmptySyncHistory_populatesSyncHistory() {
         playerMapper.create(entity);
         activeMapper.create(entity);
         SyncHistory syncHistory = syncHistoryMapper.create(entity);
 
-        activePropertyHandler.decorateDataObject(entity, new DataObject(), true);
+        activePropertyHandler.decorateDataObject(entity, new DataObject(), false);
 
         Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.ACTIVE));
     }

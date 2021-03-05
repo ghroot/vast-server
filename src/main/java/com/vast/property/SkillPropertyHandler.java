@@ -55,9 +55,18 @@ public class SkillPropertyHandler extends AbstractPropertyHandler<Map<String, By
 
 	@Override
 	protected DataObject convertPropertyDataToDataObjectData(Map<String, Byte> skillWords) {
+		String[] words = new String[skillWords.size()];
+		byte[] wordLevels = new byte[skillWords.size()];
+		int index = 0;
+		for (String word : skillWords.keySet()) {
+			words[index] = word;
+			wordLevels[index] = skillWords.get(word);
+			index++;
+		}
+
 		reusableSkillDataObject.clear();
-		reusableSkillDataObject.set((byte) 0, skillWords.keySet().toArray());
-		reusableSkillDataObject.set((byte) 1, skillWords.values().toArray());
+		reusableSkillDataObject.set((byte) 0, words);
+		reusableSkillDataObject.set((byte) 1, wordLevels);
 
 		return reusableSkillDataObject;
 	}

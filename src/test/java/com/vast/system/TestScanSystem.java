@@ -10,7 +10,8 @@ import net.mostlyoriginal.api.utils.QuadTree;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

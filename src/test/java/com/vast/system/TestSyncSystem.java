@@ -10,10 +10,6 @@ import com.vast.property.PropertyHandler;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public class TestSyncSystem {
 	private World world;
 	private ComponentMapper<Player> playerMapper;
