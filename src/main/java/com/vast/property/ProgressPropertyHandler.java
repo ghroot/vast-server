@@ -1,43 +1,43 @@
 package com.vast.property;
 
 import com.artemis.ComponentMapper;
-import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Constructable;
-import com.vast.component.SyncHistory;
 import com.vast.network.Properties;
 
-public class ProgressPropertyHandler implements PropertyHandler {
+public class ProgressPropertyHandler extends AbstractPropertyHandler<Integer, Byte> {
 	private ComponentMapper<Constructable> constructableMapper;
-	private ComponentMapper<SyncHistory> syncHistoryMapper;
 
-	private final int PROGRESS_THRESHOLD = 10;
+	private int progressThreshold;
 
-	@Override
-	public byte getProperty() {
-		return Properties.PROGRESS;
+	public ProgressPropertyHandler(int progressThreshold) {
+		super(Properties.PROGRESS);
+
+		this.progressThreshold = progressThreshold;
 	}
 
 	@Override
-	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
-		if (constructableMapper.has(entity)) {
-			Constructable constructable = constructableMapper.get(entity);
-			SyncHistory syncHistory = syncHistoryMapper.get(entity);
+	protected boolean isInterestedIn(int entity) {
+		return constructableMapper.has(entity);
+	}
 
-			int progress = (int) Math.floor(100.0f * constructable.buildTime / constructable.buildDuration);
+	@Override
+	protected Integer getPropertyData(int entity) {
+		Constructable constructable = constructableMapper.get(entity);
+		return Math.min((int) Math.floor(100.0f * constructable.buildTime / constructable.buildDuration), 100);
+	}
 
-			int progressDifference = Integer.MAX_VALUE;
-			if (!force && syncHistory != null && syncHistory.syncedValues.containsKey(Properties.PROGRESS)) {
-				int lastSyncedProgress = (int) syncHistory.syncedValues.get(Properties.PROGRESS);
-				progressDifference = (int) Math.abs(lastSyncedProgress - progress);
-			}
-			if (force || progress == 100 || progressDifference >= PROGRESS_THRESHOLD) {
-				dataObject.set(Properties.PROGRESS, progress);
-				if (syncHistory != null) {
-					syncHistory.syncedValues.put(Properties.PROGRESS, progress);
-				}
+	@Override
+	protected boolean passedThresholdForSync(int entity, Integer lastSyncedProgress) {
+		int progress = getPropertyData(entity);
+		if (progress != lastSyncedProgress) {
+			if (progress == 100) {
 				return true;
+			} else {
+				int progressDifference = Math.abs(lastSyncedProgress - progress);
+				return progressDifference >= progressThreshold;
 			}
+		} else {
+			return false;
 		}
-		return false;
 	}
 }

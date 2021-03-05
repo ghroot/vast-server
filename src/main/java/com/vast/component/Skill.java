@@ -18,14 +18,14 @@ public class Skill extends PooledComponent {
 		countdown = 0f;
 	}
 
-	public boolean increaseWordLevel(String word) {
+	public boolean increaseWordLevel(String word, int amount) {
 		boolean didIncrease = false;
 		boolean handled = false;
 
 		for (int i = 0; i < words.length; i++) {
 			if (word.equals(words[i])) {
 				if (wordLevels[i] < 100) {
-					wordLevels[i]++;
+					wordLevels[i] = (byte) Math.min(wordLevels[i] + amount, 100);
 					didIncrease = true;
 				}
 				handled = true;
@@ -37,10 +37,14 @@ public class Skill extends PooledComponent {
 			words = Arrays.copyOf(words, words.length + 1);
 			words[words.length - 1] = word;
 			wordLevels = Arrays.copyOf(wordLevels, wordLevels.length + 1);
-			wordLevels[wordLevels.length - 1] = (byte) 1;
+			wordLevels[wordLevels.length - 1] = (byte) Math.min(amount, 100);
 			didIncrease = true;
 		}
 
 		return didIncrease;
+	}
+
+	public boolean increaseWordLevel(String word) {
+		return increaseWordLevel(word, 1);
 	}
 }

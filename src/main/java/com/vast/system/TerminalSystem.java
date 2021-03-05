@@ -456,6 +456,8 @@ public class TerminalSystem extends IntervalSystem {
 								wordsString.append(skill.words[j].toUpperCase());
 							} else {
 								wordsString.append(skill.words[j]);
+								wordsString.append(": ");
+								wordsString.append(skill.wordLevels[j]);
 							}
 							if (j < skill.words.length - 1) {
 								wordsString.append(", ");

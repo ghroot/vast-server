@@ -70,16 +70,16 @@ public class VastWorld implements Runnable {
 		};
 		PropertyHandler[] propertyHandlers = {
 			new PositionPropertyHandler(0.3f),
-			new RotationPropertyHandler(),
+			new RotationPropertyHandler(15f),
 			new ActivePropertyHandler(),
-			new ProgressPropertyHandler(),
+			new ProgressPropertyHandler(10),
 			new InventoryPropertyHandler(),
 			new FueledPropertyHandler(),
 			new HomePropertyHandler(),
 			new GrowingPropertyHandler(),
 			new StatePropertyHandler(),
 			new ConfigurationPropertyHandler(items, recipes),
-			new SkillPropertyHandler()
+			new SkillPropertyHandler(5)
 		};
 		Map<String, Behaviour> behaviours = new HashMap<>();
 		behaviours.put("human", new HumanBehaviour(interactionHandlers, random, incomingRequestsByPeer, items, recipes));

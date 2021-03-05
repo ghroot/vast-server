@@ -1,33 +1,36 @@
 package com.vast.property;
 
 import com.artemis.ComponentMapper;
-import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Home;
 import com.vast.network.Properties;
 
-public class HomePropertyHandler implements PropertyHandler {
+import javax.vecmath.Point2f;
+
+public class HomePropertyHandler extends AbstractPropertyHandler<Point2f, double[]> {
 	private ComponentMapper<Home> homeMapper;
 
 	private double[] reusablePosition;
 
 	public HomePropertyHandler() {
+		super(Properties.HOME);
+
 		reusablePosition = new double[2];
 	}
 
 	@Override
-	public byte getProperty() {
-		return Properties.HOME;
+	protected boolean isInterestedIn(int entity) {
+		return homeMapper.has(entity);
 	}
 
 	@Override
-	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
-		if (homeMapper.has(entity)) {
-			Home home = homeMapper.get(entity);
-			reusablePosition[0] = home.position.x;
-			reusablePosition[1] = home.position.y;
-			dataObject.set(Properties.HOME, reusablePosition);
-			return true;
-		}
-		return false;
+	protected Point2f getPropertyData(int entity) {
+		return homeMapper.get(entity).position;
+	}
+
+	@Override
+	protected double[] convertPropertyDataToDataObjectData(Point2f position) {
+		reusablePosition[0] = position.x;
+		reusablePosition[1] = position.y;
+		return reusablePosition;
 	}
 }

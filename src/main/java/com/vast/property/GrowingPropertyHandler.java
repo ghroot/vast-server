@@ -1,29 +1,28 @@
 package com.vast.property;
 
 import com.artemis.ComponentMapper;
-import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Growing;
 import com.vast.network.Properties;
 
-public class GrowingPropertyHandler implements PropertyHandler {
+// TODO: Currently interested in all entities. Fix this by maybe changing to/introducing a new component, e.g. "Growable"
+public class GrowingPropertyHandler extends AbstractPropertyHandler<Boolean, Boolean> {
 	private ComponentMapper<Growing> growingMapper;
 
-	@Override
-	public byte getProperty() {
-		return Properties.GROWING;
+	public GrowingPropertyHandler() {
+		super(Properties.GROWING);
 	}
 
 	@Override
-	public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
-		if (force) {
-			if (growingMapper.has(entity)) {
-				dataObject.set(Properties.GROWING, growingMapper.get(entity).timeLeft > 0.0f);
-				return true;
-			}
-			return false;
+	protected boolean isInterestedIn(int entity) {
+		return true;
+	}
+
+	@Override
+	protected Boolean getPropertyData(int entity) {
+		if (growingMapper.has(entity)) {
+			return growingMapper.get(entity).timeLeft > 0f;
 		} else {
-			dataObject.set(Properties.GROWING, growingMapper.has(entity) && growingMapper.get(entity).timeLeft > 0.0f);
-			return true;
+			return false;
 		}
 	}
 }

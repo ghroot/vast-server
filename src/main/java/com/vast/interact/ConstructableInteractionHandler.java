@@ -48,7 +48,7 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 
 	@Override
 	public void stop(int playerEntity, int buildingEntity) {
-		stateMapper.get(playerEntity).name = null;
+		stateMapper.get(playerEntity).name = "none";
 		syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
 	}
 }

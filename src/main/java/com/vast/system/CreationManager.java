@@ -121,7 +121,7 @@ public class CreationManager extends BaseSystem {
 		transformMapper.get(treeEntity).position.set(position);
 		transformMapper.get(treeEntity).rotation = random.nextFloat() * 360;
 		if (growing) {
-			growingMapper.create(treeEntity).timeLeft = 60f;
+			growingMapper.create(treeEntity).timeLeft = /*60f*/10f;
 		}
 
 		return treeEntity;

@@ -6,7 +6,6 @@ import com.artemis.WorldConfigurationBuilder;
 import com.vast.component.Active;
 import com.vast.component.Known;
 import com.vast.component.Player;
-import com.vast.network.VastPeer;
 import org.junit.Assert;
 import org.junit.Test;
 
