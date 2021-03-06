@@ -19,10 +19,15 @@ public class GrowSystem extends IteratingSystem {
 	protected void process(int growEntity) {
 		Growing growing = growingMapper.get(growEntity);
 
-		growing.timeLeft -= world.getDelta();
-		if (growing.timeLeft <= 0.0f) {
+		if (growing.finished) {
 			growingMapper.remove(growEntity);
-			syncMapper.create(growEntity).markPropertyAsDirty(Properties.GROWING);
+		} else {
+			growing.timeLeft -= world.getDelta();
+			if (growing.timeLeft <= 0.0f) {
+				growing.timeLeft = 0f;
+				growing.finished = true;
+				syncMapper.create(growEntity).markPropertyAsDirty(Properties.GROWING);
+			}
 		}
 	}
 }

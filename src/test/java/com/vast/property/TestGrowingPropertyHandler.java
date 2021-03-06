@@ -32,12 +32,12 @@ public class TestGrowingPropertyHandler {
     }
 
     @Test
-    public void givenEmptyEntity_decoratesDataObject() {
+    public void givenEmptyEntity_doesNotDecorateDataObject() {
         DataObject dataObject = new DataObject();
         boolean decorated = growingPropertyHandler.decorateDataObject(entity, dataObject, true);
 
-        Assert.assertTrue(decorated);
-        Assert.assertFalse((Boolean) dataObject.get(Properties.GROWING).value);
+        Assert.assertFalse(decorated);
+        Assert.assertFalse(dataObject.contains(Properties.GROWING));
     }
 
     @Test
@@ -92,11 +92,13 @@ public class TestGrowingPropertyHandler {
     }
 
     @Test
-    public void givenGrowingStopped_decoratesDataObject() {
+    public void givenGrowingFinished_decoratesDataObject() {
+        Growing growing = growingMapper.create(entity);
         SyncHistory syncHistory = syncHistoryMapper.create(entity);
 
-        // Changed from growing -> stopped growing
+        // Changed from growing -> finished growing
         syncHistory.syncedValues.put(Properties.GROWING, true);
+        growing.finished = true;
 
         DataObject dataObject = new DataObject();
         boolean decorated = growingPropertyHandler.decorateDataObject(entity, dataObject, false);
