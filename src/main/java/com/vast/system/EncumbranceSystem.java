@@ -6,12 +6,16 @@ import com.artemis.systems.IteratingSystem;
 import com.vast.component.Inventory;
 import com.vast.component.Speed;
 
-public class SpeedSystem extends IteratingSystem {
+public class EncumbranceSystem extends IteratingSystem {
 	private ComponentMapper<Speed> speedMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
 
-	public SpeedSystem() {
+	private float ratioWhenEncumbered;
+
+	public EncumbranceSystem(int percentWhenEncumbered) {
 		super(Aspect.all(Speed.class, Inventory.class));
+
+		ratioWhenEncumbered = percentWhenEncumbered / 100f;
 	}
 
 	@Override
@@ -19,7 +23,7 @@ public class SpeedSystem extends IteratingSystem {
 		Speed speed = speedMapper.get(entity);
 		Inventory inventory = inventoryMapper.get(entity);
 
-		if ((float) inventory.getNumberOfItems() / inventory.capacity >= 0.75f) {
+		if ((float) inventory.getNumberOfItems() / inventory.capacity >= ratioWhenEncumbered) {
 			speed.modifier = 0.85f;
 		} else {
 			speed.modifier = 1.0f;

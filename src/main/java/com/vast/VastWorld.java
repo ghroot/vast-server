@@ -105,7 +105,7 @@ public class VastWorld implements Runnable {
 			new OrderSystem(orderHandlers, incomingRequestsByPeer),
 			new InteractSystem(interactionHandlers),
 			new AISystem(behaviours, random),
-			new SpeedSystem(),
+			new EncumbranceSystem(75),
 			new PathMoveSystem(),
 			new CollisionSystem(worldConfiguration, quadTree, random, metrics),
 			new FollowSystem(),
