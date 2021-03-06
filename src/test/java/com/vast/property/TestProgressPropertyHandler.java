@@ -48,7 +48,7 @@ public class TestProgressPropertyHandler {
         boolean decorated = progressPropertyHandler.decorateDataObject(entity, dataObject, false);
 
         Assert.assertTrue(decorated);
-        Assert.assertEquals(0, dataObject.get(Properties.PROGRESS).value);
+        Assert.assertEquals((byte) 0, dataObject.get(Properties.PROGRESS).value);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class TestProgressPropertyHandler {
         boolean decorated = progressPropertyHandler.decorateDataObject(entity, dataObject, false);
 
         Assert.assertTrue(decorated);
-        Assert.assertEquals(80, dataObject.get(Properties.PROGRESS).value);
+        Assert.assertEquals((byte) 80, dataObject.get(Properties.PROGRESS).value);
         Assert.assertEquals(80, syncHistory.syncedValues.get(Properties.PROGRESS));
     }
 
@@ -114,7 +114,7 @@ public class TestProgressPropertyHandler {
         boolean decorated = progressPropertyHandler.decorateDataObject(entity, dataObject, false);
 
         Assert.assertTrue(decorated);
-        Assert.assertEquals(100, dataObject.get(Properties.PROGRESS).value);
+        Assert.assertEquals((byte) 100, dataObject.get(Properties.PROGRESS).value);
         Assert.assertEquals(100, syncHistory.syncedValues.get(Properties.PROGRESS));
     }
 

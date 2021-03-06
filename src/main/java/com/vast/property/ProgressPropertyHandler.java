@@ -40,4 +40,9 @@ public class ProgressPropertyHandler extends AbstractPropertyHandler<Integer, By
 			return false;
 		}
 	}
+
+	@Override
+	protected Byte convertPropertyDataToDataObjectData(Integer propertyData) {
+		return propertyData.byteValue();
+	}
 }

@@ -44,8 +44,8 @@ public abstract class AbstractPropertyHandler<TPropertyData, TDataObjectData> im
         return (TDataObjectData) propertyData;
     }
 
-    private void setDataObjectData(DataObject dataObject, TDataObjectData data) {
-        dataObject.set(property, data);
+    private void setDataObjectData(DataObject dataObject, TDataObjectData dataObjectData) {
+        dataObject.set(property, dataObjectData);
     }
 
     protected boolean hasSyncHistory(int entity) {
