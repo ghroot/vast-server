@@ -37,10 +37,10 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 		Inventory playerInventory = inventoryMapper.get(playerEntity);
 
 		if (ownerMapper.has(containerEntity) && !playerMapper.get(playerEntity).name.equals(ownerMapper.get(containerEntity).name)) {
-			eventMapper.create(playerEntity).addEntry("message").setData("This is not mine...").setOwnerOnly(true);
+			eventMapper.create(playerEntity).addEntry("message").setData("This is not mine...").setOwnerPropagation();
 			return false;
 		} else if (!containerMapper.get(containerEntity).persistent && playerInventory.isFull()) {
-			eventMapper.create(playerEntity).addEntry("message").setData("My backpack is full...").setOwnerOnly(true);
+			eventMapper.create(playerEntity).addEntry("message").setData("My backpack is full...").setOwnerPropagation();
 			return false;
 		} else {
 			return true;

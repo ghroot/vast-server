@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class VastWorld implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(VastWorld.class);
@@ -90,7 +91,7 @@ public class VastWorld implements Runnable {
 			new CreationManager(worldConfiguration, random),
 			new TimeManager(),
 
-			new WorldSerializationSystem(snapshotFile, metrics),
+			new WorldSerializationSystem(snapshotFile, metrics, TimeUnit.MINUTES.toSeconds(5)),
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequestsByPeer),
 			new PeerEntitySystem(peers, entitiesByPeer),

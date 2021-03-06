@@ -1,12 +1,16 @@
 package com.vast.system;
 
 import com.artemis.Aspect;
+import com.artemis.BaseSystem;
+import com.artemis.ComponentMapper;
 import com.artemis.io.JsonArtemisSerializer;
 import com.artemis.io.KryoArtemisSerializer;
 import com.artemis.io.SaveFileFormat;
 import com.artemis.managers.WorldSerializationManager;
 import com.artemis.systems.IntervalSystem;
 import com.artemis.utils.IntBag;
+import com.vast.component.Event;
+import com.vast.component.Time;
 import com.vast.data.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,18 +21,25 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.concurrent.TimeUnit;
 
-public class WorldSerializationSystem extends IntervalSystem {
+public class WorldSerializationSystem extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(WorldSerializationSystem.class);
 
+	private static final int SAVE_NOTIFICATION_TIME = 3;
+
 	private CreationManager creationManager;
+	private ComponentMapper<Event> eventMapper;
 
 	private String snapshotFile;
 	private Metrics metrics;
+	private float saveInterval;
 
-	public WorldSerializationSystem(String snapshotFile, Metrics metrics) {
-		super(Aspect.all(), TimeUnit.MINUTES.toSeconds(5));
+	private float timeSinceLastSave;
+	private boolean save;
+
+	public WorldSerializationSystem(String snapshotFile, Metrics metrics, float saveInterval) {
 		this.snapshotFile = snapshotFile;
 		this.metrics = metrics;
+		this.saveInterval = saveInterval;
 	}
 
 	@Override
@@ -38,7 +49,26 @@ public class WorldSerializationSystem extends IntervalSystem {
 
 	@Override
 	protected void processSystem() {
-		saveWorld();
+		if (save) {
+			saveWorld();
+			save = false;
+			timeSinceLastSave = 0f;
+		} else {
+			float notificationTime = saveInterval - SAVE_NOTIFICATION_TIME;
+			if (timeSinceLastSave < notificationTime && timeSinceLastSave + world.delta >= notificationTime) {
+				notifyAllActivePlayers();
+			}
+			timeSinceLastSave += world.delta;
+			if (timeSinceLastSave >= saveInterval) {
+				save = true;
+			}
+		}
+	}
+
+	private void notifyAllActivePlayers() {
+		int worldEntity = world.getAspectSubscriptionManager().get(Aspect.all(Time.class)).getEntities().get(0);
+		eventMapper.create(worldEntity).addEntry("message")
+				.setData("Saving world in " + SAVE_NOTIFICATION_TIME + " seconds...").setAllPropagation();
 	}
 
 	// TODO: Can this be done in a thread?

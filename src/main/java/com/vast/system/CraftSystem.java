@@ -45,7 +45,7 @@ public class CraftSystem extends IteratingSystem {
 				inventory.add(craft.recipe.getItemId());
 				syncMapper.create(craftEntity).markPropertyAsDirty(Properties.INVENTORY);
 				String itemName = items.getItem(craft.recipe.getItemId()).getName();
-				eventMapper.create(craftEntity).addEntry("message").setData("Crafted Item: " + itemName).setOwnerOnly(true);
+				eventMapper.create(craftEntity).addEntry("message").setData("Crafted Item: " + itemName).setOwnerPropagation();
 			}
 			craftMapper.remove(craftEntity);
 		}

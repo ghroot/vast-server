@@ -32,7 +32,7 @@ public class DayNightCycleSystem extends IteratingSystem {
 	@Override
 	protected void inserted(int playerEntity) {
 		eventMapper.create(playerEntity).addEntry(isDay(timeManager.getTime()) ? "dayInital" : "nightInitial")
-				.setOwnerOnly(true);
+				.setOwnerPropagation();
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class DayNightCycleSystem extends IteratingSystem {
 	protected void process(int playerEntity) {
 		if (changed) {
 			eventMapper.create(playerEntity).addEntry(isDay(timeManager.getTime()) ? "dayChanged" : "nightChanged")
-				.setOwnerOnly(true);
+				.setOwnerPropagation();
 		}
 	}
 

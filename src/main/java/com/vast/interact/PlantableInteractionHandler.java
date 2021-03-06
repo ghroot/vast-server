@@ -35,7 +35,7 @@ public class PlantableInteractionHandler extends AbstractInteractionHandler {
 		Plantable plantable = plantableMapper.get(plantableEntity);
 
 		if (!plantable.planted && !inventory.has(items.getItem("Seed"))) {
-			eventMapper.create(plantableEntity).addEntry("message").setData("I need a seed...").setOwnerOnly(true);
+			eventMapper.create(plantableEntity).addEntry("message").setData("I need a seed...").setOwnerPropagation();
 			return false;
 		} else {
 			return true;

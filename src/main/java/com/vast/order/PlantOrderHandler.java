@@ -65,7 +65,7 @@ public class PlantOrderHandler implements OrderHandler {
 
 			return true;
 		} else {
-			eventMapper.create(orderEntity).addEntry("message").setData("I need a seed...").setOwnerOnly(true);
+			eventMapper.create(orderEntity).addEntry("message").setData("I need a seed...").setOwnerPropagation();
 			return false;
 		}
 	}

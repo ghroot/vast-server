@@ -40,9 +40,9 @@ public class FollowOrderHandler implements OrderHandler {
 		followMapper.create(orderEntity).entity = followEntity;
 		if (typeMapper.has(followEntity) && typeMapper.get(followEntity).type.equals("animal")) {
 			followMapper.get(orderEntity).distance = 3.0f;
-			eventMapper.create(orderEntity).addEntry("message").setData("Easy, I'm not going to hurt you...").setOwnerOnly(true);
+			eventMapper.create(orderEntity).addEntry("message").setData("Easy, I'm not going to hurt you...").setOwnerPropagation();
 		} else {
-			eventMapper.create(orderEntity).addEntry("message").setData("I wonder where they are going...").setOwnerOnly(true);
+			eventMapper.create(orderEntity).addEntry("message").setData("I wonder where they are going...").setOwnerPropagation();
 		}
 		return true;
 	}

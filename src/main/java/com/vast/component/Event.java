@@ -24,10 +24,11 @@ public class Event extends PooledComponent {
 	public static class EventEntry {
 		public String type;
 		public Object data = null;
-		public boolean ownerOnly = false;
+		public EventPropagation propagation;
 
 		private EventEntry(String type) {
 			this.type = type;
+			propagation = EventPropagation.NEARBY;
 		}
 
 		public EventEntry setData(Object data) {
@@ -35,9 +36,20 @@ public class Event extends PooledComponent {
 			return this;
 		}
 
-		public EventEntry setOwnerOnly(boolean ownerOnly) {
-			this.ownerOnly = ownerOnly;
+		public EventEntry setOwnerPropagation() {
+			propagation = EventPropagation.OWNER;
 			return this;
 		}
+
+		public EventEntry setAllPropagation() {
+			propagation = EventPropagation.ALL;
+			return this;
+		}
+	}
+
+	public enum EventPropagation {
+		OWNER,
+		NEARBY,
+		ALL
 	}
 }

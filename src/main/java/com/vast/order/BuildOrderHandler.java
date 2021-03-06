@@ -74,7 +74,7 @@ public class BuildOrderHandler implements OrderHandler {
 
 			return true;
 		} else {
-			eventMapper.create(orderEntity).addEntry("message").setData("I don't have the required materials...").setOwnerOnly(true);
+			eventMapper.create(orderEntity).addEntry("message").setData("I don't have the required materials...").setOwnerPropagation();
 			return false;
 		}
 	}

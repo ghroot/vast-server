@@ -2,12 +2,15 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.artemis.EntitySubscription;
+import com.artemis.annotations.All;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.component.Active;
 import com.vast.component.Event;
 import com.vast.component.Known;
+import com.vast.component.Player;
 import com.vast.data.Metrics;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
@@ -20,6 +23,9 @@ public class EventSystem extends IteratingSystem {
 	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Known> knownMapper;
+
+	@All({Player.class, Active.class})
+	private EntitySubscription activePlayerSubscription;
 
 	private Metrics metrics;
 
@@ -52,12 +58,12 @@ public class EventSystem extends IteratingSystem {
 				reusableEventMessage.getDataObject().set(MessageCodes.EVENT_VALUE, entry.data);
 			}
 
-			if (entry.ownerOnly) {
+			if (entry.propagation == Event.EventPropagation.OWNER) {
 				Active ownerActive = activeMapper.get(eventEntity);
 				if (ownerActive != null) {
 					ownerActive.peer.send(reusableEventMessage);
 				}
-			} else if (knownMapper.has(eventEntity)) {
+			} else if (entry.propagation == Event.EventPropagation.NEARBY && knownMapper.has(eventEntity)) {
 				IntBag knownByEntitiesBag = knownMapper.get(eventEntity).knownByEntities;
 				int[] knownByEntities = knownByEntitiesBag.getData();
 				for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
@@ -66,6 +72,14 @@ public class EventSystem extends IteratingSystem {
 						VastPeer knownByPeer = activeMapper.get(knownByEntity).peer;
 						knownByPeer.send(reusableEventMessage);
 					}
+				}
+			} else if (entry.propagation == Event.EventPropagation.ALL) {
+				IntBag activePlayerEntitiesBag = activePlayerSubscription.getEntities();
+				int[] activePlayerEntities = activePlayerEntitiesBag.getData();
+				for (int i = 0, size = activePlayerEntitiesBag.size(); i < size; ++i) {
+					int activePlayerEntity = activePlayerEntities[i];
+					VastPeer activePlayerPeer = activeMapper.get(activePlayerEntity).peer;
+					activePlayerPeer.send(reusableEventMessage);
 				}
 			}
 
