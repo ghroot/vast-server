@@ -26,4 +26,11 @@ public class InventoryPropertyHandler extends AbstractPropertyHandler<short[], s
 	protected boolean passedThresholdForSync(int entity, short[] lastSyncedInventory) {
 		return !Arrays.equals(inventoryMapper.get(entity).items, lastSyncedInventory);
 	}
+
+	@Override
+	protected void setSyncHistoryData(int entity, short[] items) {
+		if (syncHistoryMapper.has(entity)) {
+			super.setSyncHistoryData(entity, Arrays.copyOf(items, items.length));
+		}
+	}
 }

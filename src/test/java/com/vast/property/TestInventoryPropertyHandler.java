@@ -6,6 +6,7 @@ import com.artemis.WorldConfigurationBuilder;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Inventory;
 import com.vast.component.SyncHistory;
+import com.vast.component.Transform;
 import com.vast.network.Properties;
 import org.junit.Assert;
 import org.junit.Before;
@@ -64,12 +65,12 @@ public class TestInventoryPropertyHandler {
     }
 
     @Test
-    public void givenPositionChange_decoratesDataObject() {
+    public void givenInventoryChange_decoratesDataObject() {
         Inventory inventory = inventoryMapper.create(entity);
         SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
 
         // Changed from [] -> [1]
-        syncHistory.syncedValues.put(Properties.INVENTORY, new short[9]);
+        syncHistory.syncedValues.put(Properties.INVENTORY, new short[0]);
         inventory.add(0);
 
         DataObject dataObject = new DataObject();
@@ -77,7 +78,7 @@ public class TestInventoryPropertyHandler {
 
         Assert.assertTrue(decorated);
         Assert.assertArrayEquals(new short[] {1}, (short[]) dataObject.get(Properties.INVENTORY).value);
-        Assert.assertEquals(inventory.items, syncHistory.syncedValues.get(Properties.INVENTORY));
+        Assert.assertArrayEquals(inventory.items, (short[]) syncHistory.syncedValues.get(Properties.INVENTORY));
     }
 
     @Test
@@ -99,5 +100,15 @@ public class TestInventoryPropertyHandler {
         inventoryPropertyHandler.decorateDataObject(entity, new DataObject(), false);
 
         Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.INVENTORY));
+    }
+
+    @Test
+    public void givenSyncHistory_syncHistoryDataIsNotSameInstanceAsPropertyData() {
+        Inventory inventory = inventoryMapper.create(entity);
+        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+
+        inventoryPropertyHandler.decorateDataObject(entity, new DataObject(), false);
+
+        Assert.assertNotSame(syncHistory.syncedValues.get(Properties.INVENTORY), inventory.items);
     }
 }

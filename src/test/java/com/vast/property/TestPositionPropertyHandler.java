@@ -4,6 +4,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.nhnent.haste.protocol.data.DataObject;
+import com.vast.component.Home;
 import com.vast.component.SyncHistory;
 import com.vast.component.Transform;
 import com.vast.network.Properties;
@@ -101,5 +102,15 @@ public class TestPositionPropertyHandler {
         positionPropertyHandler.decorateDataObject(entity, new DataObject(), false);
 
         Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.POSITION));
+    }
+
+    @Test
+    public void givenSyncHistory_syncHistoryDataIsNotSameInstanceAsPropertyData() {
+        Transform transform = transformMapper.create(entity);
+        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+
+        positionPropertyHandler.decorateDataObject(entity, new DataObject(), false);
+
+        Assert.assertNotSame(syncHistory.syncedValues.get(Properties.POSITION), transform.position);
     }
 }

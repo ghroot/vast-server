@@ -2,6 +2,7 @@ package com.vast.property;
 
 import com.artemis.ComponentMapper;
 import com.vast.component.Home;
+import com.vast.component.SyncHistory;
 import com.vast.network.Properties;
 
 import javax.vecmath.Point2f;
@@ -32,5 +33,18 @@ public class HomePropertyHandler extends AbstractPropertyHandler<Point2f, double
 		reusablePosition[0] = position.x;
 		reusablePosition[1] = position.y;
 		return reusablePosition;
+	}
+
+	@Override
+	protected void setSyncHistoryData(int entity, Point2f position) {
+		SyncHistory syncHistory = syncHistoryMapper.get(entity);
+		if (syncHistory != null) {
+			Point2f lastSyncedPosition = getSyncHistoryData(entity);
+			if (lastSyncedPosition != null) {
+				lastSyncedPosition.set(position);
+			} else {
+				super.setSyncHistoryData(entity, new Point2f(position));
+			}
+		}
 	}
 }

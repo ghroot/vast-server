@@ -102,4 +102,14 @@ public class TestHomePropertyHandler {
 
         Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.HOME));
     }
+
+    @Test
+    public void givenSyncHistory_syncHistoryDataIsNotSameInstanceAsPropertyData() {
+        Home home = homeMapper.create(entity);
+        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+
+        homePropertyHandler.decorateDataObject(entity, new DataObject(), false);
+
+        Assert.assertNotSame(syncHistory.syncedValues.get(Properties.HOME), home.position);
+    }
 }
