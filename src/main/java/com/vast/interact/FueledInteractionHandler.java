@@ -21,7 +21,7 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 
 	@Override
 	public boolean canInteract(int playerEntity, int fueledEntity) {
-		return !fueledMapper.get(fueledEntity).isFueled();
+		return true;
 	}
 
 	@Override
@@ -29,7 +29,10 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 		Inventory inventory = inventoryMapper.get(playerEntity);
 		Fueled fueled = fueledMapper.get(fueledEntity);
 
-		if (!inventory.has(fueled.cost)) {
+		if (fueled.isFueled()) {
+			eventMapper.create(playerEntity).addEntry("message").setData("I don't have to add any materials...").setOwnerOnly(true);
+			return false;
+		} else if (!inventory.has(fueled.cost)) {
 			eventMapper.create(playerEntity).addEntry("message").setData("I don't have the required materials...").setOwnerOnly(true);
 			return false;
 		} else {
