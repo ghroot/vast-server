@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 public class WorldSerializationSystem extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(WorldSerializationSystem.class);
 
-	private static final int SAVE_NOTIFICATION_TIME = 3;
+	private static final int SAVE_NOTIFICATION_TIME = 10;
 
 	private CreationManager creationManager;
 	private ComponentMapper<Event> eventMapper;
