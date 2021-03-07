@@ -12,6 +12,7 @@ import com.vast.network.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
 
 public class PathMoveSystem extends IteratingSystem {
@@ -22,18 +23,26 @@ public class PathMoveSystem extends IteratingSystem {
 	private ComponentMapper<Speed> speedMapper;
 	private ComponentMapper<Sync> syncMapper;
 
-    private Vector2f reusableDirection;
+	private float cancelMovementDuration;
 
-    public PathMoveSystem() {
+    private Vector2f reusableVector;
+
+    public PathMoveSystem(float cancelMovementDuration) {
         super(Aspect.all(Transform.class, Path.class, Speed.class));
-        reusableDirection = new Vector2f();
+
+        this.cancelMovementDuration = cancelMovementDuration;
+
+        reusableVector = new Vector2f();
     }
 
-	@Override
-	public void inserted(IntBag entities) {
-	}
+    @Override
+    protected void inserted(int entity) {
+        Transform transform = transformMapper.get(entity);
+        Path path = pathMapper.get(entity);
+        path.lastPosition = new Point2f(transform.position);
+    }
 
-	@Override
+    @Override
 	public void removed(IntBag entities) {
 	}
 
@@ -43,27 +52,43 @@ public class PathMoveSystem extends IteratingSystem {
         Path path = pathMapper.get(entity);
         Speed speed = speedMapper.get(entity);
 
-        reusableDirection.set(path.targetPosition.x - transform.position.x, path.targetPosition.y - transform.position.y);
-		float distance = reusableDirection.length();
-        if (distance > 0) {
-			transform.rotation = getAngle(reusableDirection);
-			syncMapper.create(entity).markPropertyAsDirty(Properties.ROTATION);
+        float moveDistance = speed.getModifiedSpeed() * world.delta;
 
-            reusableDirection.normalize();
-            if (speed.getModifiedSpeed() * world.delta > distance) {
+        reusableVector.set(transform.position.x - path.lastPosition.x, transform.position.y - path.lastPosition.y);
+        float distanceFromLastPosition = reusableVector.length();
+        if (distanceFromLastPosition < moveDistance / 4) {
+            path.timeInSamePosition += world.delta;
+        } else {
+            path.timeInSamePosition = 0f;
+        }
+
+        if (path.timeInSamePosition >= cancelMovementDuration) {
+            logger.debug("Cancelling path movement for entity {}", entity);
+            pathMapper.remove(entity);
+        } else {
+            reusableVector.set(path.targetPosition.x - transform.position.x, path.targetPosition.y - transform.position.y);
+            float distanceToTargetPosition = reusableVector.length();
+            reusableVector.normalize();
+
+            if (moveDistance > distanceToTargetPosition) {
                 transform.position.set(path.targetPosition);
+                syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
                 pathMapper.remove(entity);
             } else {
-                reusableDirection.scale(speed.getModifiedSpeed() * world.delta);
-                transform.position.add(reusableDirection);
+                transform.rotation = getAngle(reusableVector);
+                syncMapper.create(entity).markPropertyAsDirty(Properties.ROTATION);
+
+                path.lastPosition.set(transform.position);
+                reusableVector.scale(moveDistance);
+                transform.position.add(reusableVector);
+                syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
             }
-			syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
         }
 	}
 
 	public float getAngle(Vector2f direction) {
 		float angle = (float) Math.toDegrees(Math.atan2(direction.y, direction.x));
-		if (angle < 0){
+		if (angle < 0) {
 			angle += 360;
 		}
 		return angle;
