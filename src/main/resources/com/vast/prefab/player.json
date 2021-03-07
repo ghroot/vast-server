@@ -5,13 +5,13 @@
       "key": "player",
       "components": {
         "Collision": {
-          "radius": 0.5
+          "radius": 0.4
         },
         "Inventory": {
           "capacity": 100
         },
         "Speed": {
-          "baseSpeed": 4
+          "baseSpeed": 2.5
         },
         "SyncPropagation": {
           "ownerPropagationProperties": 1696,

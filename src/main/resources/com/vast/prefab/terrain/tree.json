@@ -5,7 +5,7 @@
       "key": "tree",
       "components": {
         "Collision": {
-          "radius": 0.4
+          "radius": 0.2
         },
         "Harvestable": {
           "requiredItemTag": "axe",
