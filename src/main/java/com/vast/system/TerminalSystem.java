@@ -216,10 +216,12 @@ public class TerminalSystem extends IntervalSystem {
 			textGraphics.putString(0, 5, "Player entities: " + playerEntities.size() + " (" + activePlayerEntities.size() + " active)");
 			textGraphics.putString(0, 6, "Scanning entities: " + scanEntities.size());
 
-			if (vastWorld.getTimeModifier() == 0) {
+			if (vastWorld.getTimeModifier() < 0.001f) {
 				textGraphics.putString(screen.getTerminalSize().getColumns() / 2 - 3, 1, "PAUSED");
-			} else if (vastWorld.getTimeModifier() > 1) {
-				textGraphics.putString(screen.getTerminalSize().getColumns() / 2 - 7, 1, "FAST FORWARD " + vastWorld.getTimeModifier() + "X");
+			} else if (Math.abs(vastWorld.getTimeModifier() - 0.5f) < 0.001f) {
+				textGraphics.putString(screen.getTerminalSize().getColumns() / 2 - 2, 1, "SLOW");
+			} else if (vastWorld.getTimeModifier() > 1.001f) {
+				textGraphics.putString(screen.getTerminalSize().getColumns() / 2 - 7, 1, "FAST FORWARD " + Math.round(vastWorld.getTimeModifier()) + "X");
 			}
 
 			if (metrics != null) {
@@ -435,7 +437,8 @@ public class TerminalSystem extends IntervalSystem {
 					} else if (component instanceof Transform) {
 						detail = "" + (Math.round(((Transform) component).position.x * 100.0f) / 100.0f) + ", " + (Math.round(((Transform) component).position.y * 100.0f) / 100.0f);
 					} else if (component instanceof Path) {
-						detail = "" + (Math.round(((Path) component).targetPosition.x * 100.0f) / 100.0f) + ", " + (Math.round(((Path) component).targetPosition.y * 100.0f) / 100.0f);
+						Path path = (Path) component;
+						detail = "" + (Math.round(path.targetPosition.x * 100f) / 100f) + ", " + (Math.round(path.targetPosition.y * 100f) / 100f) + " " + (Math.round(path.timeInSamePosition * 10f) / 10f);
 					} else if (component instanceof Inventory) {
 						Inventory inventory = (Inventory) component;
 						StringBuilder s = new StringBuilder();
@@ -470,6 +473,16 @@ public class TerminalSystem extends IntervalSystem {
 					} else if (component instanceof Configuration) {
 						Configuration configuration = (Configuration) component;
 						detail = "" + configuration.version;
+					} else if (component instanceof Teach) {
+						Teach teach = (Teach) component;
+						StringBuilder wordsString = new StringBuilder();
+						for (int j = 0; j < teach.words.length; j++) {
+							wordsString.append(teach.words[j]);
+							if (j < teach.words.length - 1) {
+								wordsString.append(", ");
+							}
+						}
+						detail = wordsString.toString();
 					}
 					if (detail != null) {
 						textGraphics.putString(0, row, componentName + " (" + detail + ")");
@@ -589,10 +602,20 @@ public class TerminalSystem extends IntervalSystem {
 						showSentMessages = false;
 						showSyncedProperties = false;
 					} else if (keyStroke.getCharacter().toString().equals(">")) {
-						vastWorld.setTimeModifier(vastWorld.getTimeModifier() + 1);
+						if (Math.abs(vastWorld.getTimeModifier()) < 0.001f) {
+							vastWorld.setTimeModifier(0.5f);
+						} else if (Math.abs(vastWorld.getTimeModifier() - 0.5f) < 0.001f) {
+							vastWorld.setTimeModifier(1f);
+						} else {
+							vastWorld.setTimeModifier(vastWorld.getTimeModifier() + 1f);
+						}
 					} else if (keyStroke.getCharacter().toString().equals("<")) {
-						if (vastWorld.getTimeModifier() > 0) {
-							vastWorld.setTimeModifier(vastWorld.getTimeModifier() - 1);
+						if (Math.abs(vastWorld.getTimeModifier() - 1f) < 0.001f) {
+							vastWorld.setTimeModifier(0.5f);
+						} else if (Math.abs(vastWorld.getTimeModifier() - 0.5f) < 0.001f) {
+							vastWorld.setTimeModifier(0f);
+						} else if (vastWorld.getTimeModifier() > 1f) {
+							vastWorld.setTimeModifier(vastWorld.getTimeModifier() - 1f);
 						}
 					}
 				} else if (keyStroke.getKeyType() == KeyType.ArrowDown) {

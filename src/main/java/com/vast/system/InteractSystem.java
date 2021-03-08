@@ -106,12 +106,17 @@ public class InteractSystem extends IteratingSystem {
 			} else {
 				Transform otherTransform = transformMapper.get(interact.entity);
 				if (interact.phase == Interact.Phase.APPROACHING) {
-					pathMapper.create(entity).targetPosition.set(otherTransform.position);
+					if (pathMapper.has(entity)) {
+						pathMapper.get(entity).targetPosition.set(otherTransform.position);
+					} else {
+						logger.info("Entity {} could not reach entity {} to interact", entity, interact.entity);
+						interactMapper.remove(entity);
+					}
 				} else {
 					if (interact.phase == Interact.Phase.INTERACTING) {
 						interact.handler.stop(entity, interact.entity);
 					}
-					logger.debug("Entity {} started approaching entity {}", entity, interact.entity);
+					logger.debug("Entity {} started approaching entity {} to interact", entity, interact.entity);
 					pathMapper.create(entity).targetPosition.set(otherTransform.position);
 					interact.phase = Interact.Phase.APPROACHING;
 				}

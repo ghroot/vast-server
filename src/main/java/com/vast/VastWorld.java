@@ -33,7 +33,7 @@ public class VastWorld implements Runnable {
 	private World world;
 	private boolean isAlive;
 	private long lastFrameStartTime;
-	private int timeModifier = 1;
+	private float timeModifier = 1f;
 	private Metrics metrics;
 
 	private Map<String, VastPeer> peers;
@@ -171,11 +171,11 @@ public class VastWorld implements Runnable {
 		isAlive = false;
 	}
 
-	public void setTimeModifier(int timeModifier) {
+	public void setTimeModifier(float timeModifier) {
 		this.timeModifier = timeModifier;
 	}
 
-	public int getTimeModifier() {
+	public float getTimeModifier() {
 		return timeModifier;
 	}
 
@@ -207,5 +207,9 @@ public class VastWorld implements Runnable {
 
 	public Items getItems() {
 		return items;
+	}
+
+	public CreationManager getCreationManager() {
+		return world.getSystem(CreationManager.class);
 	}
 }

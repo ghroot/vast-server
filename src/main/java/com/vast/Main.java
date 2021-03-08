@@ -31,11 +31,18 @@ public class Main {
 			CommandLineParser parser = new DefaultParser();
 			CommandLine cmd = parser.parse(options, args);
 
+			System.setProperty("org.slf4j.simpleLogger.showThreadName", "false");
+			System.setProperty("org.slf4j.simpleLogger.showShortLogName", "true");
+			System.setProperty("org.slf4j.simpleLogger.levelInBrackets", "true");
+			System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug");
+			System.setProperty("org.slf4j.simpleLogger.showDateTime", "true");
+			System.setProperty("org.slf4j.simpleLogger.dateTimeFormat", "HH:mm:ss");
 			if (cmd.hasOption("log")) {
 				System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", cmd.getOptionValue("log"));
 			} else {
 				System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
 			}
+
 			snapshotFile = cmd.getOptionValue("snapshot", "snapshot.json");
 			numberOfPeersToSimulate = cmd.hasOption("simulate") ? Integer.parseInt(cmd.getOptionValue("simulate", "0")) : 0;
 			randomSeed = cmd.hasOption("seed") ? Long.parseLong(cmd.getOptionValue("seed", "-1")) : -1;

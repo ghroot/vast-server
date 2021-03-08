@@ -12,7 +12,6 @@ import com.vast.network.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
 
 public class PathMoveSystem extends IteratingSystem {
@@ -39,7 +38,7 @@ public class PathMoveSystem extends IteratingSystem {
     protected void inserted(int entity) {
         Transform transform = transformMapper.get(entity);
         Path path = pathMapper.get(entity);
-        path.lastPosition = new Point2f(transform.position);
+        path.stuckCheckPosition.set(transform.position);
     }
 
     @Override
@@ -52,14 +51,17 @@ public class PathMoveSystem extends IteratingSystem {
         Path path = pathMapper.get(entity);
         Speed speed = speedMapper.get(entity);
 
-        float moveDistance = speed.getModifiedSpeed() * world.delta;
-
-        reusableVector.set(transform.position.x - path.lastPosition.x, transform.position.y - path.lastPosition.y);
-        float distanceFromLastPosition = reusableVector.length();
-        if (distanceFromLastPosition < moveDistance / 4) {
-            path.timeInSamePosition += world.delta;
-        } else {
-            path.timeInSamePosition = 0f;
+        path.timeSinceLastStuckCheck += world.delta;
+        if (path.timeSinceLastStuckCheck >= 1f) {
+            reusableVector.set(transform.position.x - path.stuckCheckPosition.x, transform.position.y - path.stuckCheckPosition.y);
+            float distanceFromStuckCheckPosition = reusableVector.length();
+            if (distanceFromStuckCheckPosition < speed.getModifiedSpeed() / 2) {
+                path.timeInSamePosition += path.timeSinceLastStuckCheck;
+            } else {
+                path.stuckCheckPosition.set(transform.position);
+                path.timeInSamePosition = 0f;
+            }
+            path.timeSinceLastStuckCheck = 0f;
         }
 
         if (path.timeInSamePosition >= cancelMovementDuration) {
@@ -70,6 +72,7 @@ public class PathMoveSystem extends IteratingSystem {
             float distanceToTargetPosition = reusableVector.length();
             reusableVector.normalize();
 
+            float moveDistance = speed.getModifiedSpeed() * world.delta;
             if (moveDistance > distanceToTargetPosition) {
                 transform.position.set(path.targetPosition);
                 syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);
@@ -78,7 +81,6 @@ public class PathMoveSystem extends IteratingSystem {
                 transform.rotation = getAngle(reusableVector);
                 syncMapper.create(entity).markPropertyAsDirty(Properties.ROTATION);
 
-                path.lastPosition.set(transform.position);
                 reusableVector.scale(moveDistance);
                 transform.position.add(reusableVector);
                 syncMapper.create(entity).markPropertyAsDirty(Properties.POSITION);

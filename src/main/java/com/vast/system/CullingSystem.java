@@ -79,7 +79,6 @@ public class CullingSystem extends IteratingSystem {
 	}
 
 	private void notifyAboutRemovedEntity(VastPeer peer, int deletedEntity) {
-		logger.debug("Notifying peer {} about removed entity {} (culling)", peer.getName(), deletedEntity);
 		reusableDestroyedEventMessage.getDataObject().clear();
 		reusableDestroyedEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, deletedEntity);
 		reusableDestroyedEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_REASON, "culling");
@@ -101,7 +100,6 @@ public class CullingSystem extends IteratingSystem {
 	}
 
 	private void notifyAboutNewEntity(VastPeer peer, int entity, int newEntity) {
-		logger.debug("Notifying peer {} about new entity {} (culling)", peer.getName(), newEntity);
 		SyncPropagation syncPropagation = syncPropagationMapper.get(newEntity);
 		reusableCreatedEventMessage.getDataObject().clear();
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, newEntity);
