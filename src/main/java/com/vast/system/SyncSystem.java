@@ -14,6 +14,7 @@ import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Set;
 
 public class SyncSystem extends IteratingSystem {
@@ -23,7 +24,9 @@ public class SyncSystem extends IteratingSystem {
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 	private ComponentMapper<Active> activeMapper;
 	private ComponentMapper<Known> knownMapper;
+	private ComponentMapper<Owner> ownerMapper;
 
+	private Map<String, VastPeer> peers;
 	private PropertyHandler[] propertyHandlers;
 	private Metrics metrics;
 
@@ -31,8 +34,9 @@ public class SyncSystem extends IteratingSystem {
 	private ChangedProperties reusableChangedProperties;
 	private EventMessage reusableMessage;
 
-	public SyncSystem(PropertyHandler[] propertyHandlers, Metrics metrics) {
+	public SyncSystem(Map<String, VastPeer> peers, PropertyHandler[] propertyHandlers, Metrics metrics) {
 		super(Aspect.all(Sync.class, SyncPropagation.class, Known.class));
+		this.peers = peers;
 		this.propertyHandlers = propertyHandlers;
 		this.metrics = metrics;
 
@@ -55,7 +59,7 @@ public class SyncSystem extends IteratingSystem {
 
 		syncNearbyPropagationProperties(syncEntity, sync);
 
-		if (activeMapper.has(syncEntity)) {
+		if (activeMapper.has(syncEntity) || ownerMapper.has(syncEntity)) {
 			syncOwnerPropagationProperties(syncEntity, sync);
 		}
 
@@ -90,11 +94,18 @@ public class SyncSystem extends IteratingSystem {
 			reusableMessage.getDataObject().clear();
 			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
 			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, changedProperties.propertiesDataObject);
-			VastPeer ownerPeer = activeMapper.get(syncEntity).peer;
-			if (changedProperties.reliable) {
-				ownerPeer.send(reusableMessage);
+			VastPeer ownerPeer;
+			if (ownerMapper.has(syncEntity)) {
+				ownerPeer = peers.get(ownerMapper.get(syncEntity).name);
 			} else {
-				ownerPeer.sendUnreliable(reusableMessage);
+				ownerPeer = activeMapper.get(syncEntity).peer;
+			}
+			if (ownerPeer != null) {
+				if (changedProperties.reliable) {
+					ownerPeer.send(reusableMessage);
+				} else {
+					ownerPeer.sendUnreliable(reusableMessage);
+				}
 			}
 		}
 	}

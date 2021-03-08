@@ -94,7 +94,7 @@ public class InteractSystem extends IteratingSystem {
 						InteractionHandler handler = findInteractionHandler(entity, interact.entity);
 						if (handler != null && handler.attemptStart(entity, interact.entity)) {
 							interact.handler = handler;
-							logger.debug("Entity {} started interacting with entity {}", entity, interact.entity);
+							logger.debug("Entity {} started interacting with entity {} with handler {}", entity, interact.entity, handler.getClass().getSimpleName());
 							interact.phase = Interact.Phase.INTERACTING;
 							usedMapper.create(interact.entity).usedByEntity = interact.entity;
 						} else {

@@ -30,7 +30,6 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 	private ComponentMapper<Speed> speedMapper;
 	private ComponentMapper<Growing> growingMapper;
-	private ComponentMapper<Plantable> plantableMapper;
 	private ComponentMapper<Group> groupMapper;
 	private ComponentMapper<Teach> teachMapper;
 	private ComponentMapper<Owner> ownerMapper;
@@ -73,6 +72,7 @@ public class CreationManager extends BaseSystem {
 		buildingPrefabs.put("planter", new BuildingPrefabs.PlanterPrefab(world));
 		buildingPrefabs.put("torch", new BuildingPrefabs.TorchPrefab(world));
 		buildingPrefabs.put("wall", new BuildingPrefabs.WallPrefab(world));
+		buildingPrefabs.put("factory", new BuildingPrefabs.FactoryPrefab(world));
 		pickupPrefabs = new HashMap<>();
 		pickupPrefabs.put("harvestedResources", new PickupPrefabs.HarvestedResourcesTemplate(world));
 		pickupPrefabs.put("woodPile", new PickupPrefabs.WoodPileTemplate(world));
@@ -112,8 +112,8 @@ public class CreationManager extends BaseSystem {
 			aiMapper.create(playerEntity).behaviourName = "human";
 		}
 
-		inventoryMapper.get(playerEntity).add(0, 10);
-		inventoryMapper.get(playerEntity).add(1, 10);
+		inventoryMapper.get(playerEntity).add(0, 15);
+		inventoryMapper.get(playerEntity).add(1, 15);
 		inventoryMapper.get(playerEntity).add(3, 5);
 
 		return playerEntity;

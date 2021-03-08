@@ -121,17 +121,43 @@ public class StepDefinitions {
             return world.getCreationManager().createTree(new Point2f(x, y), false);
         } else if (name.equals("rock")) {
             return world.getCreationManager().createRock(new Point2f(x, y));
+        } else if (name.equals("factory")) {
+            int buildingEntity =  world.getCreationManager().createBuilding(name, new Point2f(x, y), 0f, "player");
+            world.getComponentMapper(Constructable.class).remove(buildingEntity);
+            return buildingEntity;
         }
 
         return -1;
     }
 
+    @Given("a {string} at {float}, {float} owned by player {string}")
+    public int createEntity(String name, float x, float y, String playerName) {
+        int entity = createEntity(name, x, y);
+        if (world.getComponentMapper(Owner.class).has(entity)) {
+            world.getComponentMapper(Owner.class).get(entity).name = playerName;
+        }
+
+        return entity;
+    }
+
     @Given("a {string} at {float}, {float} called {string}")
-    public void createEntityAtWithDesignation(String name, float x, float y, String designation) {
+    public int createEntityAtWithDesignation(String name, float x, float y, String designation) {
         int entity = createEntity(name, x, y);
         if (entity != -1) {
             designations.put(designation, entity);
         }
+
+        return entity;
+    }
+
+    @Given("a {string} at {float}, {float} owned by player {string} called {string}")
+    public int createEntityAtWithDesignation(String name, float x, float y, String playerName, String designation) {
+        int entity = createEntity(name, x, y, playerName);
+        if (entity != -1) {
+            designations.put(designation, entity);
+        }
+
+        return entity;
     }
 
     @Given("a player {string}")
@@ -213,7 +239,7 @@ public class StepDefinitions {
         int timeEntity = world.getEntities(Aspect.all(Time.class))[0];
         Time time = world.getComponentMapper(Time.class).get(timeEntity);
         float startTime = time.time;
-        await().until(() -> time.time >= startTime + seconds);
+        await().timeout(Duration.FOREVER).until(() -> time.time >= startTime + seconds);
     }
 
     @Then("{string} should exist")
@@ -251,5 +277,11 @@ public class StepDefinitions {
         Vector2f diff = new Vector2f(playerPosition.x - targetPosition.x, playerPosition.y - targetPosition.y);
         float distance = diff.length();
         Assert.assertTrue(distance > 2f);
+    }
+
+    @Then("player {string} should have at least {int} of item {string}")
+    public void playerShouldHaveItem(String playerName, int amount, String itemName) {
+        Inventory playerInventory = world.getComponentMapper(Inventory.class).get(world.getPeerEntity(playerName));
+        Assert.assertTrue(playerInventory.has(world.getItems().getItem(itemName).getId(), amount));
     }
 }

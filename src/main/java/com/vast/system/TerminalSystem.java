@@ -80,7 +80,6 @@ public class TerminalSystem extends IntervalSystem {
 		propertyNames.put(Properties.INVENTORY, "Inventory");
 		propertyNames.put(Properties.FUELED, "Fueled");
 		propertyNames.put(Properties.HOME, "Home");
-		propertyNames.put(Properties.GROWING, "Growing");
 		propertyNames.put(Properties.STATE, "State");
 		propertyNames.put(Properties.CONFIGURATION, "Configuration");
 		propertyNames.put(Properties.SKILL, "Skill");
@@ -483,6 +482,9 @@ public class TerminalSystem extends IntervalSystem {
 							}
 						}
 						detail = wordsString.toString();
+					} else if (component instanceof Producer) {
+						Producer producer = (Producer) component;
+						detail = producer.recipeId + " " + (Math.round(producer.time * 10f) / 10f);
 					}
 					if (detail != null) {
 						textGraphics.putString(0, row, componentName + " (" + detail + ")");

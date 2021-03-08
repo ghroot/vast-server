@@ -54,5 +54,20 @@
       "Wood": 5,
       "Stone": 1
     }
+  },
+  {
+    "id": 7,
+    "entityType": "factory",
+    "cost": {
+      "Wood": 1
+    }
+  },
+  {
+    "id": 8,
+    "itemName": "Vegetables",
+    "duration": 10,
+    "cost": {
+      "Seed": 1
+    }
   }
 ]

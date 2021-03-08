@@ -2,28 +2,45 @@
   "entities": {
     "0": {
       "archetype": 0,
-      "key": "harvestedResources",
+      "key": "factory",
       "components": {
+        "Collision": {
+          "radius": 0.5
+        },
+        "Constructable": {
+          "buildDuration": 5
+        },
+        "Inventory": {
+          "capacity": 10
+        },
+        "Producer": {
+          "recipeId": 0
+        },
         "SubType": {
-          "subType": 0
+          "subType": 5
         },
         "SyncPropagation": {
           "ownerPropagationProperties": 32
         },
         "Type": {
-          "type": "pickup"
+          "type": "building"
         }
       }
     }
   },
   "archetypes": {
     "0": [
-      "Container",
+      "Collision",
+      "Constructable",
       "Inventory",
       "Known",
-      "Lifetime",
+      "Owner",
+      "Producer",
+      "State",
       "Static",
       "SubType",
+      "State",
+      "SyncHistory",
       "SyncPropagation",
       "Transform",
       "Type"
@@ -42,6 +59,7 @@
     "com.vast.component.Known": "Known",
     "com.vast.component.Lifetime": "Lifetime",
     "com.vast.component.Owner": "Owner",
+    "com.vast.component.Producer": "Producer",
     "com.vast.component.Skill": "Skill",
     "com.vast.component.Speed": "Speed",
     "com.vast.component.State": "State",

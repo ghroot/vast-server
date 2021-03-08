@@ -1,8 +1,5 @@
 package com.vast.data;
 
-import org.json.JSONObject;
-
-import java.util.Map;
 import java.util.Set;
 
 public class Recipe {

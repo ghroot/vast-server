@@ -30,6 +30,8 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 	public boolean attemptStart(int playerEntity, int constructableEntity) {
 		stateMapper.get(playerEntity).name = "building";
 		syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
+		stateMapper.get(constructableEntity).name = "building";
+		syncMapper.create(constructableEntity).markPropertyAsDirty(Properties.STATE);
 		return true;
 	}
 
@@ -47,8 +49,10 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 	}
 
 	@Override
-	public void stop(int playerEntity, int buildingEntity) {
+	public void stop(int playerEntity, int constructableEntity) {
 		stateMapper.get(playerEntity).name = "none";
 		syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
+		stateMapper.get(constructableEntity).name = "none";
+		syncMapper.create(constructableEntity).markPropertyAsDirty(Properties.STATE);
 	}
 }
