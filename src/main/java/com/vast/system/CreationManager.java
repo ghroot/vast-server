@@ -30,7 +30,6 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 	private ComponentMapper<Speed> speedMapper;
 	private ComponentMapper<Growing> growingMapper;
-	private ComponentMapper<Plantable> plantableMapper;
 	private ComponentMapper<Group> groupMapper;
 	private ComponentMapper<Teach> teachMapper;
 	private ComponentMapper<Owner> ownerMapper;

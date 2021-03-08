@@ -9,7 +9,6 @@ public class Properties {
 	public static byte INVENTORY = 5;
 	public static byte FUELED = 6;
 	public static byte HOME = 7;
-	public static byte GROWING = 8;
-	public static byte CONFIGURATION = 9;
-	public static byte SKILL = 10;
+	public static byte CONFIGURATION = 8;
+	public static byte SKILL = 9;
 }

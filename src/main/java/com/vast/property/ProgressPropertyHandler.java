@@ -2,6 +2,7 @@ package com.vast.property;
 
 import com.artemis.ComponentMapper;
 import com.vast.component.Constructable;
+import com.vast.component.Growing;
 import com.vast.component.Producer;
 import com.vast.data.Recipe;
 import com.vast.data.Recipes;
@@ -10,6 +11,7 @@ import com.vast.network.Properties;
 public class ProgressPropertyHandler extends AbstractPropertyHandler<Integer, Byte> {
 	private ComponentMapper<Constructable> constructableMapper;
 	private ComponentMapper<Producer> producerMapper;
+	private ComponentMapper<Growing> growingMapper;
 
 	private Recipes recipes;
 	private int progressThreshold;
@@ -22,18 +24,22 @@ public class ProgressPropertyHandler extends AbstractPropertyHandler<Integer, By
 
 	@Override
 	protected boolean isInterestedIn(int entity) {
-		return constructableMapper.has(entity) || producerMapper.has(entity);
+		return constructableMapper.has(entity) || producerMapper.has(entity) || growingMapper.has(entity);
 	}
 
 	@Override
 	protected Integer getPropertyData(int entity) {
 		if (constructableMapper.has(entity)) {
 			Constructable constructable = constructableMapper.get(entity);
-			return Math.min((int) Math.floor(100.0f * constructable.buildTime / constructable.buildDuration), 100);
-		} else {
+			return Math.min((int) Math.floor(100f * constructable.buildTime / constructable.buildDuration), 100);
+		} else if (producerMapper.has(entity)) {
 			Producer producer = producerMapper.get(entity);
 			Recipe recipe = recipes.getRecipe(producer.recipeId);
-			return Math.min((int) Math.floor(100.0f * producer.time / recipe.getDuration()), 100);
+			return Math.min((int) Math.floor(100f * producer.time / recipe.getDuration()), 100);
+		} else {
+			Growing growing = growingMapper.get(entity);
+			float timePassed = 10f - growing.timeLeft;
+			return Math.min((int) Math.floor(100f * timePassed / 10f), 100);
 		}
 	}
 

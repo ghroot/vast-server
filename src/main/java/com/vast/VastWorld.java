@@ -55,7 +55,6 @@ public class VastWorld implements Runnable {
 			new HarvestableInteractionHandler(items),
 			new ConstructableInteractionHandler(),
 			new ProducerInteractionHandler(recipes),
-			new PlantableInteractionHandler(items),
 			new ContainerInteractionHandler(items),
 			new FueledInteractionHandler()
 		};
@@ -78,7 +77,6 @@ public class VastWorld implements Runnable {
 			new InventoryPropertyHandler(),
 			new FueledPropertyHandler(),
 			new HomePropertyHandler(),
-			new GrowingPropertyHandler(),
 			new StatePropertyHandler(),
 			new ConfigurationPropertyHandler(items, recipes),
 			new SkillPropertyHandler(5)

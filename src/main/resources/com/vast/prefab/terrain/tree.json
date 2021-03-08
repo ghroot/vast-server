@@ -63,7 +63,6 @@
     "com.vast.component.Known": "Known",
     "com.vast.component.Lifetime": "Lifetime",
     "com.vast.component.Owner": "Owner",
-    "com.vast.component.Plantable": "Plantable",
     "com.vast.component.Skill": "Skill",
     "com.vast.component.Speed": "Speed",
     "com.vast.component.State": "State",

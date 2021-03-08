@@ -10,6 +10,12 @@
         "Constructable": {
           "buildDuration": 5
         },
+        "Inventory": {
+          "capacity": 10
+        },
+        "Producer": {
+          "recipeId": 8
+        },
         "SubType": {
           "subType": 4
         },
@@ -23,9 +29,10 @@
     "0": [
       "Collision",
       "Constructable",
+      "Inventory",
       "Known",
       "Owner",
-      "Plantable",
+      "Producer",
       "State",
       "Static",
       "SubType",
@@ -48,7 +55,7 @@
     "com.vast.component.Known": "Known",
     "com.vast.component.Lifetime": "Lifetime",
     "com.vast.component.Owner": "Owner",
-    "com.vast.component.Plantable": "Plantable",
+    "com.vast.component.Producer": "Producer",
     "com.vast.component.Skill": "Skill",
     "com.vast.component.Speed": "Speed",
     "com.vast.component.State": "State",

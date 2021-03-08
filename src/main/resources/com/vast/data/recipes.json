@@ -61,5 +61,13 @@
     "cost": {
       "Wood": 1
     }
+  },
+  {
+    "id": 8,
+    "itemName": "Vegetables",
+    "duration": 10,
+    "cost": {
+      "Seed": 1
+    }
   }
 ]
