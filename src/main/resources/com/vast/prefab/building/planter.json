@@ -26,6 +26,7 @@
       "Known",
       "Owner",
       "Plantable",
+      "State",
       "Static",
       "SubType",
       "SyncHistory",

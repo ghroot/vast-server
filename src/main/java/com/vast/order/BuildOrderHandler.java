@@ -24,6 +24,7 @@ public class BuildOrderHandler implements OrderHandler {
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Event> eventMapper;
+	private ComponentMapper<State> stateMapper;
 
 	private Recipes recipes;
 
@@ -68,6 +69,7 @@ public class BuildOrderHandler implements OrderHandler {
 			Point2f buildPosition = new Point2f(position[0], position[1]);
 			int buildingEntity = creationManager.createBuilding(recipe.getEntityType(), buildPosition, rotation,
 					playerMapper.get(orderEntity).name);
+			stateMapper.get(buildingEntity).name = "placed";
 			createMapper.create(buildingEntity).reason = "built";
 
 			interactMapper.create(orderEntity).entity = buildingEntity;

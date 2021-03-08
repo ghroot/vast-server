@@ -33,20 +33,7 @@ public class ProducerInteractionHandler extends AbstractInteractionHandler {
 	@Override
 	public boolean attemptStart(int playerEntity, int producerEntity) {
 		Producer producer = producerMapper.get(producerEntity);
-		Inventory producerInventory = inventoryMapper.get(producerEntity);
-
-		if (!producer.producing) {
-			return true;
-		}
-
-		if (producer.recipeId >= 0) {
-			Recipe recipe = recipes.getRecipe(producer.recipeId);
-			if (producerInventory.has(recipe.getItemId())) {
-				return true;
-			}
-		}
-
-		return false;
+		return producer.recipeId >= 0;
 	}
 
 	@Override
@@ -59,6 +46,7 @@ public class ProducerInteractionHandler extends AbstractInteractionHandler {
 			Recipe recipe = recipes.getRecipe(producer.recipeId);
 
 			if (producerInventory.has(recipe.getItemId())) {
+				// Collect produced items
 				int numberOfItemsToTransfer = producerInventory.getNumberOfItems(recipe.getItemId());
 				producerInventory.remove(recipe.getItemId(), numberOfItemsToTransfer);
 				playerInventory.add(recipe.getItemId(), numberOfItemsToTransfer);
@@ -66,16 +54,21 @@ public class ProducerInteractionHandler extends AbstractInteractionHandler {
 				syncMapper.create(producerEntity).markPropertyAsDirty(Properties.INVENTORY);
 				eventMapper.create(playerEntity).addEntry("action").setData("pickedUp");
 			} else {
-				boolean atLeastOneItemWasTransferred = false;
+				int numberOfItemsInRecipeCosts = 0;
 				for (Cost cost : recipe.getCosts()) {
-					while (playerInventory.has(cost.getItemId()) && !producerInventory.isFull()) {
-						playerInventory.remove(cost.getItemId());
-						producerInventory.add(cost.getItemId());
-						atLeastOneItemWasTransferred = true;
-					}
+					numberOfItemsInRecipeCosts += cost.getCount();
 				}
-				if (atLeastOneItemWasTransferred) {
+				if (producerInventory.getFreeSpace() < numberOfItemsInRecipeCosts) {
+					// Not enough space in producer for recipe cost
+					eventMapper.create(playerEntity).addEntry("message").setData("It's full...").setOwnerPropagation();
+				} else if (!playerInventory.has(recipe.getCosts())) {
+					// Player doesn't have recipe costs in inventory
+					eventMapper.create(playerEntity).addEntry("message").setData("I don't have the required items...").setOwnerPropagation();
+				} else {
+					// Add items for recipe cost
+					playerInventory.remove(recipe.getCosts());
 					syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
+					producerInventory.add(recipe.getCosts());
 					syncMapper.create(producerEntity).markPropertyAsDirty(Properties.INVENTORY);
 					eventMapper.create(playerEntity).addEntry("action").setData("pickedUp");
 				}

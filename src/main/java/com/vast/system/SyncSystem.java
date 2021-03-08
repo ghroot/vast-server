@@ -100,10 +100,12 @@ public class SyncSystem extends IteratingSystem {
 			} else {
 				ownerPeer = activeMapper.get(syncEntity).peer;
 			}
-			if (changedProperties.reliable) {
-				ownerPeer.send(reusableMessage);
-			} else {
-				ownerPeer.sendUnreliable(reusableMessage);
+			if (ownerPeer != null) {
+				if (changedProperties.reliable) {
+					ownerPeer.send(reusableMessage);
+				} else {
+					ownerPeer.sendUnreliable(reusableMessage);
+				}
 			}
 		}
 	}

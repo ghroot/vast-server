@@ -11,7 +11,7 @@
           "buildDuration": 5
         },
         "Inventory": {
-          "capacity": 20
+          "capacity": 10
         },
         "Producer": {
           "recipeId": 0
@@ -39,6 +39,7 @@
       "State",
       "Static",
       "SubType",
+      "State",
       "SyncHistory",
       "SyncPropagation",
       "Transform",

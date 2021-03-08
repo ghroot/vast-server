@@ -54,6 +54,16 @@ public class Inventory extends PooledComponent {
 		add(otherInventory.items);
 	}
 
+	public void add(Cost cost) {
+		add(cost.getItemId(), cost.getCount());
+	}
+
+	public void add(Set<Cost> costs) {
+		for (Cost cost : costs) {
+			add(cost);
+		}
+	}
+
 	public void remove(int itemId, int amount) {
 		if (amount > 0) {
 			items[itemId] -= amount;
@@ -122,6 +132,10 @@ public class Inventory extends PooledComponent {
 
 	public boolean isFull() {
 		return getNumberOfItems() >= capacity;
+	}
+
+	public int getFreeSpace() {
+		return capacity - getNumberOfItems();
 	}
 
 	public int getNumberOfItems() {

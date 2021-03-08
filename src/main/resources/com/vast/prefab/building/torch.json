@@ -25,6 +25,7 @@
       "Constructable",
       "Known",
       "Owner",
+      "State",
       "Static",
       "SubType",
       "SyncHistory",

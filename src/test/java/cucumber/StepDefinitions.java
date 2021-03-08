@@ -3,8 +3,6 @@ package cucumber;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.nhnent.haste.protocol.messages.EventMessage;
-import com.nhnent.haste.protocol.messages.Message;
 import com.nhnent.haste.protocol.messages.RequestMessage;
 import com.vast.VastWorld;
 import com.vast.component.*;
@@ -12,7 +10,6 @@ import com.vast.data.Items;
 import com.vast.data.Recipes;
 import com.vast.data.WorldConfiguration;
 import com.vast.network.*;
-import com.vast.network.Properties;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
@@ -21,7 +18,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.awaitility.Duration;
 import org.junit.Assert;
-import org.mockito.internal.matchers.Any;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
@@ -168,34 +164,6 @@ public class StepDefinitions {
     public void playerConnects(String playerName) {
         VastPeer peer = mock(VastPeer.class);
         when(peer.getName()).thenReturn(playerName);
-        when(peer.send(any())).then(invocation -> {
-            Message message = invocation.getArgument(0);
-            if (message.getCode() == MessageCodes.UPDATE_PROPERTIES) {
-                int entityId = (int) message.getDataObject().get(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID).value;
-                DataObject properties = (DataObject) message.getDataObject().get(MessageCodes.UPDATE_PROPERTIES_PROPERTIES).value;
-                if (properties.contains(Properties.PROGRESS)) {
-                    System.out.println("PROGRESS " + entityId + ": " + properties.get(Properties.PROGRESS));
-                }
-                if (properties.contains(Properties.INVENTORY)) {
-                    System.out.println("INVENTORY " + entityId + ": " + properties.get(Properties.INVENTORY));
-                }
-            }
-            return null;
-        });
-        when(peer.sendUnreliable(any())).then(invocation -> {
-            Message message = invocation.getArgument(0);
-            if (message.getCode() == MessageCodes.UPDATE_PROPERTIES) {
-                int entityId = (int) message.getDataObject().get(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID).value;
-                DataObject properties = (DataObject) message.getDataObject().get(MessageCodes.UPDATE_PROPERTIES_PROPERTIES).value;
-                if (properties.contains(Properties.PROGRESS)) {
-                    System.out.println("PROGRESS " + entityId + ": " + properties.get(Properties.PROGRESS));
-                }
-                if (properties.contains(Properties.INVENTORY)) {
-                    System.out.println("INVENTORY " + entityId + ": " + properties.get(Properties.INVENTORY));
-                }
-            }
-            return null;
-        });
         for (PeerListener peerListener : peerListeners) {
             peerListener.peerAdded(peer);
         }
