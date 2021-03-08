@@ -54,5 +54,12 @@
       "Wood": 5,
       "Stone": 1
     }
+  },
+  {
+    "id": 7,
+    "entityType": "factory",
+    "cost": {
+      "Wood": 1
+    }
   }
 ]

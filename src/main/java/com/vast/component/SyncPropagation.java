@@ -6,7 +6,7 @@ import com.artemis.annotations.PooledWeaver;
 @PooledWeaver
 public class SyncPropagation extends Component {
 	public int unreliableProperties = 0;
-	public int ownerPropagationProperties = 0;
+	public int ownerPropagationProperties = 0; // TODO: Consider concept of "nearby owners" (Owner component)
 
 	public void setUnreliable(int property) {
 		unreliableProperties |= (1 << property);

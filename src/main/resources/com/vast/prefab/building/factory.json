@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "0": {
+      "archetype": 0,
+      "key": "factory",
+      "components": {
+        "Collision": {
+          "radius": 0.5
+        },
+        "Constructable": {
+          "buildDuration": 5
+        },
+        "Inventory": {
+          "capacity": 20
+        },
+        "Producer": {
+          "recipeId": 0
+        },
+        "SubType": {
+          "subType": 5
+        },
+        "SyncPropagation": {
+          "ownerPropagationProperties": 32
+        },
+        "Type": {
+          "type": "building"
+        }
+      }
+    }
+  },
+  "archetypes": {
+    "0": [
+      "Collision",
+      "Constructable",
+      "Inventory",
+      "Known",
+      "Owner",
+      "Producer",
+      "State",
+      "Static",
+      "SubType",
+      "SyncHistory",
+      "SyncPropagation",
+      "Transform",
+      "Type"
+    ]
+  },
+  "componentIdentifiers": {
+    "com.vast.component.AI": "AI",
+    "com.vast.component.Collision": "Collision",
+    "com.vast.component.Configuration": "Configuration",
+    "com.vast.component.Constructable": "Constructable",
+    "com.vast.component.Container": "Container",
+    "com.vast.component.Fueled": "Fueled",
+    "com.vast.component.Group": "Group",
+    "com.vast.component.Harvestable": "Harvestable",
+    "com.vast.component.Inventory": "Inventory",
+    "com.vast.component.Known": "Known",
+    "com.vast.component.Lifetime": "Lifetime",
+    "com.vast.component.Owner": "Owner",
+    "com.vast.component.Producer": "Producer",
+    "com.vast.component.Skill": "Skill",
+    "com.vast.component.Speed": "Speed",
+    "com.vast.component.State": "State",
+    "com.vast.component.Static": "Static",
+    "com.vast.component.SubType": "SubType",
+    "com.vast.component.SyncHistory": "SyncHistory",
+    "com.vast.component.SyncPropagation": "SyncPropagation",
+    "com.vast.component.Teach": "Teach",
+    "com.vast.component.Transform": "Transform",
+    "com.vast.component.Type": "Type"
+  },
+  "metadata": {
+    "version": 1
+  }
+}

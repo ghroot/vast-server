@@ -3,6 +3,8 @@ package cucumber;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.nhnent.haste.protocol.data.DataObject;
+import com.nhnent.haste.protocol.messages.EventMessage;
+import com.nhnent.haste.protocol.messages.Message;
 import com.nhnent.haste.protocol.messages.RequestMessage;
 import com.vast.VastWorld;
 import com.vast.component.*;
@@ -10,6 +12,7 @@ import com.vast.data.Items;
 import com.vast.data.Recipes;
 import com.vast.data.WorldConfiguration;
 import com.vast.network.*;
+import com.vast.network.Properties;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
@@ -18,6 +21,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.awaitility.Duration;
 import org.junit.Assert;
+import org.mockito.internal.matchers.Any;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
@@ -121,23 +125,77 @@ public class StepDefinitions {
             return world.getCreationManager().createTree(new Point2f(x, y), false);
         } else if (name.equals("rock")) {
             return world.getCreationManager().createRock(new Point2f(x, y));
+        } else if (name.equals("factory")) {
+            int buildingEntity =  world.getCreationManager().createBuilding(name, new Point2f(x, y), 0f, "player");
+            world.getComponentMapper(Constructable.class).remove(buildingEntity);
+            return buildingEntity;
         }
 
         return -1;
     }
 
+    @Given("a {string} at {float}, {float} owned by player {string}")
+    public int createEntity(String name, float x, float y, String playerName) {
+        int entity = createEntity(name, x, y);
+        if (world.getComponentMapper(Owner.class).has(entity)) {
+            world.getComponentMapper(Owner.class).get(entity).name = playerName;
+        }
+
+        return entity;
+    }
+
     @Given("a {string} at {float}, {float} called {string}")
-    public void createEntityAtWithDesignation(String name, float x, float y, String designation) {
+    public int createEntityAtWithDesignation(String name, float x, float y, String designation) {
         int entity = createEntity(name, x, y);
         if (entity != -1) {
             designations.put(designation, entity);
         }
+
+        return entity;
+    }
+
+    @Given("a {string} at {float}, {float} owned by player {string} called {string}")
+    public int createEntityAtWithDesignation(String name, float x, float y, String playerName, String designation) {
+        int entity = createEntity(name, x, y, playerName);
+        if (entity != -1) {
+            designations.put(designation, entity);
+        }
+
+        return entity;
     }
 
     @Given("a player {string}")
     public void playerConnects(String playerName) {
         VastPeer peer = mock(VastPeer.class);
         when(peer.getName()).thenReturn(playerName);
+        when(peer.send(any())).then(invocation -> {
+            Message message = invocation.getArgument(0);
+            if (message.getCode() == MessageCodes.UPDATE_PROPERTIES) {
+                int entityId = (int) message.getDataObject().get(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID).value;
+                DataObject properties = (DataObject) message.getDataObject().get(MessageCodes.UPDATE_PROPERTIES_PROPERTIES).value;
+                if (properties.contains(Properties.PROGRESS)) {
+                    System.out.println("PROGRESS " + entityId + ": " + properties.get(Properties.PROGRESS));
+                }
+                if (properties.contains(Properties.INVENTORY)) {
+                    System.out.println("INVENTORY " + entityId + ": " + properties.get(Properties.INVENTORY));
+                }
+            }
+            return null;
+        });
+        when(peer.sendUnreliable(any())).then(invocation -> {
+            Message message = invocation.getArgument(0);
+            if (message.getCode() == MessageCodes.UPDATE_PROPERTIES) {
+                int entityId = (int) message.getDataObject().get(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID).value;
+                DataObject properties = (DataObject) message.getDataObject().get(MessageCodes.UPDATE_PROPERTIES_PROPERTIES).value;
+                if (properties.contains(Properties.PROGRESS)) {
+                    System.out.println("PROGRESS " + entityId + ": " + properties.get(Properties.PROGRESS));
+                }
+                if (properties.contains(Properties.INVENTORY)) {
+                    System.out.println("INVENTORY " + entityId + ": " + properties.get(Properties.INVENTORY));
+                }
+            }
+            return null;
+        });
         for (PeerListener peerListener : peerListeners) {
             peerListener.peerAdded(peer);
         }
@@ -213,7 +271,7 @@ public class StepDefinitions {
         int timeEntity = world.getEntities(Aspect.all(Time.class))[0];
         Time time = world.getComponentMapper(Time.class).get(timeEntity);
         float startTime = time.time;
-        await().until(() -> time.time >= startTime + seconds);
+        await().timeout(Duration.FOREVER).until(() -> time.time >= startTime + seconds);
     }
 
     @Then("{string} should exist")
@@ -251,5 +309,11 @@ public class StepDefinitions {
         Vector2f diff = new Vector2f(playerPosition.x - targetPosition.x, playerPosition.y - targetPosition.y);
         float distance = diff.length();
         Assert.assertTrue(distance > 2f);
+    }
+
+    @Then("player {string} should have at least {int} of item {string}")
+    public void playerShouldHaveItem(String playerName, int amount, String itemName) {
+        Inventory playerInventory = world.getComponentMapper(Inventory.class).get(world.getPeerEntity(playerName));
+        Assert.assertTrue(playerInventory.has(world.getItems().getItem(itemName).getId(), amount));
     }
 }

@@ -10,6 +10,8 @@ import com.vast.property.PropertyHandler;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.HashMap;
+
 public class TestSyncSystem {
 	private World world;
 	private ComponentMapper<Player> playerMapper;
@@ -20,7 +22,7 @@ public class TestSyncSystem {
 
 	private void setupWorld(PropertyHandler[] propertyHandlers) {
 		world = new World(new WorldConfigurationBuilder().with(
-			new SyncSystem(propertyHandlers, null)
+			new SyncSystem(new HashMap<>(), propertyHandlers, null)
 		).build());
 
 		playerMapper = world.getMapper(Player.class);

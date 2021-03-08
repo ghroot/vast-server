@@ -483,6 +483,9 @@ public class TerminalSystem extends IntervalSystem {
 							}
 						}
 						detail = wordsString.toString();
+					} else if (component instanceof Producer) {
+						Producer producer = (Producer) component;
+						detail = producer.recipeId + " " + (Math.round(producer.time * 10f) / 10f);
 					}
 					if (detail != null) {
 						textGraphics.putString(0, row, componentName + " (" + detail + ")");

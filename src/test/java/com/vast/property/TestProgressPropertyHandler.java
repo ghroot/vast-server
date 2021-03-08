@@ -6,6 +6,7 @@ import com.artemis.WorldConfigurationBuilder;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Constructable;
 import com.vast.component.SyncHistory;
+import com.vast.data.Recipes;
 import com.vast.network.Properties;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,7 +21,7 @@ public class TestProgressPropertyHandler {
 
     @Before
     public void setUp() {
-        progressPropertyHandler = new ProgressPropertyHandler(10);
+        progressPropertyHandler = new ProgressPropertyHandler(new Recipes(), 10);
 
         world = new World(new WorldConfigurationBuilder().build());
         world.inject(progressPropertyHandler);

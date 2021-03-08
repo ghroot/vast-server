@@ -73,6 +73,7 @@ public class CreationManager extends BaseSystem {
 		buildingPrefabs.put("planter", new BuildingPrefabs.PlanterPrefab(world));
 		buildingPrefabs.put("torch", new BuildingPrefabs.TorchPrefab(world));
 		buildingPrefabs.put("wall", new BuildingPrefabs.WallPrefab(world));
+		buildingPrefabs.put("factory", new BuildingPrefabs.FactoryPrefab(world));
 		pickupPrefabs = new HashMap<>();
 		pickupPrefabs.put("harvestedResources", new PickupPrefabs.HarvestedResourcesTemplate(world));
 		pickupPrefabs.put("woodPile", new PickupPrefabs.WoodPileTemplate(world));

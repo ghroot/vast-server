@@ -54,6 +54,7 @@ public class VastWorld implements Runnable {
 			new GrowingInteractionHandler(),
 			new HarvestableInteractionHandler(items),
 			new ConstructableInteractionHandler(),
+			new ProducerInteractionHandler(recipes),
 			new PlantableInteractionHandler(items),
 			new ContainerInteractionHandler(items),
 			new FueledInteractionHandler()
@@ -73,7 +74,7 @@ public class VastWorld implements Runnable {
 			new PositionPropertyHandler(0.3f),
 			new RotationPropertyHandler(10f),
 			new ActivePropertyHandler(),
-			new ProgressPropertyHandler(10),
+			new ProgressPropertyHandler(recipes,10),
 			new InventoryPropertyHandler(),
 			new FueledPropertyHandler(),
 			new HomePropertyHandler(),
@@ -112,6 +113,7 @@ public class VastWorld implements Runnable {
 			new FollowSystem(),
 			new FuelSystem(),
 			new CraftSystem(items),
+			new ProducerSystem(items, recipes),
 			new GrowSystem(),
 			new LifetimeSystem(),
 			new LearnSystem(),
@@ -121,7 +123,7 @@ public class VastWorld implements Runnable {
 			new ParentSystem(),
 			new DeleteSystem(),
 			new EventSystem(metrics),
-			new SyncSystem(propertyHandlers, metrics)
+			new SyncSystem(peers, propertyHandlers, metrics)
 		).with(
 			new WorldSerializationManager(),
 			new EntityLinkManager()

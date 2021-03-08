@@ -131,4 +131,8 @@ public class Inventory extends PooledComponent {
 		}
 		return numberOfItems;
 	}
+
+	public int getNumberOfItems(int itemId) {
+		return items[itemId];
+	}
 }

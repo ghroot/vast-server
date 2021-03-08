@@ -38,4 +38,11 @@ public class BuildingPrefabs {
             super(world);
         }
     }
+
+    @PrefabData("com/vast/prefab/building/factory.json")
+    public static class FactoryPrefab extends VastPrefab {
+        public FactoryPrefab(World world) {
+            super(world);
+        }
+    }
 }
