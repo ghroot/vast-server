@@ -20,8 +20,8 @@ public class FollowOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public short getMessageCode() {
-		return MessageCodes.FOLLOW;
+	public boolean handlesMessageCode(short messageCode) {
+		return messageCode == MessageCodes.FOLLOW;
 	}
 
 	@Override
@@ -45,5 +45,10 @@ public class FollowOrderHandler implements OrderHandler {
 			eventMapper.create(orderEntity).addEntry("message").setData("I wonder where they are going...").setOwnerPropagation();
 		}
 		return true;
+	}
+
+	@Override
+	public boolean modifyOrder(int orderEntity, DataObject dataObject) {
+		return false;
 	}
 }

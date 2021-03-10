@@ -13,8 +13,8 @@ public class EmoteOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public short getMessageCode() {
-		return MessageCodes.EMOTE;
+	public boolean handlesMessageCode(short messageCode) {
+		return messageCode == MessageCodes.EMOTE;
 	}
 
 	@Override
@@ -31,5 +31,10 @@ public class EmoteOrderHandler implements OrderHandler {
 		byte emoteType = (byte) dataObject.get(MessageCodes.EMOTE_TYPE).value;
 		eventMapper.create(orderEntity).addEntry("emoted").setData(emoteType);
 		return true;
+	}
+
+	@Override
+	public boolean modifyOrder(int orderEntity, DataObject dataObject) {
+		return false;
 	}
 }

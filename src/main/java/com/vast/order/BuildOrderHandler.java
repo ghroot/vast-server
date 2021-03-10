@@ -40,8 +40,8 @@ public class BuildOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public short getMessageCode() {
-		return MessageCodes.BUILD;
+	public boolean handlesMessageCode(short messageCode) {
+		return messageCode == MessageCodes.BUILD;
 	}
 
 	@Override
@@ -79,5 +79,10 @@ public class BuildOrderHandler implements OrderHandler {
 			eventMapper.create(orderEntity).addEntry("message").setData("I don't have the required materials...").setOwnerPropagation();
 			return false;
 		}
+	}
+
+	@Override
+	public boolean modifyOrder(int orderEntity, DataObject dataObject) {
+		return false;
 	}
 }

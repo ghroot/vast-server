@@ -29,8 +29,8 @@ public class InteractOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public short getMessageCode() {
-		return MessageCodes.INTERACT;
+	public boolean handlesMessageCode(short messageCode) {
+		return messageCode == MessageCodes.INTERACT;
 	}
 
 	@Override
@@ -53,6 +53,11 @@ public class InteractOrderHandler implements OrderHandler {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public boolean modifyOrder(int orderEntity, DataObject dataObject) {
+		return false;
 	}
 
 	private boolean canInteract(int entity, int otherEntity) {

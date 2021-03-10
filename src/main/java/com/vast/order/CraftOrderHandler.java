@@ -29,8 +29,8 @@ public class CraftOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public short getMessageCode() {
-		return MessageCodes.CRAFT;
+	public boolean handlesMessageCode(short messageCode) {
+		return messageCode == MessageCodes.CRAFT;
 	}
 
 	@Override
@@ -55,5 +55,10 @@ public class CraftOrderHandler implements OrderHandler {
 			eventMapper.create(orderEntity).addEntry("message").setData("I don't have the required materials...").setOwnerPropagation();
 			return false;
 		}
+	}
+
+	@Override
+	public boolean modifyOrder(int orderEntity, DataObject dataObject) {
+		return false;
 	}
 }

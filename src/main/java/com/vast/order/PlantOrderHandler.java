@@ -36,8 +36,8 @@ public class PlantOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public short getMessageCode() {
-		return MessageCodes.PLANT;
+	public boolean handlesMessageCode(short messageCode) {
+		return messageCode == MessageCodes.PLANT;
 	}
 
 	@Override
@@ -68,5 +68,10 @@ public class PlantOrderHandler implements OrderHandler {
 			eventMapper.create(orderEntity).addEntry("message").setData("I need a seed...").setOwnerPropagation();
 			return false;
 		}
+	}
+
+	@Override
+	public boolean modifyOrder(int orderEntity, DataObject dataObject) {
+		return false;
 	}
 }

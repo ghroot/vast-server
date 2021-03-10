@@ -9,6 +9,7 @@ import com.vast.component.Active;
 import com.vast.component.Order;
 import com.vast.component.Player;
 import com.vast.network.IncomingRequest;
+import com.vast.order.MoveOrderHandler;
 import com.vast.order.OrderHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,10 +65,17 @@ public class OrderSystem extends IteratingSystem {
 			if (incomingRequestsByPeer.containsKey(player.name)) {
 				List<IncomingRequest> incomingRequests = incomingRequestsByPeer.get(player.name);
 				if (incomingRequests.size() > 0) {
+					IncomingRequest lastIncomingRequest = incomingRequests.get(incomingRequests.size() - 1);
 					if (orderMapper.has(playerEntity)) {
-						cancelOrder(playerEntity);
+						Order order = orderMapper.get(playerEntity);
+						if (order.handler.handlesMessageCode(lastIncomingRequest.getMessage().getCode()) &&
+								order.handler.modifyOrder(playerEntity, lastIncomingRequest.getMessage().getDataObject())) {
+							incomingRequests.clear();
+							logger.debug("Modifying order for entity {} with handler {}", playerEntity, order.handler.getClass().getSimpleName());
+						} else {
+							cancelOrder(playerEntity);
+						}
 					} else {
-						IncomingRequest lastIncomingRequest = incomingRequests.get(incomingRequests.size() - 1);
 						incomingRequests.clear();
 						OrderHandler handler = getOrderHandler(lastIncomingRequest.getMessage().getCode());
 						if (handler != null) {
@@ -112,7 +120,7 @@ public class OrderSystem extends IteratingSystem {
 
 	private OrderHandler getOrderHandler(short messageCode) {
 		for (OrderHandler orderHandler : orderHandlers) {
-			if (orderHandler.getMessageCode() == messageCode) {
+			if (orderHandler.handlesMessageCode(messageCode)) {
 				return orderHandler;
 			}
 		}
