@@ -37,7 +37,6 @@ public class CraftSystem extends IteratingSystem {
 	protected void process(int craftEntity) {
 		Craft craft = craftMapper.get(craftEntity);
 
-		craft.craftTime += world.getDelta();
 		if (craft.craftTime >= craft.recipe.getDuration()) {
 			Inventory inventory = inventoryMapper.get(craftEntity);
 			if (inventory.has(craft.recipe.getCosts())) {
@@ -48,6 +47,9 @@ public class CraftSystem extends IteratingSystem {
 				eventMapper.create(craftEntity).addEntry("message").setData("Crafted Item: " + itemName).setOwnerPropagation();
 			}
 			craftMapper.remove(craftEntity);
+		} else {
+			craft.craftTime += world.getDelta();
+			syncMapper.create(craftEntity).markPropertyAsDirty(Properties.PROGRESS);
 		}
 	}
 }

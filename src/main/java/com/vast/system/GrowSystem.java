@@ -32,16 +32,12 @@ public class GrowSystem extends IteratingSystem {
 	protected void process(int growEntity) {
 		Growing growing = growingMapper.get(growEntity);
 
-		if (growing.finished) {
+		if (growing.timeLeft <= 0f) {
 			growingMapper.remove(growEntity);
 			stateMapper.get(growEntity).name = "none";
 			syncMapper.create(growEntity).markPropertyAsDirty(Properties.STATE);
 		} else {
 			growing.timeLeft -= world.getDelta();
-			if (growing.timeLeft <= 0f) {
-				growing.timeLeft = 0f;
-				growing.finished = true;
-			}
 			syncMapper.create(growEntity).markPropertyAsDirty(Properties.PROGRESS);
 		}
 	}
