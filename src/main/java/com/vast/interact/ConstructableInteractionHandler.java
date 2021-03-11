@@ -38,12 +38,13 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 	@Override
 	public boolean process(int playerEntity, int constructableEntity) {
 		Constructable constructable = constructableMapper.get(constructableEntity);
-		constructable.buildTime += world.getDelta();
-		syncMapper.create(constructableEntity).markPropertyAsDirty(Properties.PROGRESS);
+
 		if (constructable.isComplete()) {
 			constructableMapper.remove(constructableEntity);
 			return true;
 		} else {
+			constructable.buildTime += world.getDelta();
+			syncMapper.create(constructableEntity).markPropertyAsDirty(Properties.PROGRESS);
 			return false;
 		}
 	}
