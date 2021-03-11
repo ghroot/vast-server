@@ -16,6 +16,10 @@ import com.vast.network.VastPeer;
 import com.vast.network.VastServerApplication;
 import com.vast.order.*;
 import com.vast.property.*;
+import com.vast.property.progress.ConstructableProgressPropertyHandler;
+import com.vast.property.progress.CraftProgressPropertyHandler;
+import com.vast.property.progress.GrowingProgressPropertyHandler;
+import com.vast.property.progress.ProducerProgressPropertyHandler;
 import com.vast.system.*;
 import net.mostlyoriginal.api.utils.QuadTree;
 import org.slf4j.Logger;
@@ -73,7 +77,10 @@ public class VastWorld implements Runnable {
 			new PositionPropertyHandler(0.3f),
 			new RotationPropertyHandler(10f),
 			new ActivePropertyHandler(),
-			new ProgressPropertyHandler(recipes,10),
+			new ConstructableProgressPropertyHandler(10),
+			new CraftProgressPropertyHandler(5),
+			new GrowingProgressPropertyHandler(10),
+			new ProducerProgressPropertyHandler(recipes, 10),
 			new InventoryPropertyHandler(),
 			new FueledPropertyHandler(),
 			new HomePropertyHandler(),
