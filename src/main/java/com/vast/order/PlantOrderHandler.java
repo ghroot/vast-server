@@ -50,7 +50,7 @@ public class PlantOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean startOrder(int orderEntity, DataObject dataObject) {
+	public boolean startOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		Inventory inventory = inventoryMapper.get(orderEntity);
 		if (inventory.has(items.getItem("Seed").getId())) {
 			inventory.remove(items.getItem("Seed").getId(), 1);
@@ -71,7 +71,7 @@ public class PlantOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean modifyOrder(int orderEntity, DataObject dataObject) {
+	public boolean modifyOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		return false;
 	}
 }

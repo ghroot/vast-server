@@ -45,7 +45,7 @@ public class InteractOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean startOrder(int orderEntity, DataObject dataObject) {
+	public boolean startOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		int otherEntity = (int) dataObject.get(MessageCodes.INTERACT_ENTITY_ID).value;
 		if (canInteract(orderEntity, otherEntity)) {
 			interactMapper.create(orderEntity).entity = otherEntity;
@@ -56,7 +56,7 @@ public class InteractOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean modifyOrder(int orderEntity, DataObject dataObject) {
+	public boolean modifyOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		return false;
 	}
 

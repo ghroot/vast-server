@@ -32,7 +32,7 @@ public class ChatOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean startOrder(int orderEntity, DataObject dataObject) {
+	public boolean startOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		String word = (String) dataObject.get(MessageCodes.CHAT_WORD).value;
 		IntBag knownByEntitiesBag = knownMapper.get(orderEntity).knownByEntities;
 		int[] knownByEntities = knownByEntitiesBag.getData();
@@ -44,7 +44,7 @@ public class ChatOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean modifyOrder(int orderEntity, DataObject dataObject) {
+	public boolean modifyOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		return false;
 	}
 }

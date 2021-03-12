@@ -44,7 +44,7 @@ public class CraftOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean startOrder(int orderEntity, DataObject dataObject) {
+	public boolean startOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		int recipeId = (byte) dataObject.get(MessageCodes.CRAFT_RECIPE_ID).value;
 		Recipe recipe = recipes.getRecipe(recipeId);
 		Inventory inventory = inventoryMapper.get(orderEntity);
@@ -58,7 +58,7 @@ public class CraftOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean modifyOrder(int orderEntity, DataObject dataObject) {
+	public boolean modifyOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		return false;
 	}
 }

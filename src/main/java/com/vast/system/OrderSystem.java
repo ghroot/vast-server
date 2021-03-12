@@ -69,7 +69,7 @@ public class OrderSystem extends IteratingSystem {
 					if (orderMapper.has(playerEntity)) {
 						Order order = orderMapper.get(playerEntity);
 						if (order.handler.handlesMessageCode(lastIncomingRequest.getMessage().getCode()) &&
-								order.handler.modifyOrder(playerEntity, lastIncomingRequest.getMessage().getDataObject())) {
+								order.handler.modifyOrder(playerEntity, lastIncomingRequest.getMessage().getCode(), lastIncomingRequest.getMessage().getDataObject())) {
 							incomingRequests.clear();
 							logger.debug("Modifying order for entity {} with handler {}", playerEntity, order.handler.getClass().getSimpleName());
 						} else {
@@ -79,7 +79,7 @@ public class OrderSystem extends IteratingSystem {
 						incomingRequests.clear();
 						OrderHandler handler = getOrderHandler(lastIncomingRequest.getMessage().getCode());
 						if (handler != null) {
-							startOrder(playerEntity, handler, lastIncomingRequest.getMessage().getDataObject());
+							startOrder(playerEntity, handler, lastIncomingRequest.getMessage().getCode(), lastIncomingRequest.getMessage().getDataObject());
 						} else {
 							logger.warn("Could not find order handler for message code {}", lastIncomingRequest.getMessage().getCode());
 						}
@@ -109,8 +109,8 @@ public class OrderSystem extends IteratingSystem {
 		}
 	}
 
-	private void startOrder(int playerEntity, OrderHandler handler, DataObject dataObject) {
-		if (handler.startOrder(playerEntity, dataObject)) {
+	private void startOrder(int playerEntity, OrderHandler handler, short messageCode, DataObject dataObject) {
+		if (handler.startOrder(playerEntity, messageCode, dataObject)) {
 			orderMapper.create(playerEntity).handler = handler;
 			logger.debug("Starting order for entity {} with handler {}", playerEntity, handler.getClass().getSimpleName());
 		} else {

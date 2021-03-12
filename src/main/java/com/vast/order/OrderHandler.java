@@ -7,6 +7,6 @@ public interface OrderHandler {
 	boolean handlesMessageCode(short messageCode);
 	boolean isOrderComplete(int orderEntity);
 	void cancelOrder(int orderEntity);
-	boolean startOrder(int orderEntity, DataObject dataObject);
-	boolean modifyOrder(int orderEntity, DataObject dataObject);
+	boolean startOrder(int orderEntity, short messageCode, DataObject dataObject);
+	boolean modifyOrder(int orderEntity, short messageCode, DataObject dataObject);
 }

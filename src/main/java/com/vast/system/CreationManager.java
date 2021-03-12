@@ -41,7 +41,8 @@ public class CreationManager extends BaseSystem {
 	private PlayerPrefab playerPrefab;
 	private Map<String, VastPrefab> terrainPrefabs;
 	private Map<String, VastPrefab> animalPrefabs;
-	private Map<String, VastPrefab> buildingPrefabs;
+	private VastPrefab buildingPlaceholderPrefab;
+	private Map<String, BuildingPrefab> buildingPrefabs;
 	private Map<String, VastPrefab> pickupPrefabs;
 
 	private int nextAnimalGroupId = 0;
@@ -66,6 +67,7 @@ public class CreationManager extends BaseSystem {
 		animalPrefabs.put("rabbitYoung", new AnimalPrefabs.RabbitAdultPrefab(world));
 		animalPrefabs.put("deerAdult", new AnimalPrefabs.RabbitAdultPrefab(world));
 		animalPrefabs.put("deerYoung", new AnimalPrefabs.RabbitAdultPrefab(world));
+		buildingPlaceholderPrefab = new BuildingPrefabs.PlaceholderPrefab(world);
 		buildingPrefabs = new HashMap<>();
 		buildingPrefabs.put("chest", new BuildingPrefabs.ChestPrefab(world));
 		buildingPrefabs.put("fireplace", new BuildingPrefabs.FireplacePrefab(world));
@@ -155,6 +157,14 @@ public class CreationManager extends BaseSystem {
 		groupMapper.get(animalEntity).id = groupId;
 
 		return animalEntity;
+	}
+
+	public int createBuildingPlaceholder(String key, Point2f position) {
+		int buildingPlaceholderEntity = buildingPlaceholderPrefab.createEntity();
+		transformMapper.get(buildingPlaceholderEntity).position.set(position);
+		subTypeMapper.get(buildingPlaceholderEntity).subType = buildingPrefabs.get(key).getSubType();
+
+		return buildingPlaceholderEntity;
 	}
 
 	public int createBuilding(String key, Point2f position, float rotation, String owner) {

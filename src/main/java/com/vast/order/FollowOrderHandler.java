@@ -35,7 +35,7 @@ public class FollowOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean startOrder(int orderEntity, DataObject dataObject) {
+	public boolean startOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		int followEntity = (int) dataObject.get(MessageCodes.FOLLOW_ENTITY_ID).value;
 		followMapper.create(orderEntity).entity = followEntity;
 		if (typeMapper.has(followEntity) && typeMapper.get(followEntity).type.equals("animal")) {
@@ -48,7 +48,7 @@ public class FollowOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean modifyOrder(int orderEntity, DataObject dataObject) {
+	public boolean modifyOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		return false;
 	}
 }
