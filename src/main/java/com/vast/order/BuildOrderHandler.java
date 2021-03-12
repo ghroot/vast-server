@@ -27,6 +27,7 @@ public class BuildOrderHandler implements OrderHandler {
 	private ComponentMapper<State> stateMapper;
 	private ComponentMapper<Build> buildMapper;
 	private ComponentMapper<Delete> deleteMapper;
+	private ComponentMapper<Placeholder> placeholderMapper;
 
 	private Recipes recipes;
 
@@ -73,10 +74,13 @@ public class BuildOrderHandler implements OrderHandler {
 
 			Point2f buildPosition = new Point2f(orderTransform.position.x, orderTransform.position.y + 3f);
 			int buildingPlaceholderEntity = creationManager.createBuildingPlaceholder(recipe.getEntityType(), buildPosition);
+			stateMapper.get(buildingPlaceholderEntity).name = "placeholder";
 
 			Build build = buildMapper.create(orderEntity);
 			build.placeholderEntity = buildingPlaceholderEntity;
 			build.recipe = recipe;
+
+			syncMapper.create(buildingPlaceholderEntity).markPropertyAsDirty(Properties.VALID);
 
 			return true;
 		} else {
@@ -106,6 +110,7 @@ public class BuildOrderHandler implements OrderHandler {
 			}
 
 			syncMapper.create(build.placeholderEntity).markPropertyAsDirty(Properties.POSITION);
+			syncMapper.create(build.placeholderEntity).markPropertyAsDirty(Properties.VALID);
 
 			return true;
 		} else if (messageCode == MessageCodes.BUILD_ROTATE) {
@@ -132,26 +137,32 @@ public class BuildOrderHandler implements OrderHandler {
 			return true;
 		} else if (messageCode == MessageCodes.BUILD_CONFIRM) {
 			Build build = buildMapper.get(orderEntity);
-			Inventory inventory = inventoryMapper.get(orderEntity);
-			if (inventory.has(build.recipe.getCosts())) {
-				inventory.remove(build.recipe.getCosts());
-				syncMapper.create(orderEntity).markPropertyAsDirty(Properties.INVENTORY);
+			Placeholder placeholder = placeholderMapper.get(build.placeholderEntity);
+			if (placeholder.valid) {
+				Inventory inventory = inventoryMapper.get(orderEntity);
+				if (inventory.has(build.recipe.getCosts())) {
+					inventory.remove(build.recipe.getCosts());
+					syncMapper.create(orderEntity).markPropertyAsDirty(Properties.INVENTORY);
 
-				Transform placeholderTransform = transformMapper.get(build.placeholderEntity);
+					Transform placeholderTransform = transformMapper.get(build.placeholderEntity);
 
-				int buildingEntity = creationManager.createBuilding(build.recipe.getEntityType(),
-						placeholderTransform.position, placeholderTransform.rotation, playerMapper.get(orderEntity).name);
-				stateMapper.get(buildingEntity).name = "placed";
-				createMapper.create(buildingEntity).reason = "built";
+					int buildingEntity = creationManager.createBuilding(build.recipe.getEntityType(),
+							placeholderTransform.position, placeholderTransform.rotation, playerMapper.get(orderEntity).name);
+					stateMapper.get(buildingEntity).name = "placed";
+					createMapper.create(buildingEntity).reason = "built";
 
-				interactMapper.create(orderEntity).entity = buildingEntity;
+					interactMapper.create(orderEntity).entity = buildingEntity;
 
-				deleteMapper.create(build.placeholderEntity);
-				buildMapper.remove(orderEntity);
+					deleteMapper.create(build.placeholderEntity);
+					buildMapper.remove(orderEntity);
 
-				return true;
+					return true;
+				} else {
+					eventMapper.create(orderEntity).addEntry("message").setData("I don't have the required materials...").setOwnerPropagation();
+					return false;
+				}
 			} else {
-				eventMapper.create(orderEntity).addEntry("message").setData("I don't have the required materials...").setOwnerPropagation();
+				eventMapper.create(orderEntity).addEntry("message").setData("I can't build there...").setOwnerPropagation();
 				return false;
 			}
 		} else if (messageCode == MessageCodes.BUILD_CANCEL) {

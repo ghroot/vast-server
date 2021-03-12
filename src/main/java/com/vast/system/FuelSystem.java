@@ -18,7 +18,6 @@ public class FuelSystem extends IteratingSystem {
 	private ComponentMapper<Fueled> fueledMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Scan> scanMapper;
-
 	private ComponentMapper<Sync> syncMapper;
 
 	public FuelSystem() {

@@ -19,12 +19,14 @@
   "archetypes": {
     "0": [
       "Known",
-      "Owner",
+      "Placeholder",
+      "Scan",
       "State",
       "SubType",
       "SyncHistory",
       "SyncPropagation",
       "Transform",
+      "Transient",
       "Type"
     ]
   },
@@ -41,6 +43,8 @@
     "com.vast.component.Known": "Known",
     "com.vast.component.Lifetime": "Lifetime",
     "com.vast.component.Owner": "Owner",
+    "com.vast.component.Placeholder": "Placeholder",
+    "com.vast.component.Scan": "Scan",
     "com.vast.component.Skill": "Skill",
     "com.vast.component.Speed": "Speed",
     "com.vast.component.State": "State",
@@ -50,6 +54,7 @@
     "com.vast.component.SyncPropagation": "SyncPropagation",
     "com.vast.component.Teach": "Teach",
     "com.vast.component.Transform": "Transform",
+    "com.vast.component.Transient": "Transient",
     "com.vast.component.Type": "Type"
   },
   "metadata": {

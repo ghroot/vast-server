@@ -11,4 +11,5 @@ public class Properties {
 	public static byte HOME = 7;
 	public static byte CONFIGURATION = 8;
 	public static byte SKILL = 9;
+	public static byte VALID = 10;
 }
