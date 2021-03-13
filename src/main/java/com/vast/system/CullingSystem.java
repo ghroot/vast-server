@@ -13,6 +13,9 @@ import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class CullingSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CullingSystem.class);
 
@@ -29,6 +32,7 @@ public class CullingSystem extends IteratingSystem {
 	private IntBag reusableRemovedEntities;
 	private EventMessage reusableDestroyedEventMessage;
 	private EventMessage reusableCreatedEventMessage;
+	private Set<Byte> reusableAlreadyInterestedProperties;
 	private DataObject reusablePropertiesDataObject;
 
 	public CullingSystem(PropertyHandler[] propertyHandlers) {
@@ -38,6 +42,7 @@ public class CullingSystem extends IteratingSystem {
 		reusableRemovedEntities = new IntBag();
 		reusableDestroyedEventMessage = new EventMessage(MessageCodes.ENTITY_DESTROYED);
 		reusableCreatedEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
+		reusableAlreadyInterestedProperties = new HashSet<>();
 		reusablePropertiesDataObject = new DataObject();
 	}
 
@@ -111,11 +116,16 @@ public class CullingSystem extends IteratingSystem {
 		if (playerMapper.has(newEntity)) {
 			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(newEntity).name));
 		}
+		reusableAlreadyInterestedProperties.clear();
 		reusablePropertiesDataObject.clear();
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, reusablePropertiesDataObject);
 		for (PropertyHandler propertyHandler : propertyHandlers) {
+			byte property = propertyHandler.getProperty();
 			if (newEntity == entity || syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
-				propertyHandler.decorateDataObject(newEntity, reusablePropertiesDataObject, true);
+				if (!reusableAlreadyInterestedProperties.contains(property) && propertyHandler.isInterestedIn(newEntity)) {
+					propertyHandler.decorateDataObject(newEntity, reusablePropertiesDataObject, true);
+					reusableAlreadyInterestedProperties.add(property);
+				}
 			}
 		}
 		peer.send(reusableCreatedEventMessage);

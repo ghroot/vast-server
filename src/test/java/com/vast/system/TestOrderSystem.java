@@ -28,8 +28,8 @@ public class TestOrderSystem {
 	private void setupWorld(OrderHandler[] orderHandlers, IncomingRequest incomingRequest) {
 		Map<String, List<IncomingRequest>> incomingRequests = new HashMap<>();
 		incomingRequestsForPlayer = new ArrayList<>();
-		incomingRequests.put(incomingRequest.getPeer().getName(), incomingRequestsForPlayer);
 		if (incomingRequest != null) {
+			incomingRequests.put(incomingRequest.getPeer().getName(), incomingRequestsForPlayer);
 			incomingRequestsForPlayer.add(incomingRequest);
 		}
 		world = new World(new WorldConfigurationBuilder().with(
@@ -88,7 +88,7 @@ public class TestOrderSystem {
 
 		OrderHandler orderHandler = mock(OrderHandler.class);
 		when(orderHandler.handlesMessageCode(anyShort())).thenReturn(true);
-		when(orderHandler.startOrder(anyInt(), any(DataObject.class))).thenReturn(true);
+		when(orderHandler.startOrder(anyInt(), anyShort(), any(DataObject.class))).thenReturn(true);
 
 		DataObject dataObject = new DataObject();
 		RequestMessage message = new RequestMessage((short) 1, dataObject);
@@ -105,7 +105,7 @@ public class TestOrderSystem {
 
 		assertTrue(orderMapper.has(playerEntityId));
 		assertEquals(orderHandler, orderMapper.get(playerEntityId).handler);
-		verify(orderHandler).startOrder(playerEntityId, dataObject);
+		verify(orderHandler).startOrder(playerEntityId, (short) 1, dataObject);
 	}
 
 	@Test
@@ -114,9 +114,9 @@ public class TestOrderSystem {
 
 		OrderHandler orderHandler = mock(OrderHandler.class);
 		when(orderHandler.handlesMessageCode(anyShort())).thenReturn(true);
-		when(orderHandler.startOrder(anyInt(), any(DataObject.class))).thenReturn(true);
+		when(orderHandler.startOrder(anyInt(), anyShort(), any(DataObject.class))).thenReturn(true);
 		when(orderHandler.isOrderComplete(anyInt())).thenReturn(false);
-		when(orderHandler.modifyOrder(anyInt(), any(DataObject.class))).thenReturn(true);
+		when(orderHandler.modifyOrder(anyInt(), anyShort(), any(DataObject.class))).thenReturn(true);
 
 		DataObject dataObject = new DataObject();
 		RequestMessage message = new RequestMessage((short) 1, dataObject);
@@ -142,6 +142,6 @@ public class TestOrderSystem {
 		assertTrue(orderMapper.has(playerEntityId));
 		assertEquals(orderHandler, orderMapper.get(playerEntityId).handler);
 		assertEquals(order, orderMapper.get(playerEntityId));
-		verify(orderHandler).modifyOrder(playerEntityId, dataObject2);
+		verify(orderHandler).modifyOrder(playerEntityId, (short) 1, dataObject2);
 	}
 }

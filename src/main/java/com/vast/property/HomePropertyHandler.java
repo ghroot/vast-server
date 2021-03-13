@@ -19,7 +19,7 @@ public class HomePropertyHandler extends AbstractPropertyHandler<Point2f, double
 	}
 
 	@Override
-	protected boolean isInterestedIn(int entity) {
+	public boolean isInterestedIn(int entity) {
 		return homeMapper.has(entity);
 	}
 

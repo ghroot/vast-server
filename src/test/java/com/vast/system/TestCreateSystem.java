@@ -10,15 +10,42 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.HashMap;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 public class TestCreateSystem {
-	@Test
-	public void removesCreateComponent() {
-		World world = new World(new WorldConfigurationBuilder().with(
-			new CreateSystem(new PropertyHandler[0])
+	private World world;
+	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Create> createMapper;
+	private ComponentMapper<Known> knownMapper;
+	private ComponentMapper<Scan> scanMapper;
+	private ComponentMapper<Type> typeMapper;
+	private ComponentMapper<SyncPropagation> syncPropagationMapper;
+
+	private void setupWorld(PropertyHandler[] propertyHandlers) {
+		world = new World(new WorldConfigurationBuilder().with(
+			new CreateSystem(propertyHandlers)
 		).build());
 
-		ComponentMapper<Create> createMapper = world.getMapper(Create.class);
-		ComponentMapper<Type> typeMapper = world.getMapper(Type.class);
+		playerMapper = world.getMapper(Player.class);
+		activeMapper = world.getMapper(Active.class);
+		createMapper = world.getMapper(Create.class);
+		knownMapper = world.getMapper(Known.class);
+		scanMapper = world.getMapper(Scan.class);
+		typeMapper = world.getMapper(Type.class);
+		syncPropagationMapper = world.getMapper(SyncPropagation.class);
+	}
+
+	private void setupWorld() {
+		setupWorld(new PropertyHandler[0]);
+	}
+
+	@Test
+	public void removesCreateComponent() {
+		setupWorld();
 
 		int entityToCreate = world.create();
 		typeMapper.create(entityToCreate).type = "testType";
@@ -26,23 +53,14 @@ public class TestCreateSystem {
 
 		world.process();
 
-		Assert.assertFalse(createMapper.has(entityToCreate));
+		assertFalse(createMapper.has(entityToCreate));
 	}
 
 	@Test
 	public void createdEntityIsKnownFromBothSides() {
-		VastPeer peer = Mockito.mock(VastPeer.class);
-		Mockito.when(peer.getId()).thenReturn(123L);
-		World world = new World(new WorldConfigurationBuilder().with(
-			new CreateSystem(new PropertyHandler[0])
-		).build());
-
-		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
-		ComponentMapper<Active> activeMapper = world.getMapper(Active.class);
-		ComponentMapper<Create> createMapper = world.getMapper(Create.class);
-		ComponentMapper<Known> knownMapper = world.getMapper(Known.class);
-		ComponentMapper<Scan> scanMapper = world.getMapper(Scan.class);
-		ComponentMapper<Type> typeMapper = world.getMapper(Type.class);
+		VastPeer peer = mock(VastPeer.class);
+		when(peer.getId()).thenReturn(123L);
+		setupWorld();
 
 		int playerEntity = world.create();
 		int entityToCreate = world.create();
@@ -57,8 +75,41 @@ public class TestCreateSystem {
 
 		world.process();
 
-		Assert.assertTrue(activeMapper.get(playerEntity).knowEntities.contains(entityToCreate));
-		Assert.assertTrue(knownMapper.get(entityToCreate).knownByEntities.contains(playerEntity));
-		Mockito.verify(peer).send(Mockito.any());
+		assertTrue(activeMapper.get(playerEntity).knowEntities.contains(entityToCreate));
+		assertTrue(knownMapper.get(entityToCreate).knownByEntities.contains(playerEntity));
+		verify(peer).send(any());
+	}
+
+	@Test
+	public void onlyDecoratesFirstOfEachProperty() {
+		VastPeer peer = mock(VastPeer.class);
+		when(peer.getId()).thenReturn(123L);
+		byte property = (byte) 1;
+		PropertyHandler firstPropertyHandler = mock(PropertyHandler.class);
+		when(firstPropertyHandler.getProperty()).thenReturn(property);
+		when(firstPropertyHandler.isInterestedIn(anyInt())).thenReturn(true);
+		when(firstPropertyHandler.decorateDataObject(anyInt(), any(), anyBoolean())).thenReturn(true);
+		PropertyHandler secondPropertyHandler = mock(PropertyHandler.class);
+		when(secondPropertyHandler.getProperty()).thenReturn(property);
+		when(secondPropertyHandler.isInterestedIn(anyInt())).thenReturn(true);
+		when(secondPropertyHandler.decorateDataObject(anyInt(), any(), anyBoolean())).thenReturn(true);
+		setupWorld(new PropertyHandler[]{firstPropertyHandler, secondPropertyHandler});
+
+		int playerEntity = world.create();
+		int entityToCreate = world.create();
+
+		playerMapper.create(playerEntity).name = "TestName";
+		activeMapper.create(playerEntity).peer = peer;
+		scanMapper.create(playerEntity).nearbyEntities.add(entityToCreate);
+
+		createMapper.create(entityToCreate).reason = "testing";
+		typeMapper.create(entityToCreate).type = "testType";
+		knownMapper.create(entityToCreate);
+		syncPropagationMapper.create(entityToCreate);
+
+		world.process();
+
+		verify(firstPropertyHandler, times(1)).decorateDataObject(anyInt(), any(), anyBoolean());
+		verify(secondPropertyHandler, never()).decorateDataObject(anyInt(), any(), anyBoolean());
 	}
 }

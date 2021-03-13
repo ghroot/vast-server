@@ -12,7 +12,7 @@ public class ValidPropertyHandler extends AbstractPropertyHandler<Boolean, Boole
 	}
 
 	@Override
-	protected boolean isInterestedIn(int entity) {
+	public boolean isInterestedIn(int entity) {
 		return placeholderMapper.has(entity);
 	}
 

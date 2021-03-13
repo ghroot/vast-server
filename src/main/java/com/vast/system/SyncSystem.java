@@ -14,6 +14,7 @@ import com.vast.property.PropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,6 +31,7 @@ public class SyncSystem extends IteratingSystem {
 	private PropertyHandler[] propertyHandlers;
 	private Metrics metrics;
 
+	private Set<Byte> reusableAlreadyInterestedProperties;
 	private DataObject reusablePropertiesDataObject;
 	private ChangedProperties reusableChangedProperties;
 	private EventMessage reusableMessage;
@@ -40,6 +42,7 @@ public class SyncSystem extends IteratingSystem {
 		this.propertyHandlers = propertyHandlers;
 		this.metrics = metrics;
 
+		reusableAlreadyInterestedProperties = new HashSet<>();
 		reusablePropertiesDataObject = new DataObject();
 		reusableChangedProperties = new ChangedProperties();
 		reusableMessage = new EventMessage(MessageCodes.UPDATE_PROPERTIES);
@@ -113,19 +116,23 @@ public class SyncSystem extends IteratingSystem {
 	private ChangedProperties getChangedProperties(int syncEntity, Sync sync, boolean nearbyPropagation) {
 		boolean reliable = false;
 		boolean atLeastOnePropertySet = false;
+		reusableAlreadyInterestedProperties.clear();
 		reusablePropertiesDataObject.clear();
 
-		for (PropertyHandler syncHandler : propertyHandlers) {
-			byte property = syncHandler.getProperty();
+		for (PropertyHandler propertyHandler : propertyHandlers) {
+			byte property = propertyHandler.getProperty();
 			if (sync.isPropertyDirty(property)) {
 				SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
 				if ((nearbyPropagation && syncPropagation.isNearbyPropagation(property)) ||
 					(!nearbyPropagation && syncPropagation.isOwnerPropagation(property))) {
-					if (syncHandler.decorateDataObject(syncEntity, reusablePropertiesDataObject, false)) {
-						atLeastOnePropertySet = true;
-						if (metrics != null) {
-							metrics.incrementSyncedProperty(property);
+					if (!reusableAlreadyInterestedProperties.contains(property) && propertyHandler.isInterestedIn(syncEntity)) {
+						if (propertyHandler.decorateDataObject(syncEntity, reusablePropertiesDataObject, false)) {
+							atLeastOnePropertySet = true;
+							if (metrics != null) {
+								metrics.incrementSyncedProperty(property);
+							}
 						}
+						reusableAlreadyInterestedProperties.add(property);
 					}
 				}
 				if (!reliable && syncPropagation.isReliable(property)) {

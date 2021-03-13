@@ -11,7 +11,7 @@ public class CraftProgressPropertyHandler extends AbstractProgressPropertyHandle
 	}
 
 	@Override
-	protected boolean isInterestedIn(int entity) {
+	public boolean isInterestedIn(int entity) {
 		return craftMapper.has(entity);
 	}
 

@@ -12,7 +12,7 @@ public class FueledPropertyHandler extends AbstractPropertyHandler<Boolean, Bool
 	}
 
 	@Override
-	protected boolean isInterestedIn(int entity) {
+	public boolean isInterestedIn(int entity) {
 		return fueledMapper.has(entity);
 	}
 

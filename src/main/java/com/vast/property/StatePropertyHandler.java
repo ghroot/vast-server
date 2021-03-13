@@ -12,7 +12,7 @@ public class StatePropertyHandler extends AbstractPropertyHandler<String, String
 	}
 
 	@Override
-	protected boolean isInterestedIn(int entity) {
+	public boolean isInterestedIn(int entity) {
 		return stateMapper.has(entity);
 	}
 

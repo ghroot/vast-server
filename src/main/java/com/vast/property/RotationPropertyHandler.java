@@ -16,7 +16,7 @@ public class RotationPropertyHandler extends AbstractPropertyHandler<Float, Floa
 	}
 
 	@Override
-	protected boolean isInterestedIn(int entity) {
+	public boolean isInterestedIn(int entity) {
 		return transformMapper.has(entity);
 	}
 
