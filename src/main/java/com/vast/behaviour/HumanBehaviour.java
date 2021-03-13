@@ -68,19 +68,14 @@ public class HumanBehaviour extends AbstractBehaviour {
 				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.PLANT)));
 			}
 		} else if (roll <= 30f) {
-//			Inventory inventory = inventoryMapper.get(entity);
-//			List<Recipe> entityRecipes = recipes.getEntityRecipes();
-//			Recipe randomEntityRecipe = entityRecipes.get((int) Math.floor(random.nextFloat() * entityRecipes.size()));
-//			if (inventory.has(randomEntityRecipe.getCosts())) {
-//				float x = transformMapper.get(entity).position.x;
-//				float y = transformMapper.get(entity).position.y - 1.0f;
-//				float[] position = new float[]{x, y};
-//				float rotation = random.nextFloat() * 360f;
-//				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD, new DataObject()
-//					.set(MessageCodes.BUILD_RECIPE_ID, (byte) randomEntityRecipe.getId())
-//					.set(MessageCodes.BUILD_POSITION, position)
-//					.set(MessageCodes.BUILD_ROTATION, rotation))));
-//			}
+			Inventory inventory = inventoryMapper.get(entity);
+			List<Recipe> entityRecipes = recipes.getEntityRecipes();
+			Recipe randomEntityRecipe = entityRecipes.get((int) Math.floor(random.nextFloat() * entityRecipes.size()));
+			if (inventory.has(randomEntityRecipe.getCosts())) {
+				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD_START, new DataObject()
+					.set(MessageCodes.BUILD_START_RECIPE_ID, (byte) randomEntityRecipe.getId()))));
+				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD_CONFIRM)));
+			}
 		} else if (roll <= 60f) {
 			List<Integer> nearbyEntities = getNearbyEntities(entity);
 			if (nearbyEntities.size() > 0) {
