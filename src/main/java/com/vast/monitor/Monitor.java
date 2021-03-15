@@ -46,12 +46,12 @@ public class Monitor extends JFrame implements ActionListener {
         canvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-            try {
-                clickPoint = canvas.at.inverseTransform(e.getPoint(), null);
-                clickPoint.setLocation(clickPoint.getX(), clickPoint.getY() + zoomSlider.getHeight() / canvas.scale);
-            } catch (NoninvertibleTransformException noninvertibleTransformException) {
-                noninvertibleTransformException.printStackTrace();
-            }
+                try {
+                    clickPoint = canvas.at.inverseTransform(e.getPoint(), null);
+                    clickPoint.setLocation(clickPoint.getX(), clickPoint.getY() + zoomSlider.getHeight() / canvas.scale);
+                } catch (NoninvertibleTransformException noninvertibleTransformException) {
+                    noninvertibleTransformException.printStackTrace();
+                }
             }
         });
         getContentPane().add(canvas, BorderLayout.CENTER);
