@@ -5,6 +5,8 @@ import com.vast.data.Metrics;
 import com.vast.data.WorldConfiguration;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.NoninvertibleTransformException;
@@ -41,18 +43,15 @@ public class Monitor extends JFrame implements ActionListener {
 
     private void setupUI(Metrics metrics) {
         canvas = new MonitorCanvas();
-        PanningHandler panner = new PanningHandler(canvas);
-        canvas.addMouseListener(panner);
-        canvas.addMouseMotionListener(panner);
         canvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                try {
-                    clickPoint = canvas.at.inverseTransform(e.getPoint(), null);
-                    clickPoint.setLocation(clickPoint.getX(), clickPoint.getY() + zoomSlider.getHeight() / canvas.scale);
-                } catch (NoninvertibleTransformException noninvertibleTransformException) {
-                    noninvertibleTransformException.printStackTrace();
-                }
+            try {
+                clickPoint = canvas.at.inverseTransform(e.getPoint(), null);
+                clickPoint.setLocation(clickPoint.getX(), clickPoint.getY() + zoomSlider.getHeight() / canvas.scale);
+            } catch (NoninvertibleTransformException noninvertibleTransformException) {
+                noninvertibleTransformException.printStackTrace();
+            }
             }
         });
         getContentPane().add(canvas, BorderLayout.CENTER);
@@ -62,7 +61,12 @@ public class Monitor extends JFrame implements ActionListener {
         zoomSlider.setMinorTickSpacing(10);
         zoomSlider.setPaintTicks(true);
         zoomSlider.setPaintLabels(true);
-        zoomSlider.addChangeListener(new ScaleHandler(canvas));
+        zoomSlider.addChangeListener(e -> {
+            JSlider slider = (JSlider) e.getSource();
+            int zoomPercent = slider.getValue();
+            canvas.scale = Math.max(0.00001, zoomPercent / 100.0);
+            canvas.repaint();
+        });
         getContentPane().add(zoomSlider, BorderLayout.NORTH);
 
         systemMetricsTableModel = new SystemMetricsModel(metrics);
