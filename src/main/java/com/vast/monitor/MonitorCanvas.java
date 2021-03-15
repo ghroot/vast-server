@@ -16,9 +16,11 @@ public class MonitorCanvas extends JComponent {
     public double scale;
     public AffineTransform at;
 
-    private MonitorWorld monitorWorld;
+    private final MonitorWorld monitorWorld;
 
-    public MonitorCanvas() {
+    public MonitorCanvas(MonitorWorld monitorWorld) {
+        this.monitorWorld = monitorWorld;
+
         translateX = 0;
         translateY = 0;
         scale = 1;
@@ -26,10 +28,6 @@ public class MonitorCanvas extends JComponent {
         PanningHandler panningHandler = new PanningHandler(this);
         addMouseListener(panningHandler);
         addMouseMotionListener(panningHandler);
-    }
-
-    public void setMonitorWorld(MonitorWorld monitorWorld) {
-        this.monitorWorld = monitorWorld;
     }
 
     public void paintComponent(Graphics g) {
@@ -53,9 +51,9 @@ public class MonitorCanvas extends JComponent {
         // The zooming transformation. Notice that it will be performed
         // after the panning transformation, zooming the panned scene,
         // rather than the original scene
-        at.translate(getWidth() / 2, getHeight() / 2);
+        at.translate(getWidth() / 2f, getHeight() / 2f);
         at.scale(scale, scale);
-        at.translate(-getWidth() / 2, -getHeight() / 2);
+        at.translate(-getWidth() / 2f, -getHeight() / 2f);
 
         // The panning transformation
         at.translate(translateX, translateY);
@@ -63,7 +61,7 @@ public class MonitorCanvas extends JComponent {
         ourGraphics.setTransform(at);
 
         // Draw the objects
-        if (monitorWorld != null) {
+        synchronized (monitorWorld) {
             monitorWorld.paint(ourGraphics);
         }
 
@@ -73,11 +71,7 @@ public class MonitorCanvas extends JComponent {
     }
 
     public Dimension getPreferredSize() {
-        if (monitorWorld != null) {
-            return new Dimension(monitorWorld.getSize().x, monitorWorld.getSize().y);
-        } else {
-            return new Dimension();
-        }
+        return new Dimension(monitorWorld.getSize().x, monitorWorld.getSize().y);
     }
 
     class PanningHandler extends MouseAdapter implements MouseListener, MouseMotionListener {

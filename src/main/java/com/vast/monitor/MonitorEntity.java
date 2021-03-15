@@ -10,16 +10,15 @@ import java.util.List;
 import java.util.Map;
 
 public class MonitorEntity {
-    public int entity;
+    public final int entity;
     public String type;
     public Point2i position;
     public int collisionRadius;
     public Point2i pathPosition;
     public String name;
+    public List<String> components;
 
     private static Map<String, Image> entityImages;
-
-    public List<String> components;
 
     static {
         try {
@@ -32,6 +31,10 @@ public class MonitorEntity {
             entityImages.put("building", ImageIO.read(new File("images/Home-Icon.png")));
         } catch (IOException ignored) {
         }
+    }
+
+    public MonitorEntity(int entity) {
+        this.entity = entity;
     }
 
     public void paint(Graphics g) {
@@ -50,23 +53,23 @@ public class MonitorEntity {
         }
     }
 
-    public void paintDebug(Graphics g, DebugSettings debugSettings) {
+    public void paintDebug(Graphics g, Map<String, Boolean> debugSettings) {
         if (!g.getClipBounds().contains(position.x, position.y)) {
             return;
         }
 
-        if (debugSettings.collision && collisionRadius > 0) {
+        if (debugSettings.get("Collision") && collisionRadius > 0) {
             g.setColor(Color.BLUE);
             g.drawArc(position.x - collisionRadius, position.y - collisionRadius,
                     collisionRadius * 2, collisionRadius * 2, 0, 360);
         }
 
-        if (debugSettings.path && pathPosition != null) {
+        if (debugSettings.get("Path") && pathPosition != null) {
             g.setColor(Color.YELLOW);
             g.drawLine(position.x, position.y, pathPosition.x, pathPosition.y);
         }
 
-        if (debugSettings.name && name != null) {
+        if (debugSettings.get("Name") && name != null) {
             g.setColor(Color.WHITE);
             g.drawString(name, position.x + 7, position.y + 5);
         }

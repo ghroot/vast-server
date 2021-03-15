@@ -34,26 +34,29 @@ public class VastWorld implements Runnable {
 	private final int FRAME_RATE = 30;
 	private final int FRAME_DURATION_MILLIS = 1000 / FRAME_RATE;
 
+	private Metrics metrics;
+	private WorldConfiguration worldConfiguration;
+	private Map<String, VastPeer> peers;
+	private Map<String, Integer> entitiesByPeer;
+	private QuadTree quadTree;
+	private Items items;
+
 	private World world;
 	private boolean isAlive;
 	private long lastFrameStartTime;
 	private float timeModifier = 1f;
-	private Metrics metrics;
-
-	private Map<String, VastPeer> peers;
-	private Map<String, Integer> entitiesByPeer;
-	private Items items;
 
 	public VastWorld(VastServerApplication serverApplication, String snapshotFile, Random random,
 					 boolean showMonitor, Metrics metrics, WorldConfiguration worldConfiguration,
 					 Items items, Recipes recipes) {
 		this.metrics = metrics;
+		this.worldConfiguration = worldConfiguration;
 		this.items = items;
 
 		peers = new HashMap<>();
 		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<>();
 		entitiesByPeer = new HashMap<>();
-		QuadTree quadTree = new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height);
+		quadTree = new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height);
 		InteractionHandler[] interactionHandlers = {
 			new GrowingInteractionHandler(),
 			new HarvestableInteractionHandler(items),
@@ -137,7 +140,7 @@ public class VastWorld implements Runnable {
 		);
 		if (showMonitor) {
 //			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, this));
-			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new MonitorSystem(peers, metrics, worldConfiguration, this));
+			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new MonitorSystem(this));
 			worldConfigurationBuilder.register(new ProfiledInvocationStrategy(metrics));
 		}
 		world = new World(worldConfigurationBuilder.build());
@@ -187,6 +190,18 @@ public class VastWorld implements Runnable {
 
 	public float getTimeModifier() {
 		return timeModifier;
+	}
+
+	public WorldConfiguration getWorldConfiguration() {
+		return worldConfiguration;
+	}
+
+	public Metrics getMetrics() {
+		return metrics;
+	}
+
+	public QuadTree getQuadTree() {
+		return quadTree;
 	}
 
 	public VastPeer getPeer(String name) {

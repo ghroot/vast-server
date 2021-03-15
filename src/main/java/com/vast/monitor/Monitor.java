@@ -1,48 +1,51 @@
 package com.vast.monitor;
 
 import com.vast.VastWorld;
-import com.vast.data.Metrics;
-import com.vast.data.WorldConfiguration;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Monitor extends JFrame implements ActionListener {
-    private WorldConfiguration worldConfiguration;
+    private VastWorld vastWorld;
 
     private MonitorCanvas canvas;
     private JSlider zoomSlider;
     private SystemMetricsModel systemMetricsTableModel;
     private JTable systemMetricsTable;
 
-    private CheckboxMenuItem showCollisionMenuItem;
-    private CheckboxMenuItem showPathMenuItem;
-    private CheckboxMenuItem showNameMenuItem;
-
     private Timer timer;
 
-    private DebugSettings debugSettings;
+    private Map<String, Boolean> debugSettings;
+    private final MonitorWorld monitorWorld;
     private Point2D clickPoint;
 
-    public Monitor(WorldConfiguration worldConfiguration, Metrics metrics) {
+    public Monitor(VastWorld vastWorld) {
         super("Vast Monitor");
-        this.worldConfiguration = worldConfiguration;
+        this.vastWorld = vastWorld;
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(1000, 800);
-        setupUI(metrics);
+
+        monitorWorld = createMonitorWorld();
+
+        setupUI();
         setupMenu();
         setVisible(true);
         startTimer();
     }
 
-    private void setupUI(Metrics metrics) {
-        canvas = new MonitorCanvas();
+    private MonitorWorld createMonitorWorld() {
+        debugSettings = new HashMap<>();
+        return new MonitorWorld(vastWorld, debugSettings);
+    }
+
+    private void setupUI() {
+        canvas = new MonitorCanvas(monitorWorld);
         canvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -61,6 +64,7 @@ public class Monitor extends JFrame implements ActionListener {
         zoomSlider.setMinorTickSpacing(10);
         zoomSlider.setPaintTicks(true);
         zoomSlider.setPaintLabels(true);
+        zoomSlider.setSnapToTicks(true);
         zoomSlider.addChangeListener(e -> {
             JSlider slider = (JSlider) e.getSource();
             int zoomPercent = slider.getValue();
@@ -69,7 +73,7 @@ public class Monitor extends JFrame implements ActionListener {
         });
         getContentPane().add(zoomSlider, BorderLayout.NORTH);
 
-        systemMetricsTableModel = new SystemMetricsModel(metrics);
+        systemMetricsTableModel = new SystemMetricsModel(vastWorld.getMetrics());
         systemMetricsTable = new JTable(systemMetricsTableModel);
         systemMetricsTable.getColumn("System").setPreferredWidth(150);
         systemMetricsTable.getColumn("Time").setPreferredWidth(30);
@@ -93,24 +97,22 @@ public class Monitor extends JFrame implements ActionListener {
         viewMenu.add(systemMetricsMenuItem);
         menuBar.add(viewMenu);
 
-        debugSettings = new DebugSettings();
-
         Menu debugMenu = new Menu("Debug");
-        showCollisionMenuItem = new CheckboxMenuItem("Collision");
-        showCollisionMenuItem.setShortcut(new MenuShortcut(KeyEvent.VK_C));
-        showCollisionMenuItem.addItemListener(e -> debugSettings.collision = showCollisionMenuItem.getState());
-        debugMenu.add(showCollisionMenuItem);
-        showPathMenuItem = new CheckboxMenuItem("Path");
-        showPathMenuItem.setShortcut(new MenuShortcut(KeyEvent.VK_P));
-        showPathMenuItem.addItemListener(e -> debugSettings.path = showPathMenuItem.getState());
-        debugMenu.add(showPathMenuItem);
-        showNameMenuItem = new CheckboxMenuItem("Name");
-        showNameMenuItem.setShortcut(new MenuShortcut(KeyEvent.VK_N));
-        showNameMenuItem.addItemListener(e -> debugSettings.name = showNameMenuItem.getState());
-        debugMenu.add(showNameMenuItem);
+        addDebugMenuItem(debugMenu, "Collision", KeyEvent.VK_C);
+        addDebugMenuItem(debugMenu, "Path", KeyEvent.VK_P);
+        addDebugMenuItem(debugMenu, "Name", KeyEvent.VK_N);
+        addDebugMenuItem(debugMenu, "Quad", KeyEvent.VK_U);
         menuBar.add(debugMenu);
 
         setMenuBar(menuBar);
+    }
+
+    private void addDebugMenuItem(Menu debugMenu, String name, int shortcut) {
+        CheckboxMenuItem debugMenuItem = new CheckboxMenuItem(name);
+        debugMenuItem.setShortcut(new MenuShortcut(shortcut));
+        debugMenuItem.addItemListener(e -> debugSettings.put(name, debugMenuItem.getState()));
+        debugMenu.add(debugMenuItem);
+        debugSettings.put(name, false);
     }
 
     private void startTimer() {
@@ -118,9 +120,11 @@ public class Monitor extends JFrame implements ActionListener {
         timer.start();
     }
 
-    public void sync(VastWorld vastWorld) {
-        canvas.setMonitorWorld(new MonitorWorld(worldConfiguration, vastWorld, debugSettings, clickPoint));
-        clickPoint = null;
+    public void sync() {
+        synchronized (monitorWorld) {
+            monitorWorld.sync(clickPoint);
+            clickPoint = null;
+        }
     }
 
     @Override
