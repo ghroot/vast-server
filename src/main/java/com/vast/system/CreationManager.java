@@ -98,7 +98,7 @@ public class CreationManager extends BaseSystem {
 				if (noise1.GetWhiteNoise(x, y) > 0.9f) {
 					createRock(new Point2f(x, y));
 				}
-				if (noise2.GetWhiteNoise(x, y) > 0.99f) {
+				if (noise2.GetWhiteNoise(x, y) > 0.999f) {
 					createAnimalGroup(new Point2f(x, y), random.nextFloat() < 0.5f ? "rabbit" : "deer");
 				}
 			}
@@ -144,8 +144,11 @@ public class CreationManager extends BaseSystem {
 
 	private void createAnimalGroup(Point2f position, String animalName) {
 		int groupId = nextAnimalGroupId++;
-		createAnimal(animalName + "Adult", new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), groupId);
-		int numberOfYoung = 1 + random.nextInt(2);
+		int numberOfAdult = 1 + random.nextInt(2);
+		for (int i = 0; i < numberOfAdult; i++) {
+			createAnimal(animalName + "Adult", new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), groupId);
+		}
+		int numberOfYoung = random.nextInt(3);
 		for (int i = 0; i < numberOfYoung; i++) {
 			createAnimal(animalName + "Young", new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), groupId);
 		}
