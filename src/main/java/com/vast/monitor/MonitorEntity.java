@@ -34,7 +34,7 @@ public class MonitorEntity {
         }
     }
 
-    public void paint(Graphics g, DebugSettings debugSettings) {
+    public void paint(Graphics g) {
         if (!g.getClipBounds().contains(position.x, position.y)) {
             return;
         }
@@ -47,6 +47,12 @@ public class MonitorEntity {
         } else {
             g.setColor(Color.WHITE);
             g.fillRect(position.x - 5, position.y - 5, 10, 10);
+        }
+    }
+
+    public void paintDebug(Graphics g, DebugSettings debugSettings) {
+        if (!g.getClipBounds().contains(position.x, position.y)) {
+            return;
         }
 
         if (debugSettings.collision && collisionRadius > 0) {

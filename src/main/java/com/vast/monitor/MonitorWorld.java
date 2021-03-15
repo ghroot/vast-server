@@ -201,7 +201,11 @@ public class MonitorWorld {
 
     public void paint(Graphics g) {
         for (MonitorEntity monitorEntity : monitorEntities) {
-            monitorEntity.paint(g, debugSettings);
+            monitorEntity.paint(g);
+        }
+
+        for (MonitorEntity monitorEntity : monitorEntities) {
+            monitorEntity.paintDebug(g, debugSettings);
         }
     }
 }
