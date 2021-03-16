@@ -16,7 +16,7 @@ public class MonitorEntity {
     public int collisionRadius;
     public Point2i pathPosition;
     public String name;
-    public List<String> components;
+    public List<MonitorComponent> components;
 
     private static Map<String, Image> entityImages;
 
@@ -77,12 +77,6 @@ public class MonitorEntity {
         if (components != null) {
             g.setColor(Color.WHITE);
             g.drawArc(position.x - 15, position.y - 15, 30, 30, 0, 360);
-
-            int y = position.y - 20;
-            for (String componentInfo : components) {
-                g.drawString(componentInfo, position.x + 20, y);
-                y += 14;
-            }
         }
     }
 }

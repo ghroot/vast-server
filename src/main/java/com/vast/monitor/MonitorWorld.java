@@ -36,6 +36,10 @@ public class MonitorWorld {
         monitorEntities = new HashMap<>();
     }
 
+    public MonitorEntity getSelectedMonitorEntity() {
+        return selectedMonitorEntity;
+    }
+
     public void sync(Point2D clickPoint) {
         Set<Integer> entities = Arrays.stream(vastWorld.getEntities(Aspect.all(Transform.class))).boxed().collect(Collectors.toSet());
         monitorEntities.entrySet().removeIf(entry -> !entities.contains(entry.getValue().entity));
@@ -68,15 +72,20 @@ public class MonitorWorld {
         }
 
         if (clickPoint != null) {
-            if (selectedMonitorEntity != null) {
-                selectedMonitorEntity.components = null;
-            }
-
             MonitorEntity closestMonitorEntity = getMonitorEntityClosestTo(clickPoint);
-            if (closestMonitorEntity != null) {
-                selectedMonitorEntity = closestMonitorEntity;
+            if (selectedMonitorEntity != null) {
+                if (selectedMonitorEntity.entity == closestMonitorEntity.entity) {
+                    // Clicked selected
+                    selectedMonitorEntity.components = null;
+                    selectedMonitorEntity = null;
+                } else {
+                    // Clicked other
+                    selectedMonitorEntity.components = null;
+                    selectedMonitorEntity = closestMonitorEntity;
+                }
             } else {
-                selectedMonitorEntity = null;
+                // Clicked first
+                selectedMonitorEntity = closestMonitorEntity;
             }
         }
 
@@ -182,12 +191,21 @@ public class MonitorWorld {
                 } else if (component instanceof Producer) {
                     Producer producer = (Producer) component;
                     detail = producer.recipeId + " " + (Math.round(producer.time * 10f) / 10f);
+                } else if (component instanceof SyncHistory) {
+                    SyncHistory syncHistory = (SyncHistory) component;
+                    detail = "" + syncHistory.syncedValues.size();
+                } else if (component instanceof SyncPropagation) {
+                    SyncPropagation syncPropagation = (SyncPropagation) component;
+                    detail = syncPropagation.unreliableProperties + ", " + syncPropagation.ownerPropagationProperties;
                 }
+                MonitorComponent monitorComponent = new MonitorComponent();
+                monitorComponent.name = componentName;
                 if (detail != null) {
-                    selectedMonitorEntity.components.add(componentName + " (" + detail + ")");
+                    monitorComponent.details = detail;
                 } else {
-                    selectedMonitorEntity.components.add(componentName);
+                    monitorComponent.details = "";
                 }
+                selectedMonitorEntity.components.add(monitorComponent);
             }
         }
 

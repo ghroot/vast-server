@@ -17,6 +17,8 @@ public class Monitor extends JFrame implements ActionListener {
     private JSlider zoomSlider;
     private SystemMetricsModel systemMetricsTableModel;
     private JTable systemMetricsTable;
+    private EntityModel entityModel;
+    private JTable entityTable;
 
     private Timer timer;
 
@@ -52,6 +54,9 @@ public class Monitor extends JFrame implements ActionListener {
                 try {
                     clickPoint = canvas.at.inverseTransform(e.getPoint(), null);
                     clickPoint.setLocation(clickPoint.getX(), clickPoint.getY() + zoomSlider.getHeight() / canvas.scale);
+                    if (entityTable.getParent() != null) {
+                        clickPoint.setLocation(clickPoint.getX() + entityTable.getWidth() / canvas.scale, clickPoint.getY());
+                    }
                 } catch (NoninvertibleTransformException noninvertibleTransformException) {
                     noninvertibleTransformException.printStackTrace();
                 }
@@ -78,6 +83,11 @@ public class Monitor extends JFrame implements ActionListener {
         systemMetricsTable.getColumn("System").setPreferredWidth(150);
         systemMetricsTable.getColumn("Time").setPreferredWidth(30);
         systemMetricsTable.getColumn("Entities").setPreferredWidth(50);
+
+        entityModel = new EntityModel();
+        entityTable = new JTable(entityModel);
+        entityTable.getColumn("Component").setPreferredWidth(120);
+        entityTable.getColumn("Details").setPreferredWidth(100);
     }
 
     private void setupMenu() {
@@ -133,6 +143,28 @@ public class Monitor extends JFrame implements ActionListener {
             systemMetricsTableModel.refresh();
         }
 
+        if (monitorWorld.getSelectedMonitorEntity() != null) {
+            entityModel.setEntity(monitorWorld.getSelectedMonitorEntity());
+            if (entityTable.getParent() == null) {
+                getContentPane().add(entityTable, BorderLayout.WEST);
+                revalidate();
+            }
+        } else {
+            if (entityTable.getParent() != null) {
+                getContentPane().remove(entityTable);
+                entityModel.setEntity(null);
+                revalidate();
+            }
+        }
+
         repaint();
+    }
+
+    // TODO: Hack?
+    @Override
+    public void paint(Graphics g) {
+        synchronized (monitorWorld) {
+            super.paint(g);
+        }
     }
 }
