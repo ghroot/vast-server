@@ -19,20 +19,16 @@ import java.util.stream.Collectors;
 public class MonitorWorld {
     private final int SCALE = 5;
 
-    private VastWorld vastWorld;
     private Map<String, Boolean> debugSettings;
 
-    private Point2i size;
+    private Point2i size = new Point2i();
     private Map<Integer, MonitorEntity> monitorEntities;
     private MonitorEntity selectedMonitorEntity;
     private List<Rectangle> quadRects = new ArrayList<>();
 
-    public MonitorWorld(VastWorld vastWorld, Map<String, Boolean> debugSettings) {
-        this.vastWorld = vastWorld;
+    public MonitorWorld(Map<String, Boolean> debugSettings) {
         this.debugSettings = debugSettings;
 
-        size = new Point2i(vastWorld.getWorldConfiguration().width * SCALE,
-                vastWorld.getWorldConfiguration().height * SCALE);
         monitorEntities = new HashMap<>();
     }
 
@@ -40,7 +36,10 @@ public class MonitorWorld {
         return selectedMonitorEntity;
     }
 
-    public void sync(Point2D clickPoint) {
+    public void sync(VastWorld vastWorld, Point2D clickPoint) {
+        size = new Point2i(vastWorld.getWorldConfiguration().width * SCALE,
+                vastWorld.getWorldConfiguration().height * SCALE);
+
         Set<Integer> entities = Arrays.stream(vastWorld.getEntities(Aspect.all(Transform.class))).boxed().collect(Collectors.toSet());
         monitorEntities.entrySet().removeIf(entry -> !entities.contains(entry.getValue().entity));
         for (int entity : entities) {
@@ -248,19 +247,19 @@ public class MonitorWorld {
     }
 
     public void paint(Graphics g) {
+        if (debugSettings.get("Quad")) {
+            g.setColor(new Color(0x3f, 0x3f, 0x3f));
+            for (Rectangle rect : quadRects) {
+                g.drawRect(rect.x, rect.y, rect.width, rect.height);
+            }
+        }
+
         for (MonitorEntity monitorEntity : monitorEntities.values()) {
             monitorEntity.paint(g);
         }
 
         for (MonitorEntity monitorEntity : monitorEntities.values()) {
             monitorEntity.paintDebug(g, debugSettings);
-        }
-
-        if (debugSettings.get("Quad")) {
-            g.setColor(new Color(0x3f, 0x3f, 0x3f));
-            for (Rectangle rect : quadRects) {
-                g.drawRect(rect.x, rect.y, rect.width, rect.height);
-            }
         }
     }
 }

@@ -1,4 +1,6 @@
-package com.vast.monitor;
+package com.vast.monitor.model;
+
+import com.vast.monitor.MonitorEntity;
 
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -15,12 +17,16 @@ public class EntityModel implements TableModel {
         listeners = new ArrayList<>();
     }
 
-    public void setEntity(MonitorEntity entity) {
+    public void refresh(MonitorEntity entity) {
         this.entity = entity;
 
         for (TableModelListener l : listeners) {
             l.tableChanged(new TableModelEvent(this));
         }
+    }
+
+    public void clear() {
+        refresh(null);
     }
 
     @Override

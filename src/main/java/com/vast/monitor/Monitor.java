@@ -1,28 +1,35 @@
 package com.vast.monitor;
 
+import com.artemis.BaseSystem;
 import com.vast.VastWorld;
+import com.vast.monitor.model.EntityModel;
+import com.vast.monitor.model.ModelData;
+import com.vast.monitor.model.SystemMetricsModel;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Monitor extends JFrame implements ActionListener {
     private VastWorld vastWorld;
 
     private MonitorCanvas canvas;
     private JSlider zoomSlider;
+
+    private final ModelData modelData;
     private SystemMetricsModel systemMetricsTableModel;
     private JTable systemMetricsTable;
-    private EntityModel entityModel;
+    private EntityModel entityTableModel;
     private JTable entityTable;
 
     private Timer timer;
 
-    private Map<String, Boolean> debugSettings;
+    private final Map<String, Boolean> debugSettings = new HashMap<>();
     private final MonitorWorld monitorWorld;
     private Point2D clickPoint;
 
@@ -33,17 +40,13 @@ public class Monitor extends JFrame implements ActionListener {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(1000, 800);
 
-        monitorWorld = createMonitorWorld();
+        monitorWorld = new MonitorWorld(debugSettings);
+        modelData = new ModelData();
 
         setupUI();
         setupMenu();
         setVisible(true);
         startTimer();
-    }
-
-    private MonitorWorld createMonitorWorld() {
-        debugSettings = new HashMap<>();
-        return new MonitorWorld(vastWorld, debugSettings);
     }
 
     private void setupUI() {
@@ -78,14 +81,14 @@ public class Monitor extends JFrame implements ActionListener {
         });
         getContentPane().add(zoomSlider, BorderLayout.NORTH);
 
-        systemMetricsTableModel = new SystemMetricsModel(vastWorld.getMetrics());
+        systemMetricsTableModel = new SystemMetricsModel();
         systemMetricsTable = new JTable(systemMetricsTableModel);
         systemMetricsTable.getColumn("System").setPreferredWidth(150);
         systemMetricsTable.getColumn("Time").setPreferredWidth(30);
         systemMetricsTable.getColumn("Entities").setPreferredWidth(50);
 
-        entityModel = new EntityModel();
-        entityTable = new JTable(entityModel);
+        entityTableModel = new EntityModel();
+        entityTable = new JTable(entityTableModel);
         entityTable.getColumn("Component").setPreferredWidth(120);
         entityTable.getColumn("Details").setPreferredWidth(100);
     }
@@ -132,39 +135,61 @@ public class Monitor extends JFrame implements ActionListener {
 
     public void sync() {
         synchronized (monitorWorld) {
-            monitorWorld.sync(clickPoint);
+            monitorWorld.sync(vastWorld, clickPoint);
             clickPoint = null;
+        }
+
+        // Seems to work without "synchronized" due to always setting new values?
+        synchronized (modelData) {
+            modelData.systemMetricsToShow = vastWorld.getMetrics().getSystemMetrics().entrySet()
+                    .stream()
+                    .sorted(Map.Entry.comparingByKey(Comparator.comparing((BaseSystem system) -> system.getClass().getSimpleName())))
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (e1, e2) -> e1,
+                            LinkedHashMap::new
+                    ));
+
+            MonitorEntity selected = monitorWorld.getSelectedMonitorEntity();
+            if (selected != null) {
+                MonitorEntity clone = new MonitorEntity(selected.entity);
+                clone.components = new ArrayList<>();
+                for (MonitorComponent component : selected.components) {
+                    MonitorComponent clonedComponent = new MonitorComponent();
+                    clonedComponent.name = component.name;
+                    clonedComponent.details = component.details;
+                    clone.components.add(clonedComponent);
+                }
+                modelData.entity = clone;
+            } else {
+                modelData.entity = null;
+            }
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (systemMetricsTable.isShowing()) {
-            systemMetricsTableModel.refresh();
-        }
-
-        if (monitorWorld.getSelectedMonitorEntity() != null) {
-            entityModel.setEntity(monitorWorld.getSelectedMonitorEntity());
-            if (entityTable.getParent() == null) {
-                getContentPane().add(entityTable, BorderLayout.WEST);
-                revalidate();
+        synchronized (modelData) {
+            if (systemMetricsTable.isShowing()) {
+                systemMetricsTableModel.refresh(modelData.systemMetricsToShow);
             }
-        } else {
-            if (entityTable.getParent() != null) {
-                getContentPane().remove(entityTable);
-                entityModel.setEntity(null);
-                revalidate();
+
+            if (modelData.entity != null) {
+                entityTableModel.refresh(modelData.entity);
+                if (entityTable.getParent() == null) {
+                    getContentPane().add(entityTable, BorderLayout.WEST);
+                    revalidate();
+                }
+            } else {
+                if (entityTable.getParent() != null) {
+                    getContentPane().remove(entityTable);
+                    entityTableModel.clear();
+                    revalidate();
+                }
             }
         }
 
         repaint();
-    }
-
-    // TODO: Hack?
-    @Override
-    public void paint(Graphics g) {
-        synchronized (monitorWorld) {
-            super.paint(g);
-        }
     }
 }

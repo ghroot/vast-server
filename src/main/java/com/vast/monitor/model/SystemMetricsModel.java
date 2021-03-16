@@ -1,4 +1,4 @@
-package com.vast.monitor;
+package com.vast.monitor.model;
 
 import com.artemis.BaseSystem;
 import com.vast.data.Metrics;
@@ -11,30 +11,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SystemMetricsModel implements TableModel {
-    private Metrics metrics;
-
     private List<TableModelListener> listeners;
     private String[] systemNames;
     private int[] systemTimes;
     private int[] systemEntities;
 
-    public SystemMetricsModel(Metrics metrics) {
-        this.metrics = metrics;
-
+    public SystemMetricsModel() {
         listeners = new ArrayList<>();
     }
 
-    public void refresh() {
-        Map<BaseSystem, SystemMetrics> systemMetricsToShow = metrics.getSystemMetrics().entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByKey(Comparator.comparing((BaseSystem system) -> system.getClass().getSimpleName())))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (e1, e2) -> e1,
-                        LinkedHashMap::new
-                ));
-
+    public void refresh(Map<BaseSystem, SystemMetrics> systemMetricsToShow) {
         int size = systemMetricsToShow.size();
         if (systemNames == null || systemNames.length != size) {
             systemNames = new String[size];
@@ -47,7 +33,7 @@ public class SystemMetricsModel implements TableModel {
         }
         int index = 0;
         for (BaseSystem system : systemMetricsToShow.keySet()) {
-            SystemMetrics systemMetrics = metrics.getSystemMetrics().get(system);
+            SystemMetrics systemMetrics = systemMetricsToShow.get(system);
             systemNames[index] = system.getClass().getSimpleName();
             systemTimes[index] = systemMetrics.getProcessingTime();
             systemEntities[index] = Math.max(systemMetrics.getNumberOfEntitiesInSystem(), 0);

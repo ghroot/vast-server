@@ -5,6 +5,8 @@ import com.artemis.systems.IntervalSystem;
 import com.vast.VastWorld;
 import com.vast.monitor.Monitor;
 
+import javax.swing.*;
+
 public class MonitorSystem extends IntervalSystem {
     private VastWorld vastWorld;
 
@@ -17,7 +19,10 @@ public class MonitorSystem extends IntervalSystem {
 
     @Override
     protected void initialize() {
-        monitor = new Monitor(vastWorld);
+        try {
+            SwingUtilities.invokeAndWait(() -> monitor = new Monitor(vastWorld));
+        } catch (Exception ignored) {
+        }
     }
 
     @Override
