@@ -27,11 +27,15 @@ public class MonitorSystem extends IntervalSystem {
 
     @Override
     protected void dispose() {
-        monitor.dispose();
+        if (monitor != null) {
+            monitor.dispose();
+        }
     }
 
     @Override
     protected void processSystem() {
-        monitor.sync();
+        if (monitor != null) {
+            monitor.sync();
+        }
     }
 }

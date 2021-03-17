@@ -11,14 +11,18 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 
 public class MonitorCanvas extends JComponent {
+    private int width;
+    private int height;
+    private final MonitorWorld monitorWorld;
+
     public double translateX;
     public double translateY;
     public double scale;
     public AffineTransform at;
 
-    private final MonitorWorld monitorWorld;
-
-    public MonitorCanvas(MonitorWorld monitorWorld) {
+    public MonitorCanvas(int width, int height, MonitorWorld monitorWorld) {
+        this.width = width;
+        this.height = height;
         this.monitorWorld = monitorWorld;
 
         translateX = 0;
@@ -41,9 +45,9 @@ public class MonitorCanvas extends JComponent {
 
         at = new AffineTransform(saveTransform);
 
-        at.translate(getWidth() / 2f, getHeight() / 2f);
+        at.translate(width / 2f, height / 2f);
         at.scale(scale, scale);
-        at.translate(-getWidth() / 2f, -getHeight() / 2f);
+        at.translate(-width / 2f, -height / 2f);
 
         at.translate(translateX, translateY);
 

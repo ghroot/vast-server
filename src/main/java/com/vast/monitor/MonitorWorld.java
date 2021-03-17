@@ -98,9 +98,6 @@ public class MonitorWorld {
                 // Clicked first
                 selectedMonitorEntity = closestMonitorEntity;
             }
-            if (selectedMonitorEntity != oldSelected && selectedMonitorEntity != null) {
-//                System.out.println("New selected with position: " + selectedMonitorEntity.position);
-            }
         }
 
         if (selectedMonitorEntity != null) {

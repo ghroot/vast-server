@@ -10,12 +10,14 @@ import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Monitor extends JFrame implements ActionListener {
+    private static final int WIDTH = 1000;
+    private static final int HEIGHT = 800;
+
     private VastWorld vastWorld;
 
     private MonitorCanvas canvas;
@@ -38,7 +40,7 @@ public class Monitor extends JFrame implements ActionListener {
         this.vastWorld = vastWorld;
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setSize(1000, 800);
+        setSize(WIDTH, HEIGHT);
 
         monitorWorld = new MonitorWorld(debugSettings);
         modelData = new ModelData();
@@ -50,83 +52,29 @@ public class Monitor extends JFrame implements ActionListener {
     }
 
     private void setupUI() {
-        canvas = new MonitorCanvas(monitorWorld);
+        canvas = new MonitorCanvas(WIDTH, HEIGHT, monitorWorld);
         canvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == 3) {
-                    if (zoomSlider.getParent() != null) {
-                        System.out.println("Removing");
-                        getContentPane().remove(zoomSlider);
-                    } else {
-                        System.out.println("Adding");
-                        getContentPane().add(zoomSlider, BorderLayout.NORTH);
-                    }
-                    revalidate();
-                    return;
-                }
+                double x = e.getPoint().x;
+                double y = e.getPoint().y;
 
-                try {
-                    if (true) {
-                        double fixedTranslateX = canvas.translateX - (canvas.scale - 1) * (getWidth() / 2f);
-//                        double x = e.getPoint().x - canvas.translateX / canvas.scale;
-//                        double y = e.getPoint().y - canvas.translateY / canvas.scale;
-//                        System.out.println(x + ", " + y);
-//                        System.out.println(canvas.translateX + ", " + canvas.translateY);
-                        System.out.println(fixedTranslateX);
-                        return;
-                    }
+                x -= (1f - canvas.scale) * getWidth() / 2;
+                y -= (1f - canvas.scale) * getHeight() / 2;
 
-                    clickPoint = canvas.at.inverseTransform(e.getPoint(), null);
+                x -= canvas.translateX * canvas.scale;
+                y -= canvas.translateY * canvas.scale;
 
-                    clickPoint.setLocation(
-                            clickPoint.getX() * canvas.at.getScaleX(),
-                            clickPoint.getY() * canvas.at.getScaleY());
+                x /= canvas.scale;
+                y /= canvas.scale;
 
-                    clickPoint.setLocation(
-                            clickPoint.getX() + canvas.translateX * canvas.scale,
-                            clickPoint.getY() + canvas.translateY * canvas.scale);
-
-                    // Weird correction...
-                    clickPoint.setLocation(
-                            clickPoint.getX() - (canvas.scale - 1) * (getWidth() / 2f),
-                            clickPoint.getY() -(canvas.scale - 1) * (getHeight() / 2f));
-
-                    clickPoint.setLocation(
-                            clickPoint.getX() / canvas.scale,
-                            clickPoint.getY() / canvas.scale);
-
-                    if (zoomSlider.getParent() != null) {
-//                        System.out.println("(" + zoomSlider.getHeight() + " / " + canvas.scale + ") * " +
-//                                canvas.at.getScaleY() + " = " +
-//                                ((zoomSlider.getHeight() / canvas.scale) * canvas.at.getScaleY()));
-//                        clickPoint.setLocation(
-//                                clickPoint.getX(),
-//                                clickPoint.getY() + (zoomSlider.getHeight() / canvas.scale) * canvas.at.getScaleY());
-
-//                        double height = (2f * zoomSlider.getHeight() / canvas.scale);
-//                        System.out.println(height);
-//                        clickPoint.setLocation(
-//                                clickPoint.getX(),
-//                                clickPoint.getY() + height);
-                    }
-
-//                    if (entityTable.getParent() != null) {
-//                        clickPoint.setLocation(
-//                                clickPoint.getX() + (entityTable.getWidth() / canvas.scale) * canvas.at.getScaleX(),
-//                                clickPoint.getY());
-//                    }
-
-                    System.out.println("clickPoint: " + clickPoint);
-                } catch (NoninvertibleTransformException noninvertibleTransformException) {
-                    noninvertibleTransformException.printStackTrace();
-                }
+                clickPoint = new Point((int) Math.round(x), (int) Math.round(y));
             }
         });
         getContentPane().add(canvas, BorderLayout.CENTER);
 
         zoomSlider = new JSlider(JSlider.HORIZONTAL, 50, 500, 100);
-        zoomSlider.setMajorTickSpacing(25);
+        zoomSlider.setMajorTickSpacing(50);
         zoomSlider.setMinorTickSpacing(10);
         zoomSlider.setPaintTicks(true);
         zoomSlider.setPaintLabels(true);
@@ -158,7 +106,7 @@ public class Monitor extends JFrame implements ActionListener {
         CheckboxMenuItem systemMetricsMenuItem = new CheckboxMenuItem("System Metrics");
         systemMetricsMenuItem.setShortcut(new MenuShortcut(KeyEvent.VK_S));
         systemMetricsMenuItem.addItemListener(e -> {
-            if (systemMetricsTable.isShowing()) {
+            if (systemMetricsTable.getParent() != null) {
                 getContentPane().remove(systemMetricsTable);
             } else {
                 getContentPane().add(systemMetricsTable, BorderLayout.EAST);
@@ -230,23 +178,23 @@ public class Monitor extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         synchronized (modelData) {
-//            if (systemMetricsTable.isShowing()) {
-//                systemMetricsTableModel.refresh(modelData.systemMetricsToShow);
-//            }
-//
-//            if (modelData.entity != null) {
-//                entityTableModel.refresh(modelData.entity);
-//                if (entityTable.getParent() == null) {
-//                    getContentPane().add(entityTable, BorderLayout.WEST);
-//                    revalidate();
-//                }
-//            } else {
-//                if (entityTable.getParent() != null) {
-//                    getContentPane().remove(entityTable);
-//                    entityTableModel.clear();
-//                    revalidate();
-//                }
-//            }
+            if (systemMetricsTable.isShowing()) {
+                systemMetricsTableModel.refresh(modelData.systemMetricsToShow);
+            }
+
+            if (modelData.entity != null) {
+                entityTableModel.refresh(modelData.entity);
+                if (entityTable.getParent() == null) {
+                    getContentPane().add(entityTable, BorderLayout.WEST);
+                    revalidate();
+                }
+            } else {
+                if (entityTable.getParent() != null) {
+                    getContentPane().remove(entityTable);
+                    entityTableModel.clear();
+                    revalidate();
+                }
+            }
         }
 
         repaint();
