@@ -3,6 +3,7 @@ package com.vast.monitor;
 import javax.imageio.ImageIO;
 import javax.vecmath.Point2i;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,20 +18,45 @@ public class MonitorEntity {
     public int scanDistance;
     public Point2i pathPosition;
     public String name;
+    public boolean colored = true;
     public List<MonitorComponent> components;
 
-    private static Map<String, Image> entityImages;
+    private static Map<String, Image> coloredEntityImages;
+    private static Map<String, Image> grayEntityImages;
 
     static {
+        coloredEntityImages = new HashMap<>();
+        coloredEntityImages.put("player", colorImage("images/User-Icon.png", Color.WHITE));
+        coloredEntityImages.put("animal", colorImage("images/Demon.png", Color.CYAN));
+        coloredEntityImages.put("pickup", colorImage("images/Chest-Icon.png", Color.BLUE));
+        coloredEntityImages.put("tree", colorImage("images/Tree-Icon.png", Color.GREEN));
+        coloredEntityImages.put("rock", colorImage("images/Diamond-Icon.png", Color.GRAY));
+        coloredEntityImages.put("building", colorImage("images/Home-Icon.png", Color.YELLOW));
+
+        grayEntityImages = new HashMap<>();
+        grayEntityImages.put("player", colorImage("images/User-Icon.png", Color.DARK_GRAY));
+        grayEntityImages.put("animal", colorImage("images/Demon.png", Color.DARK_GRAY));
+        grayEntityImages.put("pickup", colorImage("images/Chest-Icon.png", Color.DARK_GRAY));
+        grayEntityImages.put("tree", colorImage("images/Tree-Icon.png", Color.DARK_GRAY));
+        grayEntityImages.put("rock", colorImage("images/Diamond-Icon.png", Color.DARK_GRAY));
+        grayEntityImages.put("building", colorImage("images/Home-Icon.png", Color.DARK_GRAY));
+    }
+
+    private static BufferedImage colorImage(String imageName, Color color) {
         try {
-            entityImages = new HashMap<>();
-            entityImages.put("player", ImageIO.read(new File("images/User-Icon.png")));
-            entityImages.put("animal", ImageIO.read(new File("images/Demon.png")));
-            entityImages.put("pickup", ImageIO.read(new File("images/Chest-Icon.png")));
-            entityImages.put("tree", ImageIO.read(new File("images/Tree-Icon.png")));
-            entityImages.put("rock", ImageIO.read(new File("images/Diamond-Icon.png")));
-            entityImages.put("building", ImageIO.read(new File("images/Home-Icon.png")));
-        } catch (IOException ignored) {
+            BufferedImage image = ImageIO.read(new File(imageName));
+            int w = image.getWidth();
+            int h = image.getHeight();
+            BufferedImage dyed = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = dyed.createGraphics();
+            g.drawImage(image, 0, 0, null);
+            g.setComposite(AlphaComposite.SrcAtop);
+            g.setColor(color);
+            g.fillRect(0, 0, w, h);
+            g.dispose();
+            return dyed;
+        } catch (IOException exception) {
+            return null;
         }
     }
 
@@ -43,7 +69,7 @@ public class MonitorEntity {
             return;
         }
 
-        Image image = entityImages.get(type);
+        Image image = colored ? coloredEntityImages.get(type) : grayEntityImages.get(type);
         if (image != null) {
             int width = 12;
             int height = (int) (((float) image.getHeight(null) / image.getWidth(null)) * width);

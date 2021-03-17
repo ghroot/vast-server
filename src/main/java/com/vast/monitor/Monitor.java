@@ -52,7 +52,7 @@ public class Monitor extends JFrame implements ActionListener {
     }
 
     private void setupUI() {
-        canvas = new MonitorCanvas(WIDTH, HEIGHT, monitorWorld);
+        canvas = new MonitorCanvas(this, monitorWorld);
         canvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
