@@ -54,12 +54,70 @@ public class Monitor extends JFrame implements ActionListener {
         canvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                try {
-                    clickPoint = canvas.at.inverseTransform(e.getPoint(), null);
-                    clickPoint.setLocation(clickPoint.getX(), clickPoint.getY() + zoomSlider.getHeight() / canvas.scale);
-                    if (entityTable.getParent() != null) {
-                        clickPoint.setLocation(clickPoint.getX() + entityTable.getWidth() / canvas.scale, clickPoint.getY());
+                if (e.getButton() == 3) {
+                    if (zoomSlider.getParent() != null) {
+                        System.out.println("Removing");
+                        getContentPane().remove(zoomSlider);
+                    } else {
+                        System.out.println("Adding");
+                        getContentPane().add(zoomSlider, BorderLayout.NORTH);
                     }
+                    revalidate();
+                    return;
+                }
+
+                try {
+                    if (true) {
+                        double fixedTranslateX = canvas.translateX - (canvas.scale - 1) * (getWidth() / 2f);
+//                        double x = e.getPoint().x - canvas.translateX / canvas.scale;
+//                        double y = e.getPoint().y - canvas.translateY / canvas.scale;
+//                        System.out.println(x + ", " + y);
+//                        System.out.println(canvas.translateX + ", " + canvas.translateY);
+                        System.out.println(fixedTranslateX);
+                        return;
+                    }
+
+                    clickPoint = canvas.at.inverseTransform(e.getPoint(), null);
+
+                    clickPoint.setLocation(
+                            clickPoint.getX() * canvas.at.getScaleX(),
+                            clickPoint.getY() * canvas.at.getScaleY());
+
+                    clickPoint.setLocation(
+                            clickPoint.getX() + canvas.translateX * canvas.scale,
+                            clickPoint.getY() + canvas.translateY * canvas.scale);
+
+                    // Weird correction...
+                    clickPoint.setLocation(
+                            clickPoint.getX() - (canvas.scale - 1) * (getWidth() / 2f),
+                            clickPoint.getY() -(canvas.scale - 1) * (getHeight() / 2f));
+
+                    clickPoint.setLocation(
+                            clickPoint.getX() / canvas.scale,
+                            clickPoint.getY() / canvas.scale);
+
+                    if (zoomSlider.getParent() != null) {
+//                        System.out.println("(" + zoomSlider.getHeight() + " / " + canvas.scale + ") * " +
+//                                canvas.at.getScaleY() + " = " +
+//                                ((zoomSlider.getHeight() / canvas.scale) * canvas.at.getScaleY()));
+//                        clickPoint.setLocation(
+//                                clickPoint.getX(),
+//                                clickPoint.getY() + (zoomSlider.getHeight() / canvas.scale) * canvas.at.getScaleY());
+
+//                        double height = (2f * zoomSlider.getHeight() / canvas.scale);
+//                        System.out.println(height);
+//                        clickPoint.setLocation(
+//                                clickPoint.getX(),
+//                                clickPoint.getY() + height);
+                    }
+
+//                    if (entityTable.getParent() != null) {
+//                        clickPoint.setLocation(
+//                                clickPoint.getX() + (entityTable.getWidth() / canvas.scale) * canvas.at.getScaleX(),
+//                                clickPoint.getY());
+//                    }
+
+                    System.out.println("clickPoint: " + clickPoint);
                 } catch (NoninvertibleTransformException noninvertibleTransformException) {
                     noninvertibleTransformException.printStackTrace();
                 }
@@ -171,23 +229,23 @@ public class Monitor extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         synchronized (modelData) {
-            if (systemMetricsTable.isShowing()) {
-                systemMetricsTableModel.refresh(modelData.systemMetricsToShow);
-            }
-
-            if (modelData.entity != null) {
-                entityTableModel.refresh(modelData.entity);
-                if (entityTable.getParent() == null) {
-                    getContentPane().add(entityTable, BorderLayout.WEST);
-                    revalidate();
-                }
-            } else {
-                if (entityTable.getParent() != null) {
-                    getContentPane().remove(entityTable);
-                    entityTableModel.clear();
-                    revalidate();
-                }
-            }
+//            if (systemMetricsTable.isShowing()) {
+//                systemMetricsTableModel.refresh(modelData.systemMetricsToShow);
+//            }
+//
+//            if (modelData.entity != null) {
+//                entityTableModel.refresh(modelData.entity);
+//                if (entityTable.getParent() == null) {
+//                    getContentPane().add(entityTable, BorderLayout.WEST);
+//                    revalidate();
+//                }
+//            } else {
+//                if (entityTable.getParent() != null) {
+//                    getContentPane().remove(entityTable);
+//                    entityTableModel.clear();
+//                    revalidate();
+//                }
+//            }
         }
 
         repaint();

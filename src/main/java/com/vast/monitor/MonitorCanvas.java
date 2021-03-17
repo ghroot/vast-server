@@ -30,44 +30,30 @@ public class MonitorCanvas extends JComponent {
         addMouseMotionListener(panningHandler);
     }
 
+    @Override
     public void paintComponent(Graphics g) {
-        Graphics2D ourGraphics = (Graphics2D) g;
-        // save the original transform so that we can restore
-        // it later
-        AffineTransform saveTransform = ourGraphics.getTransform();
+        Graphics2D g2d = (Graphics2D) g;
 
-        // blank the screen. If we do not call super.paintComponent, then
-        // we need to blank it ourselves
-        ourGraphics.setColor(new Color(0x2b, 0x2b, 0x2b));
-        ourGraphics.fillRect(0, 0, getWidth(), getHeight());
+        AffineTransform saveTransform = g2d.getTransform();
 
-        // We need to add new transforms to the existing
-        // transform, rather than creating a new transform from scratch.
-        // If we create a transform from scratch, we will
-        // will start from the upper left of a JFrame,
-        // rather than from the upper left of our component
+        g2d.setColor(new Color(0x2b, 0x2b, 0x2b));
+        g2d.fillRect(0, 0, getWidth(), getHeight());
+
         at = new AffineTransform(saveTransform);
 
-        // The zooming transformation. Notice that it will be performed
-        // after the panning transformation, zooming the panned scene,
-        // rather than the original scene
         at.translate(getWidth() / 2f, getHeight() / 2f);
         at.scale(scale, scale);
         at.translate(-getWidth() / 2f, -getHeight() / 2f);
 
-        // The panning transformation
         at.translate(translateX, translateY);
 
-        ourGraphics.setTransform(at);
+        g2d.setTransform(at);
 
-        // Draw the objects
         synchronized (monitorWorld) {
-            monitorWorld.paint(ourGraphics);
+            monitorWorld.paint(g2d);
         }
 
-        // make sure you restore the original transform or else the drawing
-        // of borders and other components might be messed up
-        ourGraphics.setTransform(saveTransform);
+        g2d.setTransform(saveTransform);
     }
 
     public Dimension getPreferredSize() {
@@ -77,60 +63,44 @@ public class MonitorCanvas extends JComponent {
     class PanningHandler extends MouseAdapter implements MouseListener, MouseMotionListener {
         private MonitorCanvas canvas;
 
-        private double referenceX;
-        private double referenceY;
-        // saves the initial transform at the beginning of the pan interaction
         private AffineTransform initialTransform;
-        private Point2D XFormedPoint; // storage for a transformed mouse point
+        private Point2D pressedPoint;
+        private Point2D canvasStartPoint;
 
         public PanningHandler(MonitorCanvas canvas) {
             this.canvas = canvas;
+
+            canvasStartPoint = new Point();
         }
 
-        // capture the starting point
+        @Override
         public void mousePressed(MouseEvent e) {
-            // first transform the mouse point to the pan and zoom
-            // coordinates
             try {
-                XFormedPoint = canvas.at.inverseTransform(e.getPoint(), null);
+                pressedPoint = canvas.at.inverseTransform(e.getPoint(), null);
             }
-            catch (NoninvertibleTransformException ignored) {
+            catch (NoninvertibleTransformException exception) {
+                return;
             }
 
-            // save the transformed starting point and the initial
-            // transform
-            referenceX = XFormedPoint.getX();
-            referenceY = XFormedPoint.getY();
             initialTransform = canvas.at;
+            canvasStartPoint.setLocation(canvas.translateX, canvas.translateY);
         }
 
+        @Override
         public void mouseDragged(MouseEvent e) {
-
-            // first transform the mouse point to the pan and zoom
-            // coordinates. We must take care to transform by the
-            // initial transform, not the updated transform, so that
-            // both the initial reference point and all subsequent
-            // reference points are measured against the same origin.
+            Point2D mousePoint;
             try {
-                XFormedPoint = initialTransform.inverseTransform(e.getPoint(), null);
+                mousePoint = initialTransform.inverseTransform(e.getPoint(), null);
             }
-            catch (NoninvertibleTransformException ignored) {
+            catch (NoninvertibleTransformException exception) {
+                return;
             }
 
-            // the size of the pan translations
-            // are defined by the current mouse location subtracted
-            // from the reference location
-            double deltaX = XFormedPoint.getX() - referenceX;
-            double deltaY = XFormedPoint.getY() - referenceY;
+            canvas.translateX = canvasStartPoint.getX() +
+                    (mousePoint.getX() - pressedPoint.getX()) * initialTransform.getScaleX() / canvas.scale;
+            canvas.translateY = canvasStartPoint.getY() +
+                    (mousePoint.getY() - pressedPoint.getY()) * initialTransform.getScaleY() / canvas.scale;
 
-            // make the reference point be the new mouse point.
-            referenceX = XFormedPoint.getX();
-            referenceY = XFormedPoint.getY();
-
-            canvas.translateX += deltaX;
-            canvas.translateY += deltaY;
-
-            // schedule a repaint.
             canvas.repaint();
         }
     }

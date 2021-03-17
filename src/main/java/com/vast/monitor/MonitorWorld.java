@@ -37,8 +37,7 @@ public class MonitorWorld {
     }
 
     public void sync(VastWorld vastWorld, Point2D clickPoint) {
-        size = new Point2i(vastWorld.getWorldConfiguration().width * SCALE,
-                vastWorld.getWorldConfiguration().height * SCALE);
+        size.set(vastWorld.getWorldConfiguration().width * SCALE, vastWorld.getWorldConfiguration().height * SCALE);
 
         Set<Integer> entities = Arrays.stream(vastWorld.getEntities(Aspect.all(Transform.class))).boxed().collect(Collectors.toSet());
         monitorEntities.entrySet().removeIf(entry -> !entities.contains(entry.getValue().entity));
@@ -71,6 +70,7 @@ public class MonitorWorld {
         }
 
         if (clickPoint != null) {
+            MonitorEntity oldSelected = selectedMonitorEntity;
             MonitorEntity closestMonitorEntity = getMonitorEntityClosestTo(clickPoint);
             if (selectedMonitorEntity != null) {
                 if (selectedMonitorEntity.entity == closestMonitorEntity.entity) {
@@ -85,6 +85,9 @@ public class MonitorWorld {
             } else {
                 // Clicked first
                 selectedMonitorEntity = closestMonitorEntity;
+            }
+            if (selectedMonitorEntity != oldSelected && selectedMonitorEntity != null) {
+//                System.out.println("New selected with position: " + selectedMonitorEntity.position);
             }
         }
 

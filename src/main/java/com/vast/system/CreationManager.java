@@ -88,21 +88,27 @@ public class CreationManager extends BaseSystem {
 	public void createWorld() {
 		worldPrefab.createEntity();
 
-		FastNoise noise1 = new FastNoise((int) (random.nextDouble() * 10000000));
-		FastNoise noise2 = new FastNoise((int) (random.nextDouble() * 10000000));
-		for (float x = -worldConfiguration.width / 2f; x < worldConfiguration.width / 2f; x += 3f) {
-			for (float y = -worldConfiguration.height / 2f; y < worldConfiguration.height / 2f; y += 3f) {
-				if (noise1.GetSimplex(x, y) > 0.35f) {
-					createTree(new Point2f(x - 1f + random.nextFloat() * 2f, y - 1f + random.nextFloat() * 2f), false);
-				}
-				if (noise1.GetWhiteNoise(x, y) > 0.9f) {
-					createRock(new Point2f(x, y));
-				}
-				if (noise2.GetWhiteNoise(x, y) > 0.999f) {
-					createAnimalGroup(new Point2f(x, y), random.nextFloat() < 0.5f ? "rabbit" : "deer");
-				}
-			}
-		}
+//		FastNoise noise1 = new FastNoise((int) (random.nextDouble() * 10000000));
+//		FastNoise noise2 = new FastNoise((int) (random.nextDouble() * 10000000));
+//		for (float x = -worldConfiguration.width / 2f; x < worldConfiguration.width / 2f; x += 3f) {
+//			for (float y = -worldConfiguration.height / 2f; y < worldConfiguration.height / 2f; y += 3f) {
+//				if (noise1.GetSimplex(x, y) > 0.35f) {
+//					createTree(new Point2f(x - 1f + random.nextFloat() * 2f, y - 1f + random.nextFloat() * 2f), false);
+//				}
+//				if (noise1.GetWhiteNoise(x, y) > 0.9f) {
+//					createRock(new Point2f(x, y));
+//				}
+//				if (noise2.GetWhiteNoise(x, y) > 0.999f) {
+//					createAnimalGroup(new Point2f(x, y), random.nextFloat() < 0.5f ? "rabbit" : "deer");
+//				}
+//			}
+//		}
+
+		createTree(new Point2f(-worldConfiguration.width / 2f + 5f, -worldConfiguration.height / 2f + 5f), false);
+		createTree(new Point2f(-worldConfiguration.width / 2f + 5f, worldConfiguration.height / 2f - 5f), false);
+		createTree(new Point2f(worldConfiguration.width / 2f - 5f, -worldConfiguration.height / 2f + 5f), false);
+		createTree(new Point2f(worldConfiguration.width / 2f - 5f, worldConfiguration.height / 2f - 5f), false);
+		createTree(new Point2f(0f, 0f), false);
 	}
 
 	public int createPlayer(String name, int subType, boolean fakePlayer) {

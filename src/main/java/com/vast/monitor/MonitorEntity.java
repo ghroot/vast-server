@@ -78,5 +78,8 @@ public class MonitorEntity {
             g.setColor(Color.WHITE);
             g.drawArc(position.x - 15, position.y - 15, 30, 30, 0, 360);
         }
+
+        g.setColor(Color.WHITE);
+        g.drawString(position.x + ", " + position.y, position.x + 10, position.y + 5);
     }
 }
