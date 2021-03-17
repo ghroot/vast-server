@@ -14,6 +14,7 @@ public class MonitorEntity {
     public String type;
     public Point2i position;
     public int collisionRadius;
+    public int scanDistance;
     public Point2i pathPosition;
     public String name;
     public List<MonitorComponent> components;
@@ -62,6 +63,11 @@ public class MonitorEntity {
             g.setColor(Color.BLUE);
             g.drawArc(position.x - collisionRadius, position.y - collisionRadius,
                     collisionRadius * 2, collisionRadius * 2, 0, 360);
+        }
+
+        if (debugSettings.get("Scan") && scanDistance > 0) {
+            g.setColor(Color.BLUE);
+            g.drawRect(position.x - scanDistance, position.y - scanDistance, 2 * scanDistance, 2 * scanDistance);
         }
 
         if (debugSettings.get("Path") && pathPosition != null) {

@@ -170,6 +170,7 @@ public class Monitor extends JFrame implements ActionListener {
 
         Menu debugMenu = new Menu("Debug");
         addDebugMenuItem(debugMenu, "Collision", KeyEvent.VK_C);
+        addDebugMenuItem(debugMenu, "Scan", KeyEvent.VK_A);
         addDebugMenuItem(debugMenu, "Path", KeyEvent.VK_P);
         addDebugMenuItem(debugMenu, "Name", KeyEvent.VK_N);
         addDebugMenuItem(debugMenu, "Quad", KeyEvent.VK_U);

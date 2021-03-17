@@ -56,16 +56,28 @@ public class MonitorWorld {
 
             if (vastWorld.getComponentMapper(Collision.class).has(entity)) {
                 monitorEntity.collisionRadius = (int) (vastWorld.getComponentMapper(Collision.class).get(entity).radius * SCALE);
+            } else {
+                monitorEntity.collisionRadius = 0;
+            }
+
+            if (vastWorld.getComponentMapper(Scan.class).has(entity)) {
+                monitorEntity.scanDistance = (int) (vastWorld.getComponentMapper(Scan.class).get(entity).distance * SCALE);
+            } else {
+                monitorEntity.scanDistance = 0;
             }
 
             if (vastWorld.getComponentMapper(Path.class).has(entity)) {
                 Point2f targetPosition = vastWorld.getComponentMapper(Path.class).get(entity).targetPosition;
                 monitorEntity.pathPosition = new Point2i(size.x / 2 + (int) (targetPosition.x * SCALE),
                         size.y / 2 - (int) (targetPosition.y * SCALE));
+            } else {
+                monitorEntity.pathPosition = null;
             }
 
             if (vastWorld.getComponentMapper(Player.class).has(entity)) {
                 monitorEntity.name = vastWorld.getComponentMapper(Player.class).get(entity).name;
+            } else {
+                monitorEntity.name = null;
             }
         }
 
