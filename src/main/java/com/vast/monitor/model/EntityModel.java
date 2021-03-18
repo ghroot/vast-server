@@ -31,7 +31,11 @@ public class EntityModel implements TableModel {
 
     @Override
     public int getRowCount() {
-        return entity.components.size();
+        if (entity != null) {
+            return entity.components.size();
+        } else {
+            return 1;
+        }
     }
 
     @Override
@@ -68,12 +72,22 @@ public class EntityModel implements TableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        if (columnIndex == 0) {
-            return entity.components.get(rowIndex).name;
-        } else if (columnIndex == 1) {
-            return entity.components.get(rowIndex).details;
+        if (entity != null) {
+            if (columnIndex == 0) {
+                return entity.components.get(rowIndex).name;
+            } else if (columnIndex == 1) {
+                return entity.components.get(rowIndex).details;
+            } else {
+                return null;
+            }
         } else {
-            return null;
+            if (columnIndex == 0) {
+                return "No entity selected";
+            } else if (columnIndex == 1) {
+                return "";
+            } else {
+                return null;
+            }
         }
     }
 

@@ -1,14 +1,14 @@
 package com.vast.monitor.model;
 
 import com.artemis.BaseSystem;
-import com.vast.data.Metrics;
 import com.vast.data.SystemMetrics;
 
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class SystemMetricsModel implements TableModel {
     private List<TableModelListener> listeners;
@@ -20,28 +20,34 @@ public class SystemMetricsModel implements TableModel {
         listeners = new ArrayList<>();
     }
 
-    public void refresh(Map<BaseSystem, SystemMetrics> systemMetricsToShow) {
-        int size = systemMetricsToShow.size();
-        if (systemNames == null || systemNames.length != size) {
-            systemNames = new String[size];
-        }
-        if (systemTimes == null || systemTimes.length != size) {
-            systemTimes = new int[size];
-        }
-        if (systemEntities == null || systemEntities.length != size) {
-            systemEntities = new int[size];
-        }
-        int index = 0;
-        for (BaseSystem system : systemMetricsToShow.keySet()) {
-            SystemMetrics systemMetrics = systemMetricsToShow.get(system);
-            systemNames[index] = system.getClass().getSimpleName();
-            systemTimes[index] = systemMetrics.getProcessingTime();
-            systemEntities[index] = Math.max(systemMetrics.getNumberOfEntitiesInSystem(), 0);
-            index++;
-        }
+    public void refresh(Map<BaseSystem, SystemMetrics> systemMetrics) {
+        if (systemMetrics != null) {
+            int size = systemMetrics.size();
+            if (systemNames == null || systemNames.length != size) {
+                systemNames = new String[size];
+            }
+            if (systemTimes == null || systemTimes.length != size) {
+                systemTimes = new int[size];
+            }
+            if (systemEntities == null || systemEntities.length != size) {
+                systemEntities = new int[size];
+            }
+            int index = 0;
+            for (BaseSystem system : systemMetrics.keySet()) {
+                SystemMetrics metrics = systemMetrics.get(system);
+                systemNames[index] = system.getClass().getSimpleName();
+                systemTimes[index] = metrics.getProcessingTime();
+                systemEntities[index] = Math.max(metrics.getNumberOfEntitiesInSystem(), 0);
+                index++;
+            }
 
-        for (TableModelListener l : listeners) {
-            l.tableChanged(new TableModelEvent(this));
+            for (TableModelListener l : listeners) {
+                l.tableChanged(new TableModelEvent(this));
+            }
+        } else {
+            systemNames = new String[0];
+            systemTimes = new int[0];
+            systemEntities = new int[0];
         }
     }
 

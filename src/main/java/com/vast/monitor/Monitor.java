@@ -5,6 +5,7 @@ import com.vast.VastWorld;
 import com.vast.monitor.model.EntityModel;
 import com.vast.monitor.model.ModelData;
 import com.vast.monitor.model.SystemMetricsModel;
+import com.vast.monitor.model.WorldInfoModel;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -15,7 +16,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Monitor extends JFrame implements ActionListener {
-    private static final int WIDTH = 1000;
+    private static final int WIDTH = 1400;
     private static final int HEIGHT = 800;
 
     private VastWorld vastWorld;
@@ -28,6 +29,8 @@ public class Monitor extends JFrame implements ActionListener {
     private JTable systemMetricsTable;
     private EntityModel entityTableModel;
     private JTable entityTable;
+    private WorldInfoModel worldInfoModel;
+    private JTable worldInfoTable;
 
     private Timer timer;
 
@@ -89,32 +92,33 @@ public class Monitor extends JFrame implements ActionListener {
 
         systemMetricsTableModel = new SystemMetricsModel();
         systemMetricsTable = new JTable(systemMetricsTableModel);
-        systemMetricsTable.getColumn("System").setPreferredWidth(150);
-        systemMetricsTable.getColumn("Time").setPreferredWidth(30);
-        systemMetricsTable.getColumn("Entities").setPreferredWidth(50);
+        systemMetricsTable.getColumn("System").setMaxWidth(120);
+        systemMetricsTable.getColumn("Time").setMaxWidth(40);
+        systemMetricsTable.getColumn("Entities").setMaxWidth(50);
+        systemMetricsTable.setPreferredScrollableViewportSize(new Dimension(210, HEIGHT));
+        getContentPane().add(new JScrollPane(systemMetricsTable), BorderLayout.EAST);
+
+        JPanel leftPanel = new JPanel(new BorderLayout());
+
+        worldInfoModel = new WorldInfoModel();
+        worldInfoTable = new JTable(worldInfoModel);
+        worldInfoTable.getColumn("Name").setMaxWidth(100);
+        worldInfoTable.getColumn("Value").setMaxWidth(120);
+        worldInfoTable.setPreferredScrollableViewportSize(new Dimension(220, 270));
+        leftPanel.add(new JScrollPane(worldInfoTable), BorderLayout.NORTH);
 
         entityTableModel = new EntityModel();
         entityTable = new JTable(entityTableModel);
-        entityTable.getColumn("Component").setPreferredWidth(120);
-        entityTable.getColumn("Details").setPreferredWidth(100);
+        entityTable.getColumn("Component").setMaxWidth(120);
+        entityTable.getColumn("Details").setMaxWidth(100);
+        entityTable.setPreferredScrollableViewportSize(new Dimension(220, HEIGHT - 400));
+        leftPanel.add(new JScrollPane(entityTable), BorderLayout.SOUTH);
+
+        getContentPane().add(leftPanel, BorderLayout.WEST);
     }
 
     private void setupMenu() {
         MenuBar menuBar = new MenuBar();
-
-        Menu viewMenu = new Menu("View");
-        CheckboxMenuItem systemMetricsMenuItem = new CheckboxMenuItem("System Metrics");
-        systemMetricsMenuItem.setShortcut(new MenuShortcut(KeyEvent.VK_S));
-        systemMetricsMenuItem.addItemListener(e -> {
-            if (systemMetricsTable.getParent() != null) {
-                getContentPane().remove(systemMetricsTable);
-            } else {
-                getContentPane().add(systemMetricsTable, BorderLayout.EAST);
-            }
-            getContentPane().revalidate();
-        });
-        viewMenu.add(systemMetricsMenuItem);
-        menuBar.add(viewMenu);
 
         Menu debugMenu = new Menu("Debug");
         addDebugMenuItem(debugMenu, "Collision", KeyEvent.VK_C);
@@ -144,7 +148,14 @@ public class Monitor extends JFrame implements ActionListener {
         monitorWorld.sync(vastWorld, clickPoint);
         clickPoint = null;
 
-        modelData.systemMetricsToShow = vastWorld.getMetrics().getSystemMetrics().entrySet()
+        Map<String, String> worldInfo = new HashMap<>();
+        worldInfo.put("World size", "" + monitorWorld.getWorldSize().x + " x " + monitorWorld.getWorldSize().y);
+        worldInfo.put("Total entities", "" + monitorWorld.getNumberOfEntities());
+        worldInfo.put("Static entities", "" + monitorWorld.getNumberOfStaticEntities());
+        worldInfo.put("Moving entities", "" + monitorWorld.getNumberOfMovingEntities());
+        modelData.worldInfo = worldInfo;
+
+        modelData.systemMetrics = vastWorld.getMetrics().getSystemMetrics().entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing((BaseSystem system) -> system.getClass().getSimpleName())))
                 .collect(Collectors.toMap(
@@ -172,24 +183,14 @@ public class Monitor extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        synchronized (modelData) {
-            if (systemMetricsTable.isShowing()) {
-                systemMetricsTableModel.refresh(modelData.systemMetricsToShow);
-            }
+        systemMetricsTableModel.refresh(modelData.systemMetrics);
 
-            if (modelData.entity != null) {
-                entityTableModel.refresh(modelData.entity);
-                if (entityTable.getParent() == null) {
-                    getContentPane().add(entityTable, BorderLayout.WEST);
-                    revalidate();
-                }
-            } else {
-                if (entityTable.getParent() != null) {
-                    getContentPane().remove(entityTable);
-                    entityTableModel.clear();
-                    revalidate();
-                }
-            }
+        worldInfoModel.refresh(modelData.worldInfo);
+
+        if (modelData.entity != null) {
+            entityTableModel.refresh(modelData.entity);
+        } else {
+            entityTableModel.clear();
         }
 
         repaint();

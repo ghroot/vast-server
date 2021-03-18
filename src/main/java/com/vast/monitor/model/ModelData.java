@@ -7,6 +7,7 @@ import com.vast.monitor.MonitorEntity;
 import java.util.Map;
 
 public class ModelData {
-    public Map<BaseSystem, SystemMetrics> systemMetricsToShow;
+    public Map<String, String> worldInfo;
+    public Map<BaseSystem, SystemMetrics> systemMetrics;
     public MonitorEntity entity;
 }

@@ -24,6 +24,9 @@ public class MonitorWorld {
 
     private Point2i size = new Point2i();
     private Map<Integer, MonitorEntity> monitorEntities;
+    private int numberOfStaticEntities;
+    private int numberOfMovingEntities;
+    private Point2i worldSize;
     private MonitorEntity selectedMonitorEntity;
     private List<Rectangle> quadRects;
 
@@ -37,11 +40,31 @@ public class MonitorWorld {
         return selectedMonitorEntity;
     }
 
+    public int getNumberOfEntities() {
+        return monitorEntities != null ? monitorEntities.size() : 0;
+    }
+
+    public int getNumberOfStaticEntities() {
+        return numberOfStaticEntities;
+    }
+
+    public int getNumberOfMovingEntities() {
+        return numberOfMovingEntities;
+    }
+
+    public Point2i getWorldSize() {
+        return worldSize;
+    }
+
     public void sync(VastWorld vastWorld, Point2D clickPoint) {
         size.set(vastWorld.getWorldConfiguration().width * SCALE, vastWorld.getWorldConfiguration().height * SCALE);
 
+        worldSize = new Point2i(vastWorld.getWorldConfiguration().width, vastWorld.getWorldConfiguration().height);
+
         Set<Integer> entities = Arrays.stream(vastWorld.getEntities(Aspect.all(Transform.class))).boxed().collect(Collectors.toSet());
         monitorEntities.entrySet().removeIf(entry -> !entities.contains(entry.getValue().entity));
+        numberOfStaticEntities = 0;
+        numberOfMovingEntities = 0;
         for (int entity : entities) {
             MonitorEntity monitorEntity;
             if (monitorEntities.containsKey(entity)) {
@@ -86,6 +109,12 @@ public class MonitorWorld {
                 monitorEntity.colored = scan.nearbyEntities.contains(entity);
             } else {
                 monitorEntity.colored = true;
+            }
+
+            if (vastWorld.getComponentMapper(Static.class).has(entity)) {
+                numberOfStaticEntities++;
+            } else {
+                numberOfMovingEntities++;
             }
         }
 

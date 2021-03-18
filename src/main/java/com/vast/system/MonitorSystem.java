@@ -2,6 +2,8 @@ package com.vast.system;
 
 import com.artemis.Aspect;
 import com.artemis.systems.IntervalSystem;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.extras.FlatInspector;
 import com.vast.VastWorld;
 import com.vast.monitor.Monitor;
 
@@ -20,7 +22,11 @@ public class MonitorSystem extends IntervalSystem {
     @Override
     protected void initialize() {
         try {
-            SwingUtilities.invokeAndWait(() -> monitor = new Monitor(vastWorld));
+            SwingUtilities.invokeAndWait(() -> {
+                FlatDarkLaf.install();
+                FlatInspector.install("ctrl shift alt X");
+                monitor = new Monitor(vastWorld);
+            });
         } catch (Exception ignored) {
         }
     }
