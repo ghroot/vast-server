@@ -51,9 +51,7 @@ public class MonitorCanvas extends JComponent {
 
         g2d.setTransform(at);
 
-        synchronized (monitorWorld) {
-            monitorWorld.paint(g2d);
-        }
+        monitorWorld.paint(g2d);
 
         g2d.setTransform(saveTransform);
     }

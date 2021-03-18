@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class MonitorWorld {
@@ -24,12 +25,12 @@ public class MonitorWorld {
     private Point2i size = new Point2i();
     private Map<Integer, MonitorEntity> monitorEntities;
     private MonitorEntity selectedMonitorEntity;
-    private List<Rectangle> quadRects = new ArrayList<>();
+    private List<Rectangle> quadRects;
 
     public MonitorWorld(Map<String, Boolean> debugSettings) {
         this.debugSettings = debugSettings;
 
-        monitorEntities = new HashMap<>();
+        monitorEntities = new ConcurrentHashMap<>();
     }
 
     public MonitorEntity getSelectedMonitorEntity() {
@@ -226,20 +227,21 @@ public class MonitorWorld {
             }
         }
 
-        quadRects.clear();
-        addQuadContainers(vastWorld.getQuadTree());
+        List<Rectangle> newQuadRects = new ArrayList<>();
+        addQuadContainers(newQuadRects, vastWorld.getQuadTree());
+        quadRects = newQuadRects;
     }
 
-    private void addQuadContainers(QuadTree quadTree) {
+    private void addQuadContainers(List<Rectangle> quadRectsToAddTo, QuadTree quadTree) {
         int x = (int) (quadTree.getBounds().getX() * SCALE);
         int y = (int) -(quadTree.getBounds().getY() * SCALE);
         y -= quadTree.getBounds().getHeight() * SCALE;
         y += size.y;
-        quadRects.add(new Rectangle(x, y,
+        quadRectsToAddTo.add(new Rectangle(x, y,
                 (int) (quadTree.getBounds().getWidth() * SCALE), (int) (quadTree.getBounds().getHeight() * SCALE)));
         for (QuadTree child : quadTree.getNodes()) {
             if (child != null) {
-                addQuadContainers(child);
+                addQuadContainers(quadRectsToAddTo, child);
             }
         }
     }

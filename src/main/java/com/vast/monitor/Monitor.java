@@ -141,37 +141,32 @@ public class Monitor extends JFrame implements ActionListener {
     }
 
     public void sync() {
-        synchronized (monitorWorld) {
-            monitorWorld.sync(vastWorld, clickPoint);
-            clickPoint = null;
-        }
+        monitorWorld.sync(vastWorld, clickPoint);
+        clickPoint = null;
 
-        // Seems to work without "synchronized" due to always setting new values?
-        synchronized (modelData) {
-            modelData.systemMetricsToShow = vastWorld.getMetrics().getSystemMetrics().entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByKey(Comparator.comparing((BaseSystem system) -> system.getClass().getSimpleName())))
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue,
-                            (e1, e2) -> e1,
-                            LinkedHashMap::new
-                    ));
+        modelData.systemMetricsToShow = vastWorld.getMetrics().getSystemMetrics().entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey(Comparator.comparing((BaseSystem system) -> system.getClass().getSimpleName())))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
 
-            MonitorEntity selected = monitorWorld.getSelectedMonitorEntity();
-            if (selected != null) {
-                MonitorEntity clone = new MonitorEntity(selected.entity);
-                clone.components = new ArrayList<>();
-                for (MonitorComponent component : selected.components) {
-                    MonitorComponent clonedComponent = new MonitorComponent();
-                    clonedComponent.name = component.name;
-                    clonedComponent.details = component.details;
-                    clone.components.add(clonedComponent);
-                }
-                modelData.entity = clone;
-            } else {
-                modelData.entity = null;
+        MonitorEntity selected = monitorWorld.getSelectedMonitorEntity();
+        if (selected != null) {
+            MonitorEntity clone = new MonitorEntity(selected.entity);
+            clone.components = new ArrayList<>();
+            for (MonitorComponent component : selected.components) {
+                MonitorComponent clonedComponent = new MonitorComponent();
+                clonedComponent.name = component.name;
+                clonedComponent.details = component.details;
+                clone.components.add(clonedComponent);
             }
+            modelData.entity = clone;
+        } else {
+            modelData.entity = null;
         }
     }
 
