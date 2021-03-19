@@ -12,6 +12,7 @@ import com.vast.interact.InteractionHandler;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class TestInteractSystem {
@@ -44,7 +45,7 @@ public class TestInteractSystem {
 
 		world.process();
 
-		Assert.assertFalse(interactMapper.has(interactEntity));
+		assertFalse(interactMapper.has(interactEntity));
 	}
 
 	@Test
@@ -61,7 +62,7 @@ public class TestInteractSystem {
 
 		world.process();
 
-		Assert.assertEquals(Interact.Phase.APPROACHING, interactMapper.get(interactEntity).phase);
+		assertEquals(Interact.Phase.APPROACHING, interactMapper.get(interactEntity).phase);
 	}
 
 	@Test
@@ -79,7 +80,7 @@ public class TestInteractSystem {
 
 		world.process();
 
-		Assert.assertEquals(Interact.Phase.INTERACTING, interactMapper.get(interactEntity).phase);
+		assertEquals(Interact.Phase.INTERACTING, interactMapper.get(interactEntity).phase);
 	}
 
 	@Test
@@ -119,7 +120,7 @@ public class TestInteractSystem {
 
 		world.process();
 
-		Assert.assertFalse(interactMapper.has(interactEntity));
+		assertFalse(interactMapper.has(interactEntity));
 	}
 
 	@Test
@@ -142,6 +143,44 @@ public class TestInteractSystem {
 		interactMapper.remove(interactEntity);
 
 		verify(interactionHandler).stop(interactEntity, otherEntity);
+	}
+
+	@Test
+	public void markedAsUsedWhenInteractionStarts() {
+		InteractionHandler interactionHandler = new TestInteractionHandler();
+		setupWorld(interactionHandler);
+
+		int interactEntity = world.create();
+		int otherEntity = world.create();
+
+		transformMapper.create(interactEntity);
+		interactMapper.create(interactEntity).entity = otherEntity;
+		interactMapper.get(interactEntity).handler = interactionHandler;
+		interactMapper.get(interactEntity).phase = Interact.Phase.APPROACHING;
+
+		transformMapper.create(otherEntity);
+
+		world.process();
+
+		assertTrue(usedMapper.has(otherEntity));
+		assertEquals(interactEntity, usedMapper.get(otherEntity).usedByEntity);
+	}
+
+	@Test
+	public void removesInteractIfOtherEntityIsDestroyed() {
+		InteractionHandler interactionHandler = new TestInteractionHandler();
+		setupWorld(interactionHandler);
+
+		int interactEntity = world.create();
+
+		transformMapper.create(interactEntity);
+		interactMapper.create(interactEntity).entity = -1;
+		interactMapper.get(interactEntity).handler = interactionHandler;
+		interactMapper.get(interactEntity).phase = Interact.Phase.INTERACTING;
+
+		world.process();
+
+		assertFalse(interactMapper.has(interactEntity));
 	}
 
 	class TestInteractionHandler extends AbstractInteractionHandler {
