@@ -17,6 +17,7 @@ public class MonitorEntity {
     public int collisionRadius;
     public int scanDistance;
     public Point2i pathPosition;
+    public Point2i interactPosition;
     public String name;
     public boolean colored = true;
     public List<MonitorComponent> components;
@@ -101,6 +102,11 @@ public class MonitorEntity {
             g.drawLine(position.x, position.y, pathPosition.x, pathPosition.y);
         }
 
+        if (debugSettings.get("Interact") && interactPosition != null) {
+            g.setColor(Color.MAGENTA);
+            drawDashedLine(g, position.x, position.y, interactPosition.x, interactPosition.y);
+        }
+
         if (debugSettings.get("Name") && name != null) {
             g.setColor(Color.WHITE);
             g.drawString(name, position.x + 7, position.y + 5);
@@ -110,5 +116,13 @@ public class MonitorEntity {
             g.setColor(Color.WHITE);
             g.drawArc(position.x - 15, position.y - 15, 30, 30, 0, 360);
         }
+    }
+
+    public void drawDashedLine(Graphics g, int x1, int y1, int x2, int y2) {
+        Graphics2D g2d = (Graphics2D) g.create();
+        Stroke dashed = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{2}, 0);
+        g2d.setStroke(dashed);
+        g2d.drawLine(x1, y1, x2, y2);
+        g2d.dispose();
     }
 }

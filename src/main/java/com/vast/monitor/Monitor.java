@@ -85,8 +85,9 @@ public class Monitor extends JFrame implements ActionListener {
         togglePanel.add(createDebugSettingToggleButton("Quad"));
         togglePanel.add(createDebugSettingToggleButton("Name"));
         togglePanel.add(createDebugSettingToggleButton("Path"));
+        togglePanel.add(createDebugSettingToggleButton("Interact"));
         toggleContainer.add(togglePanel, new GridBagConstraints());
-        toggleContainer.setPreferredSize(new Dimension(350, 40));
+        toggleContainer.setPreferredSize(new Dimension(450, 40));
         topPanel.add(toggleContainer, BorderLayout.WEST);
 
         zoomSlider = new JSlider(JSlider.HORIZONTAL, 50, 500, 100);

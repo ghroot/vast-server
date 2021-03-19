@@ -98,6 +98,20 @@ public class MonitorWorld {
                 monitorEntity.pathPosition = null;
             }
 
+            if (vastWorld.getComponentMapper(Interact.class).has(entity)) {
+                int interactEntity = vastWorld.getComponentMapper(Interact.class).get(entity).entity;
+                if (interactEntity >= 0) {
+                    Point2f interactPosition = vastWorld.getComponentMapper(Transform.class).get(interactEntity).position;
+                    monitorEntity.interactPosition = new Point2i(size.x / 2 + (int) (interactPosition.x * SCALE),
+                            size.y / 2 - (int) (interactPosition.y * SCALE));
+                }
+                else {
+                    monitorEntity.interactPosition = null;
+                }
+            } else {
+                monitorEntity.interactPosition = null;
+            }
+
             if (vastWorld.getComponentMapper(Player.class).has(entity)) {
                 monitorEntity.name = vastWorld.getComponentMapper(Player.class).get(entity).name;
             } else {
@@ -133,6 +147,11 @@ public class MonitorWorld {
             } else {
                 // Clicked first
                 selectedMonitorEntity = closestMonitorEntity;
+            }
+        } else if (selectedMonitorEntity != null) {
+            // Selected entity was removed
+            if (!entities.contains(selectedMonitorEntity.entity)) {
+                selectedMonitorEntity = null;
             }
         }
 
