@@ -82,7 +82,7 @@ public class EntityModel implements TableModel {
             }
         } else {
             if (columnIndex == 0) {
-                return "No entity selected";
+                return "No entity";
             } else if (columnIndex == 1) {
                 return "";
             } else {

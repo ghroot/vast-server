@@ -52,7 +52,9 @@ public class InteractSystem extends IteratingSystem {
 	protected void removed(int entity) {
 		Interact interact = interactMapper.get(entity);
 		if (interact != null && interact.phase == Interact.Phase.INTERACTING) {
-			usedMapper.remove(interact.entity);
+			if (interact.entity >= 0) {
+				usedMapper.remove(interact.entity);
+			}
 			if (interact.handler != null) {
 				interact.handler.stop(entity, interact.entity);
 			}

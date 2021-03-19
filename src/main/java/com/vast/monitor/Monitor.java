@@ -9,6 +9,8 @@ import com.vast.monitor.model.WorldInfoModel;
 
 import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
@@ -49,7 +51,6 @@ public class Monitor extends JFrame implements ActionListener {
         modelData = new ModelData();
 
         setupUI();
-        setupMenu();
         setVisible(true);
         startTimer();
     }
@@ -74,69 +75,103 @@ public class Monitor extends JFrame implements ActionListener {
                 clickPoint = new Point((int) Math.round(x), (int) Math.round(y));
             }
         });
-        getContentPane().add(canvas, BorderLayout.CENTER);
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+
+        JPanel toggleContainer = new JPanel(new GridBagLayout());
+        JPanel togglePanel = new JPanel(new FlowLayout());
+        togglePanel.add(createDebugSettingToggleButton("Collision"));
+        togglePanel.add(createDebugSettingToggleButton("Scan"));
+        togglePanel.add(createDebugSettingToggleButton("Quad"));
+        togglePanel.add(createDebugSettingToggleButton("Name"));
+        togglePanel.add(createDebugSettingToggleButton("Path"));
+        toggleContainer.add(togglePanel, new GridBagConstraints());
+        toggleContainer.setPreferredSize(new Dimension(350, 40));
+        topPanel.add(toggleContainer, BorderLayout.WEST);
 
         zoomSlider = new JSlider(JSlider.HORIZONTAL, 50, 500, 100);
+        zoomSlider.setFocusable(false);
+        zoomSlider.setPreferredSize(new Dimension(WIDTH - toggleContainer.getPreferredSize().width, 40));
         zoomSlider.setMajorTickSpacing(50);
         zoomSlider.setMinorTickSpacing(10);
         zoomSlider.setPaintTicks(true);
         zoomSlider.setPaintLabels(true);
         zoomSlider.setSnapToTicks(true);
+        zoomSlider.setFocusable(false);
         zoomSlider.addChangeListener(e -> {
             JSlider slider = (JSlider) e.getSource();
             int zoomPercent = slider.getValue();
             canvas.scale = Math.max(0.00001, zoomPercent / 100.0);
             canvas.repaint();
         });
-        getContentPane().add(zoomSlider, BorderLayout.NORTH);
+        topPanel.add(zoomSlider, BorderLayout.EAST);
 
         systemMetricsTableModel = new SystemMetricsModel();
         systemMetricsTable = new JTable(systemMetricsTableModel);
-        systemMetricsTable.getColumn("System").setMaxWidth(120);
-        systemMetricsTable.getColumn("Time").setMaxWidth(40);
-        systemMetricsTable.getColumn("Entities").setMaxWidth(50);
-        systemMetricsTable.setPreferredScrollableViewportSize(new Dimension(210, HEIGHT));
-        getContentPane().add(new JScrollPane(systemMetricsTable), BorderLayout.EAST);
-
-        JPanel leftPanel = new JPanel(new BorderLayout());
+        systemMetricsTable.setFocusable(false);
+        systemMetricsTable.getColumn("System").setPreferredWidth(120);
+        systemMetricsTable.getColumn("Time").setPreferredWidth(40);
+        systemMetricsTable.getColumn("Entities").setPreferredWidth(60);
+        JScrollPane systemMetricsScrollPanel = new JScrollPane(systemMetricsTable);
+        systemMetricsScrollPanel.setPreferredSize(new Dimension(220, HEIGHT));
+        systemMetricsScrollPanel.setMinimumSize(new Dimension(220, HEIGHT));
+        systemMetricsTable.setPreferredScrollableViewportSize(new Dimension(220, HEIGHT));
 
         worldInfoModel = new WorldInfoModel();
         worldInfoTable = new JTable(worldInfoModel);
-        worldInfoTable.getColumn("Name").setMaxWidth(100);
-        worldInfoTable.getColumn("Value").setMaxWidth(120);
-        worldInfoTable.setPreferredScrollableViewportSize(new Dimension(220, 270));
-        leftPanel.add(new JScrollPane(worldInfoTable), BorderLayout.NORTH);
+        worldInfoTable.setFocusable(false);
+        worldInfoTable.getColumn("Name").setPreferredWidth(130);
+        worldInfoTable.getColumn("Value").setPreferredWidth(120);
+        JScrollPane worldInfoScrollPanel = new JScrollPane(worldInfoTable);
+        worldInfoScrollPanel.setPreferredSize(new Dimension(250, HEIGHT));
+        worldInfoScrollPanel.setMinimumSize(new Dimension(250, 150));
+        worldInfoTable.setPreferredScrollableViewportSize(new Dimension(250, HEIGHT));
 
         entityTableModel = new EntityModel();
         entityTable = new JTable(entityTableModel);
-        entityTable.getColumn("Component").setMaxWidth(120);
-        entityTable.getColumn("Details").setMaxWidth(100);
-        entityTable.setPreferredScrollableViewportSize(new Dimension(220, HEIGHT - 400));
-        leftPanel.add(new JScrollPane(entityTable), BorderLayout.SOUTH);
+        entityTable.setFocusable(false);
+        entityTable.getColumn("Component").setPreferredWidth(110);
+        entityTable.getColumn("Details").setPreferredWidth(140);
+        JScrollPane entityScrollPanel = new JScrollPane(entityTable);
+        entityScrollPanel.setPreferredSize(new Dimension(250, HEIGHT));
+        entityScrollPanel.setMinimumSize(new Dimension(250, 300));
+        entityTable.setPreferredScrollableViewportSize(new Dimension(250, HEIGHT));
 
-        getContentPane().add(leftPanel, BorderLayout.WEST);
+        JSplitPane splitPanel1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+
+        JSplitPane splitPanel2 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        JSplitPane splitPanel3 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        JSplitPane splitPanel4 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+
+        splitPanel3.setLeftComponent(canvas);
+        splitPanel3.setRightComponent(systemMetricsScrollPanel);
+
+        splitPanel2.setLeftComponent(splitPanel4);
+        splitPanel2.setRightComponent(splitPanel3);
+
+        splitPanel1.setTopComponent(topPanel);
+        splitPanel1.setBottomComponent(splitPanel2);
+
+        splitPanel4.setTopComponent(worldInfoScrollPanel);
+        splitPanel4.setBottomComponent(entityScrollPanel);
+
+        splitPanel3.setResizeWeight(1);
+
+        getContentPane().add(splitPanel1);
+
+        getContentPane().requestFocusInWindow();
     }
 
-    private void setupMenu() {
-        MenuBar menuBar = new MenuBar();
-
-        Menu debugMenu = new Menu("Debug");
-        addDebugMenuItem(debugMenu, "Collision", KeyEvent.VK_C);
-        addDebugMenuItem(debugMenu, "Scan", KeyEvent.VK_A);
-        addDebugMenuItem(debugMenu, "Path", KeyEvent.VK_P);
-        addDebugMenuItem(debugMenu, "Name", KeyEvent.VK_N);
-        addDebugMenuItem(debugMenu, "Quad", KeyEvent.VK_U);
-        menuBar.add(debugMenu);
-
-        setMenuBar(menuBar);
-    }
-
-    private void addDebugMenuItem(Menu debugMenu, String name, int shortcut) {
-        CheckboxMenuItem debugMenuItem = new CheckboxMenuItem(name);
-        debugMenuItem.setShortcut(new MenuShortcut(shortcut));
-        debugMenuItem.addItemListener(e -> debugSettings.put(name, debugMenuItem.getState()));
-        debugMenu.add(debugMenuItem);
+    private JToggleButton createDebugSettingToggleButton(String name) {
+        JToggleButton toggleButton = new JToggleButton(name);
+        toggleButton.setFocusable(false);
+        toggleButton.putClientProperty("JButton.buttonType", "roundRect");
+        toggleButton.addItemListener(e -> {
+            JToggleButton changedToggleButton = (JToggleButton) e.getSource();
+            debugSettings.put(name, changedToggleButton.isSelected());
+        });
         debugSettings.put(name, false);
+        return toggleButton;
     }
 
     private void startTimer() {
