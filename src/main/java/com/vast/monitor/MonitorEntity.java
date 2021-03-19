@@ -111,11 +111,6 @@ public class MonitorEntity {
             g.setColor(Color.WHITE);
             g.drawString(name, position.x + 7, position.y + 5);
         }
-
-        if (components != null) {
-            g.setColor(Color.WHITE);
-            g.drawArc(position.x - 15, position.y - 15, 30, 30, 0, 360);
-        }
     }
 
     public void drawDashedLine(Graphics g, int x1, int y1, int x2, int y2) {

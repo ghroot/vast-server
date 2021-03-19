@@ -39,6 +39,7 @@ public class Monitor extends JFrame implements ActionListener {
     private final Map<String, Boolean> debugSettings = new HashMap<>();
     private final MonitorWorld monitorWorld;
     private Point2D clickPoint;
+    private Point2D movePoint;
 
     public Monitor(VastWorld vastWorld) {
         super("Vast Monitor");
@@ -73,6 +74,24 @@ public class Monitor extends JFrame implements ActionListener {
                 y /= canvas.scale;
 
                 clickPoint = new Point((int) Math.round(x), (int) Math.round(y));
+            }
+        });
+        canvas.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                double x = e.getPoint().x;
+                double y = e.getPoint().y;
+
+                x -= (1f - canvas.scale) * getWidth() / 2;
+                y -= (1f - canvas.scale) * getHeight() / 2;
+
+                x -= canvas.translateX * canvas.scale;
+                y -= canvas.translateY * canvas.scale;
+
+                x /= canvas.scale;
+                y /= canvas.scale;
+
+                movePoint = new Point((int) Math.round(x), (int) Math.round(y));
             }
         });
 
@@ -181,7 +200,7 @@ public class Monitor extends JFrame implements ActionListener {
     }
 
     public void sync() {
-        monitorWorld.sync(vastWorld, clickPoint);
+        monitorWorld.sync(vastWorld, clickPoint, movePoint);
         clickPoint = null;
 
         Map<String, String> worldInfo = new HashMap<>();

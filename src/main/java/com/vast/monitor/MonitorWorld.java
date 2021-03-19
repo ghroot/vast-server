@@ -28,6 +28,8 @@ public class MonitorWorld {
     private int numberOfMovingEntities;
     private Point2i worldSize;
     private MonitorEntity selectedMonitorEntity;
+    private long selectedTime;
+    private MonitorEntity hoveredMonitorEntity;
     private List<Rectangle> quadRects;
 
     public MonitorWorld(Map<String, Boolean> debugSettings) {
@@ -56,7 +58,7 @@ public class MonitorWorld {
         return worldSize;
     }
 
-    public void sync(VastWorld vastWorld, Point2D clickPoint) {
+    public void sync(VastWorld vastWorld, Point2D clickPoint, Point2D movePoint) {
         size.set(vastWorld.getWorldConfiguration().width * SCALE, vastWorld.getWorldConfiguration().height * SCALE);
 
         worldSize = new Point2i(vastWorld.getWorldConfiguration().width, vastWorld.getWorldConfiguration().height);
@@ -143,16 +145,22 @@ public class MonitorWorld {
                     // Clicked other
                     selectedMonitorEntity.components = null;
                     selectedMonitorEntity = closestMonitorEntity;
+                    selectedTime = System.currentTimeMillis();
                 }
             } else {
                 // Clicked first
                 selectedMonitorEntity = closestMonitorEntity;
+                selectedTime = System.currentTimeMillis();
             }
         } else if (selectedMonitorEntity != null) {
             // Selected entity was removed
             if (!entities.contains(selectedMonitorEntity.entity)) {
                 selectedMonitorEntity = null;
             }
+        }
+
+        if (movePoint != null) {
+            hoveredMonitorEntity = getMonitorEntityClosestTo(movePoint);
         }
 
         if (selectedMonitorEntity != null) {
@@ -323,7 +331,29 @@ public class MonitorWorld {
         }
 
         for (MonitorEntity monitorEntity : monitorEntities.values()) {
+            if (monitorEntity == hoveredMonitorEntity && monitorEntity != selectedMonitorEntity) {
+                g.setColor(Color.DARK_GRAY);
+                g.drawArc(monitorEntity.position.x - 15, monitorEntity.position.y - 15, 30, 30, 0, 360);
+            }
+        }
+
+        for (MonitorEntity monitorEntity : monitorEntities.values()) {
             monitorEntity.paint(g);
+        }
+
+        for (MonitorEntity monitorEntity : monitorEntities.values()) {
+            if (monitorEntity == selectedMonitorEntity) {
+                int size;
+                float secondsSinceSelected = (System.currentTimeMillis() - selectedTime) / 1000f;
+                if (secondsSinceSelected < 0.2f) {
+                    size = 30 + (int) ((0.2f - secondsSinceSelected) * 40);
+                } else {
+                    size = 30;
+                }
+
+                g.setColor(Color.WHITE);
+                g.drawArc(monitorEntity.position.x - size / 2, monitorEntity.position.y - size / 2, size, size, 0, 360);
+            }
         }
 
         for (MonitorEntity monitorEntity : monitorEntities.values()) {
