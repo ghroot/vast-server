@@ -43,9 +43,9 @@ public class MonitorCanvas extends JComponent {
 
         at = new AffineTransform(saveTransform);
 
-        at.translate(monitor.getWidth() / 2f, monitor.getHeight() / 2f);
+        at.translate(getWidth() / 2f, getHeight() / 2f);
         at.scale(scale, scale);
-        at.translate(-monitor.getWidth() / 2f, -monitor.getHeight() / 2f);
+        at.translate(-getWidth() / 2f, -getHeight() / 2f);
 
         at.translate(translateX, translateY);
 

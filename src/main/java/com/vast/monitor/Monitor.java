@@ -64,8 +64,8 @@ public class Monitor extends JFrame implements ActionListener {
                 double x = e.getPoint().x;
                 double y = e.getPoint().y;
 
-                x -= (1f - canvas.scale) * getWidth() / 2;
-                y -= (1f - canvas.scale) * getHeight() / 2;
+                x -= (1f - canvas.scale) * canvas.getWidth() / 2;
+                y -= (1f - canvas.scale) * canvas.getHeight() / 2;
 
                 x -= canvas.translateX * canvas.scale;
                 y -= canvas.translateY * canvas.scale;
@@ -82,8 +82,8 @@ public class Monitor extends JFrame implements ActionListener {
                 double x = e.getPoint().x;
                 double y = e.getPoint().y;
 
-                x -= (1f - canvas.scale) * getWidth() / 2;
-                y -= (1f - canvas.scale) * getHeight() / 2;
+                x -= (1f - canvas.scale) * canvas.getWidth() / 2;
+                y -= (1f - canvas.scale) * canvas.getHeight() / 2;
 
                 x -= canvas.translateX * canvas.scale;
                 y -= canvas.translateY * canvas.scale;
