@@ -86,7 +86,7 @@ public class MonitorWorld {
                 monitorEntity.collisionRadius = 0;
             }
 
-            if (vastWorld.getComponentMapper(Player.class).has(entity)) {
+            if (vastWorld.getComponentMapper(Player.class).has(entity) && vastWorld.getComponentMapper(Scan.class).has(entity)) {
                 monitorEntity.scanDistance = (int) (vastWorld.getComponentMapper(Scan.class).get(entity).distance * SCALE);
             } else {
                 monitorEntity.scanDistance = 0;
@@ -120,7 +120,8 @@ public class MonitorWorld {
                 monitorEntity.name = null;
             }
 
-            if (selectedMonitorEntity != null && vastWorld.getComponentMapper(Player.class).has(selectedMonitorEntity.entity)) {
+            if (selectedMonitorEntity != null && vastWorld.getComponentMapper(Player.class).has(selectedMonitorEntity.entity)
+                && vastWorld.getComponentMapper(Scan.class).has(selectedMonitorEntity.entity)) {
                 Scan scan = vastWorld.getComponentMapper(Scan.class).get(selectedMonitorEntity.entity);
                 monitorEntity.colored = scan.nearbyEntities.contains(entity);
             } else {
