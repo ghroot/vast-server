@@ -51,13 +51,17 @@ public class MonitorCanvas extends JComponent {
 
         g2d.setTransform(at);
 
-        monitorWorld.paint(g2d);
+        synchronized (monitorWorld) {
+            monitorWorld.paint(g2d);
+        }
 
         g2d.setTransform(saveTransform);
     }
 
     public Dimension getPreferredSize() {
-        return new Dimension(monitorWorld.getSize().x, monitorWorld.getSize().y);
+        synchronized (monitorWorld) {
+            return new Dimension(monitorWorld.getSize().x, monitorWorld.getSize().y);
+        }
     }
 
     class PanningHandler extends MouseAdapter implements MouseListener, MouseMotionListener {

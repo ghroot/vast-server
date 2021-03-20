@@ -200,41 +200,43 @@ public class Monitor extends JFrame implements ActionListener {
     }
 
     public void sync() {
-        monitorWorld.sync(vastWorld, clickPoint, movePoint);
-        clickPoint = null;
+        synchronized (monitorWorld) {
+            monitorWorld.sync(vastWorld, clickPoint, movePoint);
+            clickPoint = null;
 
-        Map<String, String> worldInfo = new HashMap<>();
-        worldInfo.put("World size", "" + monitorWorld.getWorldSize().x + " x " + monitorWorld.getWorldSize().y);
-        worldInfo.put("Total entities", "" + monitorWorld.getNumberOfEntities());
-        worldInfo.put("Static entities", "" + monitorWorld.getNumberOfStaticEntities());
-        worldInfo.put("Moving entities", "" + monitorWorld.getNumberOfMovingEntities());
-        modelData.worldInfo = worldInfo;
+            Map<String, String> worldInfo = new HashMap<>();
+            worldInfo.put("World size", "" + monitorWorld.getWorldSize().x + " x " + monitorWorld.getWorldSize().y);
+            worldInfo.put("Total entities", "" + monitorWorld.getNumberOfEntities());
+            worldInfo.put("Static entities", "" + monitorWorld.getNumberOfStaticEntities());
+            worldInfo.put("Moving entities", "" + monitorWorld.getNumberOfMovingEntities());
+            modelData.worldInfo = worldInfo;
 
-        if (vastWorld.getMetrics() != null) {
-            modelData.systemMetrics = vastWorld.getMetrics().getSystemMetrics().entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByKey(Comparator.comparing((BaseSystem system) -> system.getClass().getSimpleName())))
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            Map.Entry::getValue,
-                            (e1, e2) -> e1,
-                            LinkedHashMap::new
-                    ));
-        }
-
-        MonitorEntity selected = monitorWorld.getSelectedMonitorEntity();
-        if (selected != null) {
-            MonitorEntity clone = new MonitorEntity(selected.entity);
-            clone.components = new ArrayList<>();
-            for (MonitorComponent component : selected.components) {
-                MonitorComponent clonedComponent = new MonitorComponent();
-                clonedComponent.name = component.name;
-                clonedComponent.details = component.details;
-                clone.components.add(clonedComponent);
+            if (vastWorld.getMetrics() != null) {
+                modelData.systemMetrics = vastWorld.getMetrics().getSystemMetrics().entrySet()
+                        .stream()
+                        .sorted(Map.Entry.comparingByKey(Comparator.comparing((BaseSystem system) -> system.getClass().getSimpleName())))
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (e1, e2) -> e1,
+                                LinkedHashMap::new
+                        ));
             }
-            modelData.entity = clone;
-        } else {
-            modelData.entity = null;
+
+            MonitorEntity selected = monitorWorld.getSelectedMonitorEntity();
+            if (selected != null) {
+                MonitorEntity clone = new MonitorEntity(selected.entity);
+                clone.components = new ArrayList<>();
+                for (MonitorComponent component : selected.components) {
+                    MonitorComponent clonedComponent = new MonitorComponent();
+                    clonedComponent.name = component.name;
+                    clonedComponent.details = component.details;
+                    clone.components.add(clonedComponent);
+                }
+                modelData.entity = clone;
+            } else {
+                modelData.entity = null;
+            }
         }
     }
 

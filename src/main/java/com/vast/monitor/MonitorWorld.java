@@ -14,7 +14,6 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class MonitorWorld {
@@ -35,7 +34,7 @@ public class MonitorWorld {
     public MonitorWorld(Map<String, Boolean> debugSettings) {
         this.debugSettings = debugSettings;
 
-        monitorEntities = new ConcurrentHashMap<>();
+        monitorEntities = new HashMap<>();
     }
 
     public MonitorEntity getSelectedMonitorEntity() {
