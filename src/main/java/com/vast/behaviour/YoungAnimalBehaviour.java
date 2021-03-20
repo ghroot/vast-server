@@ -4,6 +4,7 @@ import com.artemis.ComponentMapper;
 import com.vast.component.AI;
 import com.vast.component.Follow;
 import com.vast.component.Group;
+import com.vast.data.WorldConfiguration;
 import com.vast.interact.InteractionHandler;
 
 import java.util.Random;
@@ -12,11 +13,9 @@ public class YoungAnimalBehaviour extends AbstractBehaviour {
 	private ComponentMapper<Group> groupMapper;
 	private ComponentMapper<Follow> followMapper;
 
-	private Random random;
-
-	public YoungAnimalBehaviour(InteractionHandler[] interactionHandlers, Random random) {
-		super(interactionHandlers);
-		this.random = random;
+	public YoungAnimalBehaviour(InteractionHandler[] interactionHandlers, WorldConfiguration worldConfiguration,
+								Random random) {
+		super(interactionHandlers, worldConfiguration, random);
 	}
 
 	@Override
@@ -29,7 +28,7 @@ public class YoungAnimalBehaviour extends AbstractBehaviour {
 				for (int nearbyEntity : getNearbyEntities(entity)) {
 					if (groupMapper.has(nearbyEntity) && groupMapper.get(nearbyEntity).id == group.id) {
 						followMapper.create(entity).entity = nearbyEntity;
-						followMapper.get(entity).distance = 1f + 1f * random.nextFloat();
+						followMapper.get(entity).distance = 1f + random.nextFloat();
 						ai.state = "following";
 						break;
 					}

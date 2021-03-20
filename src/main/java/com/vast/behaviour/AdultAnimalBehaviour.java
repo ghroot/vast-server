@@ -2,8 +2,10 @@ package com.vast.behaviour;
 
 import com.artemis.ComponentMapper;
 import com.vast.component.*;
+import com.vast.data.WorldConfiguration;
 import com.vast.interact.InteractionHandler;
 
+import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
 import java.util.Random;
 
@@ -17,13 +19,11 @@ public class AdultAnimalBehaviour extends AbstractBehaviour {
 	private final float SCARED_DISTANCE = 2.5f;
 	private final float FLEE_DISTANCE = 4.0f;
 
-	private Random random;
-
 	private Vector2f reusableVector;
 
-	public AdultAnimalBehaviour(InteractionHandler[] interactionHandlers, Random random) {
-		super(interactionHandlers);
-		this.random = random;
+	public AdultAnimalBehaviour(InteractionHandler[] interactionHandlers, WorldConfiguration worldConfiguration,
+								Random random) {
+		super(interactionHandlers, worldConfiguration, random);
 
 		reusableVector = new Vector2f();
 	}
@@ -54,11 +54,11 @@ public class AdultAnimalBehaviour extends AbstractBehaviour {
 				}
 				if (ai.state.equals("none")) {
 					if (random.nextFloat() <= 0.2f) {
-						pathMapper.create(entity).targetPosition.set(
-							transformMapper.get(entity).position.x - 2f + random.nextFloat() * 4f,
-							transformMapper.get(entity).position.y - 2f + random.nextFloat() * 4f
-						);
-						ai.state = "moving";
+						Point2f randomMovePosition = getRandomMovePosition(transform.position, 2f);
+						if (randomMovePosition != null) {
+							pathMapper.create(entity).targetPosition.set(randomMovePosition);
+							ai.state = "moving";
+						}
 					} else {
 						ai.countdown = 2f + random.nextFloat() * 2f;
 						ai.state = "idling";

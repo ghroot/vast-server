@@ -93,9 +93,9 @@ public class VastWorld implements Runnable {
 			new ValidPropertyHandler()
 		};
 		Map<String, Behaviour> behaviours = new HashMap<>();
-		behaviours.put("human", new HumanBehaviour(interactionHandlers, random, incomingRequestsByPeer, items, recipes));
-		behaviours.put("adultAnimal", new AdultAnimalBehaviour(interactionHandlers, random));
-		behaviours.put("youngAnimal", new YoungAnimalBehaviour(interactionHandlers, random));
+		behaviours.put("human", new HumanBehaviour(interactionHandlers, worldConfiguration, random, incomingRequestsByPeer, items, recipes));
+		behaviours.put("adultAnimal", new AdultAnimalBehaviour(interactionHandlers, worldConfiguration, random));
+		behaviours.put("youngAnimal", new YoungAnimalBehaviour(interactionHandlers, worldConfiguration, random));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldConfiguration, random),
@@ -127,7 +127,7 @@ public class VastWorld implements Runnable {
 			new GrowSystem(),
 			new LifetimeSystem(),
 			new LearnSystem(),
-			new PickupSystem(random),
+			new PickupSystem(worldConfiguration, random),
 			new DayNightCycleSystem(worldConfiguration),
 			new WeatherSystem(random),
 			new ParentSystem(),
