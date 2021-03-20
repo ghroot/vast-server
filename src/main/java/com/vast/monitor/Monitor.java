@@ -210,15 +210,17 @@ public class Monitor extends JFrame implements ActionListener {
         worldInfo.put("Moving entities", "" + monitorWorld.getNumberOfMovingEntities());
         modelData.worldInfo = worldInfo;
 
-        modelData.systemMetrics = vastWorld.getMetrics().getSystemMetrics().entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByKey(Comparator.comparing((BaseSystem system) -> system.getClass().getSimpleName())))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (e1, e2) -> e1,
-                        LinkedHashMap::new
-                ));
+        if (vastWorld.getMetrics() != null) {
+            modelData.systemMetrics = vastWorld.getMetrics().getSystemMetrics().entrySet()
+                    .stream()
+                    .sorted(Map.Entry.comparingByKey(Comparator.comparing((BaseSystem system) -> system.getClass().getSimpleName())))
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (e1, e2) -> e1,
+                            LinkedHashMap::new
+                    ));
+        }
 
         MonitorEntity selected = monitorWorld.getSelectedMonitorEntity();
         if (selected != null) {

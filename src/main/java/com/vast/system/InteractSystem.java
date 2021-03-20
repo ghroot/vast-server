@@ -117,6 +117,7 @@ public class InteractSystem extends IteratingSystem {
 				} else {
 					if (interact.phase == Interact.Phase.INTERACTING) {
 						interact.handler.stop(entity, interact.entity);
+						usedMapper.remove(interact.entity);
 					}
 					logger.debug("Entity {} started approaching entity {} to interact", entity, interact.entity);
 					pathMapper.create(entity).targetPosition.set(otherTransform.position);
