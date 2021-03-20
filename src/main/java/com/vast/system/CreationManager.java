@@ -64,9 +64,9 @@ public class CreationManager extends BaseSystem {
 		terrainPrefabs.put("rock", new TerrainPrefabs.RockPrefab(world));
 		animalPrefabs = new HashMap<>();
 		animalPrefabs.put("rabbitAdult", new AnimalPrefabs.RabbitAdultPrefab(world));
-		animalPrefabs.put("rabbitYoung", new AnimalPrefabs.RabbitAdultPrefab(world));
-		animalPrefabs.put("deerAdult", new AnimalPrefabs.RabbitAdultPrefab(world));
-		animalPrefabs.put("deerYoung", new AnimalPrefabs.RabbitAdultPrefab(world));
+		animalPrefabs.put("rabbitYoung", new AnimalPrefabs.RabbitYoungPrefab(world));
+		animalPrefabs.put("deerAdult", new AnimalPrefabs.DeerAdultPrefab(world));
+		animalPrefabs.put("deerYoung", new AnimalPrefabs.DeerYoungPrefab(world));
 		buildingPlaceholderPrefab = new BuildingPrefabs.PlaceholderPrefab(world);
 		buildingPrefabs = new HashMap<>();
 		buildingPrefabs.put("chest", new BuildingPrefabs.ChestPrefab(world));

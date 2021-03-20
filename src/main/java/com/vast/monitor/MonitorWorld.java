@@ -203,7 +203,8 @@ public class MonitorWorld {
                 } else if (component instanceof  Active) {
                     detail = Integer.toString(((Active) component).knowEntities.size());
                 } else if (component instanceof Follow) {
-                    detail = "" + ((Follow) component).entity;
+                    Follow follow = (Follow) component;
+                    detail = follow.entity + ", " + (Math.round((follow.distance * 100.0f) / 100.0f));
                 } else if (component instanceof Group) {
                     detail = "" + ((Group) component).id;
                 } else if (component instanceof Order) {
@@ -212,9 +213,9 @@ public class MonitorWorld {
                         detail = "" + order.handler.getClass().getSimpleName();
                     }
                 } else if (component instanceof Speed) {
-                    detail = "" + (Math.round(((Speed) component).getModifiedSpeed() * 100.0f) / 100.0f);
+                    detail = "" + (Math.round(((Speed) component).getModifiedSpeed() * 10f) / 10f);
                 } else if (component instanceof Transform) {
-                    detail = "" + (Math.round(((Transform) component).position.x * 100.0f) / 100.0f) + ", " + (Math.round(((Transform) component).position.y * 100.0f) / 100.0f);
+                    detail = "" + (Math.round(((Transform) component).position.x * 100f) / 100f) + ", " + (Math.round(((Transform) component).position.y * 100.0f) / 100.0f);
                 } else if (component instanceof Path) {
                     Path path = (Path) component;
                     detail = "" + (Math.round(path.targetPosition.x * 100f) / 100f) + ", " + (Math.round(path.targetPosition.y * 100f) / 100f) + " " + (Math.round(path.timeInSamePosition * 10f) / 10f);
