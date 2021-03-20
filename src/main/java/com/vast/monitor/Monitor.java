@@ -9,12 +9,13 @@ import com.vast.monitor.model.WorldInfoModel;
 
 import javax.swing.*;
 import javax.swing.Timer;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Monitor extends JFrame implements ActionListener {
@@ -129,6 +130,7 @@ public class Monitor extends JFrame implements ActionListener {
         systemMetricsTableModel = new SystemMetricsModel();
         systemMetricsTable = new JTable(systemMetricsTableModel);
         systemMetricsTable.setFocusable(false);
+        sortTable(systemMetricsTable);
         systemMetricsTable.getColumn("System").setPreferredWidth(120);
         systemMetricsTable.getColumn("Time").setPreferredWidth(40);
         systemMetricsTable.getColumn("Entities").setPreferredWidth(60);
@@ -150,6 +152,7 @@ public class Monitor extends JFrame implements ActionListener {
         entityTableModel = new EntityModel();
         entityTable = new JTable(entityTableModel);
         entityTable.setFocusable(false);
+        sortTable(entityTable);
         entityTable.getColumn("Component").setPreferredWidth(110);
         entityTable.getColumn("Details").setPreferredWidth(140);
         JScrollPane entityScrollPanel = new JScrollPane(entityTable);
@@ -192,6 +195,15 @@ public class Monitor extends JFrame implements ActionListener {
         });
         debugSettings.put(name, false);
         return toggleButton;
+    }
+
+    private void sortTable(JTable table) {
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
+        table.setRowSorter(sorter);
+        List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+        sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+        sorter.setSortKeys(sortKeys);
+        sorter.sort();
     }
 
     private void startTimer() {
