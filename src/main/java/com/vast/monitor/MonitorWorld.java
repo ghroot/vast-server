@@ -153,14 +153,14 @@ public class MonitorWorld {
 
     private MonitorEntity getMonitorEntityClosestTo(Point2D point) {
         MonitorEntity monitorEntityClosestToClick = null;
-        float closestDistance = Float.MAX_VALUE;
+        float closestDistance2 = Float.MAX_VALUE;
         for (MonitorEntity monitorEntity : monitorEntities.values()) {
             float dx = Math.abs((float) (monitorEntity.position.x - point.getX()));
             float dy = Math.abs((float) (monitorEntity.position.y - point.getY()));
-            float distance = (float) Math.sqrt(dx * dx + dy * dy);
-            if (monitorEntityClosestToClick == null || distance < closestDistance) {
+            float distance2 = dx * dx + dy * dy;
+            if (monitorEntityClosestToClick == null || distance2 < closestDistance2) {
                 monitorEntityClosestToClick = monitorEntity;
-                closestDistance = distance;
+                closestDistance2 = distance2;
             }
         }
 
