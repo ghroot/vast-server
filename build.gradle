@@ -44,8 +44,8 @@ dependencies {
 }
 
 compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 1.9
+    targetCompatibility = 1.9
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 
