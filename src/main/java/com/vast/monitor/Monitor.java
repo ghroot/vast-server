@@ -221,8 +221,10 @@ public class Monitor extends JFrame implements ActionListener {
         synchronized (modelData) {
             Map<String, String> worldInfo = new HashMap<>();
             worldInfo.put("World size", "" + vastWorld.getWorldConfiguration().width + " x " + vastWorld.getWorldConfiguration().height);
+            worldInfo.put("Fps", "" + vastWorld.getMetrics().getFps());
             worldInfo.put("Total entities", "" + vastWorld.getEntities(Aspect.all(Transform.class)).length);
             worldInfo.put("Static entities", "" + vastWorld.getEntities(Aspect.all(Static.class)).length);
+            worldInfo.put("Collisions", vastWorld.getMetrics().getNumberOfCollisions() + " / " + vastWorld.getMetrics().getNumberOfCollisionChecks());
             modelData.worldInfo = worldInfo;
 
             if (vastWorld.getMetrics() != null) {
