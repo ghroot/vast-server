@@ -93,7 +93,10 @@ public class CreationManager extends BaseSystem {
 		for (float x = -worldConfiguration.width / 2f; x < worldConfiguration.width / 2f; x += 3f) {
 			for (float y = -worldConfiguration.height / 2f; y < worldConfiguration.height / 2f; y += 3f) {
 				if (noise1.GetSimplex(x, y) > 0.35f) {
-					createTree(new Point2f(x - 1f + random.nextFloat() * 2f, y - 1f + random.nextFloat() * 2f), false);
+					Point2f fuzzyPosition = new Point2f(x - 1f + random.nextFloat() * 2f, y - 1f + random.nextFloat() * 2f);
+					if (isPositionInWorld(fuzzyPosition)) {
+						createTree(fuzzyPosition, false);
+					}
 				}
 				if (noise1.GetWhiteNoise(x, y) > 0.9f) {
 					createRock(new Point2f(x, y));
@@ -194,5 +197,14 @@ public class CreationManager extends BaseSystem {
 
 	private Point2f getRandomPositionInWorld() {
 		return new Point2f(-worldConfiguration.width / 2f + random.nextFloat() * worldConfiguration.width, -worldConfiguration.height / 2f + random.nextFloat() * worldConfiguration.height);
+	}
+
+	private boolean isPositionInWorld(Point2f position) {
+		if (position.x < -worldConfiguration.width / 2f  || position.x > worldConfiguration.width / 2f ||
+				position.y < -worldConfiguration.height / 2f || position.y > worldConfiguration.height / 2f) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }
