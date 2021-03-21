@@ -1,9 +1,6 @@
 package com.vast.monitor;
 
 import com.artemis.Aspect;
-import com.artemis.Component;
-import com.artemis.components.SerializationTag;
-import com.artemis.utils.Bag;
 import com.vast.VastWorld;
 import com.vast.component.*;
 import net.mostlyoriginal.api.utils.QuadTree;
@@ -23,49 +20,27 @@ public class MonitorWorld {
 
     private Point2i size = new Point2i();
     private Map<Integer, MonitorEntity> monitorEntities;
-    private int numberOfStaticEntities;
-    private int numberOfMovingEntities;
-    private Point2i worldSize;
     private MonitorEntity selectedMonitorEntity;
     private long selectedTime;
     private MonitorEntity hoveredMonitorEntity;
     private List<Rectangle> quadRects;
+    private List<MonitorEntity> monitoryEntitiesOnScreen;
 
     public MonitorWorld(Map<String, Boolean> debugSettings) {
         this.debugSettings = debugSettings;
-
         monitorEntities = new HashMap<>();
+        monitoryEntitiesOnScreen = new ArrayList<>();
     }
 
-    public MonitorEntity getSelectedMonitorEntity() {
-        return selectedMonitorEntity;
-    }
-
-    public int getNumberOfEntities() {
-        return monitorEntities != null ? monitorEntities.size() : 0;
-    }
-
-    public int getNumberOfStaticEntities() {
-        return numberOfStaticEntities;
-    }
-
-    public int getNumberOfMovingEntities() {
-        return numberOfMovingEntities;
-    }
-
-    public Point2i getWorldSize() {
-        return worldSize;
+    public int getSelectedMonitorEntity() {
+        return selectedMonitorEntity != null ? selectedMonitorEntity.entity : -1;
     }
 
     public void sync(VastWorld vastWorld, Point2D clickPoint, Point2D movePoint) {
         size.set(vastWorld.getWorldConfiguration().width * SCALE, vastWorld.getWorldConfiguration().height * SCALE);
 
-        worldSize = new Point2i(vastWorld.getWorldConfiguration().width, vastWorld.getWorldConfiguration().height);
-
         Set<Integer> entities = Arrays.stream(vastWorld.getEntities(Aspect.all(Transform.class))).boxed().collect(Collectors.toSet());
         monitorEntities.entrySet().removeIf(entry -> !entities.contains(entry.getValue().entity));
-        numberOfStaticEntities = 0;
-        numberOfMovingEntities = 0;
         for (int entity : entities) {
             MonitorEntity monitorEntity;
             if (monitorEntities.containsKey(entity)) {
@@ -126,12 +101,6 @@ public class MonitorWorld {
             } else {
                 monitorEntity.colored = true;
             }
-
-            if (vastWorld.getComponentMapper(Static.class).has(entity)) {
-                numberOfStaticEntities++;
-            } else {
-                numberOfMovingEntities++;
-            }
         }
 
         if (clickPoint != null) {
@@ -161,127 +130,6 @@ public class MonitorWorld {
 
         if (movePoint != null) {
             hoveredMonitorEntity = getMonitorEntityClosestTo(movePoint);
-        }
-
-        if (selectedMonitorEntity != null) {
-            Bag<Component> components = new Bag<>();
-            vastWorld.getWorld().getEntity(selectedMonitorEntity.entity).getComponents(components);
-            selectedMonitorEntity.components = new ArrayList<>();
-            for (int i = 0; i < components.size(); i++) {
-                Component component = components.get(i);
-                String componentName = component.getClass().getSimpleName();
-                String detail = null;
-                if (component instanceof Type) {
-                    detail = ((com.vast.component.Type) component).type;
-                } else if (component instanceof SubType) {
-                    detail = "" + ((SubType) component).subType;
-                } else if (component instanceof Interact) {
-                    detail = "" + ((Interact) component).phase;
-                } else if (component instanceof Scan) {
-                    detail = "" + ((Scan) component).nearbyEntities.size();
-                } else if (component instanceof Known) {
-                    detail = "" + ((Known) component).knownByEntities.size();
-                } else if (component instanceof AI) {
-                    detail = ((AI) component).behaviourName;
-                } else if (component instanceof State) {
-                    String stateName = ((State) component).name;
-                    detail = stateName != null ? stateName : "";
-                } else if (component instanceof Harvestable) {
-                    detail = "" + (Math.round(((Harvestable) component).durability * 100.0f) / 100.0f);
-                } else if (component instanceof Growing) {
-                    detail = "" + (Math.round(((Growing) component).timeLeft * 100.0f) / 100.0f);
-                } else if (component instanceof Constructable) {
-                    Constructable constructable = (Constructable) component;
-                    int progress = (int) Math.floor(100.0f * constructable.buildTime / constructable.buildDuration);
-                    detail = "" + progress;
-                } else if (component instanceof Collision) {
-                    detail = "" + (Math.round(((Collision) component).radius * 100.0f) / 100.0f);
-                } else if (component instanceof Owner) {
-                    detail = ((Owner) component).name;
-                } else if (component instanceof Player) {
-                    detail = ((Player) component).name;
-                } else if (component instanceof  Active) {
-                    detail = Integer.toString(((Active) component).knowEntities.size());
-                } else if (component instanceof Follow) {
-                    Follow follow = (Follow) component;
-                    detail = follow.entity + ", " + (Math.round((follow.distance * 100.0f) / 100.0f));
-                } else if (component instanceof Group) {
-                    detail = "" + ((Group) component).id;
-                } else if (component instanceof Order) {
-                    Order order = (Order) component;
-                    if (order.handler != null) {
-                        detail = "" + order.handler.getClass().getSimpleName();
-                    }
-                } else if (component instanceof Speed) {
-                    detail = "" + (Math.round(((Speed) component).getModifiedSpeed() * 10f) / 10f);
-                } else if (component instanceof Transform) {
-                    detail = "" + (Math.round(((Transform) component).position.x * 100f) / 100f) + ", " + (Math.round(((Transform) component).position.y * 100.0f) / 100.0f);
-                } else if (component instanceof Path) {
-                    Path path = (Path) component;
-                    detail = "" + (Math.round(path.targetPosition.x * 100f) / 100f) + ", " + (Math.round(path.targetPosition.y * 100f) / 100f) + " " + (Math.round(path.timeInSamePosition * 10f) / 10f);
-                } else if (component instanceof Inventory) {
-                    Inventory inventory = (Inventory) component;
-                    StringBuilder s = new StringBuilder();
-                    for (int j = 0; j < inventory.items.length; j++) {
-                        s.append(inventory.items[j]);
-                        if (j < inventory.items.length - 1) {
-                            s.append(", ");
-                        }
-                    }
-                    detail = s.toString();
-                } else if (component instanceof Lifetime) {
-                    detail = "" + (Math.round(((Lifetime) component).timeLeft * 100.0f) / 100.0f);
-                } else if (component instanceof Skill) {
-                    Skill skill = (Skill) component;
-                    StringBuilder wordsString = new StringBuilder();
-                    for (int j = 0; j < skill.words.length; j++) {
-                        if (skill.wordLevels[j] >= 100) {
-                            wordsString.append(skill.words[j].toUpperCase());
-                        } else {
-                            wordsString.append(skill.words[j]);
-                            wordsString.append(": ");
-                            wordsString.append(skill.wordLevels[j]);
-                        }
-                        if (j < skill.words.length - 1) {
-                            wordsString.append(", ");
-                        }
-                    }
-                    detail = wordsString.toString();
-                } else if (component instanceof SerializationTag) {
-                    SerializationTag serializationTag = (SerializationTag) component;
-                    detail = serializationTag.tag;
-                } else if (component instanceof Configuration) {
-                    Configuration configuration = (Configuration) component;
-                    detail = "" + configuration.version;
-                } else if (component instanceof Teach) {
-                    Teach teach = (Teach) component;
-                    StringBuilder wordsString = new StringBuilder();
-                    for (int j = 0; j < teach.words.length; j++) {
-                        wordsString.append(teach.words[j]);
-                        if (j < teach.words.length - 1) {
-                            wordsString.append(", ");
-                        }
-                    }
-                    detail = wordsString.toString();
-                } else if (component instanceof Producer) {
-                    Producer producer = (Producer) component;
-                    detail = producer.recipeId + " " + (Math.round(producer.time * 10f) / 10f);
-                } else if (component instanceof SyncHistory) {
-                    SyncHistory syncHistory = (SyncHistory) component;
-                    detail = "" + syncHistory.syncedValues.size();
-                } else if (component instanceof SyncPropagation) {
-                    SyncPropagation syncPropagation = (SyncPropagation) component;
-                    detail = syncPropagation.unreliableProperties + ", " + syncPropagation.ownerPropagationProperties;
-                }
-                MonitorComponent monitorComponent = new MonitorComponent();
-                monitorComponent.name = componentName;
-                if (detail != null) {
-                    monitorComponent.details = detail;
-                } else {
-                    monitorComponent.details = "";
-                }
-                selectedMonitorEntity.components.add(monitorComponent);
-            }
         }
 
         List<Rectangle> newQuadRects = new ArrayList<>();
@@ -331,33 +179,38 @@ public class MonitorWorld {
             }
         }
 
+        monitoryEntitiesOnScreen.clear();
         for (MonitorEntity monitorEntity : monitorEntities.values()) {
+            if (g.getClipBounds().contains(monitorEntity.position.x, monitorEntity.position.y)) {
+                monitoryEntitiesOnScreen.add(monitorEntity);
+            }
+        }
+
+        for (MonitorEntity monitorEntity : monitoryEntitiesOnScreen) {
             if (monitorEntity == hoveredMonitorEntity && monitorEntity != selectedMonitorEntity) {
                 g.setColor(Color.DARK_GRAY);
                 g.drawArc(monitorEntity.position.x - 15, monitorEntity.position.y - 15, 30, 30, 0, 360);
             }
         }
 
-        for (MonitorEntity monitorEntity : monitorEntities.values()) {
+        for (MonitorEntity monitorEntity : monitoryEntitiesOnScreen) {
             monitorEntity.paint(g);
         }
 
-        for (MonitorEntity monitorEntity : monitorEntities.values()) {
-            if (monitorEntity == selectedMonitorEntity) {
-                int size;
-                float secondsSinceSelected = (System.currentTimeMillis() - selectedTime) / 1000f;
-                if (secondsSinceSelected < 0.2f) {
-                    size = 30 + (int) ((0.2f - secondsSinceSelected) * 40);
-                } else {
-                    size = 30;
-                }
-
-                g.setColor(Color.WHITE);
-                g.drawArc(monitorEntity.position.x - size / 2, monitorEntity.position.y - size / 2, size, size, 0, 360);
+        if (selectedMonitorEntity != null) {
+            int size;
+            float secondsSinceSelected = (System.currentTimeMillis() - selectedTime) / 1000f;
+            if (secondsSinceSelected < 0.2f) {
+                size = 30 + (int) ((0.2f - secondsSinceSelected) * 40);
+            } else {
+                size = 30;
             }
+
+            g.setColor(Color.WHITE);
+            g.drawArc(selectedMonitorEntity.position.x - size / 2, selectedMonitorEntity.position.y - size / 2, size, size, 0, 360);
         }
 
-        for (MonitorEntity monitorEntity : monitorEntities.values()) {
+        for (MonitorEntity monitorEntity : monitoryEntitiesOnScreen) {
             monitorEntity.paintDebug(g, debugSettings);
         }
     }

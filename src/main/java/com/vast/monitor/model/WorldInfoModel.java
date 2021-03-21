@@ -14,6 +14,8 @@ public class WorldInfoModel implements TableModel {
 
     public WorldInfoModel() {
         listeners = new ArrayList<>();
+        names = new String[0];
+        values = new String[0];
     }
 
     public void refresh(Map<String, String> worldInfo) {
@@ -31,19 +33,19 @@ public class WorldInfoModel implements TableModel {
                 values[index] = worldInfo.get(name);
                 index++;
             }
-
-            for (TableModelListener l : listeners) {
-                l.tableChanged(new TableModelEvent(this));
-            }
         } else {
             names = new String[0];
             values = new String[0];
+        }
+
+        for (TableModelListener l : listeners) {
+            l.tableChanged(new TableModelEvent(this));
         }
     }
 
     @Override
     public int getRowCount() {
-        return names != null ? names.length : 0;
+        return names.length;
     }
 
     @Override

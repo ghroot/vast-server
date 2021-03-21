@@ -17,10 +17,8 @@ public class MonitorCanvas extends JComponent {
     public double translateY;
     public double scale;
     public AffineTransform at;
-    private Monitor monitor;
 
-    public MonitorCanvas(Monitor monitor, MonitorWorld monitorWorld) {
-        this.monitor = monitor;
+    public MonitorCanvas(MonitorWorld monitorWorld) {
         this.monitorWorld = monitorWorld;
 
         translateX = 0;

@@ -66,10 +66,6 @@ public class MonitorEntity {
     }
 
     public void paint(Graphics g) {
-        if (!g.getClipBounds().contains(position.x, position.y)) {
-            return;
-        }
-
         Image image = colored ? coloredEntityImages.get(type) : grayEntityImages.get(type);
         if (image != null) {
             int width = 12;
@@ -82,10 +78,6 @@ public class MonitorEntity {
     }
 
     public void paintDebug(Graphics g, Map<String, Boolean> debugSettings) {
-        if (!g.getClipBounds().contains(position.x, position.y)) {
-            return;
-        }
-
         if (debugSettings.get("Collision") && collisionRadius > 0) {
             g.setColor(Color.BLUE);
             g.drawArc(position.x - collisionRadius, position.y - collisionRadius,

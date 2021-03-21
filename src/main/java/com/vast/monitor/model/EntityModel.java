@@ -1,5 +1,7 @@
 package com.vast.monitor.model;
 
+import com.artemis.BaseSystem;
+import com.vast.data.SystemMetrics;
 import com.vast.monitor.MonitorEntity;
 
 import javax.swing.event.TableModelEvent;
@@ -7,32 +9,47 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class EntityModel implements TableModel {
-    private MonitorEntity entity;
-
     private List<TableModelListener> listeners;
+    private String[] componentNames;
+    private String[] componentDetails;
 
     public EntityModel() {
         listeners = new ArrayList<>();
     }
 
-    public void refresh(MonitorEntity entity) {
-        this.entity = entity;
+    public void refresh(Map<String, String> entity) {
+        if (entity != null) {
+            int size = entity.size();
+            if (componentNames == null || componentNames.length != size) {
+                componentNames = new String[size];
+            }
+            if (componentDetails == null || componentDetails.length != size) {
+                componentDetails = new String[size];
+            }
+            int index = 0;
+            for (String componentName : entity.keySet()) {
+                String componentDetail = entity.get(componentName);
+                componentNames[index] = componentName;
+                componentDetails[index] = componentDetail;
+                index++;
+            }
+        } else {
+            componentNames = null;
+            componentDetails = null;
+        }
 
         for (TableModelListener l : listeners) {
             l.tableChanged(new TableModelEvent(this));
         }
     }
 
-    public void clear() {
-        refresh(null);
-    }
-
     @Override
     public int getRowCount() {
-        if (entity != null) {
-            return entity.components.size();
+        if (componentNames != null) {
+            return componentNames.length;
         } else {
             return 1;
         }
@@ -48,7 +65,7 @@ public class EntityModel implements TableModel {
         if (columnIndex == 0) {
             return "Component";
         } else if (columnIndex == 1) {
-            return "Details";
+            return "Detail";
         } else {
             return null;
         }
@@ -56,13 +73,7 @@ public class EntityModel implements TableModel {
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        if (columnIndex == 0) {
-            return String.class;
-        } else if (columnIndex == 1) {
-            return String.class;
-        } else {
-            return null;
-        }
+        return String.class;
     }
 
     @Override
@@ -72,28 +83,25 @@ public class EntityModel implements TableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        if (entity != null) {
+        if (componentNames != null) {
             if (columnIndex == 0) {
-                return entity.components.get(rowIndex).name;
+                return componentNames[rowIndex];
             } else if (columnIndex == 1) {
-                return entity.components.get(rowIndex).details;
-            } else {
-                return null;
+                return componentDetails[rowIndex];
             }
         } else {
             if (columnIndex == 0) {
                 return "No entity";
             } else if (columnIndex == 1) {
                 return "";
-            } else {
-                return null;
             }
         }
+
+        return null;
     }
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-
     }
 
     @Override

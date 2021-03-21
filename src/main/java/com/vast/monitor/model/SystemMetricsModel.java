@@ -18,6 +18,9 @@ public class SystemMetricsModel implements TableModel {
 
     public SystemMetricsModel() {
         listeners = new ArrayList<>();
+        systemNames = new String[0];
+        systemTimes = new int[0];
+        systemEntities = new int[0];
     }
 
     public void refresh(Map<BaseSystem, SystemMetrics> systemMetrics) {
@@ -40,20 +43,20 @@ public class SystemMetricsModel implements TableModel {
                 systemEntities[index] = Math.max(metrics.getNumberOfEntitiesInSystem(), 0);
                 index++;
             }
-
-            for (TableModelListener l : listeners) {
-                l.tableChanged(new TableModelEvent(this));
-            }
         } else {
             systemNames = new String[0];
             systemTimes = new int[0];
             systemEntities = new int[0];
         }
+
+        for (TableModelListener l : listeners) {
+            l.tableChanged(new TableModelEvent(this));
+        }
     }
 
     @Override
     public int getRowCount() {
-        return systemNames != null ? systemNames.length : 0;
+        return systemNames.length;
     }
 
     @Override
