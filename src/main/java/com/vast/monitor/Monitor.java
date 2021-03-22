@@ -7,6 +7,7 @@ import com.artemis.components.SerializationTag;
 import com.artemis.utils.Bag;
 import com.vast.VastWorld;
 import com.vast.component.*;
+import com.vast.component.Observer;
 import com.vast.monitor.model.EntityModel;
 import com.vast.monitor.model.ModelData;
 import com.vast.monitor.model.SystemMetricsModel;
@@ -274,10 +275,12 @@ public class Monitor extends JFrame implements ActionListener {
                         detail = "" + (Math.round(((Collision) component).radius * 100.0f) / 100.0f);
                     } else if (component instanceof Owner) {
                         detail = ((Owner) component).name;
-                    } else if (component instanceof Player) {
-                        detail = ((Player) component).name;
-                    } else if (component instanceof  Active) {
-                        detail = Integer.toString(((Active) component).knowEntities.size());
+                    } else if (component instanceof Avatar) {
+                        detail = ((Avatar) component).name;
+                    } else if (component instanceof Observer) {
+                        detail = Integer.toString(((Observer) component).knowEntities.size());
+                    } else if (component instanceof Observed) {
+                        detail = "" + ((Observed) component).observerEntity;
                     } else if (component instanceof Follow) {
                         Follow follow = (Follow) component;
                         detail = follow.entity + ", " + (Math.round((follow.distance * 100.0f) / 100.0f));

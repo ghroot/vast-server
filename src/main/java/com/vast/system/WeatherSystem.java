@@ -6,9 +6,8 @@ import com.artemis.EntitySubscription;
 import com.artemis.annotations.All;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.component.Active;
 import com.vast.component.Event;
-import com.vast.component.Player;
+import com.vast.component.Observer;
 import com.vast.component.Weather;
 
 import java.util.Random;
@@ -25,16 +24,16 @@ public class WeatherSystem extends IteratingSystem {
 	private boolean changed;
 
 	public WeatherSystem(Random random) {
-		super(Aspect.all(Player.class, Active.class));
+		super(Aspect.all(Observer.class));
 		this.random = random;
 	}
 
 	@Override
-	protected void inserted(int playerEntity) {
+	protected void inserted(int observerEntity) {
 		Weather weather = weatherMapper.get(weatherSubscription.getEntities().get(0));
 
 		if (weather.isRaining) {
-			eventMapper.create(playerEntity).addEntry("startedRaining").setOwnerPropagation();
+			eventMapper.create(observerEntity).addEntry("startedRaining").setOwnerPropagation();
 		}
 	}
 
@@ -59,14 +58,14 @@ public class WeatherSystem extends IteratingSystem {
 	}
 
 	@Override
-	protected void process(int playerEntity) {
+	protected void process(int observerEntity) {
 		if (changed) {
 			Weather weather = weatherMapper.get(weatherSubscription.getEntities().get(0));
 
 			if (weather.isRaining) {
-				eventMapper.create(playerEntity).addEntry("startedRaining").setOwnerPropagation();
+				eventMapper.create(observerEntity).addEntry("startedRaining").setOwnerPropagation();
 			} else {
-				eventMapper.create(playerEntity).addEntry("stoppedRaining").setOwnerPropagation();
+				eventMapper.create(observerEntity).addEntry("stoppedRaining").setOwnerPropagation();
 			}
 		}
 	}

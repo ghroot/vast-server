@@ -23,9 +23,10 @@ public class SyncSystem extends IteratingSystem {
 
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Observer> observerMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Owner> ownerMapper;
+	private ComponentMapper<Avatar> avatarMapper;
 
 	private Map<String, VastPeer> peers;
 	private PropertyHandler[] propertyHandlers;
@@ -37,7 +38,7 @@ public class SyncSystem extends IteratingSystem {
 	private EventMessage reusableMessage;
 
 	public SyncSystem(Map<String, VastPeer> peers, PropertyHandler[] propertyHandlers, Metrics metrics) {
-		super(Aspect.all(Sync.class, SyncPropagation.class, Known.class));
+		super(Aspect.all(Sync.class, SyncPropagation.class, Known.class).exclude(Invisible.class));
 		this.peers = peers;
 		this.propertyHandlers = propertyHandlers;
 		this.metrics = metrics;
@@ -62,7 +63,7 @@ public class SyncSystem extends IteratingSystem {
 
 		syncNearbyPropagationProperties(syncEntity, sync);
 
-		if (activeMapper.has(syncEntity) || ownerMapper.has(syncEntity)) {
+		if (avatarMapper.has(syncEntity) || ownerMapper.has(syncEntity)) {
 			syncOwnerPropagationProperties(syncEntity, sync);
 		}
 
@@ -79,8 +80,8 @@ public class SyncSystem extends IteratingSystem {
 			int[] knownByEntities = knownByEntitiesBag.getData();
 			for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
 				int knownByEntity = knownByEntities[i];
-				if (activeMapper.has(knownByEntity)) {
-					VastPeer knownByPeer = activeMapper.get(knownByEntity).peer;
+				if (observerMapper.has(knownByEntity)) {
+					VastPeer knownByPeer = observerMapper.get(knownByEntity).peer;
 					if (changedProperties.reliable) {
 						knownByPeer.send(reusableMessage);
 					} else {
@@ -97,12 +98,15 @@ public class SyncSystem extends IteratingSystem {
 			reusableMessage.getDataObject().clear();
 			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
 			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, changedProperties.propertiesDataObject);
-			VastPeer ownerPeer;
-			if (ownerMapper.has(syncEntity)) {
+			VastPeer ownerPeer = null;
+			if (avatarMapper.has(syncEntity)) {
+				ownerPeer = peers.get(avatarMapper.get(syncEntity).name);
+			} else if (ownerMapper.has(syncEntity)) {
 				ownerPeer = peers.get(ownerMapper.get(syncEntity).name);
-			} else {
+			}/* else {
+				// TODO: Who is owner here?
 				ownerPeer = activeMapper.get(syncEntity).peer;
-			}
+			}*/
 			if (ownerPeer != null) {
 				if (changedProperties.reliable) {
 					ownerPeer.send(reusableMessage);

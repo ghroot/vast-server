@@ -2,6 +2,7 @@ package com.vast.monitor;
 
 import com.artemis.Aspect;
 import com.vast.VastWorld;
+import com.vast.component.Observer;
 import com.vast.component.*;
 import net.mostlyoriginal.api.utils.QuadTree;
 
@@ -9,8 +10,8 @@ import javax.vecmath.Point2f;
 import javax.vecmath.Point2i;
 import java.awt.*;
 import java.awt.geom.Point2D;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MonitorWorld {
@@ -60,7 +61,7 @@ public class MonitorWorld {
                 monitorEntity.collisionRadius = 0;
             }
 
-            if (vastWorld.getComponentMapper(Player.class).has(entity) && vastWorld.getComponentMapper(Scan.class).has(entity)) {
+            if (vastWorld.getComponentMapper(Scan.class).has(entity)) {
                 monitorEntity.scanDistance = (int) (vastWorld.getComponentMapper(Scan.class).get(entity).distance * SCALE);
             } else {
                 monitorEntity.scanDistance = 0;
@@ -88,14 +89,23 @@ public class MonitorWorld {
                 monitorEntity.interactPosition = null;
             }
 
-            if (vastWorld.getComponentMapper(Player.class).has(entity)) {
-                monitorEntity.name = vastWorld.getComponentMapper(Player.class).get(entity).name;
+            if (vastWorld.getComponentMapper(Observed.class).has(entity) &&
+                    vastWorld.getComponentMapper(Observed.class).get(entity).observerEntity >= 0) {
+                Point2f observedPosition = vastWorld.getComponentMapper(Transform.class).get(
+                        vastWorld.getComponentMapper(Observed.class).get(entity).observerEntity).position;
+                monitorEntity.observedPosition = new Point2i(size.x / 2 + (int) (observedPosition.x * SCALE),
+                        size.y / 2 - (int) (observedPosition.y * SCALE));
+            } else {
+                monitorEntity.observedPosition = null;
+            }
+
+            if (vastWorld.getComponentMapper(Avatar.class).has(entity)) {
+                monitorEntity.name = vastWorld.getComponentMapper(Avatar.class).get(entity).name;
             } else {
                 monitorEntity.name = null;
             }
 
-            if (selectedMonitorEntity != null && vastWorld.getComponentMapper(Player.class).has(selectedMonitorEntity.entity)
-                && vastWorld.getComponentMapper(Scan.class).has(selectedMonitorEntity.entity)) {
+            if (selectedMonitorEntity != null && vastWorld.getComponentMapper(Scan.class).has(selectedMonitorEntity.entity)) {
                 Scan scan = vastWorld.getComponentMapper(Scan.class).get(selectedMonitorEntity.entity);
                 monitorEntity.colored = scan.nearbyEntities.contains(entity);
             } else {
@@ -194,6 +204,10 @@ public class MonitorWorld {
         }
 
         for (MonitorEntity monitorEntity : monitoryEntitiesOnScreen) {
+            monitorEntity.paintDebugBottom(g, debugSettings);
+        }
+
+        for (MonitorEntity monitorEntity : monitoryEntitiesOnScreen) {
             monitorEntity.paint(g);
         }
 
@@ -211,7 +225,7 @@ public class MonitorWorld {
         }
 
         for (MonitorEntity monitorEntity : monitoryEntitiesOnScreen) {
-            monitorEntity.paintDebug(g, debugSettings);
+            monitorEntity.paintDebugTop(g, debugSettings);
         }
     }
 }

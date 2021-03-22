@@ -25,7 +25,7 @@ public class PickupSystem extends IteratingSystem {
 
 
 	public PickupSystem(WorldConfiguration worldConfiguration, Random random) {
-		super(Aspect.all(Player.class, Active.class, Scan.class));
+		super(Aspect.all(Avatar.class, Observed.class, Scan.class));
 		this.worldConfiguration = worldConfiguration;
 		this.random = random;
 
@@ -38,8 +38,8 @@ public class PickupSystem extends IteratingSystem {
 	}
 
 	@Override
-	protected void process(int playerEntity) {
-		Scan scan = scanMapper.get(playerEntity);
+	protected void process(int avatarEntity) {
+		Scan scan = scanMapper.get(avatarEntity);
 
 		boolean hasPickupNearby = false;
 		int[] nearbyEntities = scan.nearbyEntities.getData();
@@ -51,7 +51,7 @@ public class PickupSystem extends IteratingSystem {
 			}
 		}
 		if (!hasPickupNearby) {
-			Transform transform = transformMapper.get(playerEntity);
+			Transform transform = transformMapper.get(avatarEntity);
 
 			Point2f randomSpawnPosition = getRandomSpawnPosition(transform.position, scan.distance * 0.95f);
 			if (randomSpawnPosition != null) {

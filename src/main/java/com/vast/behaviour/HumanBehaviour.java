@@ -19,8 +19,9 @@ import java.util.Random;
 public class HumanBehaviour extends AbstractBehaviour {
 	private ComponentMapper<Interact> interactMapper;
 	private ComponentMapper<Path> pathMapper;
-	private ComponentMapper<Player> playerMapper;
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Avatar> avatarMapper;
+	private ComponentMapper<Observed> observedMapper;
+	private ComponentMapper<Observer> observerMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Craft> craftMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
@@ -41,11 +42,11 @@ public class HumanBehaviour extends AbstractBehaviour {
 
 	@Override
 	public void process(int entity) {
-		if (!activeMapper.has(entity) || interactMapper.has(entity) || pathMapper.has(entity) || craftMapper.has(entity)) {
+		if (interactMapper.has(entity) || pathMapper.has(entity) || craftMapper.has(entity)) {
 			return;
 		}
 
-		VastPeer peer = activeMapper.get(entity).peer;
+		VastPeer peer = observerMapper.get(observedMapper.get(entity).observerEntity).peer;
 		float roll = random.nextFloat() * 100f;
 		if (roll <= 0.2f) {
 			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.SET_HOME)));

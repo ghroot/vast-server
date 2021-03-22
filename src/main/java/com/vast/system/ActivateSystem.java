@@ -15,15 +15,15 @@ import java.util.Map;
 public class ActivateSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(ActivateSystem.class);
 
-	private ComponentMapper<Player> playerMapper;
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Avatar> avatarMapper;
+	private ComponentMapper<Observed> observedMapper;
 	private ComponentMapper<Sync> syncMapper;
-	private ComponentMapper<Scan> scanMapper;
+	private CreationManager creationManager;
 
 	private Map<String, VastPeer> peers;
 
 	public ActivateSystem(Map<String, VastPeer> peers) {
-		super(Aspect.all(Player.class).exclude(Active.class));
+		super(Aspect.all(Avatar.class).exclude(Observed.class));
 		this.peers = peers;
 	}
 
@@ -36,15 +36,22 @@ public class ActivateSystem extends IteratingSystem {
 	}
 
 	@Override
-	protected void process(int inactivePlayerEntity) {
-		Player player = playerMapper.get(inactivePlayerEntity);
-		if (peers.containsKey(player.name)) {
-			VastPeer peer = peers.get(player.name);
-			player.id = peer.getId();
-			logger.info("Activating peer entity: {} for {} ({})", inactivePlayerEntity, player.name, player.id);
-			activeMapper.create(inactivePlayerEntity).peer = peer;
-			syncMapper.create(inactivePlayerEntity).markPropertyAsDirty(Properties.ACTIVE);
-			scanMapper.create(inactivePlayerEntity);
+	protected void process(int avatarEntity) {
+		Avatar avatar = avatarMapper.get(avatarEntity);
+		if (peers.containsKey(avatar.name)) {
+			VastPeer peer = peers.get(avatar.name);
+			logger.info("Activating peer entity: {} for {} ({})", avatarEntity, avatar.name, peer.getId());
+			syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.ACTIVE);
+
+			int observerEntity = creationManager.createObserver(peer, avatarEntity);
+
+			// TODO: Temporary!
+			Follow follow = getWorld().getMapper(Follow.class).create(observerEntity);
+			follow.entity = avatarEntity;
+			follow.distance = 2f;
+			getWorld().getMapper(Speed.class).create(observerEntity).baseSpeed = 30f;
+
+			observedMapper.create(avatarEntity).observerEntity = observerEntity;
 		}
 	}
 }

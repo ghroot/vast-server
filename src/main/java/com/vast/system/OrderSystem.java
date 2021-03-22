@@ -5,11 +5,9 @@ import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.component.Active;
+import com.vast.component.Avatar;
 import com.vast.component.Order;
-import com.vast.component.Player;
 import com.vast.network.IncomingRequest;
-import com.vast.order.MoveOrderHandler;
 import com.vast.order.OrderHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,14 +19,13 @@ public class OrderSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(OrderSystem.class);
 
 	private ComponentMapper<Order> orderMapper;
-	private ComponentMapper<Player> playerMapper;
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Avatar> avatarMapper;
 
 	private OrderHandler[] orderHandlers;
 	private Map<String, List<IncomingRequest>> incomingRequestsByPeer;
 
 	public OrderSystem(OrderHandler[] orderHandlers, Map<String, List<IncomingRequest>> incomingRequestsByPeer) {
-		super(Aspect.all(Player.class));
+		super(Aspect.all(Avatar.class));
 		this.orderHandlers = orderHandlers;
 		this.incomingRequestsByPeer = incomingRequestsByPeer;
 	}
@@ -50,48 +47,39 @@ public class OrderSystem extends IteratingSystem {
 	}
 
 	@Override
-	protected void process(int playerEntity) {
-		Player player = playerMapper.get(playerEntity);
+	protected void process(int avatarEntity) {
+		Avatar avatar = avatarMapper.get(avatarEntity);
 
-		if (activeMapper.has(playerEntity)) {
-			if (orderMapper.has(playerEntity)) {
-				Order order = orderMapper.get(playerEntity);
-				if (order.handler.isOrderComplete(playerEntity)) {
-					logger.debug("Order completed for entity {} with handler {}", playerEntity, order.handler.getClass().getSimpleName());
-					orderMapper.remove(playerEntity);
-				}
+		if (orderMapper.has(avatarEntity)) {
+			Order order = orderMapper.get(avatarEntity);
+			if (order.handler.isOrderComplete(avatarEntity)) {
+				logger.debug("Order completed for entity {} with handler {}", avatarEntity, order.handler.getClass().getSimpleName());
+				orderMapper.remove(avatarEntity);
 			}
+		}
 
-			if (incomingRequestsByPeer.containsKey(player.name)) {
-				List<IncomingRequest> incomingRequests = incomingRequestsByPeer.get(player.name);
-				if (incomingRequests.size() > 0) {
-					IncomingRequest lastIncomingRequest = incomingRequests.get(incomingRequests.size() - 1);
-					if (orderMapper.has(playerEntity)) {
-						Order order = orderMapper.get(playerEntity);
-						if (order.handler.handlesMessageCode(lastIncomingRequest.getMessage().getCode()) &&
-								order.handler.modifyOrder(playerEntity, lastIncomingRequest.getMessage().getCode(), lastIncomingRequest.getMessage().getDataObject())) {
-							incomingRequests.clear();
-							logger.debug("Modifying order for entity {} with handler {}", playerEntity, order.handler.getClass().getSimpleName());
-						} else {
-							cancelOrder(playerEntity);
-						}
-					} else {
+		if (incomingRequestsByPeer.containsKey(avatar.name)) {
+			List<IncomingRequest> incomingRequests = incomingRequestsByPeer.get(avatar.name);
+			if (incomingRequests.size() > 0) {
+				IncomingRequest lastIncomingRequest = incomingRequests.get(incomingRequests.size() - 1);
+				if (orderMapper.has(avatarEntity)) {
+					Order order = orderMapper.get(avatarEntity);
+					if (order.handler.handlesMessageCode(lastIncomingRequest.getMessage().getCode()) &&
+							order.handler.modifyOrder(avatarEntity, lastIncomingRequest.getMessage().getCode(), lastIncomingRequest.getMessage().getDataObject())) {
 						incomingRequests.clear();
-						OrderHandler handler = getOrderHandler(lastIncomingRequest.getMessage().getCode());
-						if (handler != null) {
-							startOrder(playerEntity, handler, lastIncomingRequest.getMessage().getCode(), lastIncomingRequest.getMessage().getDataObject());
-						} else {
-							logger.warn("Could not find order handler for message code {}", lastIncomingRequest.getMessage().getCode());
-						}
+						logger.debug("Modifying order for entity {} with handler {}", avatarEntity, order.handler.getClass().getSimpleName());
+					} else {
+						cancelOrder(avatarEntity);
+					}
+				} else {
+					incomingRequests.clear();
+					OrderHandler handler = getOrderHandler(lastIncomingRequest.getMessage().getCode());
+					if (handler != null) {
+						startOrder(avatarEntity, handler, lastIncomingRequest.getMessage().getCode(), lastIncomingRequest.getMessage().getDataObject());
+					} else {
+						logger.warn("Could not find order handler for message code {}", lastIncomingRequest.getMessage().getCode());
 					}
 				}
-			}
-		} else {
-			if (incomingRequestsByPeer.containsKey(player.name)) {
-				incomingRequestsByPeer.get(player.name).clear();
-			}
-			if (orderMapper.has(playerEntity)) {
-				cancelOrder(playerEntity);
 			}
 		}
 	}

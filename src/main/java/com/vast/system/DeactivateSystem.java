@@ -15,8 +15,9 @@ import java.util.Map;
 public class DeactivateSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(DeactivateSystem.class);
 
-	private ComponentMapper<Player> playerMapper;
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Avatar> avatarMapper;
+	private ComponentMapper<Observed> observedMapper;
+	private ComponentMapper<Observer> observerMapper;
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Known> knownMapper;
@@ -24,7 +25,7 @@ public class DeactivateSystem extends IteratingSystem {
 	private Map<String, VastPeer> peers;
 
 	public DeactivateSystem(Map<String, VastPeer> peers) {
-		super(Aspect.all(Player.class, Active.class));
+		super(Aspect.all(Avatar.class, Observed.class));
 		this.peers = peers;
 	}
 
@@ -37,22 +38,17 @@ public class DeactivateSystem extends IteratingSystem {
 	}
 
 	@Override
-	protected void process(int activePlayerEntity) {
-		Player player = playerMapper.get(activePlayerEntity);
-		if (!peers.containsKey(player.name) || peers.get(player.name).getId() != player.id) {
-			logger.info("Deactivating peer entity: {} for {} ({})", activePlayerEntity, player.name, player.id);
-			player.id = 0;
+	protected void process(int avatarEntity) {
+		Avatar avatar = avatarMapper.get(avatarEntity);
+		Observed observed = observedMapper.get(avatarEntity);
+		Observer observer = observerMapper.get(observed.observerEntity);
+		if (!peers.containsKey(avatar.name) || peers.get(avatar.name).getId() != observer.peer.getId()) {
+			logger.info("Deactivating peer entity: {} for {} ({})", avatarEntity, avatar.name, observer.peer.getId());
 
-			IntBag knowEntitiesBag = activeMapper.get(activePlayerEntity).knowEntities;
-			int[] knowEntities = knowEntitiesBag.getData();
-			for (int i = 0, size = knowEntitiesBag.size(); i < size; ++i) {
-				int knowEntity = knowEntities[i];
-				knownMapper.get(knowEntity).knownByEntities.removeValue(activePlayerEntity);
-			}
+			observedMapper.remove(avatarEntity);
+			world.delete(observed.observerEntity);
 
-			activeMapper.remove(activePlayerEntity);
-			syncMapper.create(activePlayerEntity).markPropertyAsDirty(Properties.ACTIVE);
-			scanMapper.remove(activePlayerEntity);
+			syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.ACTIVE);
 		}
 	}
 }

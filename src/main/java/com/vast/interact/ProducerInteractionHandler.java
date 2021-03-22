@@ -21,26 +21,26 @@ public class ProducerInteractionHandler extends AbstractInteractionHandler {
 	private Recipes recipes;
 
 	public ProducerInteractionHandler(Recipes recipes) {
-		super(Aspect.all(Player.class, Inventory.class), Aspect.all(Producer.class, Inventory.class));
+		super(Aspect.all(Avatar.class, Inventory.class), Aspect.all(Producer.class, Inventory.class));
 		this.recipes = recipes;
 	}
 
 	@Override
-	public boolean canInteract(int playerEntity, int producerEntity) {
+	public boolean canInteract(int avatarEntity, int producerEntity) {
 		return true;
 	}
 
 	@Override
-	public boolean attemptStart(int playerEntity, int producerEntity) {
+	public boolean attemptStart(int avatarEntity, int producerEntity) {
 		Producer producer = producerMapper.get(producerEntity);
 		return producer.recipeId >= 0;
 	}
 
 	@Override
-	public boolean process(int playerEntity, int producerEntity) {
+	public boolean process(int avatarEntity, int producerEntity) {
 		Producer producer = producerMapper.get(producerEntity);
 		Inventory producerInventory = inventoryMapper.get(producerEntity);
-		Inventory playerInventory = inventoryMapper.get(playerEntity);
+		Inventory playerInventory = inventoryMapper.get(avatarEntity);
 
 		if (producer.recipeId >= 0) {
 			Recipe recipe = recipes.getRecipe(producer.recipeId);
@@ -50,9 +50,9 @@ public class ProducerInteractionHandler extends AbstractInteractionHandler {
 				int numberOfItemsToTransfer = producerInventory.getNumberOfItems(recipe.getItemId());
 				producerInventory.remove(recipe.getItemId(), numberOfItemsToTransfer);
 				playerInventory.add(recipe.getItemId(), numberOfItemsToTransfer);
-				syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
+				syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.INVENTORY);
 				syncMapper.create(producerEntity).markPropertyAsDirty(Properties.INVENTORY);
-				eventMapper.create(playerEntity).addEntry("action").setData("pickedUp");
+				eventMapper.create(avatarEntity).addEntry("action").setData("pickedUp");
 			} else {
 				int numberOfItemsInRecipeCosts = 0;
 				for (Cost cost : recipe.getCosts()) {
@@ -60,17 +60,17 @@ public class ProducerInteractionHandler extends AbstractInteractionHandler {
 				}
 				if (producerInventory.getFreeSpace() < numberOfItemsInRecipeCosts) {
 					// Not enough space in producer for recipe cost
-					eventMapper.create(playerEntity).addEntry("message").setData("It's full...").setOwnerPropagation();
+					eventMapper.create(avatarEntity).addEntry("message").setData("It's full...").setOwnerPropagation();
 				} else if (!playerInventory.has(recipe.getCosts())) {
 					// Player doesn't have recipe costs in inventory
-					eventMapper.create(playerEntity).addEntry("message").setData("I don't have the required items...").setOwnerPropagation();
+					eventMapper.create(avatarEntity).addEntry("message").setData("I don't have the required items...").setOwnerPropagation();
 				} else {
 					// Add items for recipe cost
 					playerInventory.remove(recipe.getCosts());
-					syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
+					syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.INVENTORY);
 					producerInventory.add(recipe.getCosts());
 					syncMapper.create(producerEntity).markPropertyAsDirty(Properties.INVENTORY);
-					eventMapper.create(playerEntity).addEntry("action").setData("pickedUp");
+					eventMapper.create(avatarEntity).addEntry("action").setData("pickedUp");
 				}
 			}
 		}
@@ -79,6 +79,6 @@ public class ProducerInteractionHandler extends AbstractInteractionHandler {
 	}
 
 	@Override
-	public void stop(int playerEntity, int producerEntity) {
+	public void stop(int avatarEntity, int producerEntity) {
 	}
 }

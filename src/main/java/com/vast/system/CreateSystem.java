@@ -22,15 +22,15 @@ public class CreateSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CreateSystem.class);
 
 	private ComponentMapper<Create> createMapper;
-	private ComponentMapper<Player> playerMapper;
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Avatar> avatarMapper;
+	private ComponentMapper<Observer> observerMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<SubType> subTypeMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 
-	@All({Active.class, Scan.class})
+	@All({Observer.class, Scan.class})
 	private EntitySubscription interestedSubscription;
 
 	private PropertyHandler[] propertyHandlers;
@@ -40,7 +40,7 @@ public class CreateSystem extends IteratingSystem {
 	private DataObject reusablePropertiesDataObject;
 
 	public CreateSystem(PropertyHandler[] propertyHandlers) {
-		super(Aspect.all(Create.class, Type.class));
+		super(Aspect.all(Create.class, Type.class).exclude(Invisible.class));
 		this.propertyHandlers = propertyHandlers;
 
 		reusableEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
@@ -55,10 +55,10 @@ public class CreateSystem extends IteratingSystem {
 		IntBag interestedEntities = interestedSubscription.getEntities();
 		for (int i = 0; i < interestedEntities.size(); i++) {
 			int interestedEntity = interestedEntities.get(i);
-			Active interestedActive = activeMapper.get(interestedEntity);
+			Observer interestedObserver = observerMapper.get(interestedEntity);
 			Scan interestedScan = scanMapper.get(interestedEntity);
 			if (interestedScan.nearbyEntities.contains(createEntity)) {
-				VastPeer peer = interestedActive.peer;
+				VastPeer peer = interestedObserver.peer;
 				String reason = createMapper.get(createEntity).reason;
 				logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);
 				reusableEventMessage.getDataObject().clear();
@@ -68,8 +68,8 @@ public class CreateSystem extends IteratingSystem {
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_SUB_TYPE, subTypeMapper.get(createEntity).subType);
 				}
 				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, reason);
-				if (playerMapper.has(createEntity)) {
-					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(createEntity).name));
+				if (avatarMapper.has(createEntity)) {
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(avatarMapper.get(createEntity).name));
 				}
 				reusableAlreadyInterestedProperties.clear();
 				reusablePropertiesDataObject.clear();
@@ -84,7 +84,7 @@ public class CreateSystem extends IteratingSystem {
 					}
 				}
 				peer.send(reusableEventMessage);
-				interestedActive.knowEntities.add(createEntity);
+				interestedObserver.knowEntities.add(createEntity);
 				if (known != null) {
 					known.knownByEntities.add(interestedEntity);
 				}

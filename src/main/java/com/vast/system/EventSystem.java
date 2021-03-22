@@ -7,10 +7,9 @@ import com.artemis.annotations.All;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.messages.EventMessage;
-import com.vast.component.Active;
 import com.vast.component.Event;
 import com.vast.component.Known;
-import com.vast.component.Player;
+import com.vast.component.Observer;
 import com.vast.data.Metrics;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
@@ -21,11 +20,11 @@ public class EventSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(EventSystem.class);
 
 	private ComponentMapper<Event> eventMapper;
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Observer> observerMapper;
 	private ComponentMapper<Known> knownMapper;
 
-	@All({Player.class, Active.class})
-	private EntitySubscription activePlayerSubscription;
+	@All({Observer.class})
+	private EntitySubscription observerSubscription;
 
 	private Metrics metrics;
 
@@ -59,27 +58,28 @@ public class EventSystem extends IteratingSystem {
 			}
 
 			if (entry.propagation == Event.EventPropagation.OWNER) {
-				Active ownerActive = activeMapper.get(eventEntity);
-				if (ownerActive != null) {
-					ownerActive.peer.send(reusableEventMessage);
-				}
+				// TODO: Who is owner? Avatar? Observer?
+//				Active ownerActive = activeMapper.get(eventEntity);
+//				if (ownerActive != null) {
+//					ownerActive.peer.send(reusableEventMessage);
+//				}
 			} else if (entry.propagation == Event.EventPropagation.NEARBY && knownMapper.has(eventEntity)) {
 				IntBag knownByEntitiesBag = knownMapper.get(eventEntity).knownByEntities;
 				int[] knownByEntities = knownByEntitiesBag.getData();
 				for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
 					int knownByEntity = knownByEntities[i];
-					if (activeMapper.has(knownByEntity)) {
-						VastPeer knownByPeer = activeMapper.get(knownByEntity).peer;
+					if (observerMapper.has(knownByEntity)) {
+						VastPeer knownByPeer = observerMapper.get(knownByEntity).peer;
 						knownByPeer.send(reusableEventMessage);
 					}
 				}
 			} else if (entry.propagation == Event.EventPropagation.ALL) {
-				IntBag activePlayerEntitiesBag = activePlayerSubscription.getEntities();
-				int[] activePlayerEntities = activePlayerEntitiesBag.getData();
-				for (int i = 0, size = activePlayerEntitiesBag.size(); i < size; ++i) {
-					int activePlayerEntity = activePlayerEntities[i];
-					VastPeer activePlayerPeer = activeMapper.get(activePlayerEntity).peer;
-					activePlayerPeer.send(reusableEventMessage);
+				IntBag observerEntitiesBag = observerSubscription.getEntities();
+				int[] observersEntities = observerEntitiesBag.getData();
+				for (int i = 0, size = observerEntitiesBag.size(); i < size; ++i) {
+					int activePlayerEntity = observersEntities[i];
+					VastPeer observerPeer = observerMapper.get(activePlayerEntity).peer;
+					observerPeer.send(reusableEventMessage);
 				}
 			}
 

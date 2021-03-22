@@ -2,7 +2,7 @@ package com.vast.system;
 
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
-import com.vast.component.Player;
+import com.vast.component.Avatar;
 import com.vast.network.VastPeer;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,7 +16,7 @@ public class TestPeerEntitySystem {
 	@Test
 	public void createsNewPeer() {
 		CreationManager creationManager = mock(CreationManager.class);
-		when(creationManager.createPlayer(anyString(), anyInt(), anyBoolean())).thenReturn(1);
+		when(creationManager.createAvatar(anyString(), anyInt(), anyBoolean())).thenReturn(1);
 		Map<String, VastPeer> peers = new HashMap<>();
 		VastPeer peer = mock(VastPeer.class);
 		when(peer.getName()).thenReturn("TestName");
@@ -50,13 +50,13 @@ public class TestPeerEntitySystem {
 			peerEntitySystem
 		).build());
 
-		int playerEntity = world.create();
-		world.getMapper(Player.class).create(playerEntity).name = "TestName";
+		int avatarEntity = world.create();
+		world.getMapper(Avatar.class).create(avatarEntity).name = "TestName";
 
 		world.process();
 
-		verify(creationManager, never()).createPlayer(anyString(), anyInt(), anyBoolean());
+		verify(creationManager, never()).createAvatar(anyString(), anyInt(), anyBoolean());
 		Assert.assertEquals(1, entitiesByPeer.size());
-		Assert.assertEquals(playerEntity, entitiesByPeer.get("TestName").intValue());
+		Assert.assertEquals(avatarEntity, entitiesByPeer.get("TestName").intValue());
 	}
 }

@@ -2,48 +2,26 @@
   "entities": {
     "0": {
       "archetype": 0,
-      "key": "player",
+      "key": "observer",
       "components": {
-        "Collision": {
-          "radius": 0.4
-        },
-        "Inventory": {
-          "capacity": 100
-        },
-        "Speed": {
-          "baseSpeed": 2.5
-        },
-        "SyncPropagation": {
-          "ownerPropagationProperties": 1696,
-          "unreliableProperties": 3
-        },
-        "Teach": {
-          "words": [
-            "me",
-            "you"
-          ]
+        "Scan": {
+          "distance": 15
         },
         "Type": {
-          "type": "player"
+          "type": "observer"
         }
       }
     }
   },
   "archetypes": {
     "0": [
-      "Player",
+      "Invisible",
+      "Observer",
       "Transform",
       "Type",
-      "Speed",
-      "Inventory",
-      "Collision",
-      "Skill",
+      "Scan",
       "SyncPropagation",
-      "Known",
-      "SubType",
-      "Teach",
-      "State",
-      "SyncHistory"
+      "Transient"
     ]
   },
   "componentIdentifiers": {
@@ -56,10 +34,12 @@
     "com.vast.component.Group": "Group",
     "com.vast.component.Harvestable": "Harvestable",
     "com.vast.component.Inventory": "Inventory",
+    "com.vast.component.Invisible": "Invisible",
     "com.vast.component.Known": "Known",
     "com.vast.component.Lifetime": "Lifetime",
+    "com.vast.component.Observer": "Observer",
     "com.vast.component.Owner": "Owner",
-    "com.vast.component.Player": "Player",
+    "com.vast.component.Scan": "Scan",
     "com.vast.component.Skill": "Skill",
     "com.vast.component.Speed": "Speed",
     "com.vast.component.State": "State",
@@ -69,6 +49,7 @@
     "com.vast.component.SyncPropagation": "SyncPropagation",
     "com.vast.component.Teach": "Teach",
     "com.vast.component.Transform": "Transform",
+    "com.vast.component.Transient": "Transient",
     "com.vast.component.Type": "Type"
   },
   "metadata": {

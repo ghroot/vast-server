@@ -8,7 +8,9 @@ import com.vast.behaviour.AdultAnimalBehaviour;
 import com.vast.behaviour.Behaviour;
 import com.vast.behaviour.HumanBehaviour;
 import com.vast.behaviour.YoungAnimalBehaviour;
-import com.vast.data.*;
+import com.vast.data.Items;
+import com.vast.data.Metrics;
+import com.vast.data.Recipes;
 import com.vast.data.WorldConfiguration;
 import com.vast.interact.*;
 import com.vast.network.IncomingRequest;
@@ -25,7 +27,10 @@ import net.mostlyoriginal.api.utils.QuadTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class VastWorld implements Runnable {
@@ -126,7 +131,6 @@ public class VastWorld implements Runnable {
 			new ProducerSystem(items, recipes),
 			new GrowSystem(),
 			new LifetimeSystem(),
-			new LearnSystem(),
 			new PickupSystem(worldConfiguration, random),
 			new DayNightCycleSystem(worldConfiguration),
 			new WeatherSystem(random),
@@ -139,7 +143,6 @@ public class VastWorld implements Runnable {
 			new EntityLinkManager()
 		);
 		if (showMonitor) {
-//			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, this));
 			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new MonitorSystem(this));
 			worldConfigurationBuilder.register(new ProfiledInvocationStrategy(metrics));
 		}

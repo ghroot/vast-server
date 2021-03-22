@@ -19,13 +19,14 @@ import java.util.Set;
 public class CullingSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CullingSystem.class);
 
-	private ComponentMapper<Player> playerMapper;
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Observer> observerMapper;
 	private ComponentMapper<Scan> scanMapper;
+	private ComponentMapper<Avatar> avatarMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<SubType> subTypeMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
+	private ComponentMapper<Invisible> invisibleMapper;
 
 	private PropertyHandler[] propertyHandlers;
 
@@ -36,7 +37,7 @@ public class CullingSystem extends IteratingSystem {
 	private DataObject reusablePropertiesDataObject;
 
 	public CullingSystem(PropertyHandler[] propertyHandlers) {
-		super(Aspect.all(Scan.class, Active.class));
+		super(Aspect.all(Observer.class, Scan.class));
 		this.propertyHandlers = propertyHandlers;
 
 		reusableRemovedEntities = new IntBag();
@@ -56,20 +57,20 @@ public class CullingSystem extends IteratingSystem {
 
 	@Override
 	protected void process(int entity) {
+		Observer observer = observerMapper.get(entity);
 		Scan scan = scanMapper.get(entity);
-		Active active = activeMapper.get(entity);
 
-		notifyAboutRemovedEntities(active.peer, entity, scan, active);
-		notifyAboutNewEntities(active.peer, entity, scan, active);
+		notifyAboutRemovedEntities(entity, scan, observer);
+		notifyAboutNewEntities(entity, scan, observer);
 	}
 
-	private void notifyAboutRemovedEntities(VastPeer peer, int entity, Scan scan, Active active) {
+	private void notifyAboutRemovedEntities(int entity, Scan scan, Observer observer) {
 		reusableRemovedEntities.clear();
-		int[] knowEntities = active.knowEntities.getData();
-		for (int i = 0, size = active.knowEntities.size(); i < size; ++i) {
+		int[] knowEntities = observer.knowEntities.getData();
+		for (int i = 0, size = observer.knowEntities.size(); i < size; ++i) {
 			int knowEntity = knowEntities[i];
 			if (!scan.nearbyEntities.contains(knowEntity)) {
-				notifyAboutRemovedEntity(peer, knowEntity);
+				notifyAboutRemovedEntity(observer.peer, knowEntity);
 				reusableRemovedEntities.add(knowEntity);
 				if (knownMapper.has(knowEntity)) {
 					knownMapper.get(knowEntity).knownByEntities.removeValue(entity);
@@ -79,7 +80,7 @@ public class CullingSystem extends IteratingSystem {
 		int[] entitiesToRemove = reusableRemovedEntities.getData();
 		for (int i = 0, size = reusableRemovedEntities.size(); i < size; ++i) {
 			int entityToRemove = entitiesToRemove[i];
-			active.knowEntities.removeValue(entityToRemove);
+			observer.knowEntities.removeValue(entityToRemove);
 		}
 	}
 
@@ -90,13 +91,13 @@ public class CullingSystem extends IteratingSystem {
 		peer.send(reusableDestroyedEventMessage);
 	}
 
-	private void notifyAboutNewEntities(VastPeer peer, int entity, Scan scan, Active active) {
+	private void notifyAboutNewEntities(int entity, Scan scan, Observer observer) {
 		int[] nearbyEntities = scan.nearbyEntities.getData();
 		for (int i = 0, size = scan.nearbyEntities.size(); i < size; ++i) {
 			int nearbyEntity = nearbyEntities[i];
-			if (!active.knowEntities.contains(nearbyEntity)) {
-				notifyAboutNewEntity(peer, entity, nearbyEntity);
-				active.knowEntities.add(nearbyEntity);
+			if (!invisibleMapper.has(nearbyEntity) && !observer.knowEntities.contains(nearbyEntity)) {
+				notifyAboutNewEntity(observer.peer, entity, nearbyEntity);
+				observer.knowEntities.add(nearbyEntity);
 				if (knownMapper.has(nearbyEntity)) {
 					knownMapper.get(nearbyEntity).knownByEntities.add(entity);
 				}
@@ -113,8 +114,8 @@ public class CullingSystem extends IteratingSystem {
 			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_SUB_TYPE, subTypeMapper.get(newEntity).subType);
 		}
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, "culling");
-		if (playerMapper.has(newEntity)) {
-			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(newEntity).name));
+		if (avatarMapper.has(newEntity)) {
+			reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(avatarMapper.get(newEntity).name));
 		}
 		reusableAlreadyInterestedProperties.clear();
 		reusablePropertiesDataObject.clear();

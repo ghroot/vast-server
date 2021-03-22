@@ -15,7 +15,7 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Container> containerMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Owner> ownerMapper;
-	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Avatar> avatarMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Event> eventMapper;
@@ -23,24 +23,24 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 	private Items items;
 
 	public ContainerInteractionHandler(Items items) {
-		super(Aspect.all(Player.class, Inventory.class), Aspect.all(Container.class, Inventory.class));
+		super(Aspect.all(Avatar.class, Inventory.class), Aspect.all(Container.class, Inventory.class));
 		this.items = items;
 	}
 
 	@Override
-	public boolean canInteract(int playerEntity, int containerEntity) {
+	public boolean canInteract(int avatarEntity, int containerEntity) {
 		return true;
 	}
 
 	@Override
-	public boolean attemptStart(int playerEntity, int containerEntity) {
-		Inventory playerInventory = inventoryMapper.get(playerEntity);
+	public boolean attemptStart(int avatarEntity, int containerEntity) {
+		Inventory avatarInventory = inventoryMapper.get(avatarEntity);
 
-		if (ownerMapper.has(containerEntity) && !playerMapper.get(playerEntity).name.equals(ownerMapper.get(containerEntity).name)) {
-			eventMapper.create(playerEntity).addEntry("message").setData("This is not mine...").setOwnerPropagation();
+		if (ownerMapper.has(containerEntity) && !avatarMapper.get(avatarEntity).name.equals(ownerMapper.get(containerEntity).name)) {
+			eventMapper.create(avatarEntity).addEntry("message").setData("This is not mine...").setOwnerPropagation();
 			return false;
-		} else if (!containerMapper.get(containerEntity).persistent && playerInventory.isFull()) {
-			eventMapper.create(playerEntity).addEntry("message").setData("My backpack is full...").setOwnerPropagation();
+		} else if (!containerMapper.get(containerEntity).persistent && avatarInventory.isFull()) {
+			eventMapper.create(avatarEntity).addEntry("message").setData("My backpack is full...").setOwnerPropagation();
 			return false;
 		} else {
 			return true;
@@ -48,28 +48,28 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 	}
 
 	@Override
-	public boolean process(int playerEntity, int containerEntity) {
-		Inventory playerInventory = inventoryMapper.get(playerEntity);
+	public boolean process(int avatarEntity, int containerEntity) {
+		Inventory playerInventory = inventoryMapper.get(avatarEntity);
 		Inventory containerInventory = inventoryMapper.get(containerEntity);
 
 		if (containerMapper.get(containerEntity).persistent) {
 			if (containerInventory.isEmpty() || playerInventory.isFull()) {
 				if (transferAllOrUntilFull(playerInventory, containerInventory, "basic")) {
 					syncMapper.create(containerEntity).markPropertyAsDirty(Properties.INVENTORY);
-					syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
-					eventMapper.create(playerEntity).addEntry("action").setData("pickedUp");
+					syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.INVENTORY);
+					eventMapper.create(avatarEntity).addEntry("action").setData("pickedUp");
 				}
 			} else {
 				if (transferAllOrUntilFull(containerInventory, playerInventory)) {
-					syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
+					syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.INVENTORY);
 					syncMapper.create(containerEntity).markPropertyAsDirty(Properties.INVENTORY);
-					eventMapper.create(playerEntity).addEntry("action").setData("pickedUp");
+					eventMapper.create(avatarEntity).addEntry("action").setData("pickedUp");
 				}
 			}
 		} else {
 			if (transferAllOrUntilFull(containerInventory, playerInventory)) {
-				syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
-				eventMapper.create(playerEntity).addEntry("action").setData("pickedUp");
+				syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.INVENTORY);
+				eventMapper.create(avatarEntity).addEntry("action").setData("pickedUp");
 				deleteMapper.create(containerEntity).reason = "collected";
 			}
 		}
@@ -78,7 +78,7 @@ public class ContainerInteractionHandler extends AbstractInteractionHandler {
 	}
 
 	@Override
-	public void stop(int playerEntity, int containerEntity) {
+	public void stop(int avatarEntity, int containerEntity) {
 	}
 
 	private boolean transferAllOrUntilFull(Inventory from, Inventory to, String onlyItemTag) {

@@ -5,7 +5,7 @@ import com.artemis.io.JsonArtemisSerializer;
 import com.artemis.managers.WorldSerializationManager;
 import com.vast.component.*;
 import com.vast.data.WorldConfiguration;
-import com.vast.data.*;
+import com.vast.network.VastPeer;
 import com.vast.prefab.*;
 import fastnoise.FastNoise;
 
@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Random;
 
 public class CreationManager extends BaseSystem {
-	private ComponentMapper<Player> playerMapper;
+	private ComponentMapper<Avatar> avatarMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<SubType> subTypeMapper;
@@ -33,12 +33,14 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Group> groupMapper;
 	private ComponentMapper<Teach> teachMapper;
 	private ComponentMapper<Owner> ownerMapper;
+	private ComponentMapper<Observer> observerMapper;
 
 	private WorldConfiguration worldConfiguration;
 	private Random random;
 
 	private WorldPrefab worldPrefab;
-	private PlayerPrefab playerPrefab;
+	private AvatarPrefab avatarPrefab;
+	private ObserverPrefab observerPrefab;
 	private Map<String, VastPrefab> terrainPrefabs;
 	private Map<String, VastPrefab> animalPrefabs;
 	private VastPrefab buildingPlaceholderPrefab;
@@ -58,7 +60,8 @@ public class CreationManager extends BaseSystem {
 		worldSerializationManager.setSerializer(new JsonArtemisSerializer(world));
 
 		worldPrefab = new WorldPrefab(world);
-		playerPrefab = new PlayerPrefab(world);
+		avatarPrefab = new AvatarPrefab(world);
+		observerPrefab = new ObserverPrefab(world);
 		terrainPrefabs = new HashMap<>();
 		terrainPrefabs.put("tree", new TerrainPrefabs.TreePrefab(world));
 		terrainPrefabs.put("rock", new TerrainPrefabs.RockPrefab(world));
@@ -108,20 +111,28 @@ public class CreationManager extends BaseSystem {
 		}
 	}
 
-	public int createPlayer(String name, int subType, boolean fakePlayer) {
-		int playerEntity = playerPrefab.createEntity();
-		playerMapper.get(playerEntity).name = name;
-		subTypeMapper.get(playerEntity).subType = subType;
-		transformMapper.get(playerEntity).position.set(getRandomPositionInWorld());
+	public int createAvatar(String name, int subType, boolean fakePlayer) {
+		int avatarEntity = avatarPrefab.createEntity();
+		avatarMapper.get(avatarEntity).name = name;
+		subTypeMapper.get(avatarEntity).subType = subType;
+		transformMapper.get(avatarEntity).position.set(getRandomPositionInWorld());
 		if (fakePlayer) {
-			aiMapper.create(playerEntity).behaviourName = "human";
+			aiMapper.create(avatarEntity).behaviourName = "human";
 		}
 
-		inventoryMapper.get(playerEntity).add(0, 15);
-		inventoryMapper.get(playerEntity).add(1, 15);
-		inventoryMapper.get(playerEntity).add(3, 5);
+		inventoryMapper.get(avatarEntity).add(0, 15);
+		inventoryMapper.get(avatarEntity).add(1, 15);
+		inventoryMapper.get(avatarEntity).add(3, 5);
 
-		return playerEntity;
+		return avatarEntity;
+	}
+
+	public int createObserver(VastPeer peer, int avatarEntity) {
+		int observerEntity = observerPrefab.createEntity();
+		observerMapper.get(observerEntity).peer = peer;
+		observerMapper.get(observerEntity).observedEntity = avatarEntity;
+		transformMapper.get(observerEntity).position.set(transformMapper.get(avatarEntity).position);
+		return observerEntity;
 	}
 
 	public int createTree(Point2f position, boolean growing) {

@@ -21,13 +21,15 @@ public class MonitorEntity {
     public String name;
     public boolean colored = true;
     public List<MonitorComponent> components;
+    public Point2i observedPosition;
 
     private static Map<String, Image> coloredEntityImages;
     private static Map<String, Image> grayEntityImages;
 
     static {
         coloredEntityImages = new HashMap<>();
-        coloredEntityImages.put("player", colorImage("images/User-Icon.png", Color.WHITE));
+        coloredEntityImages.put("observer", colorImage("images/Eye-Icon.png", Color.WHITE));
+        coloredEntityImages.put("avatar", colorImage("images/User-Icon.png", Color.WHITE));
         coloredEntityImages.put("animal", colorImage("images/Demon.png", Color.CYAN));
         coloredEntityImages.put("pickup", colorImage("images/Chest-Icon.png", Color.BLUE));
         coloredEntityImages.put("tree", colorImage("images/Tree-Icon.png", Color.GREEN));
@@ -35,7 +37,8 @@ public class MonitorEntity {
         coloredEntityImages.put("building", colorImage("images/Home-Icon.png", Color.YELLOW));
 
         grayEntityImages = new HashMap<>();
-        grayEntityImages.put("player", colorImage("images/User-Icon.png", Color.DARK_GRAY));
+        grayEntityImages.put("observer", colorImage("images/Eye-Icon.png", Color.DARK_GRAY));
+        grayEntityImages.put("avatar", colorImage("images/User-Icon.png", Color.DARK_GRAY));
         grayEntityImages.put("animal", colorImage("images/Demon.png", Color.DARK_GRAY));
         grayEntityImages.put("pickup", colorImage("images/Chest-Icon.png", Color.DARK_GRAY));
         grayEntityImages.put("tree", colorImage("images/Tree-Icon.png", Color.DARK_GRAY));
@@ -77,7 +80,14 @@ public class MonitorEntity {
         }
     }
 
-    public void paintDebug(Graphics g, Map<String, Boolean> debugSettings) {
+    public void paintDebugBottom(Graphics g, Map<String, Boolean> debugSettings) {
+        if (observedPosition != null) {
+            g.setColor(Color.DARK_GRAY);
+            drawDashedLine(g, position.x, position.y, observedPosition.x, observedPosition.y);
+        }
+    }
+
+    public void paintDebugTop(Graphics g, Map<String, Boolean> debugSettings) {
         if (debugSettings.get("Collision") && collisionRadius > 0) {
             g.setColor(Color.BLUE);
             g.drawArc(position.x - collisionRadius, position.y - collisionRadius,

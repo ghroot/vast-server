@@ -1,0 +1,79 @@
+{
+  "entities": {
+    "0": {
+      "archetype": 0,
+      "key": "avatar",
+      "components": {
+        "Collision": {
+          "radius": 0.4
+        },
+        "Inventory": {
+          "capacity": 100
+        },
+        "Speed": {
+          "baseSpeed": 2.5
+        },
+        "SyncPropagation": {
+          "ownerPropagationProperties": 1696,
+          "unreliableProperties": 3
+        },
+        "Teach": {
+          "words": [
+            "me",
+            "you"
+          ]
+        },
+        "Type": {
+          "type": "avatar"
+        }
+      }
+    }
+  },
+  "archetypes": {
+    "0": [
+      "Avatar",
+      "Transform",
+      "Type",
+      "Speed",
+      "Inventory",
+      "Collision",
+      "Skill",
+      "SyncPropagation",
+      "Known",
+      "SubType",
+      "Teach",
+      "Scan",
+      "State",
+      "SyncHistory"
+    ]
+  },
+  "componentIdentifiers": {
+    "com.vast.component.AI": "AI",
+    "com.vast.component.Avatar": "Avatar",
+    "com.vast.component.Collision": "Collision",
+    "com.vast.component.Configuration": "Configuration",
+    "com.vast.component.Constructable": "Constructable",
+    "com.vast.component.Container": "Container",
+    "com.vast.component.Fueled": "Fueled",
+    "com.vast.component.Group": "Group",
+    "com.vast.component.Harvestable": "Harvestable",
+    "com.vast.component.Inventory": "Inventory",
+    "com.vast.component.Known": "Known",
+    "com.vast.component.Lifetime": "Lifetime",
+    "com.vast.component.Owner": "Owner",
+    "com.vast.component.Scan": "Scan",
+    "com.vast.component.Skill": "Skill",
+    "com.vast.component.Speed": "Speed",
+    "com.vast.component.State": "State",
+    "com.vast.component.Static": "Static",
+    "com.vast.component.SubType": "SubType",
+    "com.vast.component.SyncHistory": "SyncHistory",
+    "com.vast.component.SyncPropagation": "SyncPropagation",
+    "com.vast.component.Teach": "Teach",
+    "com.vast.component.Transform": "Transform",
+    "com.vast.component.Type": "Type"
+  },
+  "metadata": {
+    "version": 1
+  }
+}

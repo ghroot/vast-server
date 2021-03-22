@@ -4,9 +4,8 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.component.Active;
 import com.vast.component.Event;
-import com.vast.component.Player;
+import com.vast.component.Observer;
 import com.vast.data.WorldConfiguration;
 
 public class DayNightCycleSystem extends IteratingSystem {
@@ -18,7 +17,7 @@ public class DayNightCycleSystem extends IteratingSystem {
 	private boolean changed;
 
 	public DayNightCycleSystem(WorldConfiguration worldConfiguration) {
-		super(Aspect.all(Player.class, Active.class));
+		super(Aspect.all(Observer.class));
 
 		this.worldConfiguration = worldConfiguration;
 	}
@@ -30,8 +29,8 @@ public class DayNightCycleSystem extends IteratingSystem {
 	}
 
 	@Override
-	protected void inserted(int playerEntity) {
-		eventMapper.create(playerEntity).addEntry(isDay(timeManager.getTime()) ? "dayInital" : "nightInitial")
+	protected void inserted(int observerEntity) {
+		eventMapper.create(observerEntity).addEntry(isDay(timeManager.getTime()) ? "dayInital" : "nightInitial")
 				.setOwnerPropagation();
 	}
 
@@ -47,9 +46,9 @@ public class DayNightCycleSystem extends IteratingSystem {
 	}
 
 	@Override
-	protected void process(int playerEntity) {
+	protected void process(int observerEntity) {
 		if (changed) {
-			eventMapper.create(playerEntity).addEntry(isDay(timeManager.getTime()) ? "dayChanged" : "nightChanged")
+			eventMapper.create(observerEntity).addEntry(isDay(timeManager.getTime()) ? "dayChanged" : "nightChanged")
 				.setOwnerPropagation();
 		}
 	}

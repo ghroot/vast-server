@@ -16,24 +16,24 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Event> eventMapper;
 
 	public FueledInteractionHandler() {
-		super(Aspect.all(Player.class, Inventory.class), Aspect.all(Fueled.class));
+		super(Aspect.all(Avatar.class, Inventory.class), Aspect.all(Fueled.class));
 	}
 
 	@Override
-	public boolean canInteract(int playerEntity, int fueledEntity) {
+	public boolean canInteract(int avatarEntity, int fueledEntity) {
 		return true;
 	}
 
 	@Override
-	public boolean attemptStart(int playerEntity, int fueledEntity) {
-		Inventory inventory = inventoryMapper.get(playerEntity);
+	public boolean attemptStart(int avatarEntity, int fueledEntity) {
+		Inventory inventory = inventoryMapper.get(avatarEntity);
 		Fueled fueled = fueledMapper.get(fueledEntity);
 
 		if (fueled.isFueled()) {
-			eventMapper.create(playerEntity).addEntry("message").setData("I don't have to add any materials...").setOwnerPropagation();
+			eventMapper.create(avatarEntity).addEntry("message").setData("I don't have to add any materials...").setOwnerPropagation();
 			return false;
 		} else if (!inventory.has(fueled.cost)) {
-			eventMapper.create(playerEntity).addEntry("message").setData("I don't have the required materials...").setOwnerPropagation();
+			eventMapper.create(avatarEntity).addEntry("message").setData("I don't have the required materials...").setOwnerPropagation();
 			return false;
 		} else {
 			return true;
@@ -41,12 +41,12 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 	}
 
 	@Override
-	public boolean process(int playerEntity, int fueledEntity) {
-		Inventory inventory = inventoryMapper.get(playerEntity);
+	public boolean process(int avatarEntity, int fueledEntity) {
+		Inventory inventory = inventoryMapper.get(avatarEntity);
 		Fueled fueled = fueledMapper.get(fueledEntity);
 
 		inventory.remove(fueled.cost);
-		syncMapper.create(playerEntity).markPropertyAsDirty(Properties.INVENTORY);
+		syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.INVENTORY);
 
 		fueled.timeLeft = 60.0f;
 		syncMapper.create(fueledEntity).markPropertyAsDirty(Properties.FUELED);
@@ -55,6 +55,6 @@ public class FueledInteractionHandler extends AbstractInteractionHandler {
 	}
 
 	@Override
-	public void stop(int playerEntity, int fueledEntity) {
+	public void stop(int avatarEntity, int fueledEntity) {
 	}
 }

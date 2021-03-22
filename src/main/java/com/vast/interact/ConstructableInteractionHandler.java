@@ -2,8 +2,8 @@ package com.vast.interact;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.vast.component.Avatar;
 import com.vast.component.Constructable;
-import com.vast.component.Player;
 import com.vast.component.State;
 import com.vast.component.Sync;
 import com.vast.network.Properties;
@@ -18,25 +18,25 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 	private ComponentMapper<State> stateMapper;
 
 	public ConstructableInteractionHandler() {
-		super(Aspect.all(Player.class), Aspect.all(Constructable.class));
+		super(Aspect.all(Avatar.class), Aspect.all(Constructable.class));
 	}
 
 	@Override
-	public boolean canInteract(int playerEntity, int constructableEntity) {
+	public boolean canInteract(int avatarEntity, int constructableEntity) {
 		return !constructableMapper.get(constructableEntity).isComplete();
 	}
 
 	@Override
-	public boolean attemptStart(int playerEntity, int constructableEntity) {
-		stateMapper.get(playerEntity).name = "building";
-		syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
+	public boolean attemptStart(int avatarEntity, int constructableEntity) {
+		stateMapper.get(avatarEntity).name = "building";
+		syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.STATE);
 		stateMapper.get(constructableEntity).name = "building";
 		syncMapper.create(constructableEntity).markPropertyAsDirty(Properties.STATE);
 		return true;
 	}
 
 	@Override
-	public boolean process(int playerEntity, int constructableEntity) {
+	public boolean process(int avatarEntity, int constructableEntity) {
 		Constructable constructable = constructableMapper.get(constructableEntity);
 
 		if (constructable.isComplete()) {
@@ -50,9 +50,9 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 	}
 
 	@Override
-	public void stop(int playerEntity, int constructableEntity) {
-		stateMapper.get(playerEntity).name = "none";
-		syncMapper.create(playerEntity).markPropertyAsDirty(Properties.STATE);
+	public void stop(int avatarEntity, int constructableEntity) {
+		stateMapper.get(avatarEntity).name = "none";
+		syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.STATE);
 		stateMapper.get(constructableEntity).name = "none";
 		syncMapper.create(constructableEntity).markPropertyAsDirty(Properties.STATE);
 	}

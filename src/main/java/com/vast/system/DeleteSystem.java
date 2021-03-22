@@ -5,7 +5,10 @@ import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.messages.EventMessage;
-import com.vast.component.*;
+import com.vast.component.Delete;
+import com.vast.component.Invisible;
+import com.vast.component.Known;
+import com.vast.component.Observer;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
 import org.slf4j.Logger;
@@ -16,7 +19,7 @@ import java.util.Map;
 public class DeleteSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(DeleteSystem.class);
 
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Observer> observerMapper;
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Known> knownMapper;
 
@@ -25,7 +28,7 @@ public class DeleteSystem extends IteratingSystem {
 	private EventMessage reusableEventMessage;
 
 	public DeleteSystem() {
-		super(Aspect.one(Delete.class));
+		super(Aspect.one(Delete.class).exclude(Invisible.class));
 
 		reusableEventMessage = new EventMessage(MessageCodes.ENTITY_DESTROYED);
 	}
@@ -48,10 +51,10 @@ public class DeleteSystem extends IteratingSystem {
 			int[] knownByEntities = knownByEntitiesBag.getData();
 			for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
 				int entityToNotify = knownByEntities[i];
-				if (activeMapper.has(entityToNotify)) {
-					VastPeer peer = activeMapper.get(entityToNotify).peer;
-					notifyAboutRemovedEntity(peer, deleteEntity, reason);
-					activeMapper.get(entityToNotify).knowEntities.removeValue(deleteEntity);
+				if (observerMapper.has(entityToNotify)) {
+					Observer observer = observerMapper.get(entityToNotify);
+					notifyAboutRemovedEntity(observer.peer, deleteEntity, reason);
+					observer.knowEntities.removeValue(deleteEntity);
 				}
 			}
 		}
