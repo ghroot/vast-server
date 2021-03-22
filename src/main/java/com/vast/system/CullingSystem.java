@@ -10,10 +10,10 @@ import com.vast.component.*;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
+import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class CullingSystem extends IteratingSystem {
@@ -42,7 +42,7 @@ public class CullingSystem extends IteratingSystem {
 		reusableRemovedEntities = new IntBag();
 		reusableDestroyedEventMessage = new EventMessage(MessageCodes.ENTITY_DESTROYED);
 		reusableCreatedEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
-		reusableAlreadyInterestedProperties = new HashSet<>();
+		reusableAlreadyInterestedProperties = new UnifiedSet<>();
 		reusablePropertiesDataObject = new DataObject();
 	}
 

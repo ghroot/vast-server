@@ -12,10 +12,10 @@ import com.vast.component.*;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
+import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class CreateSystem extends IteratingSystem {
@@ -44,7 +44,7 @@ public class CreateSystem extends IteratingSystem {
 		this.propertyHandlers = propertyHandlers;
 
 		reusableEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
-		reusableAlreadyInterestedProperties = new HashSet<>();
+		reusableAlreadyInterestedProperties = new UnifiedSet<>();
 		reusablePropertiesDataObject = new DataObject();
 	}
 

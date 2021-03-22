@@ -11,10 +11,10 @@ import com.vast.component.*;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
+import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,7 +42,7 @@ public class SyncSystem extends IteratingSystem {
 		this.propertyHandlers = propertyHandlers;
 		this.metrics = metrics;
 
-		reusableAlreadyInterestedProperties = new HashSet<>();
+		reusableAlreadyInterestedProperties = new UnifiedSet<>();
 		reusablePropertiesDataObject = new DataObject();
 		reusableChangedProperties = new ChangedProperties();
 		reusableMessage = new EventMessage(MessageCodes.UPDATE_PROPERTIES);
@@ -150,7 +150,7 @@ public class SyncSystem extends IteratingSystem {
 		}
 	}
 
-	class ChangedProperties {
+	private class ChangedProperties {
 		private DataObject propertiesDataObject;
 		private boolean reliable;
 	}
