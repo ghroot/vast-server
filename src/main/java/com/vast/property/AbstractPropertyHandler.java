@@ -18,7 +18,6 @@ public abstract class AbstractPropertyHandler<TPropertyData, TDataObjectData> im
         return property;
     }
 
-    protected abstract boolean isInterestedIn(int entity);
     protected abstract TPropertyData getPropertyData(int entity);
 
     protected boolean passedThresholdForSync(int entity, TPropertyData lastSyncedPropertyData) {
@@ -26,7 +25,7 @@ public abstract class AbstractPropertyHandler<TPropertyData, TDataObjectData> im
     }
 
     @Override
-    public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
+    public final boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
         if (isInterestedIn(entity)) {
             if (force || !hasSyncHistory(entity) || passedThresholdForSync(entity, getSyncHistoryData(entity))) {
                 TPropertyData propertyData = getPropertyData(entity);

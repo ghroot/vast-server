@@ -284,4 +284,9 @@ public class StepDefinitions {
         Inventory playerInventory = world.getComponentMapper(Inventory.class).get(world.getPeerEntity(playerName));
         Assert.assertTrue(playerInventory.has(world.getItems().getItem(itemName).getId(), amount));
     }
+
+    @Then("{string} should not be in use")
+    public void shouldNotBeInUse(String designation) {
+        Assert.assertFalse(world.getComponentMapper(Used.class).has(designations.get(designation)));
+    }
 }

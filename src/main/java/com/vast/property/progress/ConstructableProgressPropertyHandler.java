@@ -11,7 +11,7 @@ public class ConstructableProgressPropertyHandler extends AbstractProgressProper
 	}
 
 	@Override
-	protected boolean isInterestedIn(int entity) {
+	public boolean isInterestedIn(int entity) {
 		return constructableMapper.has(entity);
 	}
 

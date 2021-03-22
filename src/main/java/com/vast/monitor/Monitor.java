@@ -1,0 +1,374 @@
+package com.vast.monitor;
+
+import com.artemis.Aspect;
+import com.artemis.BaseSystem;
+import com.artemis.Component;
+import com.artemis.components.SerializationTag;
+import com.artemis.utils.Bag;
+import com.vast.VastWorld;
+import com.vast.component.*;
+import com.vast.monitor.model.EntityModel;
+import com.vast.monitor.model.ModelData;
+import com.vast.monitor.model.SystemMetricsModel;
+import com.vast.monitor.model.WorldInfoModel;
+
+import javax.swing.*;
+import javax.swing.Timer;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.Point2D;
+import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class Monitor extends JFrame implements ActionListener {
+    private static final int WIDTH = 1400;
+    private static final int HEIGHT = 800;
+
+    private VastWorld vastWorld;
+
+    private MonitorCanvas canvas;
+    private JSlider zoomSlider;
+
+    private final ModelData modelData;
+    private SystemMetricsModel systemMetricsModel;
+    private JTable systemMetricsTable;
+    private EntityModel entityModel;
+    private JTable entityTable;
+    private WorldInfoModel worldInfoModel;
+    private JTable worldInfoTable;
+
+    private Timer timer;
+
+    private final Map<String, Boolean> debugSettings = new HashMap<>();
+    private final MonitorWorld monitorWorld;
+    private Point2D clickPoint;
+    private Point2D movePoint;
+
+    public Monitor(VastWorld vastWorld) {
+        super("Vast Monitor");
+        this.vastWorld = vastWorld;
+
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setSize(WIDTH, HEIGHT);
+
+        monitorWorld = new MonitorWorld(debugSettings);
+        modelData = new ModelData();
+
+        setupUI();
+        setVisible(true);
+        startTimer();
+    }
+
+    private void setupUI() {
+        canvas = new MonitorCanvas(monitorWorld);
+        canvas.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                clickPoint = convertPointFromEventToWorld(e.getPoint());
+            }
+        });
+        canvas.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                movePoint = convertPointFromEventToWorld(e.getPoint());
+            }
+        });
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+
+        JPanel toggleContainer = new JPanel(new GridBagLayout());
+        JPanel togglePanel = new JPanel(new FlowLayout());
+        togglePanel.add(createDebugSettingToggleButton("Collision"));
+        togglePanel.add(createDebugSettingToggleButton("Scan"));
+        togglePanel.add(createDebugSettingToggleButton("Quad"));
+        togglePanel.add(createDebugSettingToggleButton("Name"));
+        togglePanel.add(createDebugSettingToggleButton("Path"));
+        togglePanel.add(createDebugSettingToggleButton("Interact"));
+        toggleContainer.add(togglePanel, new GridBagConstraints());
+        toggleContainer.setPreferredSize(new Dimension(450, 40));
+        topPanel.add(toggleContainer, BorderLayout.WEST);
+
+        zoomSlider = new JSlider(JSlider.HORIZONTAL, 50, 500, 100);
+        zoomSlider.setFocusable(false);
+        zoomSlider.setPreferredSize(new Dimension(WIDTH - toggleContainer.getPreferredSize().width, 40));
+        zoomSlider.setMajorTickSpacing(50);
+        zoomSlider.setMinorTickSpacing(10);
+        zoomSlider.setPaintTicks(true);
+        zoomSlider.setPaintLabels(true);
+        zoomSlider.setSnapToTicks(true);
+        zoomSlider.setFocusable(false);
+        zoomSlider.addChangeListener(e -> {
+            JSlider slider = (JSlider) e.getSource();
+            int zoomPercent = slider.getValue();
+            canvas.scale = Math.max(0.00001, zoomPercent / 100.0);
+            canvas.repaint();
+        });
+        topPanel.add(zoomSlider, BorderLayout.EAST);
+
+        systemMetricsModel = new SystemMetricsModel();
+        systemMetricsTable = new JTable(systemMetricsModel);
+        systemMetricsTable.setFocusable(false);
+        sortTable(systemMetricsTable);
+        systemMetricsTable.getColumn("System").setPreferredWidth(120);
+        systemMetricsTable.getColumn("Time").setPreferredWidth(40);
+        systemMetricsTable.getColumn("Entities").setPreferredWidth(60);
+        JScrollPane systemMetricsScrollPanel = new JScrollPane(systemMetricsTable);
+        systemMetricsScrollPanel.setPreferredSize(new Dimension(220, HEIGHT));
+        systemMetricsScrollPanel.setMinimumSize(new Dimension(220, HEIGHT));
+        systemMetricsTable.setPreferredScrollableViewportSize(new Dimension(220, HEIGHT));
+
+        worldInfoModel = new WorldInfoModel();
+        worldInfoTable = new JTable(worldInfoModel);
+        worldInfoTable.setFocusable(false);
+        worldInfoTable.getColumn("Name").setPreferredWidth(130);
+        worldInfoTable.getColumn("Value").setPreferredWidth(120);
+        JScrollPane worldInfoScrollPanel = new JScrollPane(worldInfoTable);
+        worldInfoScrollPanel.setPreferredSize(new Dimension(250, HEIGHT));
+        worldInfoScrollPanel.setMinimumSize(new Dimension(250, 150));
+        worldInfoTable.setPreferredScrollableViewportSize(new Dimension(250, HEIGHT));
+
+        entityModel = new EntityModel();
+        entityTable = new JTable(entityModel);
+        entityTable.setFocusable(false);
+        sortTable(entityTable);
+        entityTable.getColumn("Component").setPreferredWidth(110);
+        entityTable.getColumn("Detail").setPreferredWidth(140);
+        JScrollPane entityScrollPanel = new JScrollPane(entityTable);
+        entityScrollPanel.setPreferredSize(new Dimension(250, HEIGHT));
+        entityScrollPanel.setMinimumSize(new Dimension(250, 300));
+        entityTable.setPreferredScrollableViewportSize(new Dimension(250, HEIGHT));
+
+        JSplitPane splitPanel1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+
+        JSplitPane splitPanel2 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        JSplitPane splitPanel3 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        JSplitPane splitPanel4 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+
+        splitPanel3.setLeftComponent(canvas);
+        splitPanel3.setRightComponent(systemMetricsScrollPanel);
+
+        splitPanel2.setLeftComponent(splitPanel4);
+        splitPanel2.setRightComponent(splitPanel3);
+
+        splitPanel1.setTopComponent(topPanel);
+        splitPanel1.setBottomComponent(splitPanel2);
+
+        splitPanel4.setTopComponent(worldInfoScrollPanel);
+        splitPanel4.setBottomComponent(entityScrollPanel);
+
+        splitPanel3.setResizeWeight(1);
+
+        getContentPane().add(splitPanel1);
+
+        getContentPane().requestFocusInWindow();
+    }
+
+    private Point convertPointFromEventToWorld(Point point) {
+        double x = point.x;
+        double y = point.y;
+
+        x -= (1f - canvas.scale) * canvas.getWidth() / 2;
+        y -= (1f - canvas.scale) * canvas.getHeight() / 2;
+
+        x -= canvas.translateX * canvas.scale;
+        y -= canvas.translateY * canvas.scale;
+
+        x /= canvas.scale;
+        y /= canvas.scale;
+
+        return new Point((int) Math.round(x), (int) Math.round(y));
+    }
+
+    private JToggleButton createDebugSettingToggleButton(String name) {
+        JToggleButton toggleButton = new JToggleButton(name);
+        toggleButton.setFocusable(false);
+        toggleButton.putClientProperty("JButton.buttonType", "roundRect");
+        toggleButton.addItemListener(e -> {
+            JToggleButton changedToggleButton = (JToggleButton) e.getSource();
+            debugSettings.put(name, changedToggleButton.isSelected());
+        });
+        debugSettings.put(name, false);
+        return toggleButton;
+    }
+
+    private void sortTable(JTable table) {
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
+        table.setRowSorter(sorter);
+        List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+        sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+        sorter.setSortKeys(sortKeys);
+        sorter.sort();
+    }
+
+    private void startTimer() {
+        timer = new Timer(1000 / 30, this);
+        timer.start();
+    }
+
+    public void sync() {
+        int selectedEntity;
+        // vastWorld -> monitorWorld
+        synchronized (monitorWorld) {
+            monitorWorld.sync(vastWorld, clickPoint, movePoint);
+            selectedEntity = monitorWorld.getSelectedMonitorEntity();
+            clickPoint = null;
+        }
+
+        // vastWorld -> modelData
+        synchronized (modelData) {
+            Map<String, String> worldInfo = new HashMap<>();
+            worldInfo.put("World size", "" + vastWorld.getWorldConfiguration().width + " x " + vastWorld.getWorldConfiguration().height);
+            worldInfo.put("Fps", "" + vastWorld.getMetrics().getFps());
+            worldInfo.put("Total entities", "" + vastWorld.getEntities(Aspect.all(Transform.class)).length);
+            worldInfo.put("Static entities", "" + vastWorld.getEntities(Aspect.all(Static.class)).length);
+            worldInfo.put("Collisions", vastWorld.getMetrics().getNumberOfCollisions() + " / " + vastWorld.getMetrics().getNumberOfCollisionChecks());
+            modelData.worldInfo = worldInfo;
+
+            if (vastWorld.getMetrics() != null) {
+                modelData.systemMetrics = vastWorld.getMetrics().getSystemMetrics().entrySet()
+                        .stream()
+                        .sorted(Map.Entry.comparingByKey(Comparator.comparing((BaseSystem system) -> system.getClass().getSimpleName())))
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (e1, e2) -> e1,
+                                LinkedHashMap::new
+                        ));
+            }
+
+            if (selectedEntity >= 0) {
+                Map<String, String> entityData = new HashMap<>();
+                Bag<com.artemis.Component> components = new Bag<>();
+                vastWorld.getWorld().getEntity(selectedEntity).getComponents(components);
+                for (int i = 0; i < components.size(); i++) {
+                    Component component = components.get(i);
+                    String componentName = component.getClass().getSimpleName();
+                    String detail = null;
+                    if (component instanceof com.vast.component.Type) {
+                        detail = ((com.vast.component.Type) component).type;
+                    } else if (component instanceof SubType) {
+                        detail = "" + ((SubType) component).subType;
+                    } else if (component instanceof Interact) {
+                        detail = "" + ((Interact) component).phase;
+                    } else if (component instanceof Scan) {
+                        detail = "" + ((Scan) component).nearbyEntities.size();
+                    } else if (component instanceof Known) {
+                        detail = "" + ((Known) component).knownByEntities.size();
+                    } else if (component instanceof AI) {
+                        detail = ((AI) component).behaviourName;
+                    } else if (component instanceof State) {
+                        String stateName = ((State) component).name;
+                        detail = stateName != null ? stateName : "";
+                    } else if (component instanceof Harvestable) {
+                        detail = "" + (Math.round(((Harvestable) component).durability * 100.0f) / 100.0f);
+                    } else if (component instanceof Growing) {
+                        detail = "" + (Math.round(((Growing) component).timeLeft * 100.0f) / 100.0f);
+                    } else if (component instanceof Constructable) {
+                        Constructable constructable = (Constructable) component;
+                        int progress = (int) Math.floor(100.0f * constructable.buildTime / constructable.buildDuration);
+                        detail = "" + progress;
+                    } else if (component instanceof Collision) {
+                        detail = "" + (Math.round(((Collision) component).radius * 100.0f) / 100.0f);
+                    } else if (component instanceof Owner) {
+                        detail = ((Owner) component).name;
+                    } else if (component instanceof Player) {
+                        detail = ((Player) component).name;
+                    } else if (component instanceof  Active) {
+                        detail = Integer.toString(((Active) component).knowEntities.size());
+                    } else if (component instanceof Follow) {
+                        Follow follow = (Follow) component;
+                        detail = follow.entity + ", " + (Math.round((follow.distance * 100.0f) / 100.0f));
+                    } else if (component instanceof Group) {
+                        detail = "" + ((Group) component).id;
+                    } else if (component instanceof Order) {
+                        Order order = (Order) component;
+                        if (order.handler != null) {
+                            detail = "" + order.handler.getClass().getSimpleName();
+                        }
+                    } else if (component instanceof Speed) {
+                        detail = "" + (Math.round(((Speed) component).getModifiedSpeed() * 10f) / 10f);
+                    } else if (component instanceof Transform) {
+                        detail = "" + (Math.round(((Transform) component).position.x * 100f) / 100f) + ", " + (Math.round(((Transform) component).position.y * 100.0f) / 100.0f);
+                    } else if (component instanceof Path) {
+                        Path path = (Path) component;
+                        detail = "" + (Math.round(path.targetPosition.x * 100f) / 100f) + ", " + (Math.round(path.targetPosition.y * 100f) / 100f) + " " + (Math.round(path.timeInSamePosition * 10f) / 10f);
+                    } else if (component instanceof Inventory) {
+                        Inventory inventory = (Inventory) component;
+                        StringBuilder s = new StringBuilder();
+                        for (int j = 0; j < inventory.items.length; j++) {
+                            s.append(inventory.items[j]);
+                            if (j < inventory.items.length - 1) {
+                                s.append(", ");
+                            }
+                        }
+                        detail = s.toString();
+                    } else if (component instanceof Lifetime) {
+                        detail = "" + (Math.round(((Lifetime) component).timeLeft * 100.0f) / 100.0f);
+                    } else if (component instanceof Skill) {
+                        Skill skill = (Skill) component;
+                        StringBuilder wordsString = new StringBuilder();
+                        for (int j = 0; j < skill.words.length; j++) {
+                            if (skill.wordLevels[j] >= 100) {
+                                wordsString.append(skill.words[j].toUpperCase());
+                            } else {
+                                wordsString.append(skill.words[j]);
+                                wordsString.append(": ");
+                                wordsString.append(skill.wordLevels[j]);
+                            }
+                            if (j < skill.words.length - 1) {
+                                wordsString.append(", ");
+                            }
+                        }
+                        detail = wordsString.toString();
+                    } else if (component instanceof SerializationTag) {
+                        SerializationTag serializationTag = (SerializationTag) component;
+                        detail = serializationTag.tag;
+                    } else if (component instanceof Configuration) {
+                        Configuration configuration = (Configuration) component;
+                        detail = "" + configuration.version;
+                    } else if (component instanceof Teach) {
+                        Teach teach = (Teach) component;
+                        StringBuilder wordsString = new StringBuilder();
+                        for (int j = 0; j < teach.words.length; j++) {
+                            wordsString.append(teach.words[j]);
+                            if (j < teach.words.length - 1) {
+                                wordsString.append(", ");
+                            }
+                        }
+                        detail = wordsString.toString();
+                    } else if (component instanceof Producer) {
+                        Producer producer = (Producer) component;
+                        detail = producer.recipeId + " " + (Math.round(producer.time * 10f) / 10f);
+                    } else if (component instanceof SyncHistory) {
+                        SyncHistory syncHistory = (SyncHistory) component;
+                        detail = "" + syncHistory.syncedValues.size();
+                    } else if (component instanceof SyncPropagation) {
+                        SyncPropagation syncPropagation = (SyncPropagation) component;
+                        detail = syncPropagation.unreliableProperties + ", " + syncPropagation.ownerPropagationProperties;
+                    }
+
+                    entityData.put(componentName, detail != null ? detail : "");
+                }
+
+                modelData.selectedEntity = entityData;
+            } else {
+                modelData.selectedEntity = null;
+            }
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // modelData -> table models
+        synchronized (modelData) {
+            systemMetricsModel.refresh(modelData.systemMetrics);
+            worldInfoModel.refresh(modelData.worldInfo);
+            entityModel.refresh(modelData.selectedEntity);
+        }
+
+        repaint();
+    }
+}

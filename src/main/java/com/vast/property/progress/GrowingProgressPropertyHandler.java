@@ -11,7 +11,7 @@ public class GrowingProgressPropertyHandler extends AbstractProgressPropertyHand
 	}
 
 	@Override
-	protected boolean isInterestedIn(int entity) {
+	public boolean isInterestedIn(int entity) {
 		return growingMapper.has(entity);
 	}
 

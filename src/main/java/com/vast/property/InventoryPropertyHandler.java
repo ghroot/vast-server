@@ -14,7 +14,7 @@ public class InventoryPropertyHandler extends AbstractPropertyHandler<short[], s
 	}
 
 	@Override
-	protected boolean isInterestedIn(int entity) {
+	public boolean isInterestedIn(int entity) {
 		return inventoryMapper.has(entity);
 	}
 

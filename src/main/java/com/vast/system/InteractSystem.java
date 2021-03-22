@@ -52,7 +52,9 @@ public class InteractSystem extends IteratingSystem {
 	protected void removed(int entity) {
 		Interact interact = interactMapper.get(entity);
 		if (interact != null && interact.phase == Interact.Phase.INTERACTING) {
-			usedMapper.remove(interact.entity);
+			if (interact.entity >= 0) {
+				usedMapper.remove(interact.entity);
+			}
 			if (interact.handler != null) {
 				interact.handler.stop(entity, interact.entity);
 			}
@@ -96,7 +98,7 @@ public class InteractSystem extends IteratingSystem {
 							interact.handler = handler;
 							logger.debug("Entity {} started interacting with entity {} with handler {}", entity, interact.entity, handler.getClass().getSimpleName());
 							interact.phase = Interact.Phase.INTERACTING;
-							usedMapper.create(interact.entity).usedByEntity = interact.entity;
+							usedMapper.create(interact.entity).usedByEntity = entity;
 						} else {
 							logger.debug("Entity {} can not interact with entity {}", entity, interact.entity);
 							interactMapper.remove(entity);
@@ -115,6 +117,7 @@ public class InteractSystem extends IteratingSystem {
 				} else {
 					if (interact.phase == Interact.Phase.INTERACTING) {
 						interact.handler.stop(entity, interact.entity);
+						usedMapper.remove(interact.entity);
 					}
 					logger.debug("Entity {} started approaching entity {} to interact", entity, interact.entity);
 					pathMapper.create(entity).targetPosition.set(otherTransform.position);

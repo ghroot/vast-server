@@ -1,3 +1,4 @@
+
 # Vast Multiplayer Server
 
 Multiplayer server using an ECS implementation with [Artemis ODB](https://github.com/junkdog/artemis-odb) and networking with [Toast Haste](https://github.com/nhn/toast-haste.framework).
@@ -18,24 +19,4 @@ Windows:
 
 `java -jar build/libs/vast-server-all.jar -simulate 500 -monitor`
 
-The `monitor` argument will enable the terminal monitor where most aspects of the server simulation can be inspected.
-
-### Controls
-
-`Arrow keys` Move camera  (faster if holding `Shift`)
-
-`-` Zoom out (faster if holding `Shift`)
-
-`+` Zoom in (faster if holding `Shift`)
-
-`r` Reset camera position
-
-`p` Focus on next player entity, displaying its components
-
-`f` Focus on nearest entity, displaying its components
-
-`n` Toggle player names
-
-`i` Toggle entity ids
-
-`s` Show system times (sorted by time and name)
+The `monitor` argument will enable the visual monitor where most aspects of the server simulation can be inspected.

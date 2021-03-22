@@ -24,7 +24,7 @@ public class SkillPropertyHandler extends AbstractPropertyHandler<Map<String, By
 	}
 
 	@Override
-	protected boolean isInterestedIn(int entity) {
+	public boolean isInterestedIn(int entity) {
 		return skillMapper.has(entity);
 	}
 

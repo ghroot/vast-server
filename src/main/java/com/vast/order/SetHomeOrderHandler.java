@@ -23,8 +23,8 @@ public class SetHomeOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public short getMessageCode() {
-		return MessageCodes.SET_HOME;
+	public boolean handlesMessageCode(short messageCode) {
+		return messageCode == MessageCodes.SET_HOME;
 	}
 
 	@Override
@@ -37,10 +37,15 @@ public class SetHomeOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean startOrder(int orderEntity, DataObject dataObject) {
+	public boolean startOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		homeMapper.create(orderEntity).position.set(transformMapper.get(orderEntity).position);
 		syncMapper.create(orderEntity).markPropertyAsDirty(Properties.HOME);
 		eventMapper.create(orderEntity).addEntry("message").setData("There is no place like home...").setOwnerPropagation();
 		return true;
+	}
+
+	@Override
+	public boolean modifyOrder(int orderEntity, short messageCode, DataObject dataObject) {
+		return false;
 	}
 }

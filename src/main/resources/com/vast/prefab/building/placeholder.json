@@ -1,0 +1,63 @@
+{
+  "entities": {
+    "0": {
+      "archetype": 0,
+      "key": "placeholder",
+      "components": {
+        "SubType": {
+          "subType": 0
+        },
+        "SyncPropagation": {
+          "ownerPropagationProperties": 32
+        },
+        "Type": {
+          "type": "building"
+        }
+      }
+    }
+  },
+  "archetypes": {
+    "0": [
+      "Known",
+      "Placeholder",
+      "Scan",
+      "State",
+      "SubType",
+      "SyncHistory",
+      "SyncPropagation",
+      "Transform",
+      "Transient",
+      "Type"
+    ]
+  },
+  "componentIdentifiers": {
+    "com.vast.component.AI": "AI",
+    "com.vast.component.Collision": "Collision",
+    "com.vast.component.Configuration": "Configuration",
+    "com.vast.component.Constructable": "Constructable",
+    "com.vast.component.Container": "Container",
+    "com.vast.component.Fueled": "Fueled",
+    "com.vast.component.Group": "Group",
+    "com.vast.component.Harvestable": "Harvestable",
+    "com.vast.component.Inventory": "Inventory",
+    "com.vast.component.Known": "Known",
+    "com.vast.component.Lifetime": "Lifetime",
+    "com.vast.component.Owner": "Owner",
+    "com.vast.component.Placeholder": "Placeholder",
+    "com.vast.component.Scan": "Scan",
+    "com.vast.component.Skill": "Skill",
+    "com.vast.component.Speed": "Speed",
+    "com.vast.component.State": "State",
+    "com.vast.component.Static": "Static",
+    "com.vast.component.SubType": "SubType",
+    "com.vast.component.SyncHistory": "SyncHistory",
+    "com.vast.component.SyncPropagation": "SyncPropagation",
+    "com.vast.component.Teach": "Teach",
+    "com.vast.component.Transform": "Transform",
+    "com.vast.component.Transient": "Transient",
+    "com.vast.component.Type": "Type"
+  },
+  "metadata": {
+    "version": 1
+  }
+}

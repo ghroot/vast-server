@@ -10,6 +10,7 @@ import com.vast.network.IncomingRequest;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
 
+import javax.vecmath.Point2f;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,15 +26,14 @@ public class HumanBehaviour extends AbstractBehaviour {
 	private ComponentMapper<Inventory> inventoryMapper;
 	private ComponentMapper<Type> typeMapper;
 
-	private Random random;
 	private Map<String, List<IncomingRequest>> incomingRequestsByPeer;
 	private Items items;
 	private Recipes recipes;
 
-	public HumanBehaviour(InteractionHandler[] interactionHandlers, Random random, Map<String,
-			List<IncomingRequest>> incomingRequestsByPeer, Items items, Recipes recipes) {
-		super(interactionHandlers);
-		this.random = random;
+	public HumanBehaviour(InteractionHandler[] interactionHandlers, WorldConfiguration worldConfiguration,
+						  Random random, Map<String, List<IncomingRequest>> incomingRequestsByPeer, Items items,
+						  Recipes recipes) {
+		super(interactionHandlers, worldConfiguration, random);
 		this.incomingRequestsByPeer = incomingRequestsByPeer;
 		this.items = items;
 		this.recipes = recipes;
@@ -72,14 +72,9 @@ public class HumanBehaviour extends AbstractBehaviour {
 			List<Recipe> entityRecipes = recipes.getEntityRecipes();
 			Recipe randomEntityRecipe = entityRecipes.get((int) Math.floor(random.nextFloat() * entityRecipes.size()));
 			if (inventory.has(randomEntityRecipe.getCosts())) {
-				float x = transformMapper.get(entity).position.x;
-				float y = transformMapper.get(entity).position.y - 1.0f;
-				float[] position = new float[]{x, y};
-				float rotation = random.nextFloat() * 360f;
-				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD, new DataObject()
-					.set(MessageCodes.BUILD_RECIPE_ID, (byte) randomEntityRecipe.getId())
-					.set(MessageCodes.BUILD_POSITION, position)
-					.set(MessageCodes.BUILD_ROTATION, rotation))));
+				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD_START, new DataObject()
+					.set(MessageCodes.BUILD_START_RECIPE_ID, (byte) randomEntityRecipe.getId()))));
+				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.BUILD_CONFIRM)));
 			}
 		} else if (roll <= 60f) {
 			List<Integer> nearbyEntities = getNearbyEntities(entity);
@@ -100,10 +95,11 @@ public class HumanBehaviour extends AbstractBehaviour {
 				}
 			}
 		} else {
-			float x = transformMapper.get(entity).position.x - 2f + random.nextFloat() * 4f;
-			float y = transformMapper.get(entity).position.y - 2f + random.nextFloat() * 4f;
-			float[] position = new float[] {x, y};
-			addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.MOVE, new DataObject().set(MessageCodes.MOVE_POSITION, position))));
+			Point2f randomMovePosition = getRandomMovePosition(transformMapper.get(entity).position, 2f);
+			if (randomMovePosition != null) {
+				float[] position = new float[]{randomMovePosition.x, randomMovePosition.y};
+				addIncomingRequest(new IncomingRequest(peer, new RequestMessage(MessageCodes.MOVE, new DataObject().set(MessageCodes.MOVE_POSITION, position))));
+			}
 		}
 	}
 

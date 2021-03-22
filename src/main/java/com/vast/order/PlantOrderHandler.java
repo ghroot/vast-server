@@ -36,8 +36,8 @@ public class PlantOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public short getMessageCode() {
-		return MessageCodes.PLANT;
+	public boolean handlesMessageCode(short messageCode) {
+		return messageCode == MessageCodes.PLANT;
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class PlantOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean startOrder(int orderEntity, DataObject dataObject) {
+	public boolean startOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		Inventory inventory = inventoryMapper.get(orderEntity);
 		if (inventory.has(items.getItem("Seed").getId())) {
 			inventory.remove(items.getItem("Seed").getId(), 1);
@@ -68,5 +68,10 @@ public class PlantOrderHandler implements OrderHandler {
 			eventMapper.create(orderEntity).addEntry("message").setData("I need a seed...").setOwnerPropagation();
 			return false;
 		}
+	}
+
+	@Override
+	public boolean modifyOrder(int orderEntity, short messageCode, DataObject dataObject) {
+		return false;
 	}
 }

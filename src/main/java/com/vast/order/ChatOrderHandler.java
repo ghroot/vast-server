@@ -18,8 +18,8 @@ public class ChatOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public short getMessageCode() {
-		return MessageCodes.CHAT;
+	public boolean handlesMessageCode(short messageCode) {
+		return messageCode == MessageCodes.CHAT;
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class ChatOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean startOrder(int orderEntity, DataObject dataObject) {
+	public boolean startOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		String word = (String) dataObject.get(MessageCodes.CHAT_WORD).value;
 		IntBag knownByEntitiesBag = knownMapper.get(orderEntity).knownByEntities;
 		int[] knownByEntities = knownByEntitiesBag.getData();
@@ -41,5 +41,10 @@ public class ChatOrderHandler implements OrderHandler {
 			eventMapper.create(knownByEntity).addEntry("message").setData(playerMapper.get(orderEntity).name + " says: " + word);
 		}
 		return true;
+	}
+
+	@Override
+	public boolean modifyOrder(int orderEntity, short messageCode, DataObject dataObject) {
+		return false;
 	}
 }

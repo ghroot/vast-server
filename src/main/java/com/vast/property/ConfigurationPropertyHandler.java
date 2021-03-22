@@ -70,7 +70,7 @@ public class ConfigurationPropertyHandler extends AbstractPropertyHandler<Short,
 	}
 
 	@Override
-	protected boolean isInterestedIn(int entity) {
+	public boolean isInterestedIn(int entity) {
 		return configurationMapper.has(entity);
 	}
 

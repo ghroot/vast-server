@@ -41,7 +41,8 @@ public class CreationManager extends BaseSystem {
 	private PlayerPrefab playerPrefab;
 	private Map<String, VastPrefab> terrainPrefabs;
 	private Map<String, VastPrefab> animalPrefabs;
-	private Map<String, VastPrefab> buildingPrefabs;
+	private VastPrefab buildingPlaceholderPrefab;
+	private Map<String, BuildingPrefab> buildingPrefabs;
 	private Map<String, VastPrefab> pickupPrefabs;
 
 	private int nextAnimalGroupId = 0;
@@ -63,9 +64,10 @@ public class CreationManager extends BaseSystem {
 		terrainPrefabs.put("rock", new TerrainPrefabs.RockPrefab(world));
 		animalPrefabs = new HashMap<>();
 		animalPrefabs.put("rabbitAdult", new AnimalPrefabs.RabbitAdultPrefab(world));
-		animalPrefabs.put("rabbitYoung", new AnimalPrefabs.RabbitAdultPrefab(world));
-		animalPrefabs.put("deerAdult", new AnimalPrefabs.RabbitAdultPrefab(world));
-		animalPrefabs.put("deerYoung", new AnimalPrefabs.RabbitAdultPrefab(world));
+		animalPrefabs.put("rabbitYoung", new AnimalPrefabs.RabbitYoungPrefab(world));
+		animalPrefabs.put("deerAdult", new AnimalPrefabs.DeerAdultPrefab(world));
+		animalPrefabs.put("deerYoung", new AnimalPrefabs.DeerYoungPrefab(world));
+		buildingPlaceholderPrefab = new BuildingPrefabs.PlaceholderPrefab(world);
 		buildingPrefabs = new HashMap<>();
 		buildingPrefabs.put("chest", new BuildingPrefabs.ChestPrefab(world));
 		buildingPrefabs.put("fireplace", new BuildingPrefabs.FireplacePrefab(world));
@@ -91,12 +93,15 @@ public class CreationManager extends BaseSystem {
 		for (float x = -worldConfiguration.width / 2f; x < worldConfiguration.width / 2f; x += 3f) {
 			for (float y = -worldConfiguration.height / 2f; y < worldConfiguration.height / 2f; y += 3f) {
 				if (noise1.GetSimplex(x, y) > 0.35f) {
-					createTree(new Point2f(x - 1f + random.nextFloat() * 2f, y - 1f + random.nextFloat() * 2f), false);
+					Point2f fuzzyPosition = new Point2f(x - 1f + random.nextFloat() * 2f, y - 1f + random.nextFloat() * 2f);
+					if (isPositionInWorld(fuzzyPosition)) {
+						createTree(fuzzyPosition, false);
+					}
 				}
 				if (noise1.GetWhiteNoise(x, y) > 0.9f) {
 					createRock(new Point2f(x, y));
 				}
-				if (noise2.GetWhiteNoise(x, y) > 0.99f) {
+				if (noise2.GetWhiteNoise(x, y) > 0.999f) {
 					createAnimalGroup(new Point2f(x, y), random.nextFloat() < 0.5f ? "rabbit" : "deer");
 				}
 			}
@@ -142,8 +147,11 @@ public class CreationManager extends BaseSystem {
 
 	private void createAnimalGroup(Point2f position, String animalName) {
 		int groupId = nextAnimalGroupId++;
-		createAnimal(animalName + "Adult", new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), groupId);
-		int numberOfYoung = 1 + random.nextInt(2);
+		int numberOfAdult = 1 + random.nextInt(2);
+		for (int i = 0; i < numberOfAdult; i++) {
+			createAnimal(animalName + "Adult", new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), groupId);
+		}
+		int numberOfYoung = random.nextInt(3);
 		for (int i = 0; i < numberOfYoung; i++) {
 			createAnimal(animalName + "Young", new Point2f(position.x - 1f + 2f * random.nextFloat(), position.y - 1f + 2f * random.nextFloat()), groupId);
 		}
@@ -155,6 +163,14 @@ public class CreationManager extends BaseSystem {
 		groupMapper.get(animalEntity).id = groupId;
 
 		return animalEntity;
+	}
+
+	public int createBuildingPlaceholder(String key, Point2f position) {
+		int buildingPlaceholderEntity = buildingPlaceholderPrefab.createEntity();
+		transformMapper.get(buildingPlaceholderEntity).position.set(position);
+		subTypeMapper.get(buildingPlaceholderEntity).subType = buildingPrefabs.get(key).getSubType();
+
+		return buildingPlaceholderEntity;
 	}
 
 	public int createBuilding(String key, Point2f position, float rotation, String owner) {
@@ -181,5 +197,14 @@ public class CreationManager extends BaseSystem {
 
 	private Point2f getRandomPositionInWorld() {
 		return new Point2f(-worldConfiguration.width / 2f + random.nextFloat() * worldConfiguration.width, -worldConfiguration.height / 2f + random.nextFloat() * worldConfiguration.height);
+	}
+
+	private boolean isPositionInWorld(Point2f position) {
+		if (position.x < -worldConfiguration.width / 2f  || position.x > worldConfiguration.width / 2f ||
+				position.y < -worldConfiguration.height / 2f || position.y > worldConfiguration.height / 2f) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

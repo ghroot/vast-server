@@ -7,10 +7,10 @@ import com.artemis.io.JsonArtemisSerializer;
 import com.artemis.io.KryoArtemisSerializer;
 import com.artemis.io.SaveFileFormat;
 import com.artemis.managers.WorldSerializationManager;
-import com.artemis.systems.IntervalSystem;
 import com.artemis.utils.IntBag;
 import com.vast.component.Event;
 import com.vast.component.Time;
+import com.vast.component.Transient;
 import com.vast.data.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +85,7 @@ public class WorldSerializationSystem extends BaseSystem {
 			worldSerializationManager.setSerializer(new KryoArtemisSerializer(world));
 		}
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		IntBag entitiesToSerialize = world.getAspectSubscriptionManager().get(Aspect.all()).getEntities();
+		IntBag entitiesToSerialize = world.getAspectSubscriptionManager().get(Aspect.all().exclude(Transient.class)).getEntities();
 		logger.info("Serializing world ({} entities) to snapshot file {}", entitiesToSerialize.size(), snapshotFile);
 		worldSerializationManager.save(byteArrayOutputStream, new SaveFileFormat(entitiesToSerialize));
 		int generateDuration = (int) (System.currentTimeMillis() - startTime);

@@ -34,26 +34,29 @@ public class VastWorld implements Runnable {
 	private final int FRAME_RATE = 30;
 	private final int FRAME_DURATION_MILLIS = 1000 / FRAME_RATE;
 
+	private Metrics metrics;
+	private WorldConfiguration worldConfiguration;
+	private Map<String, VastPeer> peers;
+	private Map<String, Integer> entitiesByPeer;
+	private QuadTree quadTree;
+	private Items items;
+
 	private World world;
 	private boolean isAlive;
 	private long lastFrameStartTime;
 	private float timeModifier = 1f;
-	private Metrics metrics;
-
-	private Map<String, VastPeer> peers;
-	private Map<String, Integer> entitiesByPeer;
-	private Items items;
 
 	public VastWorld(VastServerApplication serverApplication, String snapshotFile, Random random,
 					 boolean showMonitor, Metrics metrics, WorldConfiguration worldConfiguration,
 					 Items items, Recipes recipes) {
 		this.metrics = metrics;
+		this.worldConfiguration = worldConfiguration;
 		this.items = items;
 
 		peers = new HashMap<>();
 		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<>();
 		entitiesByPeer = new HashMap<>();
-		QuadTree quadTree = new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height);
+		quadTree = new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height);
 		InteractionHandler[] interactionHandlers = {
 			new GrowingInteractionHandler(),
 			new HarvestableInteractionHandler(items),
@@ -78,20 +81,21 @@ public class VastWorld implements Runnable {
 			new RotationPropertyHandler(10f),
 			new ActivePropertyHandler(),
 			new ConstructableProgressPropertyHandler(10),
-			new CraftProgressPropertyHandler(5),
-			new GrowingProgressPropertyHandler(10),
+			new CraftProgressPropertyHandler(10),
+			new GrowingProgressPropertyHandler(20),
 			new ProducerProgressPropertyHandler(recipes, 10),
 			new InventoryPropertyHandler(),
 			new FueledPropertyHandler(),
 			new HomePropertyHandler(),
 			new StatePropertyHandler(),
 			new ConfigurationPropertyHandler(items, recipes),
-			new SkillPropertyHandler(5)
+			new SkillPropertyHandler(5),
+			new ValidPropertyHandler()
 		};
 		Map<String, Behaviour> behaviours = new HashMap<>();
-		behaviours.put("human", new HumanBehaviour(interactionHandlers, random, incomingRequestsByPeer, items, recipes));
-		behaviours.put("adultAnimal", new AdultAnimalBehaviour(interactionHandlers, random));
-		behaviours.put("youngAnimal", new YoungAnimalBehaviour(interactionHandlers, random));
+		behaviours.put("human", new HumanBehaviour(interactionHandlers, worldConfiguration, random, incomingRequestsByPeer, items, recipes));
+		behaviours.put("adultAnimal", new AdultAnimalBehaviour(interactionHandlers, worldConfiguration, random));
+		behaviours.put("youngAnimal", new YoungAnimalBehaviour(interactionHandlers, worldConfiguration, random));
 
 		WorldConfigurationBuilder worldConfigurationBuilder = new WorldConfigurationBuilder().with(
 			new CreationManager(worldConfiguration, random),
@@ -111,6 +115,7 @@ public class VastWorld implements Runnable {
 			new CullingSystem(propertyHandlers),
 			new OrderSystem(orderHandlers, incomingRequestsByPeer),
 			new InteractSystem(interactionHandlers),
+			new ValidSystem(0.75f),
 			new AISystem(behaviours, random),
 			new EncumbranceSystem(75),
 			new PathMoveSystem(3f),
@@ -122,7 +127,7 @@ public class VastWorld implements Runnable {
 			new GrowSystem(),
 			new LifetimeSystem(),
 			new LearnSystem(),
-			new PickupSystem(random),
+			new PickupSystem(worldConfiguration, random),
 			new DayNightCycleSystem(worldConfiguration),
 			new WeatherSystem(random),
 			new ParentSystem(),
@@ -134,7 +139,8 @@ public class VastWorld implements Runnable {
 			new EntityLinkManager()
 		);
 		if (showMonitor) {
-			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, this));
+//			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new TerminalSystem(peers, metrics, worldConfiguration, this));
+			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new MonitorSystem(this));
 			worldConfigurationBuilder.register(new ProfiledInvocationStrategy(metrics));
 		}
 		world = new World(worldConfigurationBuilder.build());
@@ -186,6 +192,18 @@ public class VastWorld implements Runnable {
 		return timeModifier;
 	}
 
+	public WorldConfiguration getWorldConfiguration() {
+		return worldConfiguration;
+	}
+
+	public Metrics getMetrics() {
+		return metrics;
+	}
+
+	public QuadTree getQuadTree() {
+		return quadTree;
+	}
+
 	public VastPeer getPeer(String name) {
 		return peers.get(name);
 	}
@@ -194,8 +212,16 @@ public class VastWorld implements Runnable {
 		return entitiesByPeer.getOrDefault(name, -1);
 	}
 
+	public World getWorld() {
+		return world;
+	}
+
 	public <T extends Component> ComponentMapper<T> getComponentMapper(Class<T> type) {
 		return world.getMapper(type);
+	}
+
+	public EntitySubscription getSubscription(Aspect.Builder builder) {
+		return world.getAspectSubscriptionManager().get(builder);
 	}
 
 	public int[] getEntities(Aspect.Builder builder) {

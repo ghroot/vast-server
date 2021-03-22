@@ -12,6 +12,7 @@ import com.vast.component.*;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
+import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,7 @@ public class CreateSystem extends IteratingSystem {
 	private PropertyHandler[] propertyHandlers;
 
 	private EventMessage reusableEventMessage;
+	private Set<Byte> reusableAlreadyInterestedProperties;
 	private DataObject reusablePropertiesDataObject;
 
 	public CreateSystem(PropertyHandler[] propertyHandlers) {
@@ -42,6 +44,7 @@ public class CreateSystem extends IteratingSystem {
 		this.propertyHandlers = propertyHandlers;
 
 		reusableEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
+		reusableAlreadyInterestedProperties = new UnifiedSet<>();
 		reusablePropertiesDataObject = new DataObject();
 	}
 
@@ -68,11 +71,16 @@ public class CreateSystem extends IteratingSystem {
 				if (playerMapper.has(createEntity)) {
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(playerMapper.get(createEntity).name));
 				}
+				reusableAlreadyInterestedProperties.clear();
 				reusablePropertiesDataObject.clear();
 				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, reusablePropertiesDataObject);
 				for (PropertyHandler propertyHandler : propertyHandlers) {
+					byte property = propertyHandler.getProperty();
 					if (interestedEntity == createEntity || syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
-						propertyHandler.decorateDataObject(createEntity, reusablePropertiesDataObject, true);
+						if (!reusableAlreadyInterestedProperties.contains(property) && propertyHandler.isInterestedIn(createEntity)) {
+							propertyHandler.decorateDataObject(createEntity, reusablePropertiesDataObject, true);
+							reusableAlreadyInterestedProperties.add(property);
+						}
 					}
 				}
 				peer.send(reusableEventMessage);

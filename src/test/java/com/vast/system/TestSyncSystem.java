@@ -7,10 +7,12 @@ import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.*;
 import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
+import com.vast.property.progress.AbstractProgressPropertyHandler;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.util.HashMap;
+
+import static org.mockito.Mockito.*;
 
 public class TestSyncSystem {
 	private World world;
@@ -40,6 +42,11 @@ public class TestSyncSystem {
 			}
 
 			@Override
+			public boolean isInterestedIn(int entity) {
+				return true;
+			}
+
+			@Override
 			public boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
 				return changes;
 			}
@@ -47,8 +54,8 @@ public class TestSyncSystem {
 	}
 
 	private VastPeer createPeer(int id) {
-		VastPeer peer = Mockito.mock(VastPeer.class);
-		Mockito.when(peer.getId()).thenReturn((long) id);
+		VastPeer peer = mock(VastPeer.class);
+		when(peer.getId()).thenReturn((long) id);
 		return peer;
 	}
 
@@ -71,7 +78,7 @@ public class TestSyncSystem {
 
 		world.process();
 
-		Mockito.verify(ownerPeer, Mockito.times(1)).send(Mockito.any());
+		verify(ownerPeer, times(1)).send(any());
 	}
 
 	@Test
@@ -90,7 +97,7 @@ public class TestSyncSystem {
 
 		world.process();
 
-		Mockito.verify(ownerPeer, Mockito.never()).send(Mockito.any());
+		verify(ownerPeer, never()).send(any());
 	}
 
 	@Test
@@ -108,7 +115,7 @@ public class TestSyncSystem {
 
 		world.process();
 
-		Mockito.verify(ownerPeer, Mockito.never()).send(Mockito.any());
+		verify(ownerPeer, never()).send(any());
 	}
 
 	@Test
@@ -129,8 +136,8 @@ public class TestSyncSystem {
 
 		world.process();
 
-		Mockito.verify(ownerPeer, Mockito.times(1)).send(Mockito.any());
-		Mockito.verify(ownerPeer, Mockito.never()).sendUnreliable(Mockito.any());
+		verify(ownerPeer, times(1)).send(any());
+		verify(ownerPeer, never()).sendUnreliable(any());
 	}
 
 	@Test
@@ -152,42 +159,34 @@ public class TestSyncSystem {
 
 		world.process();
 
-		Mockito.verify(ownerPeer, Mockito.times(1)).sendUnreliable(Mockito.any());
-		Mockito.verify(ownerPeer, Mockito.never()).send(Mockito.any());
+		verify(ownerPeer, times(1)).sendUnreliable(any());
+		verify(ownerPeer, never()).send(any());
 	}
 
 	@Test
-	public void notifiesOwnerAndNearbyButNotFarPlayer() {
+	public void onlyDecoratesFirstOfEachProperty() {
 		VastPeer ownerPeer = createPeer(123);
-		VastPeer nearbyPeer = createPeer(321);
-		VastPeer farPeer = createPeer(213);
-		setupWorld(new PropertyHandler[]{
-			createPropertyHandler(1, true),
-			createPropertyHandler(2, true)
-		});
+		byte property = (byte) 1;
+		PropertyHandler firstPropertyHandler = mock(PropertyHandler.class);
+		when(firstPropertyHandler.getProperty()).thenReturn(property);
+		when(firstPropertyHandler.isInterestedIn(anyInt())).thenReturn(true);
+		when(firstPropertyHandler.decorateDataObject(anyInt(), any(), anyBoolean())).thenReturn(true);
+		PropertyHandler secondPropertyHandler = mock(PropertyHandler.class);
+		when(secondPropertyHandler.getProperty()).thenReturn(property);
+		when(secondPropertyHandler.isInterestedIn(anyInt())).thenReturn(true);
+		when(secondPropertyHandler.decorateDataObject(anyInt(), any(), anyBoolean())).thenReturn(true);
+		setupWorld(new PropertyHandler[]{firstPropertyHandler, secondPropertyHandler});
 
 		int playerEntity = world.create();
-		int nearbyEntity = world.create();
-		int farEntity = world.create();
-
 		playerMapper.create(playerEntity);
 		activeMapper.create(playerEntity).peer = ownerPeer;
 		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
-		knownMapper.get(playerEntity).knownByEntities.add(nearbyEntity);
-		syncPropagationMapper.create(playerEntity).setOwnerPropagation(1);
-		syncMapper.create(playerEntity).markPropertyAsDirty(1);
-		syncMapper.create(playerEntity).markPropertyAsDirty(2);
-
-		playerMapper.create(nearbyEntity);
-		activeMapper.create(nearbyEntity).peer = nearbyPeer;
-
-		playerMapper.create(farEntity);
-		activeMapper.create(farEntity).peer = farPeer;
+		syncPropagationMapper.create(playerEntity);
+		syncMapper.create(playerEntity).markPropertyAsDirty(property);
 
 		world.process();
 
-		Mockito.verify(ownerPeer, Mockito.times(2)).send(Mockito.any());
-		Mockito.verify(nearbyPeer, Mockito.times(1)).send(Mockito.any());
-		Mockito.verify(farPeer, Mockito.never()).send(Mockito.any());
+		verify(firstPropertyHandler, times(1)).decorateDataObject(anyInt(), any(), anyBoolean());
+		verify(secondPropertyHandler, never()).decorateDataObject(anyInt(), any(), anyBoolean());
 	}
 }

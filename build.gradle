@@ -1,15 +1,17 @@
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'artemis'
-
 buildscript {
     repositories {
         jcenter()
     }
     dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:6.1.0'
         classpath 'net.onedaybeard.artemis:artemis-odb-gradle-plugin:2.3.0'
     }
 }
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'artemis'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 repositories {
     flatDir {
@@ -34,6 +36,11 @@ dependencies {
     compile group: 'org.json', name: 'json', version: '20171018'
     compile name: 'haste-all-1.0.0'
     compile name: 'jsonbeans-0.9'
+    compile group: 'com.formdev', name: 'flatlaf', version: 1.0
+    compile group: 'com.formdev', name: 'flatlaf-extras', version: 1.0
+
+    implementation 'org.eclipse.collections:eclipse-collections-api:10.4.0'
+    implementation 'org.eclipse.collections:eclipse-collections:10.4.0'
 
     testCompile 'junit:junit:4.12'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '3.1.0'
@@ -42,8 +49,8 @@ dependencies {
 }
 
 compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 1.9
+    targetCompatibility = 1.9
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 
@@ -54,8 +61,8 @@ configurations {
 }
 
 weave {
-    classesDir = new File(buildDir, "classes/java/main")
     dependsOn build
+    classesDir = new File(buildDir, "classes/java/main")
     enableArtemisPlugin = true
     enablePooledWeaving = true
     generateLinkMutators = true
@@ -68,12 +75,14 @@ jar {
     }
 }
 
-task fatJar(type: Jar) {
+shadowJar {
     dependsOn weave
-    manifest.from jar.manifest
-    baseName = 'vast-server-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+    minimize {
+        exclude(dependency('com.formdev:.*:.*'))
+    }
+    archiveBaseName.set('vast-server')
+    archiveClassifier.set('shadow')
+    archiveVersion.set('')
 }
 
 task cucumber() {

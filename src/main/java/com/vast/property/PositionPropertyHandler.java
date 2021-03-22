@@ -27,7 +27,7 @@ public class PositionPropertyHandler extends AbstractPropertyHandler<Point2f, do
 	}
 
 	@Override
-	protected boolean isInterestedIn(int entity) {
+	public boolean isInterestedIn(int entity) {
 		return transformMapper.has(entity);
 	}
 

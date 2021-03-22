@@ -16,7 +16,7 @@ public class ProducerProgressPropertyHandler extends AbstractProgressPropertyHan
 	}
 
 	@Override
-	protected boolean isInterestedIn(int entity) {
+	public boolean isInterestedIn(int entity) {
 		return producerMapper.has(entity);
 	}
 

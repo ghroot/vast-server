@@ -13,8 +13,8 @@ public class MoveOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public short getMessageCode() {
-		return MessageCodes.MOVE;
+	public boolean handlesMessageCode(short messageCode) {
+		return messageCode == MessageCodes.MOVE;
 	}
 
 	@Override
@@ -28,9 +28,16 @@ public class MoveOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean startOrder(int orderEntity, DataObject dataObject) {
+	public boolean startOrder(int orderEntity, short messageCode, DataObject dataObject) {
 		float[] position = (float[]) dataObject.get(MessageCodes.MOVE_POSITION).value;
 		pathMapper.create(orderEntity).targetPosition.set(position[0], position[1]);
+		return true;
+	}
+
+	@Override
+	public boolean modifyOrder(int orderEntity, short messageCode, DataObject dataObject) {
+		float[] position = (float[]) dataObject.get(MessageCodes.MOVE_POSITION).value;
+		pathMapper.get(orderEntity).targetPosition.set(position[0], position[1]);
 		return true;
 	}
 }
