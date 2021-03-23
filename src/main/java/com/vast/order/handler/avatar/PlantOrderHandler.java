@@ -1,4 +1,4 @@
-package com.vast.order;
+package com.vast.order.handler.avatar;
 
 import com.artemis.ComponentMapper;
 import com.artemis.World;
@@ -7,11 +7,15 @@ import com.vast.component.*;
 import com.vast.data.Items;
 import com.vast.network.Properties;
 import com.vast.network.MessageCodes;
+import com.vast.order.handler.AbstractOrderHandler;
+import com.vast.order.request.OrderRequest;
+import com.vast.order.request.avatar.EmoteOrderRequest;
+import com.vast.order.request.avatar.PlantOrderRequest;
 import com.vast.system.CreationManager;
 
 import javax.vecmath.Point2f;
 
-public class PlantOrderHandler implements OrderHandler {
+public class PlantOrderHandler extends AbstractOrderHandler<PlantOrderRequest> {
 	private World world;
 
 	private ComponentMapper<Inventory> inventoryMapper;
@@ -36,27 +40,27 @@ public class PlantOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean handlesMessageCode(short messageCode) {
-		return messageCode == MessageCodes.PLANT;
+	public boolean handlesRequest(OrderRequest request) {
+		return request instanceof PlantOrderRequest;
 	}
 
 	@Override
-	public boolean isOrderComplete(int orderEntity) {
+	public boolean isOrderComplete(int avatarEntity) {
 		return true;
 	}
 
 	@Override
-	public void cancelOrder(int orderEntity) {
+	public void cancelOrder(int avatarEntity) {
 	}
 
 	@Override
-	public boolean startOrder(int orderEntity, short messageCode, DataObject dataObject) {
-		Inventory inventory = inventoryMapper.get(orderEntity);
+	public boolean startOrder(int avatarEntity, PlantOrderRequest plantOrderRequest) {
+		Inventory inventory = inventoryMapper.get(avatarEntity);
 		if (inventory.has(items.getItem("Seed").getId())) {
 			inventory.remove(items.getItem("Seed").getId(), 1);
-			syncMapper.create(orderEntity).markPropertyAsDirty(Properties.INVENTORY);
+			syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.INVENTORY);
 
-			Transform transform = transformMapper.get(orderEntity);
+			Transform transform = transformMapper.get(avatarEntity);
 			Point2f plantPosition = new Point2f(transform.position);
 			plantPosition.x += Math.cos(Math.toRadians(transform.rotation)) * PLANT_DISTANCE;
 			plantPosition.y += Math.sin(Math.toRadians(transform.rotation)) * PLANT_DISTANCE;
@@ -65,13 +69,13 @@ public class PlantOrderHandler implements OrderHandler {
 
 			return true;
 		} else {
-			eventMapper.create(orderEntity).addEntry("message").setData("I need a seed...").setOwnerPropagation();
+			eventMapper.create(avatarEntity).addEntry("message").setData("I need a seed...").setOwnerPropagation();
 			return false;
 		}
 	}
 
 	@Override
-	public boolean modifyOrder(int orderEntity, short messageCode, DataObject dataObject) {
+	public boolean modifyOrder(int avatarEntity, PlantOrderRequest plantOrderRequest) {
 		return false;
 	}
 }

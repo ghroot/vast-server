@@ -1,23 +1,24 @@
-package com.vast.order;
+package com.vast.order.handler.observer;
 
 import com.artemis.ComponentMapper;
 import com.artemis.World;
-import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.*;
 import com.vast.data.Recipe;
 import com.vast.data.Recipes;
-import com.vast.network.MessageCodes;
 import com.vast.network.Properties;
+import com.vast.order.handler.AbstractOrderHandler;
+import com.vast.order.request.observer.BuildOrderRequest;
+import com.vast.order.request.observer.BuildStartOrderRequest;
+import com.vast.order.request.OrderRequest;
 import com.vast.system.CreationManager;
 
 import javax.vecmath.Point2f;
 
-public class BuildOrderHandler implements OrderHandler {
+public class BuildOrderHandler extends AbstractOrderHandler<BuildOrderRequest> {
 	private World world;
 
 	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Owner> ownerMapper;
-//	private ComponentMapper<Player> playerMapper;
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Interact> interactMapper;
 	private ComponentMapper<Path> pathMapper;
@@ -43,40 +44,36 @@ public class BuildOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean handlesMessageCode(short messageCode) {
-		return messageCode == MessageCodes.BUILD_START || messageCode == MessageCodes.BUILD_MOVE ||
-				messageCode == MessageCodes.BUILD_ROTATE || messageCode == MessageCodes.BUILD_CONFIRM ||
-				messageCode == MessageCodes.BUILD_CANCEL;
+	public boolean handlesRequest(OrderRequest request) {
+		return request instanceof BuildOrderRequest;
 	}
 
 	@Override
-	public boolean isOrderComplete(int orderEntity) {
-		return !buildMapper.has(orderEntity) && !interactMapper.has(orderEntity);
+	public boolean isOrderComplete(int observerEntity) {
+		return !buildMapper.has(observerEntity);
 	}
 
 	@Override
-	public void cancelOrder(int orderEntity) {
-		interactMapper.remove(orderEntity);
-		pathMapper.remove(orderEntity);
-
-		if (buildMapper.has(orderEntity)) {
-			deleteMapper.create(buildMapper.get(orderEntity).placeholderEntity).reason = "canceled";
-			buildMapper.remove(orderEntity);
+	public void cancelOrder(int observerEntity) {
+		if (buildMapper.has(observerEntity)) {
+			deleteMapper.create(buildMapper.get(observerEntity).placeholderEntity).reason = "canceled";
+			buildMapper.remove(observerEntity);
 		}
 	}
 
 	@Override
-	public boolean startOrder(int orderEntity, short messageCode, DataObject dataObject) {
-		if (messageCode == MessageCodes.BUILD_START) {
-			int recipeId = (byte) dataObject.get(MessageCodes.BUILD_START_RECIPE_ID).value;
-			Recipe recipe = recipes.getRecipe(recipeId);
-			Transform orderTransform = transformMapper.get(orderEntity);
+	public boolean startOrder(int observerEntity, BuildOrderRequest buildOrderRequest) {
+		if (buildOrderRequest instanceof BuildStartOrderRequest) {
+			BuildStartOrderRequest buildStartOrderRequest = (BuildStartOrderRequest) buildOrderRequest;
+
+			Recipe recipe = recipes.getRecipe(buildStartOrderRequest.getRecipeId());
+			Transform orderTransform = transformMapper.get(observerEntity);
 
 			Point2f buildPosition = new Point2f(orderTransform.position.x, orderTransform.position.y + 3f);
 			int buildingPlaceholderEntity = creationManager.createBuildingPlaceholder(recipe.getEntityType(), buildPosition);
 			stateMapper.get(buildingPlaceholderEntity).name = "placeholder";
 
-			Build build = buildMapper.create(orderEntity);
+			Build build = buildMapper.create(observerEntity);
 			build.placeholderEntity = buildingPlaceholderEntity;
 			build.recipe = recipe;
 
@@ -89,12 +86,13 @@ public class BuildOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean modifyOrder(int orderEntity, short messageCode, DataObject dataObject) {
-//		if (messageCode == MessageCodes.BUILD_MOVE) {
-//			int direction = (byte) dataObject.get(MessageCodes.BUILD_MOVE_DIRECTION).value;
+	public boolean modifyOrder(int observerEntity, BuildOrderRequest buildOrderRequest) {
+//		if (buildOrderRequest instanceof BuildMoveOrderRequest) {
+//			BuildMoveOrderRequest buildMoveOrderRequest = (BuildMoveOrderRequest) buildOrderRequest;
+//
 //			Build build = buildMapper.get(orderEntity);
 //			Transform buildingPlaceholderTransform = transformMapper.get(build.placeholderEntity);
-//			switch (direction) {
+//			switch (buildMoveOrderRequest.getDirection()) {
 //				case 0:
 //					buildingPlaceholderTransform.position.y += 0.5f;
 //					break;

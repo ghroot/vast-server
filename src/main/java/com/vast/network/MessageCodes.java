@@ -27,12 +27,7 @@ public class MessageCodes {
 	public static byte EVENT_VALUE = 2;
 
 	// Client -> Server
-	public static short MOVE = 50;
-	public static byte MOVE_POSITION = 0;
-
-	// Client -> Server
-	public static short INTERACT = 51;
-	public static byte INTERACT_ENTITY_ID = 0;
+	public static short SET_AVATAR_PRIORITIES = 51;
 
 	// Client -> Server
 	public static short BUILD_START = 52;
@@ -51,28 +46,6 @@ public class MessageCodes {
 
 	// Client -> Server
 	public static short BUILD_CANCEL = 56;
-
-	// Client -> Server
-	public static short EMOTE = 57;
-	public static byte EMOTE_TYPE = 0;
-
-	// Client -> Server
-	public static short SET_HOME = 58;
-
-	// Client -> Server
-	public static short CRAFT = 59;
-	public static byte CRAFT_RECIPE_ID = 0;
-
-	// Client -> Server
-	public static short PLANT = 60;
-
-	// Client -> Server
-	public static short FOLLOW = 61;
-	public static byte FOLLOW_ENTITY_ID = 0;
-
-	// Client -> Server
-	public static short CHAT = 62;
-	public static byte CHAT_WORD = 0;
 
 	// Client -> Server
 	public static short MOVE_OBSERVER = 63;

@@ -16,7 +16,11 @@ import com.vast.interact.*;
 import com.vast.network.IncomingRequest;
 import com.vast.network.VastPeer;
 import com.vast.network.VastServerApplication;
-import com.vast.order.*;
+import com.vast.order.handler.*;
+import com.vast.order.handler.avatar.*;
+import com.vast.order.handler.observer.AttachObserverOrderHandler;
+import com.vast.order.handler.observer.BuildOrderHandler;
+import com.vast.order.handler.observer.MoveObserverOrderHandler;
 import com.vast.property.*;
 import com.vast.property.progress.ConstructableProgressPropertyHandler;
 import com.vast.property.progress.CraftProgressPropertyHandler;
@@ -73,15 +77,15 @@ public class VastWorld implements Runnable {
 		OrderHandler[] orderHandlers = {
 			new MoveObserverOrderHandler(),
 			new AttachObserverOrderHandler(),
+			new BuildOrderHandler(recipes),
 			new MoveOrderHandler(),
 			new InteractOrderHandler(interactionHandlers),
-			new BuildOrderHandler(recipes),
 			new EmoteOrderHandler(),
-			new SetHomeOrderHandler(),
+			new ChatOrderHandler(),
 			new CraftOrderHandler(recipes, items),
-			new PlantOrderHandler(items),
 			new FollowOrderHandler(),
-			new ChatOrderHandler()
+			new PlantOrderHandler(items),
+			new SetHomeOrderHandler()
 		};
 		PropertyHandler[] propertyHandlers = {
 			new PositionPropertyHandler(0.3f),
@@ -120,7 +124,8 @@ public class VastWorld implements Runnable {
 			new ScanSystem(quadTree, worldConfiguration),
 			new CreateSystem(propertyHandlers),
 			new CullingSystem(propertyHandlers),
-			new OrderSystem(orderHandlers, incomingRequestsByPeer),
+			new IncomingObserverOrderSystem(incomingRequestsByPeer),
+			new OrderSystem(orderHandlers),
 			new InteractSystem(interactionHandlers),
 			new ValidSystem(0.75f),
 			new AISystem(behaviours, random),

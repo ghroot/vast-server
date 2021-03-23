@@ -1,16 +1,17 @@
-package com.vast.order;
+package com.vast.order.handler.avatar;
 
 import com.artemis.ComponentMapper;
 import com.artemis.World;
-import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Interact;
 import com.vast.component.Path;
 import com.vast.interact.InteractionHandler;
-import com.vast.network.MessageCodes;
+import com.vast.order.handler.AbstractOrderHandler;
+import com.vast.order.request.avatar.InteractOrderRequest;
+import com.vast.order.request.OrderRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InteractOrderHandler implements OrderHandler {
+public class InteractOrderHandler extends AbstractOrderHandler<InteractOrderRequest> {
 	private static final Logger logger = LoggerFactory.getLogger(InteractOrderHandler.class);
 
 	private World world;
@@ -29,8 +30,8 @@ public class InteractOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean handlesMessageCode(short messageCode) {
-		return messageCode == MessageCodes.INTERACT;
+	public boolean handlesRequest(OrderRequest request) {
+		return request instanceof InteractOrderRequest;
 	}
 
 	@Override
@@ -45,10 +46,9 @@ public class InteractOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean startOrder(int orderEntity, short messageCode, DataObject dataObject) {
-		int otherEntity = (int) dataObject.get(MessageCodes.INTERACT_ENTITY_ID).value;
-		if (canInteract(orderEntity, otherEntity)) {
-			interactMapper.create(orderEntity).entity = otherEntity;
+	public boolean startOrder(int orderEntity, InteractOrderRequest interactOrderRequest) {
+		if (canInteract(orderEntity, interactOrderRequest.getEntity())) {
+			interactMapper.create(orderEntity).entity = interactOrderRequest.getEntity();
 			return true;
 		} else {
 			return false;
@@ -56,7 +56,7 @@ public class InteractOrderHandler implements OrderHandler {
 	}
 
 	@Override
-	public boolean modifyOrder(int orderEntity, short messageCode, DataObject dataObject) {
+	public boolean modifyOrder(int orderEntity, InteractOrderRequest interactOrderRequest) {
 		return false;
 	}
 
