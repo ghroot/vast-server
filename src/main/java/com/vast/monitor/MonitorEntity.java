@@ -33,7 +33,7 @@ public class MonitorEntity {
         coloredEntityImages.put("animal", colorImage("images/Demon.png", Color.CYAN));
         coloredEntityImages.put("pickup", colorImage("images/Chest-Icon.png", Color.BLUE));
         coloredEntityImages.put("tree", colorImage("images/Tree-Icon.png", Color.GREEN));
-        coloredEntityImages.put("rock", colorImage("images/Diamond-Icon.png", Color.GRAY));
+        coloredEntityImages.put("rock", colorImage("images/Diamond-Icon.png", Color.LIGHT_GRAY));
         coloredEntityImages.put("building", colorImage("images/Home-Icon.png", Color.YELLOW));
 
         grayEntityImages = new HashMap<>();
