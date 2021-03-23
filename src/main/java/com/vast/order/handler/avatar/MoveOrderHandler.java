@@ -19,24 +19,24 @@ public class MoveOrderHandler extends AbstractOrderHandler<MoveOrderRequest> {
 	}
 
 	@Override
-	public boolean isOrderComplete(int orderEntity) {
-		return !pathMapper.has(orderEntity);
+	public boolean isOrderComplete(int avatarEntity) {
+		return !pathMapper.has(avatarEntity);
 	}
 
 	@Override
-	public void cancelOrder(int orderEntity) {
-		pathMapper.remove(orderEntity);
+	public void cancelOrder(int avatarEntity) {
+		pathMapper.remove(avatarEntity);
 	}
 
 	@Override
-	public boolean startOrder(int orderEntity, MoveOrderRequest moveOrderRequest) {
-		pathMapper.create(orderEntity).targetPosition.set(moveOrderRequest.getPosition());
+	public boolean startOrder(int avatarEntity, MoveOrderRequest moveOrderRequest) {
+		pathMapper.create(avatarEntity).targetPosition.set(moveOrderRequest.getPosition());
 		return true;
 	}
 
 	@Override
-	public boolean modifyOrder(int orderEntity, MoveOrderRequest moveOrderRequest) {
-		pathMapper.get(orderEntity).targetPosition.set(moveOrderRequest.getPosition());
+	public boolean modifyOrder(int avatarEntity, MoveOrderRequest moveOrderRequest) {
+		pathMapper.get(avatarEntity).targetPosition.set(moveOrderRequest.getPosition());
 		return true;
 	}
 }

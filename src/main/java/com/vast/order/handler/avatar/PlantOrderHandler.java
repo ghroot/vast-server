@@ -24,7 +24,7 @@ public class PlantOrderHandler extends AbstractOrderHandler<PlantOrderRequest> {
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Event> eventMapper;
 
-	private final float PLANT_DISTANCE = 1.0f;
+	private final float PLANT_DISTANCE = 1f;
 
 	private Items items;
 

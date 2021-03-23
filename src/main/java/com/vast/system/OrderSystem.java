@@ -20,7 +20,7 @@ public class OrderSystem extends IteratingSystem {
 	private OrderHandler[] orderHandlers;
 
 	public OrderSystem(OrderHandler[] orderHandlers) {
-		super(Aspect.all(OrderQueue.class));
+		super(Aspect.one(OrderQueue.class, Order.class));
 		this.orderHandlers = orderHandlers;
 	}
 
@@ -75,25 +75,25 @@ public class OrderSystem extends IteratingSystem {
 		}
 	}
 
-	private void cancelOrder(int playerEntity) {
-		Order order = orderMapper.get(playerEntity);
+	private void cancelOrder(int orderQueueEntity) {
+		Order order = orderMapper.get(orderQueueEntity);
 		if (order != null) {
 			if (order.handler != null) {
-				logger.debug("Canceling order for entity {} with handler {}", playerEntity, order.handler.getClass().getSimpleName());
-				order.handler.cancelOrder(playerEntity);
+				logger.debug("Canceling order for entity {} with handler {}", orderQueueEntity, order.handler.getClass().getSimpleName());
+				order.handler.cancelOrder(orderQueueEntity);
 			} else {
-				logger.debug("Canceling order for entity {}", playerEntity);
+				logger.debug("Canceling order for entity {}", orderQueueEntity);
 			}
-			orderMapper.remove(playerEntity);
+			orderMapper.remove(orderQueueEntity);
 		}
 	}
 
-	private void startOrder(int playerEntity, OrderHandler handler, OrderRequest request) {
-		if (handler.startOrder(playerEntity, request)) {
-			orderMapper.create(playerEntity).handler = handler;
-			logger.debug("Starting order for entity {} with handler {}", playerEntity, handler.getClass().getSimpleName());
+	private void startOrder(int orderQueueEntity, OrderHandler handler, OrderRequest request) {
+		if (handler.startOrder(orderQueueEntity, request)) {
+			orderMapper.create(orderQueueEntity).handler = handler;
+			logger.debug("Starting order for entity {} with handler {}", orderQueueEntity, handler.getClass().getSimpleName());
 		} else {
-			logger.debug("Could not start order for entity {} with handler {}", playerEntity, handler.getClass().getSimpleName());
+			logger.debug("Could not start order for entity {} with handler {}", orderQueueEntity, handler.getClass().getSimpleName());
 		}
 	}
 

@@ -104,7 +104,7 @@ public class VastWorld implements Runnable {
 			new ValidPropertyHandler()
 		};
 		Map<String, Behaviour> behaviours = new HashMap<>();
-		behaviours.put("human", new HumanBehaviour(interactionHandlers, worldConfiguration, random, incomingRequestsByPeer, items, recipes));
+		behaviours.put("human", new HumanBehaviour(interactionHandlers, worldConfiguration, random, items, recipes));
 		behaviours.put("adultAnimal", new AdultAnimalBehaviour(interactionHandlers, worldConfiguration, random));
 		behaviours.put("youngAnimal", new YoungAnimalBehaviour(interactionHandlers, worldConfiguration, random));
 
