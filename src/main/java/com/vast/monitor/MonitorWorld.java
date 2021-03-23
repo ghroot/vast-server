@@ -37,7 +37,7 @@ public class MonitorWorld {
         return selectedMonitorEntity != null ? selectedMonitorEntity.entity : -1;
     }
 
-    public void sync(VastWorld vastWorld, Point2D clickPoint, Point2D movePoint) {
+    public void sync(VastWorld vastWorld, Point2D clickPoint, Point2D movePoint, int entityToSelect) {
         size.set(vastWorld.getWorldConfiguration().width * SCALE, vastWorld.getWorldConfiguration().height * SCALE);
 
         Set<Integer> entities = Arrays.stream(vastWorld.getEntities(Aspect.all(Transform.class))).boxed().collect(Collectors.toSet());
@@ -136,6 +136,11 @@ public class MonitorWorld {
             if (!entities.contains(selectedMonitorEntity.entity)) {
                 selectedMonitorEntity = null;
             }
+        }
+
+        if (entityToSelect >= 0) {
+            selectedMonitorEntity = monitorEntities.get(entityToSelect);
+            selectedTime = System.currentTimeMillis();
         }
 
         if (movePoint != null) {

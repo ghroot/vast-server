@@ -18,6 +18,7 @@ public class ActivateSystem extends IteratingSystem {
 	private ComponentMapper<Avatar> avatarMapper;
 	private ComponentMapper<Observed> observedMapper;
 	private ComponentMapper<Sync> syncMapper;
+	private ComponentMapper<Parent> parentMapper;
 	private CreationManager creationManager;
 
 	private Map<String, VastPeer> peers;
@@ -41,17 +42,12 @@ public class ActivateSystem extends IteratingSystem {
 		if (peers.containsKey(avatar.name)) {
 			VastPeer peer = peers.get(avatar.name);
 			logger.info("Activating peer entity: {} for {} ({})", avatarEntity, avatar.name, peer.getId());
-			syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.ACTIVE);
 
 			int observerEntity = creationManager.createObserver(peer, avatarEntity);
-
-			// TODO: Temporary!
-			Follow follow = getWorld().getMapper(Follow.class).create(observerEntity);
-			follow.entity = avatarEntity;
-			follow.distance = 2f;
-			getWorld().getMapper(Speed.class).create(observerEntity).baseSpeed = 30f;
+			parentMapper.create(observerEntity).parentEntity = avatarEntity;
 
 			observedMapper.create(avatarEntity).observerEntity = observerEntity;
+			syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.ACTIVE);
 		}
 	}
 }

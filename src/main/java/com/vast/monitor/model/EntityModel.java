@@ -1,9 +1,5 @@
 package com.vast.monitor.model;
 
-import com.artemis.BaseSystem;
-import com.vast.data.SystemMetrics;
-import com.vast.monitor.MonitorEntity;
-
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
@@ -15,6 +11,8 @@ public class EntityModel implements TableModel {
     private List<TableModelListener> listeners;
     private String[] componentNames;
     private String[] componentDetails;
+
+    public int clickedEntity = -1;
 
     public EntityModel() {
         listeners = new ArrayList<>();
@@ -78,6 +76,13 @@ public class EntityModel implements TableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
+        String componentName = (String) getValueAt(rowIndex, 0);
+        String componentDetail = (String) getValueAt(rowIndex, 1);
+        if ("Observer".equals(componentName)) {
+            clickedEntity = Integer.parseInt(componentDetail.split(",")[0].trim());
+        } else if ("Observed".equals(componentName)) {
+            clickedEntity = Integer.parseInt(componentDetail);
+        }
         return false;
     }
 

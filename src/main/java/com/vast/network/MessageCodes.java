@@ -73,4 +73,11 @@ public class MessageCodes {
 	// Client -> Server
 	public static short CHAT = 62;
 	public static byte CHAT_WORD = 0;
+
+	// Client -> Server
+	public static short MOVE_OBSERVER = 63;
+	public static byte MOVE_OBSERVER_POSITION = 0;
+
+	// Client -> Server
+	public static short ATTACH_OBSERVER = 64;
 }

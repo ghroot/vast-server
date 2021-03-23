@@ -71,6 +71,8 @@ public class VastWorld implements Runnable {
 			new FueledInteractionHandler()
 		};
 		OrderHandler[] orderHandlers = {
+			new MoveObserverOrderHandler(),
+			new AttachObserverOrderHandler(),
 			new MoveOrderHandler(),
 			new InteractOrderHandler(interactionHandlers),
 			new BuildOrderHandler(recipes),
@@ -106,7 +108,7 @@ public class VastWorld implements Runnable {
 			new CreationManager(worldConfiguration, random),
 			new TimeManager(),
 
-			new WorldSerializationSystem(snapshotFile, metrics, TimeUnit.MINUTES.toSeconds(5)),
+			new WorldSerializationSystem(snapshotFile, metrics, TimeUnit.HOURS.toSeconds(5)),
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequestsByPeer),
 			new PeerEntitySystem(peers, entitiesByPeer),

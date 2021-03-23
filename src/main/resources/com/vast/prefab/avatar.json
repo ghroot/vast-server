@@ -11,7 +11,7 @@
           "capacity": 100
         },
         "Speed": {
-          "baseSpeed": 2.5
+          "baseSpeed": 1
         },
         "SyncPropagation": {
           "ownerPropagationProperties": 1696,

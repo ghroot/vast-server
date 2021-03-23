@@ -47,6 +47,7 @@ public class Monitor extends JFrame implements ActionListener {
     private final MonitorWorld monitorWorld;
     private Point2D clickPoint;
     private Point2D movePoint;
+    private int entityToSelect = -1;
 
     public Monitor(VastWorld vastWorld) {
         super("Vast Monitor");
@@ -213,9 +214,15 @@ public class Monitor extends JFrame implements ActionListener {
         int selectedEntity;
         // vastWorld -> monitorWorld
         synchronized (monitorWorld) {
-            monitorWorld.sync(vastWorld, clickPoint, movePoint);
+            monitorWorld.sync(vastWorld, clickPoint, movePoint, entityToSelect);
             selectedEntity = monitorWorld.getSelectedMonitorEntity();
             clickPoint = null;
+
+            if (entityToSelect >= 0) {
+                synchronized (this) {
+                    entityToSelect = -1;
+                }
+            }
         }
 
         // vastWorld -> modelData
@@ -225,6 +232,7 @@ public class Monitor extends JFrame implements ActionListener {
             worldInfo.put("Fps", "" + vastWorld.getMetrics().getFps());
             worldInfo.put("Total entities", "" + vastWorld.getEntities(Aspect.all(Transform.class)).length);
             worldInfo.put("Static entities", "" + vastWorld.getEntities(Aspect.all(Static.class)).length);
+            worldInfo.put("Scanning entities", "" + vastWorld.getEntities(Aspect.all(Scan.class)).length);
             worldInfo.put("Collisions", vastWorld.getMetrics().getNumberOfCollisions() + " / " + vastWorld.getMetrics().getNumberOfCollisionChecks());
             modelData.worldInfo = worldInfo;
 
@@ -278,7 +286,8 @@ public class Monitor extends JFrame implements ActionListener {
                     } else if (component instanceof Avatar) {
                         detail = ((Avatar) component).name;
                     } else if (component instanceof Observer) {
-                        detail = Integer.toString(((Observer) component).knowEntities.size());
+                        Observer observer = (Observer) component;
+                        detail = observer.observedEntity + ", " + observer.knowEntities.size();
                     } else if (component instanceof Observed) {
                         detail = "" + ((Observed) component).observerEntity;
                     } else if (component instanceof Follow) {
@@ -286,6 +295,8 @@ public class Monitor extends JFrame implements ActionListener {
                         detail = follow.entity + ", " + (Math.round((follow.distance * 100.0f) / 100.0f));
                     } else if (component instanceof Group) {
                         detail = "" + ((Group) component).id;
+                    } else if (component instanceof Parent) {
+                        detail = "" + ((Parent) component).parentEntity;
                     } else if (component instanceof Order) {
                         Order order = (Order) component;
                         if (order.handler != null) {
@@ -365,6 +376,14 @@ public class Monitor extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        // table models -> Monitor
+        synchronized (this) {
+            if (entityModel.clickedEntity >= 0) {
+                entityToSelect = entityModel.clickedEntity;
+                entityModel.clickedEntity = -1;
+            }
+        }
+
         // modelData -> table models
         synchronized (modelData) {
             systemMetricsModel.refresh(modelData.systemMetrics);
