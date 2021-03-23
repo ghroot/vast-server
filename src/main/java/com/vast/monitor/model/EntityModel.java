@@ -82,6 +82,12 @@ public class EntityModel implements TableModel {
             clickedEntity = Integer.parseInt(componentDetail.split(",")[0].trim());
         } else if ("Observed".equals(componentName)) {
             clickedEntity = Integer.parseInt(componentDetail);
+        } else if ("Parent".equals(componentName)) {
+            clickedEntity = Integer.parseInt(componentDetail);
+        } else if ("Interact".equals(componentName)) {
+            clickedEntity = Integer.parseInt(componentDetail.split(",")[0].trim());
+        } else if ("Used".equals(componentName)) {
+            clickedEntity = Integer.parseInt(componentDetail);
         }
         return false;
     }

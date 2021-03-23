@@ -261,7 +261,8 @@ public class Monitor extends JFrame implements ActionListener {
                     } else if (component instanceof SubType) {
                         detail = "" + ((SubType) component).subType;
                     } else if (component instanceof Interact) {
-                        detail = "" + ((Interact) component).phase;
+                        Interact interact = (Interact) component;
+                        detail = interact.entity + ", " + interact.phase;
                     } else if (component instanceof Scan) {
                         detail = "" + ((Scan) component).nearbyEntities.size();
                     } else if (component instanceof Known) {
@@ -362,6 +363,8 @@ public class Monitor extends JFrame implements ActionListener {
                     } else if (component instanceof SyncPropagation) {
                         SyncPropagation syncPropagation = (SyncPropagation) component;
                         detail = syncPropagation.unreliableProperties + ", " + syncPropagation.ownerPropagationProperties;
+                    } else if (component instanceof Used) {
+                        detail = "" + ((Used) component).usedByEntity;
                     }
 
                     entityData.put(componentName, detail != null ? detail : "");
