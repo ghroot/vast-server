@@ -7,9 +7,7 @@ import com.vast.component.Observer;
 import com.vast.component.OrderQueue;
 import com.vast.network.IncomingRequest;
 import com.vast.network.MessageCodes;
-import com.vast.order.request.observer.AttachObserverOrderRequest;
-import com.vast.order.request.observer.BuildStartOrderRequest;
-import com.vast.order.request.observer.MoveObserverOrderRequest;
+import com.vast.order.request.observer.*;
 
 import javax.vecmath.Point2f;
 import java.util.List;
@@ -44,6 +42,18 @@ public class IncomingObserverOrderSystem extends IteratingSystem {
                     orderQueueMapper.create(observerEntity).requests.add(new BuildStartOrderRequest(
                             (byte) lastIncomingRequest.getMessage().getDataObject().get(MessageCodes.BUILD_START_RECIPE_ID).value)
                     );
+                } else if (lastIncomingRequest.getMessage().getCode() == MessageCodes.BUILD_MOVE) {
+                    orderQueueMapper.create(observerEntity).requests.add(new BuildMoveOrderRequest(
+                            (byte) lastIncomingRequest.getMessage().getDataObject().get(MessageCodes.BUILD_MOVE_DIRECTION).value)
+                    );
+                } else if (lastIncomingRequest.getMessage().getCode() == MessageCodes.BUILD_ROTATE) {
+                    orderQueueMapper.create(observerEntity).requests.add(new BuildRotateOrderRequest(
+                            (byte) lastIncomingRequest.getMessage().getDataObject().get(MessageCodes.BUILD_MOVE_DIRECTION).value)
+                    );
+                } else if (lastIncomingRequest.getMessage().getCode() == MessageCodes.BUILD_CONFIRM) {
+                    orderQueueMapper.create(observerEntity).requests.add(new BuildConfirmOrderRequest());
+                } else if (lastIncomingRequest.getMessage().getCode() == MessageCodes.BUILD_CANCEL) {
+                    orderQueueMapper.create(observerEntity).requests.add(new BuildCancelOrderRequest());
                 }
 
                 incomingRequests.clear();
