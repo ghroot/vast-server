@@ -3,38 +3,77 @@ package com.vast.system;
 import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
-import com.vast.component.Active;
-import com.vast.component.Known;
-import com.vast.component.Player;
-import org.junit.Assert;
+import com.vast.component.Avatar;
+import com.vast.component.Observed;
+import com.vast.component.Observer;
+import com.vast.network.VastPeer;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertFalse;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TestDeactivateSystem {
 	@Test
-	public void deactivatesPlayerEntity() {
+	public void deactivatesEntityWhenNoPeer() {
 		World world = new World(new WorldConfigurationBuilder().with(
 			new DeactivateSystem(new HashMap<>())
 		).build());
 
-		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
-		ComponentMapper<Active> activeMapper = world.getMapper(Active.class);
-		ComponentMapper<Known> knownMapper = world.getMapper(Known.class);
+		ComponentMapper<Avatar> avatarMapper = world.getMapper(Avatar.class);
+		ComponentMapper<Observed> observedMapper = world.getMapper(Observed.class);
+		ComponentMapper<Observer> observerMapper = world.getMapper(Observer.class);
 
-		int playerEntity = world.create();
-		int knownEntity = world.create();
+		int avatarEntity = world.create();
+		int observerEntity = world.create();
 
-		playerMapper.create(playerEntity).name = "TestName";
-		playerMapper.create(playerEntity).id = 123;
-		activeMapper.create(playerEntity).knowEntities.add(knownEntity);
+		Observer observer = observerMapper.create(observerEntity);
+		VastPeer peer = mock(VastPeer.class);
+		when(peer.getId()).thenReturn(123L);
+		observer.peer = peer;
 
-		knownMapper.create(knownEntity).knownByEntities.add(playerEntity);
+		avatarMapper.create(avatarEntity).name = "TestName";
+		observedMapper.create(avatarEntity).observerEntity = observerEntity;
+		observer.observedEntity = avatarEntity;
 
 		world.process();
 
-		Assert.assertFalse(activeMapper.has(playerEntity));
-		Assert.assertEquals(0, playerMapper.get(playerEntity).id);
-		Assert.assertFalse(knownMapper.get(knownEntity).knownByEntities.contains(playerEntity));
+		assertFalse(observedMapper.has(avatarEntity));
+		assertFalse(world.getEntityManager().isActive(observerEntity));
+	}
+
+	@Test
+	public void deactivatesEntityWhenPeerWithDifferentId() {
+		Map<String, VastPeer> peers = new HashMap<>();
+		VastPeer peer1 = mock(VastPeer.class);
+		when(peer1.getId()).thenReturn(123L);
+		peers.put("TestName", peer1);
+		World world = new World(new WorldConfigurationBuilder().with(
+			new DeactivateSystem(peers)
+		).build());
+
+		ComponentMapper<Avatar> avatarMapper = world.getMapper(Avatar.class);
+		ComponentMapper<Observed> observedMapper = world.getMapper(Observed.class);
+		ComponentMapper<Observer> observerMapper = world.getMapper(Observer.class);
+
+		int avatarEntity = world.create();
+		int observerEntity = world.create();
+
+		Observer observer = observerMapper.create(observerEntity);
+		VastPeer peer2 = mock(VastPeer.class);
+		when(peer2.getId()).thenReturn(321L);
+		observer.peer = peer2;
+
+		avatarMapper.create(avatarEntity).name = "TestName";
+		observedMapper.create(avatarEntity).observerEntity = observerEntity;
+		observer.observedEntity = avatarEntity;
+
+		world.process();
+
+		assertFalse(observedMapper.has(avatarEntity));
+		assertFalse(world.getEntityManager().isActive(observerEntity));
 	}
 }

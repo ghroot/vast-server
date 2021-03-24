@@ -47,23 +47,22 @@ public class OrderSystem extends IteratingSystem {
 			if (order.handler.isOrderComplete(orderQueueEntity)) {
 				logger.debug("Order completed for entity {} with handler {}", orderQueueEntity, order.handler.getClass().getSimpleName());
 				orderMapper.remove(orderQueueEntity);
+				return;
 			}
 		}
 
 		if (orderQueueMapper.has(orderQueueEntity)) {
 			OrderQueue orderQueue = orderQueueMapper.get(orderQueueEntity);
 			if (orderQueue.requests.size() > 0) {
-				OrderRequest request = orderQueue.requests.get(orderQueue.requests.size() - 1);
+				OrderRequest request = orderQueue.requests.peek();
 				if (orderMapper.has(orderQueueEntity)) {
 					Order order = orderMapper.get(orderQueueEntity);
 					if (order.handler.handlesRequest(request) && order.handler.modifyOrder(orderQueueEntity, request)) {
-						orderQueueMapper.remove(orderQueueEntity);
+						orderQueue.requests.remove();
 						logger.debug("Modifying order for entity {} with handler {}", orderQueueEntity, order.handler.getClass().getSimpleName());
-					} else {
-						cancelOrder(orderQueueEntity);
 					}
 				} else {
-					orderQueueMapper.remove(orderQueueEntity);
+					orderQueue.requests.remove();
 					OrderHandler handler = getOrderHandler(request);
 					if (handler != null) {
 						startOrder(orderQueueEntity, handler, request);
@@ -71,6 +70,8 @@ public class OrderSystem extends IteratingSystem {
 						logger.warn("Could not find order handler for request {}", request.toString());
 					}
 				}
+			} else {
+				orderQueueMapper.remove(orderQueueEntity);
 			}
 		}
 	}

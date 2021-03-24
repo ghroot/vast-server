@@ -214,14 +214,6 @@ public class VastWorld implements Runnable {
 		return quadTree;
 	}
 
-	public VastPeer getPeer(String name) {
-		return peers.get(name);
-	}
-
-	public int getPeerEntity(String name) {
-		return entitiesByPeer.getOrDefault(name, -1);
-	}
-
 	public World getWorld() {
 		return world;
 	}

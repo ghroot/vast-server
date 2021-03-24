@@ -50,38 +50,44 @@ public class CreateSystem extends IteratingSystem {
 
 	@Override
 	protected void process(int createEntity) {
-		Known known = knownMapper.get(createEntity);
+		Create create = createMapper.get(createEntity);
 		SyncPropagation syncPropagation = syncPropagationMapper.get(createEntity);
+		Known known = knownMapper.get(createEntity);
+
+		reusableEventMessage.getDataObject().clear();
+		reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, createEntity);
+		reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(createEntity).type);
+		if (subTypeMapper.has(createEntity)) {
+			reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_SUB_TYPE, subTypeMapper.get(createEntity).subType);
+		} else {
+			reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_SUB_TYPE, null);
+		}
+		reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, create.reason);
+		reusableAlreadyInterestedProperties.clear();
+		reusablePropertiesDataObject.clear();
+		for (PropertyHandler propertyHandler : propertyHandlers) {
+			byte property = propertyHandler.getProperty();
+			if (syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
+				if (!reusableAlreadyInterestedProperties.contains(property) && propertyHandler.isInterestedIn(createEntity)) {
+					propertyHandler.decorateDataObject(createEntity, reusablePropertiesDataObject, true);
+					reusableAlreadyInterestedProperties.add(property);
+				}
+			}
+		}
+		reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, reusablePropertiesDataObject);
+
 		IntBag interestedEntities = interestedSubscription.getEntities();
 		for (int i = 0; i < interestedEntities.size(); i++) {
 			int interestedEntity = interestedEntities.get(i);
-			Observer interestedObserver = observerMapper.get(interestedEntity);
 			Scan interestedScan = scanMapper.get(interestedEntity);
 			if (interestedScan.nearbyEntities.contains(createEntity)) {
+				Observer interestedObserver = observerMapper.get(interestedEntity);
 				VastPeer peer = interestedObserver.peer;
-				String reason = createMapper.get(createEntity).reason;
-				logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, reason);
-				reusableEventMessage.getDataObject().clear();
-				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_ENTITY_ID, createEntity);
-				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_TYPE, typeMapper.get(createEntity).type);
-				if (subTypeMapper.has(createEntity)) {
-					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_SUB_TYPE, subTypeMapper.get(createEntity).subType);
-				}
-				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_REASON, reason);
+				logger.debug("Notifying peer {} about new entity {} ({})", peer.getName(), createEntity, create.reason);
 				if (avatarMapper.has(createEntity)) {
 					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, peer.getName().equals(avatarMapper.get(createEntity).name));
-				}
-				reusableAlreadyInterestedProperties.clear();
-				reusablePropertiesDataObject.clear();
-				reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, reusablePropertiesDataObject);
-				for (PropertyHandler propertyHandler : propertyHandlers) {
-					byte property = propertyHandler.getProperty();
-					if (interestedEntity == createEntity || syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
-						if (!reusableAlreadyInterestedProperties.contains(property) && propertyHandler.isInterestedIn(createEntity)) {
-							propertyHandler.decorateDataObject(createEntity, reusablePropertiesDataObject, true);
-							reusableAlreadyInterestedProperties.add(property);
-						}
-					}
+				} else {
+					reusableEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_OWNER, null);
 				}
 				peer.send(reusableEventMessage);
 				interestedObserver.knowEntities.add(createEntity);

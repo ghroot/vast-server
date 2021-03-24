@@ -46,9 +46,9 @@ public class DeactivateSystem extends IteratingSystem {
 			logger.info("Deactivating peer entity: {} for {} ({})", avatarEntity, avatar.name, observer.peer.getId());
 
 			observedMapper.remove(avatarEntity);
-			world.delete(observed.observerEntity);
-
 			syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.ACTIVE);
+
+			world.delete(observed.observerEntity);
 		}
 	}
 }

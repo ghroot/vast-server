@@ -112,11 +112,15 @@ public class CreationManager extends BaseSystem {
 	}
 
 	public int createAvatar(String name, int subType) {
+		return createAvatar(name, subType, "human");
+	}
+
+	public int createAvatar(String name, int subType, String behaviour) {
 		int avatarEntity = avatarPrefab.createEntity();
 		avatarMapper.get(avatarEntity).name = name;
 		subTypeMapper.get(avatarEntity).subType = subType;
 		transformMapper.get(avatarEntity).position.set(getRandomPositionInWorld());
-		aiMapper.create(avatarEntity).behaviourName = "human";
+		aiMapper.create(avatarEntity).behaviourName = behaviour;
 
 		// TODO: Temporary!
 		inventoryMapper.get(avatarEntity).add(0, 15);

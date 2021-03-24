@@ -6,19 +6,15 @@ import com.artemis.WorldConfigurationBuilder;
 import com.vast.component.*;
 import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
-import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import java.util.HashMap;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class TestCreateSystem {
 	private World world;
-	private ComponentMapper<Player> playerMapper;
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Observer> observerMapper;
 	private ComponentMapper<Create> createMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Scan> scanMapper;
@@ -30,8 +26,7 @@ public class TestCreateSystem {
 			new CreateSystem(propertyHandlers)
 		).build());
 
-		playerMapper = world.getMapper(Player.class);
-		activeMapper = world.getMapper(Active.class);
+		observerMapper = world.getMapper(Observer.class);
 		createMapper = world.getMapper(Create.class);
 		knownMapper = world.getMapper(Known.class);
 		scanMapper = world.getMapper(Scan.class);
@@ -62,12 +57,11 @@ public class TestCreateSystem {
 		when(peer.getId()).thenReturn(123L);
 		setupWorld();
 
-		int playerEntity = world.create();
+		int observerEntity = world.create();
 		int entityToCreate = world.create();
 
-		playerMapper.create(playerEntity).name = "TestName";
-		activeMapper.create(playerEntity).peer = peer;
-		scanMapper.create(playerEntity).nearbyEntities.add(entityToCreate);
+		observerMapper.create(observerEntity).peer = peer;
+		scanMapper.create(observerEntity).nearbyEntities.add(entityToCreate);
 
 		createMapper.create(entityToCreate).reason = "testing";
 		typeMapper.create(entityToCreate).type = "testType";
@@ -75,8 +69,8 @@ public class TestCreateSystem {
 
 		world.process();
 
-		assertTrue(activeMapper.get(playerEntity).knowEntities.contains(entityToCreate));
-		assertTrue(knownMapper.get(entityToCreate).knownByEntities.contains(playerEntity));
+		assertTrue(observerMapper.get(observerEntity).knowEntities.contains(entityToCreate));
+		assertTrue(knownMapper.get(entityToCreate).knownByEntities.contains(observerEntity));
 		verify(peer).send(any());
 	}
 
@@ -95,12 +89,11 @@ public class TestCreateSystem {
 		when(secondPropertyHandler.decorateDataObject(anyInt(), any(), anyBoolean())).thenReturn(true);
 		setupWorld(new PropertyHandler[]{firstPropertyHandler, secondPropertyHandler});
 
-		int playerEntity = world.create();
+		int observerEntity = world.create();
 		int entityToCreate = world.create();
 
-		playerMapper.create(playerEntity).name = "TestName";
-		activeMapper.create(playerEntity).peer = peer;
-		scanMapper.create(playerEntity).nearbyEntities.add(entityToCreate);
+		observerMapper.create(observerEntity).peer = peer;
+		scanMapper.create(observerEntity).nearbyEntities.add(entityToCreate);
 
 		createMapper.create(entityToCreate).reason = "testing";
 		typeMapper.create(entityToCreate).type = "testType";

@@ -6,17 +6,15 @@ import com.artemis.WorldConfigurationBuilder;
 import com.vast.component.*;
 import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
-import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class TestCullingSystem {
 	private World world;
-	private ComponentMapper<Player> playerMapper;
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Observer> observerMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Type> typeMapper;
@@ -27,8 +25,7 @@ public class TestCullingSystem {
 			new CullingSystem(propertyHandlers)
 		).build());
 
-		playerMapper = world.getMapper(Player.class);
-		activeMapper = world.getMapper(Active.class);
+		observerMapper = world.getMapper(Observer.class);
 		knownMapper = world.getMapper(Known.class);
 		scanMapper = world.getMapper(Scan.class);
 		typeMapper = world.getMapper(Type.class);
@@ -45,20 +42,19 @@ public class TestCullingSystem {
 		when(peer.getId()).thenReturn(123L);
 		setupWorld();
 
-		int playerEntity = world.create();
+		int observerEntity = world.create();
 		int newEntity = world.create();
 
-		playerMapper.create(playerEntity).name = "TestName";
-		activeMapper.create(playerEntity).peer = peer;
-		scanMapper.create(playerEntity).nearbyEntities.add(newEntity);
+		observerMapper.create(observerEntity).peer = peer;
+		scanMapper.create(observerEntity).nearbyEntities.add(newEntity);
 
 		typeMapper.create(newEntity).type = "testType";
 		knownMapper.create(newEntity);
 
 		world.process();
 
-		assertTrue(activeMapper.get(playerEntity).knowEntities.contains(newEntity));
-		assertTrue(knownMapper.get(newEntity).knownByEntities.contains(playerEntity));
+		assertTrue(observerMapper.get(observerEntity).knowEntities.contains(newEntity));
+		assertTrue(knownMapper.get(newEntity).knownByEntities.contains(observerEntity));
 		verify(peer).send(any());
 	}
 
@@ -68,22 +64,21 @@ public class TestCullingSystem {
 		when(peer.getId()).thenReturn(123L);
 		setupWorld();
 
-		int playerEntity = world.create();
+		int observerEntity = world.create();
 		int outOfRangeEntity = world.create();
 
-		playerMapper.create(playerEntity).name = "TestName";
-		activeMapper.create(playerEntity).peer = peer;
-		activeMapper.get(playerEntity).knowEntities.add(outOfRangeEntity);
-		scanMapper.create(playerEntity);
+		observerMapper.create(observerEntity).peer = peer;
+		observerMapper.get(observerEntity).knowEntities.add(outOfRangeEntity);
+		scanMapper.create(observerEntity);
 
 		typeMapper.create(outOfRangeEntity).type = "testType";
 		knownMapper.create(outOfRangeEntity);
-		knownMapper.get(outOfRangeEntity).knownByEntities.add(playerEntity);
+		knownMapper.get(outOfRangeEntity).knownByEntities.add(observerEntity);
 
 		world.process();
 
-		assertFalse(activeMapper.get(playerEntity).knowEntities.contains(outOfRangeEntity));
-		assertFalse(knownMapper.get(outOfRangeEntity).knownByEntities.contains(playerEntity));
+		assertFalse(observerMapper.get(observerEntity).knowEntities.contains(outOfRangeEntity));
+		assertFalse(knownMapper.get(outOfRangeEntity).knownByEntities.contains(observerEntity));
 		verify(peer).send(any());
 	}
 
@@ -102,12 +97,11 @@ public class TestCullingSystem {
 		when(secondPropertyHandler.decorateDataObject(anyInt(), any(), anyBoolean())).thenReturn(true);
 		setupWorld(new PropertyHandler[]{firstPropertyHandler, secondPropertyHandler});
 
-		int playerEntity = world.create();
+		int observerEntity = world.create();
 		int newEntity = world.create();
 
-		playerMapper.create(playerEntity).name = "TestName";
-		activeMapper.create(playerEntity).peer = peer;
-		scanMapper.create(playerEntity).nearbyEntities.add(newEntity);
+		observerMapper.create(observerEntity).peer = peer;
+		scanMapper.create(observerEntity).nearbyEntities.add(newEntity);
 
 		typeMapper.create(newEntity).type = "testType";
 		knownMapper.create(newEntity);

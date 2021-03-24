@@ -3,14 +3,16 @@ package com.vast.system;
 import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
-import com.vast.component.Active;
 import com.vast.component.Delete;
 import com.vast.component.Known;
-import com.vast.component.Player;
+import com.vast.component.Observer;
 import com.vast.network.VastPeer;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class TestDeleteSystem {
 	@Test
@@ -26,36 +28,34 @@ public class TestDeleteSystem {
 
 		world.process();
 
-		Assert.assertFalse(deleteMapper.has(entityToDelete));
+		assertFalse(deleteMapper.has(entityToDelete));
 	}
 
 	@Test
 	public void removesKnownEntity() {
-		VastPeer peer = Mockito.mock(VastPeer.class);
-		Mockito.when(peer.getId()).thenReturn(123L);
-
 		World world = new World(new WorldConfigurationBuilder().with(
 			new DeleteSystem()
 		).build());
 
-		ComponentMapper<Player> playerMapper = world.getMapper(Player.class);
-		ComponentMapper<Active> activeMapper = world.getMapper(Active.class);
+		ComponentMapper<Observer> observerMapper = world.getMapper(Observer.class);
 		ComponentMapper<Delete> deleteMapper = world.getMapper(Delete.class);
 		ComponentMapper<Known> knownMapper = world.getMapper(Known.class);
 
 		int entityToDelete = world.create();
-		int playerEntity = world.create();
+
+		int observerEntity = world.create();
+		observerMapper.create(observerEntity);
+		VastPeer peer = mock(VastPeer.class);
+		when(peer.getId()).thenReturn(123L);
+		observerMapper.get(observerEntity).peer = peer;
+		observerMapper.get(observerEntity).knowEntities.add(entityToDelete);
 
 		deleteMapper.create(entityToDelete).reason = "testing";
-		knownMapper.create(entityToDelete).knownByEntities.add(playerEntity);
-
-		playerMapper.create(playerEntity).name = "TestName";
-		activeMapper.create(playerEntity).peer = peer;
-		activeMapper.get(playerEntity).knowEntities.add(entityToDelete);
+		knownMapper.create(entityToDelete).knownByEntities.add(observerEntity);
 
 		world.process();
 
-		Assert.assertFalse(activeMapper.get(playerEntity).knowEntities.contains(entityToDelete));
-		Mockito.verify(peer).send(Mockito.any());
+		assertFalse(observerMapper.get(observerEntity).knowEntities.contains(entityToDelete));
+		verify(peer).send(any());
 	}
 }

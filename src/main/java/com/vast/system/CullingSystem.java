@@ -42,6 +42,7 @@ public class CullingSystem extends IteratingSystem {
 
 		reusableRemovedEntities = new IntBag();
 		reusableDestroyedEventMessage = new EventMessage(MessageCodes.ENTITY_DESTROYED);
+		reusableDestroyedEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_REASON, "culling");
 		reusableCreatedEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
 		reusableAlreadyInterestedProperties = new UnifiedSet<>();
 		reusablePropertiesDataObject = new DataObject();
@@ -85,9 +86,7 @@ public class CullingSystem extends IteratingSystem {
 	}
 
 	private void notifyAboutRemovedEntity(VastPeer peer, int deletedEntity) {
-		reusableDestroyedEventMessage.getDataObject().clear();
 		reusableDestroyedEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_ENTITY_ID, deletedEntity);
-		reusableDestroyedEventMessage.getDataObject().set(MessageCodes.ENTITY_DESTROYED_REASON, "culling");
 		peer.send(reusableDestroyedEventMessage);
 	}
 

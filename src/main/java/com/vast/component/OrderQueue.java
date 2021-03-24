@@ -4,12 +4,12 @@ import com.artemis.PooledComponent;
 import com.artemis.annotations.Transient;
 import com.vast.order.request.OrderRequest;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
+import java.util.Queue;
 
 @Transient
 public class OrderQueue extends PooledComponent {
-    public List<OrderRequest> requests = new ArrayList<>();
+    public Queue<OrderRequest> requests = new LinkedList<>();
 
     @Override
     protected void reset() {

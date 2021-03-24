@@ -4,8 +4,8 @@ import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.component.Active;
-import com.vast.component.Player;
+import com.vast.component.Avatar;
+import com.vast.component.Observed;
 import com.vast.component.SyncHistory;
 import com.vast.network.Properties;
 import org.junit.Assert;
@@ -15,8 +15,8 @@ import org.junit.Test;
 public class TestActivePropertyHandler {
     private ActivePropertyHandler activePropertyHandler;
     private World world;
-    private ComponentMapper<Player> playerMapper;
-    private ComponentMapper<Active> activeMapper;
+    private ComponentMapper<Avatar> avatarMapper;
+    private ComponentMapper<Observed> observedMapper;
     private ComponentMapper<SyncHistory> syncHistoryMapper;
     private int entity;
 
@@ -27,8 +27,8 @@ public class TestActivePropertyHandler {
         world = new World(new WorldConfigurationBuilder().build());
         world.inject(activePropertyHandler);
 
-        playerMapper = world.getMapper(Player.class);
-        activeMapper = world.getMapper(Active.class);
+        avatarMapper = world.getMapper(Avatar.class);
+        observedMapper = world.getMapper(Observed.class);
         syncHistoryMapper = world.getMapper(SyncHistory.class);
 
         entity = world.create();
@@ -44,9 +44,9 @@ public class TestActivePropertyHandler {
     }
 
     @Test
-    public void givenPlayer_decoratesDataObject() {
-        playerMapper.create(entity);
-        activeMapper.create(entity);
+    public void givenObservedAvatar_decoratesDataObject() {
+        avatarMapper.create(entity);
+        observedMapper.create(entity);
 
         DataObject dataObject = new DataObject();
         boolean decorated = activePropertyHandler.decorateDataObject(entity, dataObject, false);
@@ -57,8 +57,8 @@ public class TestActivePropertyHandler {
 
     @Test
     public void givenNoActiveChange_doesNotDecorateDataObject() {
-        playerMapper.create(entity);
-        activeMapper.create(entity);
+        avatarMapper.create(entity);
+        observedMapper.create(entity);
         SyncHistory syncHistory = syncHistoryMapper.create(entity);
 
         syncHistory.syncedValues.put(Properties.ACTIVE, true);
@@ -72,7 +72,7 @@ public class TestActivePropertyHandler {
 
     @Test
     public void givenActiveChange_decoratesDataObject() {
-        playerMapper.create(entity);
+        avatarMapper.create(entity);
         SyncHistory syncHistory = syncHistoryMapper.create(entity);
 
         // Changed from active -> inactive
@@ -87,8 +87,8 @@ public class TestActivePropertyHandler {
 
     @Test
     public void givenNoSyncHistory_decoratesDataObject() {
-        playerMapper.create(entity);
-        activeMapper.create(entity);
+        avatarMapper.create(entity);
+        observedMapper.create(entity);
 
         DataObject dataObject = new DataObject();
         boolean decorated = activePropertyHandler.decorateDataObject(entity, dataObject, false);
@@ -99,8 +99,8 @@ public class TestActivePropertyHandler {
 
     @Test
     public void givenEmptySyncHistory_populatesSyncHistory() {
-        playerMapper.create(entity);
-        activeMapper.create(entity);
+        avatarMapper.create(entity);
+        observedMapper.create(entity);
         SyncHistory syncHistory = syncHistoryMapper.create(entity);
 
         activePropertyHandler.decorateDataObject(entity, new DataObject(), false);

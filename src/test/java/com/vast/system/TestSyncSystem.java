@@ -7,31 +7,33 @@ import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.*;
 import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
-import com.vast.property.progress.AbstractProgressPropertyHandler;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 
 public class TestSyncSystem {
 	private World world;
-	private ComponentMapper<Player> playerMapper;
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<Observer> observerMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 	private ComponentMapper<Sync> syncMapper;
+	private ComponentMapper<Owner> ownerMapper;
 
-	private void setupWorld(PropertyHandler[] propertyHandlers) {
+	private void setupWorld(VastPeer peer, PropertyHandler[] propertyHandlers) {
+		Map<String, VastPeer> peers = new HashMap<>();
+		peers.put(peer.getName(), peer);
 		world = new World(new WorldConfigurationBuilder().with(
-			new SyncSystem(new HashMap<>(), propertyHandlers, null)
+			new SyncSystem(peers, propertyHandlers, null)
 		).build());
 
-		playerMapper = world.getMapper(Player.class);
-		activeMapper = world.getMapper(Active.class);
+		observerMapper = world.getMapper(Observer.class);
 		knownMapper = world.getMapper(Known.class);
 		syncPropagationMapper = world.getMapper(SyncPropagation.class);
 		syncMapper = world.getMapper(Sync.class);
+		ownerMapper = world.getMapper(Owner.class);
 	}
 
 	private PropertyHandler createPropertyHandler(int property, boolean changes) {
@@ -53,28 +55,92 @@ public class TestSyncSystem {
 		};
 	}
 
-	private VastPeer createPeer(int id) {
+	private VastPeer createPeer(String name) {
 		VastPeer peer = mock(VastPeer.class);
-		when(peer.getId()).thenReturn((long) id);
+		when(peer.getName()).thenReturn(name);
 		return peer;
 	}
 
 	@Test
+	public void notifiesOwnerWhenPropertiesChanged() {
+		VastPeer ownerPeer = createPeer("TestPeer");
+		setupWorld(ownerPeer, new PropertyHandler[]{
+			createPropertyHandler(1, true),
+		});
+
+		int observerEntity = world.create();
+		int changedEntity = world.create();
+
+		observerMapper.create(observerEntity).peer = ownerPeer;
+
+		ownerMapper.create(changedEntity).name = "TestPeer";
+		syncPropagationMapper.create(changedEntity).setOwnerPropagation(1);
+		syncMapper.create(changedEntity).markPropertyAsDirty(1);
+
+		world.process();
+
+		verify(ownerPeer, times(1)).send(any());
+	}
+
+	@Test
+	public void notifiesNearbyWhenPropertiesChanged() {
+		VastPeer nearbyPeer = createPeer("TestPeer");
+		setupWorld(nearbyPeer, new PropertyHandler[]{
+			createPropertyHandler(1, true),
+		});
+
+		int observerEntity = world.create();
+		int changedEntity = world.create();
+
+		observerMapper.create(observerEntity).peer = nearbyPeer;
+
+		knownMapper.create(changedEntity).knownByEntities.add(observerEntity);
+		syncPropagationMapper.create(changedEntity);
+		syncMapper.create(changedEntity).markPropertyAsDirty(1);
+
+		world.process();
+
+		verify(nearbyPeer, times(1)).send(any());
+	}
+
+	@Test
+	public void doesNotNotifyNearbyIfNotKnownWhenPropertiesChanged() {
+		VastPeer nearbyPeer = createPeer("TestPeer");
+		setupWorld(nearbyPeer, new PropertyHandler[]{
+				createPropertyHandler(1, true),
+		});
+
+		int observerEntity = world.create();
+		int changedEntity = world.create();
+
+		observerMapper.create(observerEntity).peer = nearbyPeer;
+
+		syncPropagationMapper.create(changedEntity);
+		syncMapper.create(changedEntity).markPropertyAsDirty(1);
+
+		world.process();
+
+		verify(nearbyPeer, never()).send(any());
+	}
+
+	@Test
 	public void notifiesOwnerOnceEvenIfSeveralPropertiesChanged() {
-		VastPeer ownerPeer = createPeer(123);
-		setupWorld(new PropertyHandler[]{
+		VastPeer ownerPeer = createPeer("TestPeer");
+		setupWorld(ownerPeer, new PropertyHandler[]{
 			createPropertyHandler(1, true),
 			createPropertyHandler(2, true)
 		});
 
-		int playerEntity = world.create();
-		playerMapper.create(playerEntity);
-		activeMapper.create(playerEntity).peer = ownerPeer;
-		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
-		syncPropagationMapper.create(playerEntity).setOwnerPropagation(1);
-		syncPropagationMapper.create(playerEntity).setOwnerPropagation(2);
-		syncMapper.create(playerEntity).markPropertyAsDirty(1);
-		syncMapper.create(playerEntity).markPropertyAsDirty(2);
+		int observerEntity = world.create();
+		int changedEntity = world.create();
+
+		observerMapper.create(observerEntity).peer = ownerPeer;
+
+		ownerMapper.create(changedEntity).name = "TestPeer";
+		syncPropagationMapper.create(changedEntity).setOwnerPropagation(1);
+		syncPropagationMapper.create(changedEntity).setOwnerPropagation(2);
+		syncMapper.create(changedEntity).markPropertyAsDirty(1);
+		syncMapper.create(changedEntity).markPropertyAsDirty(2);
 
 		world.process();
 
@@ -83,17 +149,19 @@ public class TestSyncSystem {
 
 	@Test
 	public void doesNotNotifyOwnerIfPropertyDidNotChange() {
-		VastPeer ownerPeer = createPeer(123);
-		setupWorld(new PropertyHandler[]{
+		VastPeer ownerPeer = createPeer("TestPeer");
+		setupWorld(ownerPeer, new PropertyHandler[]{
 			createPropertyHandler(1, false)
 		});
 
-		int playerEntity = world.create();
-		playerMapper.create(playerEntity);
-		activeMapper.create(playerEntity).peer = ownerPeer;
-		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
-		syncPropagationMapper.create(playerEntity).setOwnerPropagation(1);
-		syncMapper.create(playerEntity).markPropertyAsDirty(1);
+		int observerEntity = world.create();
+		int changedEntity = world.create();
+
+		observerMapper.create(observerEntity).peer = ownerPeer;
+
+		ownerMapper.create(changedEntity).name = "TestPeer";
+		syncPropagationMapper.create(changedEntity).setOwnerPropagation(1);
+		syncMapper.create(changedEntity).markPropertyAsDirty(1);
 
 		world.process();
 
@@ -102,16 +170,18 @@ public class TestSyncSystem {
 
 	@Test
 	public void doesNotNotifyOwnerIfPropertyWasNotMarkedAsDirty() {
-		VastPeer ownerPeer = createPeer(123);
-		setupWorld(new PropertyHandler[]{
-			createPropertyHandler(1, true)
+		VastPeer ownerPeer = createPeer("TestPeer");
+		setupWorld(ownerPeer, new PropertyHandler[]{
+				createPropertyHandler(1, false)
 		});
 
-		int playerEntity = world.create();
-		playerMapper.create(playerEntity);
-		activeMapper.create(playerEntity).peer = ownerPeer;
-		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
-		syncPropagationMapper.create(playerEntity).setOwnerPropagation(1);
+		int observerEntity = world.create();
+		int changedEntity = world.create();
+
+		observerMapper.create(observerEntity).peer = ownerPeer;
+
+		ownerMapper.create(changedEntity).name = "TestPeer";
+		syncPropagationMapper.create(changedEntity).setOwnerPropagation(1);
 
 		world.process();
 
@@ -120,19 +190,22 @@ public class TestSyncSystem {
 
 	@Test
 	public void notifiesWithReliableWhenPropertiesHaveMixedReliability() {
-		VastPeer ownerPeer = createPeer(123);
-		setupWorld(new PropertyHandler[]{
-			createPropertyHandler(1, true),
-			createPropertyHandler(2, true)
+		VastPeer ownerPeer = createPeer("TestPeer");
+		setupWorld(ownerPeer, new PropertyHandler[]{
+				createPropertyHandler(1, true),
+				createPropertyHandler(2, true)
 		});
 
-		int playerEntity = world.create();
-		playerMapper.create(playerEntity);
-		activeMapper.create(playerEntity).peer = ownerPeer;
-		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
-		syncPropagationMapper.create(playerEntity).setUnreliable(2);
-		syncMapper.create(playerEntity).markPropertyAsDirty(1);
-		syncMapper.create(playerEntity).markPropertyAsDirty(2);
+		int observerEntity = world.create();
+		int changedEntity = world.create();
+
+		observerMapper.create(observerEntity).peer = ownerPeer;
+
+		ownerMapper.create(changedEntity).name = "TestPeer";
+		knownMapper.create(changedEntity).knownByEntities.add(observerEntity);
+		syncPropagationMapper.create(changedEntity).setUnreliable(2);
+		syncMapper.create(changedEntity).markPropertyAsDirty(1);
+		syncMapper.create(changedEntity).markPropertyAsDirty(2);
 
 		world.process();
 
@@ -142,20 +215,23 @@ public class TestSyncSystem {
 
 	@Test
 	public void notifiesWithUnreliableWhenAllPropertiesAreUnreliable() {
-		VastPeer ownerPeer = createPeer(123);
-		setupWorld(new PropertyHandler[]{
-			createPropertyHandler(1, true),
-			createPropertyHandler(2, true)
+		VastPeer ownerPeer = createPeer("TestPeer");
+		setupWorld(ownerPeer, new PropertyHandler[]{
+				createPropertyHandler(1, true),
+				createPropertyHandler(2, true)
 		});
 
-		int playerEntity = world.create();
-		playerMapper.create(playerEntity);
-		activeMapper.create(playerEntity).peer = ownerPeer;
-		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
-		syncPropagationMapper.create(playerEntity).setUnreliable(1);
-		syncPropagationMapper.create(playerEntity).setUnreliable(2);
-		syncMapper.create(playerEntity).markPropertyAsDirty(1);
-		syncMapper.create(playerEntity).markPropertyAsDirty(2);
+		int observerEntity = world.create();
+		int changedEntity = world.create();
+
+		observerMapper.create(observerEntity).peer = ownerPeer;
+
+		ownerMapper.create(changedEntity).name = "TestPeer";
+		knownMapper.create(changedEntity).knownByEntities.add(observerEntity);
+		syncPropagationMapper.create(changedEntity).setUnreliable(1);
+		syncPropagationMapper.create(changedEntity).setUnreliable(2);
+		syncMapper.create(changedEntity).markPropertyAsDirty(1);
+		syncMapper.create(changedEntity).markPropertyAsDirty(2);
 
 		world.process();
 
@@ -165,7 +241,7 @@ public class TestSyncSystem {
 
 	@Test
 	public void onlyDecoratesFirstOfEachProperty() {
-		VastPeer ownerPeer = createPeer(123);
+		VastPeer ownerPeer = createPeer("TestPeer");
 		byte property = (byte) 1;
 		PropertyHandler firstPropertyHandler = mock(PropertyHandler.class);
 		when(firstPropertyHandler.getProperty()).thenReturn(property);
@@ -175,14 +251,17 @@ public class TestSyncSystem {
 		when(secondPropertyHandler.getProperty()).thenReturn(property);
 		when(secondPropertyHandler.isInterestedIn(anyInt())).thenReturn(true);
 		when(secondPropertyHandler.decorateDataObject(anyInt(), any(), anyBoolean())).thenReturn(true);
-		setupWorld(new PropertyHandler[]{firstPropertyHandler, secondPropertyHandler});
+		setupWorld(ownerPeer, new PropertyHandler[]{firstPropertyHandler, secondPropertyHandler});
 
-		int playerEntity = world.create();
-		playerMapper.create(playerEntity);
-		activeMapper.create(playerEntity).peer = ownerPeer;
-		knownMapper.create(playerEntity).knownByEntities.add(playerEntity);
-		syncPropagationMapper.create(playerEntity);
-		syncMapper.create(playerEntity).markPropertyAsDirty(property);
+		int observerEntity = world.create();
+		int changedEntity = world.create();
+
+		observerMapper.create(observerEntity).peer = ownerPeer;
+
+		ownerMapper.create(changedEntity).name = "TestPeer";
+		knownMapper.create(changedEntity).knownByEntities.add(observerEntity);
+		syncPropagationMapper.create(changedEntity);
+		syncMapper.create(changedEntity).markPropertyAsDirty(property);
 
 		world.process();
 

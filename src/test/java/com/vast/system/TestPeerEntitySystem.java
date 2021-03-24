@@ -16,7 +16,7 @@ public class TestPeerEntitySystem {
 	@Test
 	public void createsNewPeer() {
 		CreationManager creationManager = mock(CreationManager.class);
-		when(creationManager.createAvatar(anyString(), anyInt(), anyBoolean())).thenReturn(1);
+		when(creationManager.createAvatar(anyString(), anyInt())).thenReturn(1);
 		Map<String, VastPeer> peers = new HashMap<>();
 		VastPeer peer = mock(VastPeer.class);
 		when(peer.getName()).thenReturn("TestName");
@@ -55,7 +55,7 @@ public class TestPeerEntitySystem {
 
 		world.process();
 
-		verify(creationManager, never()).createAvatar(anyString(), anyInt(), anyBoolean());
+		verify(creationManager, never()).createAvatar(anyString(), anyInt());
 		Assert.assertEquals(1, entitiesByPeer.size());
 		Assert.assertEquals(avatarEntity, entitiesByPeer.get("TestName").intValue());
 	}

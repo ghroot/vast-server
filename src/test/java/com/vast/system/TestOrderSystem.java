@@ -3,41 +3,28 @@ package com.vast.system;
 import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
-import com.nhnent.haste.protocol.data.DataObject;
-import com.nhnent.haste.protocol.messages.RequestMessage;
-import com.vast.component.Active;
 import com.vast.component.Order;
-import com.vast.component.Player;
+import com.vast.component.OrderQueue;
 import com.vast.network.IncomingRequest;
 import com.vast.network.VastPeer;
-import com.vast.order.OrderHandler;
+import com.vast.order.handler.OrderHandler;
+import com.vast.order.request.OrderRequest;
 import org.junit.Test;
-
-import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class TestOrderSystem {
-	private List<IncomingRequest> incomingRequestsForPlayer;
 	private World world;
-	private ComponentMapper<Player> playerMapper;
-	private ComponentMapper<Active> activeMapper;
+	private ComponentMapper<OrderQueue> orderQueueMapper;
 	private ComponentMapper<Order> orderMapper;
 
 	private void setupWorld(OrderHandler[] orderHandlers, IncomingRequest incomingRequest) {
-		Map<String, List<IncomingRequest>> incomingRequests = new HashMap<>();
-		incomingRequestsForPlayer = new ArrayList<>();
-		if (incomingRequest != null) {
-			incomingRequests.put(incomingRequest.getPeer().getName(), incomingRequestsForPlayer);
-			incomingRequestsForPlayer.add(incomingRequest);
-		}
 		world = new World(new WorldConfigurationBuilder().with(
-			new OrderSystem(orderHandlers, incomingRequests)
+			new OrderSystem(orderHandlers)
 		).build());
 
-		playerMapper = world.getMapper(Player.class);
-		activeMapper = world.getMapper(Active.class);
+		orderQueueMapper = world.getMapper(OrderQueue.class);
 		orderMapper = world.getMapper(Order.class);
 	}
 
@@ -52,18 +39,16 @@ public class TestOrderSystem {
 	}
 
 	@Test
-	public void cancelsOrderIfNotActive() {
+	public void removesOrderQueueIfEmpty() {
 		OrderHandler orderHandler = mock(OrderHandler.class);
 		setupWorld(new OrderHandler[] {orderHandler});
 
-		int playerEntityId = world.create();
-		playerMapper.create(playerEntityId);
-		orderMapper.create(playerEntityId).handler = orderHandler;
+		int orderEntity = world.create();
+		orderQueueMapper.create(orderEntity);
 
 		world.process();
 
-		assertFalse(orderMapper.has(playerEntityId));
-		verify(orderHandler).cancelOrder(playerEntityId);
+		assertFalse(orderQueueMapper.has(orderEntity));
 	}
 
 	@Test
@@ -71,41 +56,58 @@ public class TestOrderSystem {
 		OrderHandler orderHandler = mock(OrderHandler.class);
 		setupWorld(new OrderHandler[] {orderHandler});
 
-		int playerEntityId = world.create();
-		playerMapper.create(playerEntityId);
-		activeMapper.create(playerEntityId);
-		orderMapper.create(playerEntityId).handler = orderHandler;
-		when(orderHandler.isOrderComplete(playerEntityId)).thenReturn(true);
+		int orderEntity = world.create();
+		orderMapper.create(orderEntity).handler = orderHandler;
+		when(orderHandler.isOrderComplete(orderEntity)).thenReturn(true);
 
 		world.process();
 
-		assertFalse(orderMapper.has(playerEntityId));
+		assertFalse(orderMapper.has(orderEntity));
 	}
 
 	@Test
-	public void startsOrderOnIncomingRequest() {
+	public void startsOrderWhenQueueHasRequest() {
 		VastPeer peer = createPeer("TestPeer");
 
 		OrderHandler orderHandler = mock(OrderHandler.class);
-		when(orderHandler.handlesMessageCode(anyShort())).thenReturn(true);
-		when(orderHandler.startOrder(anyInt(), anyShort(), any(DataObject.class))).thenReturn(true);
+		when(orderHandler.handlesRequest(any())).thenReturn(true);
+		when(orderHandler.startOrder(anyInt(), any())).thenReturn(true);
+		when(orderHandler.isOrderComplete(anyInt())).thenReturn(false);
 
-		DataObject dataObject = new DataObject();
-		RequestMessage message = new RequestMessage((short) 1, dataObject);
-		IncomingRequest incomingRequest = new IncomingRequest(peer, message);
+		setupWorld(new OrderHandler[] {orderHandler});
 
-		setupWorld(new OrderHandler[] {orderHandler}, incomingRequest);
+		OrderRequest orderRequest = mock(OrderRequest.class);
 
-		int playerEntityId = world.create();
-		playerMapper.create(playerEntityId).name = "TestPeer";
-		activeMapper.create(playerEntityId).peer = peer;
-		when(orderHandler.isOrderComplete(playerEntityId)).thenReturn(true);
+		int orderEntity = world.create();
+		orderQueueMapper.create(orderEntity).requests.add(orderRequest);
 
 		world.process();
 
-		assertTrue(orderMapper.has(playerEntityId));
-		assertEquals(orderHandler, orderMapper.get(playerEntityId).handler);
-		verify(orderHandler).startOrder(playerEntityId, (short) 1, dataObject);
+		assertTrue(orderMapper.has(orderEntity));
+		assertEquals(orderHandler, orderMapper.get(orderEntity).handler);
+		verify(orderHandler).startOrder(orderEntity, orderRequest);
+	}
+
+	@Test
+	public void keepsOrderWhenQueueHasRequest() {
+		VastPeer peer = createPeer("TestPeer");
+
+		OrderHandler orderHandler = mock(OrderHandler.class);
+		when(orderHandler.handlesRequest(any())).thenReturn(true);
+		when(orderHandler.startOrder(anyInt(), any())).thenReturn(true);
+		when(orderHandler.isOrderComplete(anyInt())).thenReturn(false);
+
+		setupWorld(new OrderHandler[] {orderHandler});
+
+		OrderRequest orderRequest = mock(OrderRequest.class);
+
+		int orderEntity = world.create();
+		orderQueueMapper.create(orderEntity).requests.add(orderRequest);
+		orderMapper.create(orderEntity).handler = orderHandler;
+
+		world.process();
+
+		assertEquals(1, orderQueueMapper.get(orderEntity).requests.size());
 	}
 
 	@Test
@@ -113,35 +115,22 @@ public class TestOrderSystem {
 		VastPeer peer = createPeer("TestPeer");
 
 		OrderHandler orderHandler = mock(OrderHandler.class);
-		when(orderHandler.handlesMessageCode(anyShort())).thenReturn(true);
-		when(orderHandler.startOrder(anyInt(), anyShort(), any(DataObject.class))).thenReturn(true);
+		when(orderHandler.handlesRequest(any())).thenReturn(true);
+		when(orderHandler.startOrder(anyInt(), any())).thenReturn(true);
 		when(orderHandler.isOrderComplete(anyInt())).thenReturn(false);
-		when(orderHandler.modifyOrder(anyInt(), anyShort(), any(DataObject.class))).thenReturn(true);
+		when(orderHandler.modifyOrder(anyInt(), any())).thenReturn(true);
 
-		DataObject dataObject = new DataObject();
-		RequestMessage message = new RequestMessage((short) 1, dataObject);
-		IncomingRequest incomingRequest = new IncomingRequest(peer, message);
+		setupWorld(new OrderHandler[] {orderHandler});
 
-		setupWorld(new OrderHandler[] {orderHandler}, incomingRequest);
+		OrderRequest orderRequest = mock(OrderRequest.class);
 
-		int playerEntityId = world.create();
-		playerMapper.create(playerEntityId).name = "TestPeer";
-		activeMapper.create(playerEntityId).peer = peer;
+		int orderEntity = world.create();
+		orderQueueMapper.create(orderEntity).requests.add(orderRequest);
+		orderMapper.create(orderEntity).handler = orderHandler;
 
 		world.process();
 
-		Order order = orderMapper.get(playerEntityId);
-
-		DataObject dataObject2 = new DataObject();
-		RequestMessage message2 = new RequestMessage((short) 1, dataObject2);
-		IncomingRequest incomingRequest2 = new IncomingRequest(peer, message2);
-		incomingRequestsForPlayer.add(incomingRequest2);
-
-		world.process();
-
-		assertTrue(orderMapper.has(playerEntityId));
-		assertEquals(orderHandler, orderMapper.get(playerEntityId).handler);
-		assertEquals(order, orderMapper.get(playerEntityId));
-		verify(orderHandler).modifyOrder(playerEntityId, (short) 1, dataObject2);
+		assertEquals(0, orderQueueMapper.get(orderEntity).requests.size());
+		verify(orderHandler).modifyOrder(orderEntity, orderRequest);
 	}
 }

@@ -2,14 +2,14 @@ package cucumber;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.nhnent.haste.protocol.data.DataObject;
-import com.nhnent.haste.protocol.messages.RequestMessage;
 import com.vast.VastWorld;
 import com.vast.component.*;
 import com.vast.data.Items;
 import com.vast.data.Recipes;
 import com.vast.data.WorldConfiguration;
-import com.vast.network.*;
+import com.vast.network.VastServerApplication;
+import com.vast.order.request.avatar.InteractOrderRequest;
+import com.vast.order.request.avatar.MoveOrderRequest;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
@@ -21,30 +21,18 @@ import org.junit.Assert;
 
 import javax.vecmath.Point2f;
 import javax.vecmath.Vector2f;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 public class StepDefinitions {
-    private List<IncomingRequest> incomingRequests;
-    private List<PeerListener> peerListeners;
     private VastWorld world;
     private Thread worldThread;
 
     private Map<String, Integer> designations;
-
-    private VastServerApplication createServerApplication() {
-        VastServerApplication serverApplication = mock(VastServerApplication.class);
-        when(serverApplication.getIncomingRequests()).thenReturn(incomingRequests);
-        doAnswer(invocation -> {
-            peerListeners.add(invocation.getArgument(0));
-            return null;
-        }).when(serverApplication).addPeerListener(any(PeerListener.class));
-
-        return serverApplication;
-    }
 
     @Before
     public void setUp() {
@@ -62,31 +50,8 @@ public class StepDefinitions {
         world.destroy();
     }
 
-    private void sendInteractRequest(VastPeer peer, int entityId) {
-        DataObject dataObject = new DataObject();
-        dataObject.set(MessageCodes.INTERACT_ENTITY_ID, entityId);
-        RequestMessage message = new RequestMessage(MessageCodes.INTERACT, dataObject);
-        IncomingRequest incomingRequest = new IncomingRequest(peer, message);
-        synchronized (incomingRequests) {
-            incomingRequests.add(incomingRequest);
-        }
-    }
-
-    private void sendMoveRequest(VastPeer peer, float x, float y) {
-        DataObject dataObject = new DataObject();
-        dataObject.set(MessageCodes.MOVE_POSITION, new float[] {x, y});
-        RequestMessage message = new RequestMessage(MessageCodes.MOVE, dataObject);
-        IncomingRequest incomingRequest = new IncomingRequest(peer, message);
-        synchronized (incomingRequests) {
-            incomingRequests.add(incomingRequest);
-        }
-    }
-
     private void createWorld(int width, int height, long seed, String snapshotFile) {
-        incomingRequests = new ArrayList<>();
-        peerListeners = new ArrayList<>();
-
-        VastServerApplication serverApplication = createServerApplication();
+        VastServerApplication serverApplication = mock(VastServerApplication.class);
 
         WorldConfiguration worldConfiguration = new WorldConfiguration(width, height);
         Items items = new Items("items.json");
@@ -161,28 +126,23 @@ public class StepDefinitions {
     }
 
     @Given("a player {string}")
-    public void playerConnects(String playerName) {
-        VastPeer peer = mock(VastPeer.class);
-        when(peer.getName()).thenReturn(playerName);
-        for (PeerListener peerListener : peerListeners) {
-            peerListener.peerAdded(peer);
-        }
+    public int playerConnects(String playerName) {
+        int avatarEntity = world.getCreationManager().createAvatar(playerName, 0, null);
+        designations.put(playerName, avatarEntity);
 
-        await().until(() -> world.getPeer(playerName) != null);
-        await().until(() -> world.getPeerEntity(playerName) >= 0);
+        return avatarEntity;
     }
 
     @Given("a player {string} at position {float}, {float}")
     public void playerConnectsAtPosition(String playerName, float x, float y) {
-        playerConnects(playerName);
-        int playerEntity = world.getPeerEntity(playerName);
+        int avatarEntity = playerConnects(playerName);
         ComponentMapper<Transform> transformMapper = world.getComponentMapper(Transform.class);
-        transformMapper.get(playerEntity).position.set(x, y);
+        transformMapper.get(avatarEntity).position.set(x, y);
     }
 
     @Given("player {string} has {int} of item {string}")
     public void playerHasItem(String playerName, int amount, String itemName) {
-        world.getComponentMapper(Inventory.class).get(world.getPeerEntity(playerName)).add(
+        world.getComponentMapper(Inventory.class).get(designations.get(playerName)).add(
                 world.getItems().getItem(itemName).getId(), amount);
     }
 
@@ -192,7 +152,7 @@ public class StepDefinitions {
         float closestDistance2 = Float.MAX_VALUE;
         ComponentMapper<Type> typeMapper = world.getComponentMapper(Type.class);
         ComponentMapper<Transform> transformMapper = world.getComponentMapper(Transform.class);
-        int playerEntity = world.getPeerEntity(playerName);
+        int playerEntity = designations.get(playerName);
         Point2f playerPosition = transformMapper.get(playerEntity).position;
         int[] entities = world.getEntities(Aspect.all(Type.class));
         for (int entity : entities) {
@@ -213,25 +173,28 @@ public class StepDefinitions {
 
     @When("player {string} is ordered to interact with {string}")
     public void orderPlayerToInteract(String playerName, String designation) {
-        sendInteractRequest(world.getPeer(playerName), designations.get(designation));
+        world.getComponentMapper(OrderQueue.class).create(designations.get(playerName)).requests.add(
+                new InteractOrderRequest(designations.get(designation)));
     }
 
     @When("player {string} is ordered to move {float}, {float} from current position")
     public void orderPlayerToMove(String playerName, float dx, float dy) {
-        ComponentMapper<Transform> transformMapper = world.getComponentMapper(Transform.class);
-        Point2f playerPosition = transformMapper.get(world.getPeerEntity(playerName)).position;
-        sendMoveRequest(world.getPeer(playerName), playerPosition.x + dx, playerPosition.y + dy);
+        Point2f avatarPosition = world.getComponentMapper(Transform.class).get(designations.get(playerName)).position;
+        orderPlayerToMoveTo(playerName, avatarPosition.x + dx, avatarPosition.y + dy);
     }
 
     @When("player {string} is ordered to move to {float}, {float}")
     public void orderPlayerToMoveTo(String playerName, float x, float y) {
-        sendMoveRequest(world.getPeer(playerName), x, y);
+        int avatarEntity = designations.get(playerName);
+        world.getComponentMapper(OrderQueue.class).create(designations.get(playerName)).requests.add(
+                new MoveOrderRequest(new Point2f(x, y)));
     }
 
     @When("waiting until player {string} has no order")
     public void waitForPlayerToHaveNoOrder(String playerName) {
         await().timeout(Duration.ONE_MINUTE).until(() ->
-                !world.getComponentMapper(Order.class).has(world.getPeerEntity(playerName)));
+                !world.getComponentMapper(OrderQueue.class).has(designations.get(playerName)) &&
+                !world.getComponentMapper(Order.class).has(designations.get(playerName)));
     }
 
     @When("waiting {float} seconds")
@@ -254,7 +217,7 @@ public class StepDefinitions {
 
     @Then("player {string} should have reached position {float}, {float}")
     public void shouldHaveReachedPosition(String playerName, float x, float y) {
-        Point2f playerPosition = world.getComponentMapper(Transform.class).get(world.getPeerEntity(playerName)).position;
+        Point2f playerPosition = world.getComponentMapper(Transform.class).get(designations.get(playerName)).position;
         Point2f targetPosition = new Point2f(x, y);
         Vector2f diff = new Vector2f(playerPosition.x - targetPosition.x, playerPosition.y - targetPosition.y);
         float distance = diff.length();
@@ -263,7 +226,7 @@ public class StepDefinitions {
 
     @Then("player {string} should not have reached position {float}, {float}")
     public void shouldNotHaveReachedPosition(String playerName, float x, float y) {
-        Point2f playerPosition = world.getComponentMapper(Transform.class).get(world.getPeerEntity(playerName)).position;
+        Point2f playerPosition = world.getComponentMapper(Transform.class).get(designations.get(playerName)).position;
         Point2f targetPosition = new Point2f(x, y);
         Vector2f diff = new Vector2f(playerPosition.x - targetPosition.x, playerPosition.y - targetPosition.y);
         float distance = diff.length();
@@ -272,7 +235,7 @@ public class StepDefinitions {
 
     @Then("player {string} should not be close to position {float}, {float}")
     public void playerShouldNotBeCloseToPosition(String playerName, float x, float y) {
-        Point2f playerPosition = world.getComponentMapper(Transform.class).get(world.getPeerEntity(playerName)).position;
+        Point2f playerPosition = world.getComponentMapper(Transform.class).get(designations.get(playerName)).position;
         Point2f targetPosition = new Point2f(x, y);
         Vector2f diff = new Vector2f(playerPosition.x - targetPosition.x, playerPosition.y - targetPosition.y);
         float distance = diff.length();
@@ -281,7 +244,7 @@ public class StepDefinitions {
 
     @Then("player {string} should have at least {int} of item {string}")
     public void playerShouldHaveItem(String playerName, int amount, String itemName) {
-        Inventory playerInventory = world.getComponentMapper(Inventory.class).get(world.getPeerEntity(playerName));
+        Inventory playerInventory = world.getComponentMapper(Inventory.class).get(designations.get(playerName));
         Assert.assertTrue(playerInventory.has(world.getItems().getItem(itemName).getId(), amount));
     }
 
