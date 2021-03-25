@@ -6,7 +6,6 @@ import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.messages.EventMessage;
 import com.vast.component.Delete;
-import com.vast.component.Invisible;
 import com.vast.component.Known;
 import com.vast.component.Observer;
 import com.vast.network.MessageCodes;
@@ -28,7 +27,7 @@ public class DeleteSystem extends IteratingSystem {
 	private EventMessage reusableEventMessage;
 
 	public DeleteSystem() {
-		super(Aspect.one(Delete.class).exclude(Invisible.class));
+		super(Aspect.one(Delete.class));
 
 		reusableEventMessage = new EventMessage(MessageCodes.ENTITY_DESTROYED);
 	}

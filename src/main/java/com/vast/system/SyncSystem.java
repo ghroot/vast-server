@@ -6,8 +6,8 @@ import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.nhnent.haste.protocol.messages.EventMessage;
-import com.vast.data.Metrics;
 import com.vast.component.*;
+import com.vast.data.Metrics;
 import com.vast.network.MessageCodes;
 import com.vast.network.VastPeer;
 import com.vast.property.PropertyHandler;
@@ -38,7 +38,7 @@ public class SyncSystem extends IteratingSystem {
 	private EventMessage reusableMessage;
 
 	public SyncSystem(Map<String, VastPeer> peers, PropertyHandler[] propertyHandlers, Metrics metrics) {
-		super(Aspect.all(Sync.class, SyncPropagation.class).exclude(Invisible.class));
+		super(Aspect.all(Sync.class, SyncPropagation.class));
 		this.peers = peers;
 		this.propertyHandlers = propertyHandlers;
 		this.metrics = metrics;
@@ -102,7 +102,9 @@ public class SyncSystem extends IteratingSystem {
 			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
 			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, changedProperties.propertiesDataObject);
 			VastPeer ownerPeer = null;
-			if (avatarMapper.has(syncEntity)) {
+			if (observerMapper.has(syncEntity)) {
+				ownerPeer = observerMapper.get(syncEntity).peer;
+			} else if (avatarMapper.has(syncEntity)) {
 				ownerPeer = peers.get(avatarMapper.get(syncEntity).name);
 			} else if (ownerMapper.has(syncEntity)) {
 				ownerPeer = peers.get(ownerMapper.get(syncEntity).name);
@@ -127,20 +129,24 @@ public class SyncSystem extends IteratingSystem {
 			byte property = propertyHandler.getProperty();
 			if (sync.isPropertyDirty(property)) {
 				SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
-				if ((nearbyPropagation && syncPropagation.isNearbyPropagation(property)) ||
-					(!nearbyPropagation && syncPropagation.isOwnerPropagation(property))) {
-					if (!reusableAlreadyInterestedProperties.contains(property) && propertyHandler.isInterestedIn(syncEntity)) {
-						if (propertyHandler.decorateDataObject(syncEntity, reusablePropertiesDataObject, false)) {
-							atLeastOnePropertySet = true;
-							if (metrics != null) {
-								metrics.incrementSyncedProperty(property);
+				if (!syncPropagation.isBlocked(property)) {
+					if ((nearbyPropagation && syncPropagation.isNearbyPropagation(property)) ||
+							(!nearbyPropagation && syncPropagation.isOwnerPropagation(property))) {
+						if (!reusableAlreadyInterestedProperties.contains(property) && propertyHandler.isInterestedIn(syncEntity)) {
+							if (propertyHandler.decorateDataObject(syncEntity, reusablePropertiesDataObject, false)) {
+								if (!reliable && syncPropagation.isReliable(property)) {
+									reliable = true;
+								}
+
+								atLeastOnePropertySet = true;
+
+								if (metrics != null) {
+									metrics.incrementSyncedProperty(property);
+								}
 							}
+							reusableAlreadyInterestedProperties.add(property);
 						}
-						reusableAlreadyInterestedProperties.add(property);
 					}
-				}
-				if (!reliable && syncPropagation.isReliable(property)) {
-					reliable = true;
 				}
 			}
 		}

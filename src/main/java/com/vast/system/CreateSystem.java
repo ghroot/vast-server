@@ -40,7 +40,7 @@ public class CreateSystem extends IteratingSystem {
 	private DataObject reusablePropertiesDataObject;
 
 	public CreateSystem(PropertyHandler[] propertyHandlers) {
-		super(Aspect.all(Create.class, Type.class).exclude(Invisible.class));
+		super(Aspect.all(Create.class, Type.class));
 		this.propertyHandlers = propertyHandlers;
 
 		reusableEventMessage = new EventMessage(MessageCodes.ENTITY_CREATED);
@@ -67,10 +67,12 @@ public class CreateSystem extends IteratingSystem {
 		reusablePropertiesDataObject.clear();
 		for (PropertyHandler propertyHandler : propertyHandlers) {
 			byte property = propertyHandler.getProperty();
-			if (syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
-				if (!reusableAlreadyInterestedProperties.contains(property) && propertyHandler.isInterestedIn(createEntity)) {
-					propertyHandler.decorateDataObject(createEntity, reusablePropertiesDataObject, true);
-					reusableAlreadyInterestedProperties.add(property);
+			if (!syncPropagation.isBlocked(property)) {
+				if (syncPropagation.isNearbyPropagation(property)) {
+					if (!reusableAlreadyInterestedProperties.contains(property) && propertyHandler.isInterestedIn(createEntity)) {
+						propertyHandler.decorateDataObject(createEntity, reusablePropertiesDataObject, true);
+						reusableAlreadyInterestedProperties.add(property);
+					}
 				}
 			}
 		}

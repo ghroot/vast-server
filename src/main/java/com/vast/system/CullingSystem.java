@@ -26,7 +26,6 @@ public class CullingSystem extends IteratingSystem {
 	private ComponentMapper<Type> typeMapper;
 	private ComponentMapper<SubType> subTypeMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
-	private ComponentMapper<Invisible> invisibleMapper;
 
 	private PropertyHandler[] propertyHandlers;
 
@@ -71,6 +70,7 @@ public class CullingSystem extends IteratingSystem {
 		for (int i = 0, size = observer.knowEntities.size(); i < size; ++i) {
 			int knowEntity = knowEntities[i];
 			if (avatarMapper.has(knowEntity) && observer.peer.getName().equals(avatarMapper.get(knowEntity).name)) {
+				// Observers never forget their avatar
 				continue;
 			}
 			if (!scan.nearbyEntities.contains(knowEntity)) {
@@ -97,7 +97,11 @@ public class CullingSystem extends IteratingSystem {
 		int[] nearbyEntities = scan.nearbyEntities.getData();
 		for (int i = 0, size = scan.nearbyEntities.size(); i < size; ++i) {
 			int nearbyEntity = nearbyEntities[i];
-			if (!invisibleMapper.has(nearbyEntity) && !observer.knowEntities.contains(nearbyEntity)) {
+			if (observerMapper.has(nearbyEntity) && observerMapper.get(nearbyEntity) != observer) {
+				// Observers never see other observers
+				continue;
+			}
+			if (!observer.knowEntities.contains(nearbyEntity)) {
 				notifyAboutNewEntity(observer.peer, entity, nearbyEntity);
 				observer.knowEntities.add(nearbyEntity);
 				if (knownMapper.has(nearbyEntity)) {
@@ -123,10 +127,12 @@ public class CullingSystem extends IteratingSystem {
 		reusablePropertiesDataObject.clear();
 		for (PropertyHandler propertyHandler : propertyHandlers) {
 			byte property = propertyHandler.getProperty();
-			if (newEntity == entity || syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
-				if (!reusableAlreadyInterestedProperties.contains(property) && propertyHandler.isInterestedIn(newEntity)) {
-					propertyHandler.decorateDataObject(newEntity, reusablePropertiesDataObject, true);
-					reusableAlreadyInterestedProperties.add(property);
+			if (!syncPropagation.isBlocked(property)) {
+				if (newEntity == entity || syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
+					if (!reusableAlreadyInterestedProperties.contains(property) && propertyHandler.isInterestedIn(newEntity)) {
+						propertyHandler.decorateDataObject(newEntity, reusablePropertiesDataObject, true);
+						reusableAlreadyInterestedProperties.add(property);
+					}
 				}
 			}
 		}

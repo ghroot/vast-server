@@ -7,6 +7,7 @@ import com.artemis.annotations.PooledWeaver;
 public class SyncPropagation extends Component {
 	public int unreliableProperties = 0;
 	public int ownerPropagationProperties = 0;
+	public int blockedProperties = 0;
 
 	public void setUnreliable(int property) {
 		unreliableProperties |= (1 << property);
@@ -30,5 +31,21 @@ public class SyncPropagation extends Component {
 
 	public boolean isNearbyPropagation(int property) {
 		return !isOwnerPropagation(property);
+	}
+
+	public void blockAll() {
+		blockedProperties = -1;
+	}
+
+	public void unblock(int property) {
+		blockedProperties &= ~(1 << property);
+	}
+
+	public void block(int property) {
+		blockedProperties |= (1 << property);
+	}
+
+	public boolean isBlocked(int property) {
+		return (blockedProperties & (1 << property)) > 0;
 	}
 }

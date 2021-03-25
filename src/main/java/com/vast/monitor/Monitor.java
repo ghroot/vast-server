@@ -129,7 +129,7 @@ public class Monitor extends JFrame implements ActionListener {
         worldInfoTable.getColumn("Value").setPreferredWidth(120);
         JScrollPane worldInfoScrollPanel = new JScrollPane(worldInfoTable);
         worldInfoScrollPanel.setPreferredSize(new Dimension(250, HEIGHT));
-        worldInfoScrollPanel.setMinimumSize(new Dimension(250, 150));
+        worldInfoScrollPanel.setMinimumSize(new Dimension(250, 200));
         worldInfoTable.setPreferredScrollableViewportSize(new Dimension(250, HEIGHT));
 
         entityModel = new EntityModel();
@@ -235,6 +235,12 @@ public class Monitor extends JFrame implements ActionListener {
             if (vastWorld.getMetrics() != null) {
                 worldInfo.put("Fps", "" + vastWorld.getMetrics().getFps());
                 worldInfo.put("Collisions", vastWorld.getMetrics().getNumberOfCollisions() + " / " + vastWorld.getMetrics().getNumberOfCollisionChecks());
+                Map<Byte, Integer> syncedProperties = vastWorld.getMetrics().getSyncedProperties();
+                int totalSyncedProperties = 0;
+                for (byte property : syncedProperties.keySet()) {
+                    totalSyncedProperties += syncedProperties.get(property);
+                }
+                worldInfo.put("Synced properties", "" + totalSyncedProperties);
             }
 
             modelData.worldInfo = worldInfo;
@@ -367,7 +373,8 @@ public class Monitor extends JFrame implements ActionListener {
                         detail = "" + syncHistory.syncedValues.size();
                     } else if (component instanceof SyncPropagation) {
                         SyncPropagation syncPropagation = (SyncPropagation) component;
-                        detail = syncPropagation.unreliableProperties + ", " + syncPropagation.ownerPropagationProperties;
+                        detail = syncPropagation.unreliableProperties + ", " + syncPropagation.ownerPropagationProperties +
+                                ", " + syncPropagation.blockedProperties;
                     } else if (component instanceof Used) {
                         detail = "" + ((Used) component).usedByEntity;
                     }
