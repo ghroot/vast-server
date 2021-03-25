@@ -6,11 +6,11 @@ import com.artemis.EntitySubscription;
 import com.artemis.annotations.All;
 import com.artemis.utils.IntBag;
 import com.vast.component.Avatar;
-import com.vast.network.FakePeer;
 import com.vast.network.VastPeer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class PeerEntitySystem extends BaseSystem {
@@ -26,9 +26,10 @@ public class PeerEntitySystem extends BaseSystem {
 
 	private Map<String, Integer> entitiesByPeer;
 
-	public PeerEntitySystem(Map<String, VastPeer> peers, Map<String, Integer> entitiesByPeer) {
+	public PeerEntitySystem(Map<String, VastPeer> peers) {
 		this.peers = peers;
-		this.entitiesByPeer = entitiesByPeer;
+
+		entitiesByPeer = new HashMap<>();
 	}
 
 	@Override

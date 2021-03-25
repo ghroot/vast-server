@@ -70,6 +70,9 @@ public class CullingSystem extends IteratingSystem {
 		int[] knowEntities = observer.knowEntities.getData();
 		for (int i = 0, size = observer.knowEntities.size(); i < size; ++i) {
 			int knowEntity = knowEntities[i];
+			if (avatarMapper.has(knowEntity) && observer.peer.getName().equals(avatarMapper.get(knowEntity).name)) {
+				continue;
+			}
 			if (!scan.nearbyEntities.contains(knowEntity)) {
 				notifyAboutRemovedEntity(observer.peer, knowEntity);
 				reusableRemovedEntities.add(knowEntity);
@@ -118,7 +121,6 @@ public class CullingSystem extends IteratingSystem {
 		}
 		reusableAlreadyInterestedProperties.clear();
 		reusablePropertiesDataObject.clear();
-		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, reusablePropertiesDataObject);
 		for (PropertyHandler propertyHandler : propertyHandlers) {
 			byte property = propertyHandler.getProperty();
 			if (newEntity == entity || syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
@@ -128,6 +130,7 @@ public class CullingSystem extends IteratingSystem {
 				}
 			}
 		}
+		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, reusablePropertiesDataObject);
 		peer.send(reusableCreatedEventMessage);
 	}
 }

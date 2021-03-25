@@ -291,7 +291,7 @@ public class Monitor extends JFrame implements ActionListener {
                         detail = ((Avatar) component).name;
                     } else if (component instanceof Observer) {
                         Observer observer = (Observer) component;
-                        detail = observer.observedEntity + ", " + observer.peer.getName();
+                        detail = observer.observedEntity + ", " + observer.peer.getName() + ", " + observer.knowEntities.size();
                     } else if (component instanceof Observed) {
                         detail = "" + ((Observed) component).observerEntity;
                     } else if (component instanceof Follow) {

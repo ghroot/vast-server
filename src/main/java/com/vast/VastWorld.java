@@ -46,7 +46,6 @@ public class VastWorld implements Runnable {
 	private Metrics metrics;
 	private WorldConfiguration worldConfiguration;
 	private Map<String, VastPeer> peers;
-	private Map<String, Integer> entitiesByPeer;
 	private QuadTree quadTree;
 	private Items items;
 
@@ -64,7 +63,6 @@ public class VastWorld implements Runnable {
 
 		peers = new HashMap<>();
 		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<>();
-		entitiesByPeer = new HashMap<>();
 		quadTree = new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height);
 		InteractionHandler[] interactionHandlers = {
 			new GrowingInteractionHandler(),
@@ -115,7 +113,7 @@ public class VastWorld implements Runnable {
 			new WorldSerializationSystem(snapshotFile, metrics, TimeUnit.HOURS.toSeconds(5)),
 			new PeerTransferSystem(serverApplication, peers),
 			new IncomingRequestTransferSystem(serverApplication, incomingRequestsByPeer),
-			new PeerEntitySystem(peers, entitiesByPeer),
+			new PeerEntitySystem(peers),
 			new DeactivateSystem(peers),
 			new ActivateSystem(peers),
 			new ConfigurationSystem(),

@@ -41,6 +41,41 @@ public class MonitorWorld {
         size.set(vastWorld.getWorldConfiguration().width * SCALE, vastWorld.getWorldConfiguration().height * SCALE);
 
         Set<Integer> entities = Arrays.stream(vastWorld.getEntities(Aspect.all(Transform.class))).boxed().collect(Collectors.toSet());
+
+        if (clickPoint != null) {
+            MonitorEntity closestMonitorEntity = getMonitorEntityClosestTo(clickPoint);
+            if (selectedMonitorEntity != null) {
+                if (selectedMonitorEntity.entity == closestMonitorEntity.entity) {
+                    // Clicked selected
+                    selectedMonitorEntity.components = null;
+                    selectedMonitorEntity = null;
+                } else {
+                    // Clicked other
+                    selectedMonitorEntity.components = null;
+                    selectedMonitorEntity = closestMonitorEntity;
+                    selectedTime = System.currentTimeMillis();
+                }
+            } else {
+                // Clicked first
+                selectedMonitorEntity = closestMonitorEntity;
+                selectedTime = System.currentTimeMillis();
+            }
+        } else if (selectedMonitorEntity != null) {
+            // Selected entity was removed
+            if (!entities.contains(selectedMonitorEntity.entity)) {
+                selectedMonitorEntity = null;
+            }
+        }
+
+        if (entityToSelect >= 0) {
+            selectedMonitorEntity = monitorEntities.get(entityToSelect);
+            selectedTime = System.currentTimeMillis();
+        }
+
+        if (movePoint != null) {
+            hoveredMonitorEntity = getMonitorEntityClosestTo(movePoint);
+        }
+
         monitorEntities.entrySet().removeIf(entry -> !entities.contains(entry.getValue().entity));
         for (int entity : entities) {
             MonitorEntity monitorEntity;
@@ -61,7 +96,7 @@ public class MonitorWorld {
                 monitorEntity.collisionRadius = 0;
             }
 
-            if (vastWorld.getComponentMapper(Scan.class).has(entity)) {
+            if (vastWorld.getComponentMapper(Scan.class).has(entity) && (selectedMonitorEntity == null || monitorEntity == selectedMonitorEntity)) {
                 monitorEntity.scanDistance = (int) (vastWorld.getComponentMapper(Scan.class).get(entity).distance * SCALE);
             } else {
                 monitorEntity.scanDistance = 0;
@@ -105,46 +140,19 @@ public class MonitorWorld {
                 monitorEntity.name = null;
             }
 
-            if (selectedMonitorEntity != null && vastWorld.getComponentMapper(Scan.class).has(selectedMonitorEntity.entity)) {
-                Scan scan = vastWorld.getComponentMapper(Scan.class).get(selectedMonitorEntity.entity);
-                monitorEntity.colored = scan.nearbyEntities.contains(entity);
+            if (selectedMonitorEntity != null) {
+                if (vastWorld.getComponentMapper(Observer.class).has(selectedMonitorEntity.entity)) {
+                    Observer observer = vastWorld.getComponentMapper(Observer.class).get(selectedMonitorEntity.entity);
+                    monitorEntity.colored = observer.knowEntities.contains(entity);
+                } else if (vastWorld.getComponentMapper(Scan.class).has(selectedMonitorEntity.entity)) {
+                    Scan scan = vastWorld.getComponentMapper(Scan.class).get(selectedMonitorEntity.entity);
+                    monitorEntity.colored = scan.nearbyEntities.contains(entity);
+                } else {
+                    monitorEntity.colored = true;
+                }
             } else {
                 monitorEntity.colored = true;
             }
-        }
-
-        if (clickPoint != null) {
-            MonitorEntity closestMonitorEntity = getMonitorEntityClosestTo(clickPoint);
-            if (selectedMonitorEntity != null) {
-                if (selectedMonitorEntity.entity == closestMonitorEntity.entity) {
-                    // Clicked selected
-                    selectedMonitorEntity.components = null;
-                    selectedMonitorEntity = null;
-                } else {
-                    // Clicked other
-                    selectedMonitorEntity.components = null;
-                    selectedMonitorEntity = closestMonitorEntity;
-                    selectedTime = System.currentTimeMillis();
-                }
-            } else {
-                // Clicked first
-                selectedMonitorEntity = closestMonitorEntity;
-                selectedTime = System.currentTimeMillis();
-            }
-        } else if (selectedMonitorEntity != null) {
-            // Selected entity was removed
-            if (!entities.contains(selectedMonitorEntity.entity)) {
-                selectedMonitorEntity = null;
-            }
-        }
-
-        if (entityToSelect >= 0) {
-            selectedMonitorEntity = monitorEntities.get(entityToSelect);
-            selectedTime = System.currentTimeMillis();
-        }
-
-        if (movePoint != null) {
-            hoveredMonitorEntity = getMonitorEntityClosestTo(movePoint);
         }
 
         List<Rectangle> newQuadRects = new ArrayList<>();
