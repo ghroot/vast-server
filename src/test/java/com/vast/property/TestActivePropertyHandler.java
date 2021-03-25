@@ -35,15 +35,6 @@ public class TestActivePropertyHandler {
     }
 
     @Test
-    public void givenEmptyEntity_doesNotDecorateDataObject() {
-        DataObject dataObject = new DataObject();
-        boolean decorated = activePropertyHandler.decorateDataObject(entity, dataObject, true);
-
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.ACTIVE));
-    }
-
-    @Test
     public void givenObservedAvatar_decoratesDataObject() {
         avatarMapper.create(entity);
         observedMapper.create(entity);

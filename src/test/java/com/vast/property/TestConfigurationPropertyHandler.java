@@ -34,15 +34,6 @@ public class TestConfigurationPropertyHandler {
     }
 
     @Test
-    public void givenEmptyEntity_doesNotDecorateDataObject() {
-        DataObject dataObject = new DataObject();
-        boolean decorated = configurationPropertyHandler.decorateDataObject(entity, dataObject, true);
-
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.ACTIVE));
-    }
-
-    @Test
     public void givenHasConfiguration_decoratesDataObject() {
         configurationMapper.create(entity);
 

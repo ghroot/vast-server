@@ -26,13 +26,11 @@ public abstract class AbstractPropertyHandler<TPropertyData, TDataObjectData> im
 
     @Override
     public final boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
-        if (isInterestedIn(entity)) {
-            if (force || !hasSyncHistory(entity) || passedThresholdForSync(entity, getSyncHistoryData(entity))) {
-                TPropertyData propertyData = getPropertyData(entity);
-                setDataObjectData(dataObject, convertPropertyDataToDataObjectData(propertyData));
-                setSyncHistoryData(entity, propertyData);
-                return true;
-            }
+        if (force || !hasSyncHistory(entity) || passedThresholdForSync(entity, getSyncHistoryData(entity))) {
+            TPropertyData propertyData = getPropertyData(entity);
+            setDataObjectData(dataObject, convertPropertyDataToDataObjectData(propertyData));
+            setSyncHistoryData(entity, propertyData);
+            return true;
         }
 
         return false;

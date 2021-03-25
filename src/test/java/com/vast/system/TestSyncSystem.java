@@ -74,7 +74,8 @@ public class TestSyncSystem {
 		observerMapper.create(observerEntity).peer = ownerPeer;
 
 		ownerMapper.create(changedEntity).name = "TestPeer";
-		syncPropagationMapper.create(changedEntity).setOwnerPropagation(1);
+		knownMapper.create(changedEntity).knownByEntities.add(observerEntity);
+		syncPropagationMapper.create(changedEntity).clear().setOwnerPropagation(1);
 		syncMapper.create(changedEntity).markPropertyAsDirty(1);
 
 		world.process();
@@ -95,7 +96,7 @@ public class TestSyncSystem {
 		observerMapper.create(observerEntity).peer = nearbyPeer;
 
 		knownMapper.create(changedEntity).knownByEntities.add(observerEntity);
-		syncPropagationMapper.create(changedEntity);
+		syncPropagationMapper.create(changedEntity).clear();
 		syncMapper.create(changedEntity).markPropertyAsDirty(1);
 
 		world.process();
@@ -115,7 +116,7 @@ public class TestSyncSystem {
 
 		observerMapper.create(observerEntity).peer = nearbyPeer;
 
-		syncPropagationMapper.create(changedEntity);
+		syncPropagationMapper.create(changedEntity).clear();
 		syncMapper.create(changedEntity).markPropertyAsDirty(1);
 
 		world.process();
@@ -137,8 +138,10 @@ public class TestSyncSystem {
 		observerMapper.create(observerEntity).peer = ownerPeer;
 
 		ownerMapper.create(changedEntity).name = "TestPeer";
-		syncPropagationMapper.create(changedEntity).setOwnerPropagation(1);
-		syncPropagationMapper.create(changedEntity).setOwnerPropagation(2);
+		knownMapper.create(changedEntity).knownByEntities.add(observerEntity);
+		syncPropagationMapper.create(changedEntity).clear();
+		syncPropagationMapper.get(changedEntity).setOwnerPropagation(1);
+		syncPropagationMapper.get(changedEntity).setOwnerPropagation(2);
 		syncMapper.create(changedEntity).markPropertyAsDirty(1);
 		syncMapper.create(changedEntity).markPropertyAsDirty(2);
 
@@ -160,7 +163,8 @@ public class TestSyncSystem {
 		observerMapper.create(observerEntity).peer = ownerPeer;
 
 		ownerMapper.create(changedEntity).name = "TestPeer";
-		syncPropagationMapper.create(changedEntity).setOwnerPropagation(1);
+		knownMapper.create(changedEntity).knownByEntities.add(observerEntity);
+		syncPropagationMapper.create(changedEntity).clear().setOwnerPropagation(1);
 		syncMapper.create(changedEntity).markPropertyAsDirty(1);
 
 		world.process();
@@ -181,7 +185,8 @@ public class TestSyncSystem {
 		observerMapper.create(observerEntity).peer = ownerPeer;
 
 		ownerMapper.create(changedEntity).name = "TestPeer";
-		syncPropagationMapper.create(changedEntity).setOwnerPropagation(1);
+		knownMapper.create(changedEntity).knownByEntities.add(observerEntity);
+		syncPropagationMapper.create(changedEntity).clear().setOwnerPropagation(1);
 
 		world.process();
 
@@ -203,7 +208,7 @@ public class TestSyncSystem {
 
 		ownerMapper.create(changedEntity).name = "TestPeer";
 		knownMapper.create(changedEntity).knownByEntities.add(observerEntity);
-		syncPropagationMapper.create(changedEntity).setUnreliable(2);
+		syncPropagationMapper.create(changedEntity).clear().setUnreliable(2);
 		syncMapper.create(changedEntity).markPropertyAsDirty(1);
 		syncMapper.create(changedEntity).markPropertyAsDirty(2);
 
@@ -228,8 +233,9 @@ public class TestSyncSystem {
 
 		ownerMapper.create(changedEntity).name = "TestPeer";
 		knownMapper.create(changedEntity).knownByEntities.add(observerEntity);
-		syncPropagationMapper.create(changedEntity).setUnreliable(1);
-		syncPropagationMapper.create(changedEntity).setUnreliable(2);
+		syncPropagationMapper.create(changedEntity).clear();
+		syncPropagationMapper.get(changedEntity).setUnreliable(1);
+		syncPropagationMapper.get(changedEntity).setUnreliable(2);
 		syncMapper.create(changedEntity).markPropertyAsDirty(1);
 		syncMapper.create(changedEntity).markPropertyAsDirty(2);
 
@@ -260,7 +266,7 @@ public class TestSyncSystem {
 
 		ownerMapper.create(changedEntity).name = "TestPeer";
 		knownMapper.create(changedEntity).knownByEntities.add(observerEntity);
-		syncPropagationMapper.create(changedEntity);
+		syncPropagationMapper.create(changedEntity).clear();
 		syncMapper.create(changedEntity).markPropertyAsDirty(property);
 
 		world.process();

@@ -16,10 +16,6 @@
         "SubType": {
           "subType": 0
         },
-        "SyncPropagation": {
-          "ownerPropagationProperties": 32,
-          "unreliableProperties": 3
-        },
         "Teach": {
           "words": [
             "animal"

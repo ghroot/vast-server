@@ -105,7 +105,7 @@ public class TestCullingSystem {
 
 		typeMapper.create(newEntity).type = "testType";
 		knownMapper.create(newEntity);
-		syncPropagationMapper.create(newEntity);
+		syncPropagationMapper.create(newEntity).clear();
 
 		world.process();
 

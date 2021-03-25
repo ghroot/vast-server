@@ -7,9 +7,6 @@
         "SubType": {
           "subType": 0
         },
-        "SyncPropagation": {
-          "ownerPropagationProperties": 32
-        },
         "Type": {
           "type": "building"
         }
@@ -19,6 +16,7 @@
   "archetypes": {
     "0": [
       "Known",
+      "Owner",
       "Placeholder",
       "Scan",
       "State",

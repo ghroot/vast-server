@@ -24,6 +24,7 @@ public class SyncSystem extends IteratingSystem {
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
 	private ComponentMapper<Observer> observerMapper;
+	private ComponentMapper<Observed> observedMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Owner> ownerMapper;
 	private ComponentMapper<Avatar> avatarMapper;
@@ -38,7 +39,7 @@ public class SyncSystem extends IteratingSystem {
 	private EventMessage reusableMessage;
 
 	public SyncSystem(Map<String, VastPeer> peers, PropertyHandler[] propertyHandlers, Metrics metrics) {
-		super(Aspect.all(Sync.class, SyncPropagation.class));
+		super(Aspect.all(Sync.class, SyncPropagation.class, Known.class));
 		this.peers = peers;
 		this.propertyHandlers = propertyHandlers;
 		this.metrics = metrics;
@@ -60,104 +61,79 @@ public class SyncSystem extends IteratingSystem {
 	@Override
 	protected void process(int syncEntity) {
 		Sync sync = syncMapper.get(syncEntity);
+		SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
+		Known known = knownMapper.get(syncEntity);
 
-		syncNearbyPropagationProperties(syncEntity, sync);
+		for (int i = 0; i < known.knownByEntities.size(); i++) {
+			int knownByEntity = known.knownByEntities.get(i);
+			Observer knownByObserver = observerMapper.get(knownByEntity);
+			VastPeer knownByPeer = knownByObserver.peer;
 
-		if (avatarMapper.has(syncEntity) || ownerMapper.has(syncEntity)) {
-			syncOwnerPropagationProperties(syncEntity, sync);
+			boolean reliable = false;
+			boolean atLeastOnePropertySet = false;
+
+			reusableMessage.getDataObject().clear();
+			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
+			reusableAlreadyInterestedProperties.clear();
+			reusablePropertiesDataObject.clear();
+			boolean isOwner = isOwner(knownByEntity, syncEntity);
+			for (PropertyHandler propertyHandler : propertyHandlers) {
+				byte property = propertyHandler.getProperty();
+				if (sync.isPropertyDirty(property)) {
+					if (propertyHandler.isInterestedIn(syncEntity) && !reusableAlreadyInterestedProperties.contains(property)) {
+						if (!syncPropagation.isBlocked(property)) {
+							if (syncPropagation.isNearbyPropagation(property) || isOwner) {
+								if (propertyHandler.decorateDataObject(syncEntity, reusablePropertiesDataObject, false)) {
+									if (!reliable && syncPropagation.isReliable(property)) {
+										reliable = true;
+									}
+
+									atLeastOnePropertySet = true;
+
+									if (metrics != null) {
+										metrics.incrementSyncedProperty(property);
+									}
+								}
+							}
+						}
+						reusableAlreadyInterestedProperties.add(property);
+					}
+				}
+			}
+			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, reusablePropertiesDataObject);
+
+			if (atLeastOnePropertySet) {
+				if (reliable) {
+					knownByPeer.send(reusableMessage);
+				} else {
+					knownByPeer.sendUnreliable(reusableMessage);
+				}
+			}
 		}
 
 		syncMapper.remove(syncEntity);
 	}
 
-	private void syncNearbyPropagationProperties(int syncEntity, Sync sync) {
-		Known known = knownMapper.get(syncEntity);
-		if (known != null) {
-			ChangedProperties changedProperties = getChangedProperties(syncEntity, sync, true);
-			if (changedProperties != null) {
-				reusableMessage.getDataObject().clear();
-				reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
-				reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, changedProperties.propertiesDataObject);
-				IntBag knownByEntitiesBag = known.knownByEntities;
-				int[] knownByEntities = knownByEntitiesBag.getData();
-				for (int i = 0, size = knownByEntitiesBag.size(); i < size; ++i) {
-					int knownByEntity = knownByEntities[i];
-					if (observerMapper.has(knownByEntity)) {
-						VastPeer knownByPeer = observerMapper.get(knownByEntity).peer;
-						if (changedProperties.reliable) {
-							knownByPeer.send(reusableMessage);
-						} else {
-							knownByPeer.sendUnreliable(reusableMessage);
-						}
-					}
-				}
-			}
+	private boolean isOwner(int potentialOwnerEntity, int entity) {
+		if (entity == potentialOwnerEntity) {
+			return true;
 		}
-	}
 
-	private void syncOwnerPropagationProperties(int syncEntity, Sync sync) {
-		ChangedProperties changedProperties = getChangedProperties(syncEntity, sync, false);
-		if (changedProperties != null) {
-			reusableMessage.getDataObject().clear();
-			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_ENTITY_ID, syncEntity);
-			reusableMessage.getDataObject().set(MessageCodes.UPDATE_PROPERTIES_PROPERTIES, changedProperties.propertiesDataObject);
-			VastPeer ownerPeer = null;
-			if (observerMapper.has(syncEntity)) {
-				ownerPeer = observerMapper.get(syncEntity).peer;
-			} else if (avatarMapper.has(syncEntity)) {
-				ownerPeer = peers.get(avatarMapper.get(syncEntity).name);
-			} else if (ownerMapper.has(syncEntity)) {
-				ownerPeer = peers.get(ownerMapper.get(syncEntity).name);
+		if (observerMapper.has(potentialOwnerEntity)) {
+			if (ownerMapper.has(entity) && observerMapper.get(potentialOwnerEntity).peer.getName().equals(ownerMapper.get(entity).name)) {
+				return true;
 			}
-			if (ownerPeer != null) {
-				if (changedProperties.reliable) {
-					ownerPeer.send(reusableMessage);
-				} else {
-					ownerPeer.sendUnreliable(reusableMessage);
-				}
+
+			if (avatarMapper.has(entity) && observerMapper.get(potentialOwnerEntity).peer.getName().equals(avatarMapper.get(entity).name)) {
+				return true;
 			}
-		}
-	}
 
-	private ChangedProperties getChangedProperties(int syncEntity, Sync sync, boolean nearbyPropagation) {
-		boolean reliable = false;
-		boolean atLeastOnePropertySet = false;
-		reusableAlreadyInterestedProperties.clear();
-		reusablePropertiesDataObject.clear();
-
-		for (PropertyHandler propertyHandler : propertyHandlers) {
-			byte property = propertyHandler.getProperty();
-			if (sync.isPropertyDirty(property)) {
-				SyncPropagation syncPropagation = syncPropagationMapper.get(syncEntity);
-				if (!syncPropagation.isBlocked(property)) {
-					if ((nearbyPropagation && syncPropagation.isNearbyPropagation(property)) ||
-							(!nearbyPropagation && syncPropagation.isOwnerPropagation(property))) {
-						if (!reusableAlreadyInterestedProperties.contains(property) && propertyHandler.isInterestedIn(syncEntity)) {
-							if (propertyHandler.decorateDataObject(syncEntity, reusablePropertiesDataObject, false)) {
-								if (!reliable && syncPropagation.isReliable(property)) {
-									reliable = true;
-								}
-
-								atLeastOnePropertySet = true;
-
-								if (metrics != null) {
-									metrics.incrementSyncedProperty(property);
-								}
-							}
-							reusableAlreadyInterestedProperties.add(property);
-						}
-					}
-				}
+			if (observedMapper.has(entity) && observedMapper.get(entity).observerEntity == potentialOwnerEntity) {
+				return true;
 			}
 		}
 
-		if (atLeastOnePropertySet) {
-			reusableChangedProperties.propertiesDataObject = reusablePropertiesDataObject;
-			reusableChangedProperties.reliable = reliable;
-			return reusableChangedProperties;
-		} else {
-			return null;
-		}
+		return false;
 	}
 
 	private class ChangedProperties {

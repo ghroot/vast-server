@@ -19,9 +19,6 @@
         "SubType": {
           "subType": 5
         },
-        "SyncPropagation": {
-          "ownerPropagationProperties": 32
-        },
         "Type": {
           "type": "building"
         }

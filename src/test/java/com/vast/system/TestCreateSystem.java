@@ -98,7 +98,7 @@ public class TestCreateSystem {
 		createMapper.create(entityToCreate).reason = "testing";
 		typeMapper.create(entityToCreate).type = "testType";
 		knownMapper.create(entityToCreate);
-		syncPropagationMapper.create(entityToCreate);
+		syncPropagationMapper.create(entityToCreate).clear();
 
 		world.process();
 

@@ -148,7 +148,7 @@ public class VastWorld implements Runnable {
 			new EntityLinkManager()
 		);
 		if (showMonitor) {
-			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new MonitorSystem(this));
+			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOWEST, new MonitorSystem(this));
 			worldConfigurationBuilder.register(new ProfiledInvocationStrategy(metrics));
 		}
 		world = new World(worldConfigurationBuilder.build());

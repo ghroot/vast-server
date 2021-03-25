@@ -28,6 +28,7 @@ public class BuildOrderHandler extends AbstractOrderHandler<BuildOrderRequest> {
 	private ComponentMapper<Delete> deleteMapper;
 	private ComponentMapper<Placeholder> placeholderMapper;
 	private ComponentMapper<Observer> observerMapper;
+	private ComponentMapper<Parent> parentMapper;
 
 	private Recipes recipes;
 
@@ -54,14 +55,20 @@ public class BuildOrderHandler extends AbstractOrderHandler<BuildOrderRequest> {
 
 	@Override
 	public void cancelOrder(int observerEntity) {
+		Observer observer = observerMapper.get(observerEntity);
+
 		if (buildMapper.has(observerEntity)) {
 			deleteMapper.create(buildMapper.get(observerEntity).placeholderEntity).reason = "canceled";
 			buildMapper.remove(observerEntity);
 		}
+
+		parentMapper.remove(observerEntity);
 	}
 
 	@Override
 	public boolean startOrder(int observerEntity, BuildOrderRequest buildOrderRequest) {
+		Observer observer = observerMapper.get(observerEntity);
+
 		if (buildOrderRequest instanceof BuildStartOrderRequest) {
 			BuildStartOrderRequest buildStartOrderRequest = (BuildStartOrderRequest) buildOrderRequest;
 
@@ -71,12 +78,16 @@ public class BuildOrderHandler extends AbstractOrderHandler<BuildOrderRequest> {
 			Point2f buildPosition = new Point2f(orderTransform.position.x, orderTransform.position.y + 3f);
 			int buildingPlaceholderEntity = creationManager.createBuildingPlaceholder(recipe.getEntityType(), buildPosition);
 			stateMapper.get(buildingPlaceholderEntity).name = "placeholder";
+			ownerMapper.get(buildingPlaceholderEntity).name = observer.peer.getName();
+			createMapper.create(buildingPlaceholderEntity).reason = "placeholder";
 
 			Build build = buildMapper.create(observerEntity);
 			build.placeholderEntity = buildingPlaceholderEntity;
 			build.recipe = recipe;
 
 			syncMapper.create(buildingPlaceholderEntity).markPropertyAsDirty(Properties.VALID);
+
+			parentMapper.create(observerEntity).parentEntity = buildingPlaceholderEntity;
 
 			return true;
 		} else {
@@ -86,6 +97,8 @@ public class BuildOrderHandler extends AbstractOrderHandler<BuildOrderRequest> {
 
 	@Override
 	public boolean modifyOrder(int observerEntity, BuildOrderRequest buildOrderRequest) {
+		Observer observer = observerMapper.get(observerEntity);
+
 		if (buildOrderRequest instanceof BuildMoveOrderRequest) {
 			BuildMoveOrderRequest buildMoveOrderRequest = (BuildMoveOrderRequest) buildOrderRequest;
 
@@ -136,7 +149,6 @@ public class BuildOrderHandler extends AbstractOrderHandler<BuildOrderRequest> {
 		} else if (buildOrderRequest instanceof BuildConfirmOrderRequest) {
 			Build build = buildMapper.get(observerEntity);
 			Placeholder placeholder = placeholderMapper.get(build.placeholderEntity);
-			Observer observer = observerMapper.get(observerEntity);
 			int avatarEntity = observer.observedEntity;
 			if (placeholder.valid) {
 				Inventory inventory = inventoryMapper.get(avatarEntity);
@@ -154,6 +166,8 @@ public class BuildOrderHandler extends AbstractOrderHandler<BuildOrderRequest> {
 					deleteMapper.create(build.placeholderEntity);
 					buildMapper.remove(observerEntity);
 
+					parentMapper.remove(observerEntity);
+
 					return true;
 				} else {
 					eventMapper.create(avatarEntity).addEntry("message").setData("I don't have the required materials...").setOwnerPropagation();
@@ -164,7 +178,8 @@ public class BuildOrderHandler extends AbstractOrderHandler<BuildOrderRequest> {
 				return false;
 			}
 		} else if (buildOrderRequest instanceof BuildCancelOrderRequest) {
-			return false;
+			cancelOrder(observerEntity);
+			return true;
 		} else {
 			return false;
 		}
