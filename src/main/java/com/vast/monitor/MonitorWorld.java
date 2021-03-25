@@ -96,7 +96,9 @@ public class MonitorWorld {
                 monitorEntity.collisionRadius = 0;
             }
 
-            if (vastWorld.getComponentMapper(Scan.class).has(entity) && (selectedMonitorEntity == null || monitorEntity == selectedMonitorEntity)) {
+            if (vastWorld.getComponentMapper(Scan.class).has(entity) &&
+                    (selectedMonitorEntity == null || monitorEntity == selectedMonitorEntity ||
+                            !vastWorld.getComponentMapper(Scan.class).has(selectedMonitorEntity.entity))) {
                 monitorEntity.scanDistance = (int) (vastWorld.getComponentMapper(Scan.class).get(entity).distance * SCALE);
             } else {
                 monitorEntity.scanDistance = 0;
