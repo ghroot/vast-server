@@ -6,11 +6,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SyncHistory extends PooledComponent {
-	// TODO: Needs to be based on with which entity each value was synced as well!
-	public transient Map<Byte, Object> syncedValues = new HashMap<>();
+	public transient Map<Integer, Map<Byte, Object>> syncedValues = new HashMap<>();
 
 	@Override
 	protected void reset() {
 		syncedValues.clear();
+	}
+
+	public Object getSyncedPropertyData(int propertyEntity, byte property) {
+		if (syncedValues.containsKey(propertyEntity)) {
+			Map<Byte, Object> syncedValuesForEntity = syncedValues.get(propertyEntity);
+			if (syncedValuesForEntity.containsKey(property)) {
+				return syncedValuesForEntity.get(property);
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
 	}
 }

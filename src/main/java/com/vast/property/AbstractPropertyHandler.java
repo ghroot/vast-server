@@ -5,7 +5,7 @@ import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.SyncHistory;
 
 public abstract class AbstractPropertyHandler<TPropertyData, TDataObjectData> implements PropertyHandler {
-    protected ComponentMapper<SyncHistory> syncHistoryMapper;
+    public ComponentMapper<SyncHistory> syncHistoryMapper;
 
     private byte property;
 
@@ -20,14 +20,16 @@ public abstract class AbstractPropertyHandler<TPropertyData, TDataObjectData> im
 
     protected abstract TPropertyData getPropertyData(int entity);
 
-    protected boolean passedThresholdForSync(int entity, TPropertyData lastSyncedPropertyData) {
-        return !getPropertyData(entity).equals(lastSyncedPropertyData);
+    protected boolean passedThresholdForSync(int propertyEntity, TPropertyData lastSyncedPropertyData) {
+        return !getPropertyData(propertyEntity).equals(lastSyncedPropertyData);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public final boolean decorateDataObject(int entity, DataObject dataObject, boolean force) {
-        if (force || !hasSyncHistory(entity) || passedThresholdForSync(entity, getSyncHistoryData(entity))) {
-            TPropertyData propertyData = getPropertyData(entity);
+    public final boolean decorateDataObject(int interestedEntity, int propertyEntity, DataObject dataObject, boolean force) {
+        if (force || !syncHistoryMapper.has(interestedEntity) || passedThresholdForSync(propertyEntity,
+                (TPropertyData) syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, property))) {
+            TPropertyData propertyData = getPropertyData(propertyEntity);
             setDataObjectData(dataObject, convertPropertyDataToDataObjectData(propertyData));
             setSyncHistoryData(entity, propertyData);
             return true;
