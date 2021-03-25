@@ -4,7 +4,6 @@ import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.vast.component.Avatar;
 import com.vast.network.VastPeer;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -21,8 +20,7 @@ public class TestPeerEntitySystem {
 		VastPeer peer = mock(VastPeer.class);
 		when(peer.getName()).thenReturn("TestName");
 		peers.put("TestName", peer);
-		Map<String, Integer> entitiesByPeer = new HashMap<>();
-		PeerEntitySystem peerEntitySystem = new PeerEntitySystem(peers, entitiesByPeer);
+		PeerEntitySystem peerEntitySystem = new PeerEntitySystem(peers);
 
 		World world = new World(new WorldConfigurationBuilder().with(
 			creationManager,
@@ -31,8 +29,7 @@ public class TestPeerEntitySystem {
 
 		world.process();
 
-		Assert.assertEquals(1, entitiesByPeer.size());
-		Assert.assertEquals(1, entitiesByPeer.get("TestName").intValue());
+		verify(creationManager, times(1)).createAvatar(anyString(), anyInt());
 	}
 
 	@Test
@@ -42,8 +39,7 @@ public class TestPeerEntitySystem {
 		VastPeer peer = mock(VastPeer.class);
 		when(peer.getName()).thenReturn("TestName");
 		peers.put("TestName", peer);
-		Map<String, Integer> entitiesByPeer = new HashMap<>();
-		PeerEntitySystem peerEntitySystem = new PeerEntitySystem(peers, entitiesByPeer);
+		PeerEntitySystem peerEntitySystem = new PeerEntitySystem(peers);
 
 		World world = new World(new WorldConfigurationBuilder().with(
 			creationManager,
@@ -56,7 +52,5 @@ public class TestPeerEntitySystem {
 		world.process();
 
 		verify(creationManager, never()).createAvatar(anyString(), anyInt());
-		Assert.assertEquals(1, entitiesByPeer.size());
-		Assert.assertEquals(avatarEntity, entitiesByPeer.get("TestName").intValue());
 	}
 }
