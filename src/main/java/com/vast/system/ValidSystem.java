@@ -4,9 +4,8 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.component.Placeholder;
-import com.vast.component.Scan;
-import com.vast.component.Transform;
+import com.vast.component.*;
+import com.vast.network.Properties;
 
 import javax.vecmath.Vector2f;
 
@@ -14,6 +13,8 @@ public class ValidSystem extends IteratingSystem {
     private ComponentMapper<Transform> transformMapper;
     private ComponentMapper<Scan> scanMapper;
     private ComponentMapper<Placeholder> placeholderMapper;
+    private ComponentMapper<Sync> syncMapper;
+    private ComponentMapper<Collision> collisionMapper;
 
     private float minimumDistance2;
 
@@ -40,12 +41,13 @@ public class ValidSystem extends IteratingSystem {
         Scan scan = scanMapper.get(placeholderEntity);
         Placeholder placeholder = placeholderMapper.get(placeholderEntity);
 
+        boolean previousValid = placeholder.valid;
         placeholder.valid = true;
 
         int[] nearbyEntities = scan.nearbyEntities.getData();
         for (int i = 0, size = scan.nearbyEntities.size(); i < size; ++i) {
             int nearbyEntity = nearbyEntities[i];
-            if (nearbyEntity != placeholderEntity) {
+            if (collisionMapper.has(nearbyEntity)) {
                 Transform nearbyTransform = transformMapper.get(nearbyEntity);
                 reusableVector.set(transform.position.x - nearbyTransform.position.x,
                         transform.position.y - nearbyTransform.position.y);
@@ -54,6 +56,10 @@ public class ValidSystem extends IteratingSystem {
                     break;
                 }
             }
+        }
+
+        if (placeholder.valid != previousValid) {
+            syncMapper.create(placeholderEntity).markPropertyAsDirty(Properties.VALID);
         }
     }
 }

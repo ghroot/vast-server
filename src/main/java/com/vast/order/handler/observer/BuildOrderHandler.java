@@ -120,7 +120,6 @@ public class BuildOrderHandler extends AbstractOrderHandler<BuildOrderRequest> {
 			}
 
 			syncMapper.create(build.placeholderEntity).markPropertyAsDirty(Properties.POSITION);
-			syncMapper.create(build.placeholderEntity).markPropertyAsDirty(Properties.VALID);
 
 			return true;
 		} else if (buildOrderRequest instanceof BuildRotateOrderRequest) {

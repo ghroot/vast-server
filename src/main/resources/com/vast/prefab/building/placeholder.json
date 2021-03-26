@@ -4,6 +4,9 @@
       "archetype": 0,
       "key": "placeholder",
       "components": {
+        "Scan": {
+          "distance": 2
+        },
         "SubType": {
           "subType": 0
         },
