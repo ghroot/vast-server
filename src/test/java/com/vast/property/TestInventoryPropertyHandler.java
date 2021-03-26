@@ -31,15 +31,6 @@ public class TestInventoryPropertyHandler {
     }
 
     @Test
-    public void givenEmptyEntity_doesNotDecorateDataObject() {
-        DataObject dataObject = new DataObject();
-        boolean decorated = inventoryPropertyHandler.decorateDataObject(entity, dataObject, true);
-
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.INVENTORY));
-    }
-
-    @Test
     public void givenHasInventory_decoratesDataObject() {
         inventoryMapper.create(entity);
 

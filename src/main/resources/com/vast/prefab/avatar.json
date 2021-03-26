@@ -13,10 +13,6 @@
         "Speed": {
           "baseSpeed": 1
         },
-        "SyncPropagation": {
-          "ownerPropagationProperties": 1696,
-          "unreliableProperties": 3
-        },
         "Teach": {
           "words": [
             "me",
@@ -43,8 +39,7 @@
       "SubType",
       "Teach",
       "Scan",
-      "State",
-      "SyncHistory"
+      "State"
     ]
   },
   "componentIdentifiers": {

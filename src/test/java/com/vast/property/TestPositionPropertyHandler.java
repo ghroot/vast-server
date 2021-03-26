@@ -33,15 +33,6 @@ public class TestPositionPropertyHandler {
     }
 
     @Test
-    public void givenEmptyEntity_doesNotDecorateDataObject() {
-        DataObject dataObject = new DataObject();
-        boolean decorated = positionPropertyHandler.decorateDataObject(entity, dataObject, true);
-
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.POSITION));
-    }
-
-    @Test
     public void givenHasTransform_decoratesDataObject() {
         transformMapper.create(entity);
 

@@ -12,9 +12,6 @@
         "SubType": {
           "subType": 1
         },
-        "SyncPropagation": {
-          "ownerPropagationProperties": 32
-        },
         "Type": {
           "type": "pickup"
         }

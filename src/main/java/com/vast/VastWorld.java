@@ -142,13 +142,14 @@ public class VastWorld implements Runnable {
 			new ParentSystem(),
 			new DeleteSystem(),
 			new EventSystem(metrics),
-			new SyncSystem(peers, propertyHandlers, metrics)
+			new SyncSystem(peers, propertyHandlers, metrics),
+			new SyncHistoryRemoveSystem()
 		).with(
 			new WorldSerializationManager(),
 			new EntityLinkManager()
 		);
 		if (showMonitor) {
-			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.HIGHEST, new MonitorSystem(this));
+			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOWEST, new MonitorSystem(this));
 			worldConfigurationBuilder.register(new ProfiledInvocationStrategy(metrics));
 		}
 		world = new World(worldConfigurationBuilder.build());

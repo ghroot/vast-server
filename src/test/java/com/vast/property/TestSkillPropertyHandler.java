@@ -32,15 +32,6 @@ public class TestSkillPropertyHandler {
     }
 
     @Test
-    public void givenEmptyEntity_doesNotDecorateDataObject() {
-        DataObject dataObject = new DataObject();
-        boolean decorated = skillPropertyHandler.decorateDataObject(entity, dataObject, true);
-
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.SKILL));
-    }
-
-    @Test
     public void givenHasSkill_decoratesDataObject() {
         skillMapper.create(entity);
 

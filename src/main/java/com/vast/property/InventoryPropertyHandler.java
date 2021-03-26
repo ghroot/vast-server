@@ -28,9 +28,7 @@ public class InventoryPropertyHandler extends AbstractPropertyHandler<short[], s
 	}
 
 	@Override
-	protected void setSyncHistoryData(int entity, short[] items) {
-		if (syncHistoryMapper.has(entity)) {
-			super.setSyncHistoryData(entity, Arrays.copyOf(items, items.length));
-		}
+	protected void setSyncHistoryData(int interestedEntity, int propertyEntity, short[] items) {
+		super.setSyncHistoryData(interestedEntity, propertyEntity, Arrays.copyOf(items, items.length));
 	}
 }

@@ -19,9 +19,6 @@
         "SubType": {
           "subType": 0
         },
-        "SyncPropagation": {
-          "ownerPropagationProperties": 32
-        },
         "Type": {
           "type": "building"
         }
@@ -39,7 +36,6 @@
       "State",
       "Static",
       "SubType",
-      "SyncHistory",
       "SyncPropagation",
       "Transform",
       "Type"

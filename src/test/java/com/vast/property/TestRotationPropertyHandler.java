@@ -32,15 +32,6 @@ public class TestRotationPropertyHandler {
     }
 
     @Test
-    public void givenEmptyEntity_doesNotDecorateDataObject() {
-        DataObject dataObject = new DataObject();
-        boolean decorated = rotationPropertyHandler.decorateDataObject(entity, dataObject, true);
-
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.ROTATION));
-    }
-
-    @Test
     public void givenTransform_decoratesDataObject() {
         transformMapper.create(entity);
 

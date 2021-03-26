@@ -30,15 +30,6 @@ public class TestStatePropertyHandler {
     }
 
     @Test
-    public void givenEmptyEntity_doesNotDecorateDataObject() {
-        DataObject dataObject = new DataObject();
-        boolean decorated = statePropertyHandler.decorateDataObject(entity, dataObject, true);
-
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.STATE));
-    }
-
-    @Test
     public void givenHasState_decoratesDataObject() {
         stateMapper.create(entity).name = "testState";
 

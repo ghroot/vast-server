@@ -31,29 +31,29 @@ public class IncomingObserverOrderSystem extends IteratingSystem {
         if (incomingRequestsByPeer.containsKey(observer.peer.getName())) {
             List<IncomingRequest> incomingRequests = incomingRequestsByPeer.get(observer.peer.getName());
             if (incomingRequests.size() > 0) {
-                IncomingRequest lastIncomingRequest = incomingRequests.get(incomingRequests.size() - 1);
-
-                if (lastIncomingRequest.getMessage().getCode() == MessageCodes.MOVE_OBSERVER) {
-                    float[] position = (float[]) lastIncomingRequest.getMessage().getDataObject().get(MessageCodes.MOVE_OBSERVER_POSITION).value;
-                    orderQueueMapper.create(observerEntity).requests.add(new MoveObserverOrderRequest(new Point2f(position[0], position[1])));
-                } else if (lastIncomingRequest.getMessage().getCode() == MessageCodes.ATTACH_OBSERVER) {
-                    orderQueueMapper.create(observerEntity).requests.add(new AttachObserverOrderRequest());
-                } else if (lastIncomingRequest.getMessage().getCode() == MessageCodes.BUILD_START) {
-                    orderQueueMapper.create(observerEntity).requests.add(new BuildStartOrderRequest(
-                            (byte) lastIncomingRequest.getMessage().getDataObject().get(MessageCodes.BUILD_START_RECIPE_ID).value)
-                    );
-                } else if (lastIncomingRequest.getMessage().getCode() == MessageCodes.BUILD_MOVE) {
-                    orderQueueMapper.create(observerEntity).requests.add(new BuildMoveOrderRequest(
-                            (byte) lastIncomingRequest.getMessage().getDataObject().get(MessageCodes.BUILD_MOVE_DIRECTION).value)
-                    );
-                } else if (lastIncomingRequest.getMessage().getCode() == MessageCodes.BUILD_ROTATE) {
-                    orderQueueMapper.create(observerEntity).requests.add(new BuildRotateOrderRequest(
-                            (byte) lastIncomingRequest.getMessage().getDataObject().get(MessageCodes.BUILD_MOVE_DIRECTION).value)
-                    );
-                } else if (lastIncomingRequest.getMessage().getCode() == MessageCodes.BUILD_CONFIRM) {
-                    orderQueueMapper.create(observerEntity).requests.add(new BuildConfirmOrderRequest());
-                } else if (lastIncomingRequest.getMessage().getCode() == MessageCodes.BUILD_CANCEL) {
-                    orderQueueMapper.create(observerEntity).requests.add(new BuildCancelOrderRequest());
+                for (IncomingRequest incomingRequest : incomingRequests) {
+                    if (incomingRequest.getMessage().getCode() == MessageCodes.MOVE_OBSERVER) {
+                        float[] position = (float[]) incomingRequest.getMessage().getDataObject().get(MessageCodes.MOVE_OBSERVER_POSITION).value;
+                        orderQueueMapper.create(observerEntity).requests.add(new MoveObserverOrderRequest(new Point2f(position[0], position[1])));
+                    } else if (incomingRequest.getMessage().getCode() == MessageCodes.ATTACH_OBSERVER) {
+                        orderQueueMapper.create(observerEntity).requests.add(new AttachObserverOrderRequest());
+                    } else if (incomingRequest.getMessage().getCode() == MessageCodes.BUILD_START) {
+                        orderQueueMapper.create(observerEntity).requests.add(new BuildStartOrderRequest(
+                                (byte) incomingRequest.getMessage().getDataObject().get(MessageCodes.BUILD_START_RECIPE_ID).value)
+                        );
+                    } else if (incomingRequest.getMessage().getCode() == MessageCodes.BUILD_MOVE) {
+                        orderQueueMapper.create(observerEntity).requests.add(new BuildMoveOrderRequest(
+                                (byte) incomingRequest.getMessage().getDataObject().get(MessageCodes.BUILD_MOVE_DIRECTION).value)
+                        );
+                    } else if (incomingRequest.getMessage().getCode() == MessageCodes.BUILD_ROTATE) {
+                        orderQueueMapper.create(observerEntity).requests.add(new BuildRotateOrderRequest(
+                                (byte) incomingRequest.getMessage().getDataObject().get(MessageCodes.BUILD_MOVE_DIRECTION).value)
+                        );
+                    } else if (incomingRequest.getMessage().getCode() == MessageCodes.BUILD_CONFIRM) {
+                        orderQueueMapper.create(observerEntity).requests.add(new BuildConfirmOrderRequest());
+                    } else if (incomingRequest.getMessage().getCode() == MessageCodes.BUILD_CANCEL) {
+                        orderQueueMapper.create(observerEntity).requests.add(new BuildCancelOrderRequest());
+                    }
                 }
 
                 incomingRequests.clear();

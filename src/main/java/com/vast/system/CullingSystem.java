@@ -20,12 +20,15 @@ public class CullingSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(CullingSystem.class);
 
 	private ComponentMapper<Observer> observerMapper;
+	private ComponentMapper<Observed> observedMapper;
 	private ComponentMapper<Scan> scanMapper;
 	private ComponentMapper<Avatar> avatarMapper;
 	private ComponentMapper<Known> knownMapper;
 	private ComponentMapper<Type> typeMapper;
+	private ComponentMapper<Owner> ownerMapper;
 	private ComponentMapper<SubType> subTypeMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
+	private ComponentMapper<SyncHistory> syncHistoryMapper;
 
 	private PropertyHandler[] propertyHandlers;
 
@@ -125,18 +128,42 @@ public class CullingSystem extends IteratingSystem {
 		}
 		reusableAlreadyInterestedProperties.clear();
 		reusablePropertiesDataObject.clear();
+		boolean isOwner = isOwner(entity, newEntity);
 		for (PropertyHandler propertyHandler : propertyHandlers) {
 			byte property = propertyHandler.getProperty();
-			if (!syncPropagation.isBlocked(property)) {
-				if (newEntity == entity || syncPropagation.isNearbyPropagation(propertyHandler.getProperty())) {
-					if (!reusableAlreadyInterestedProperties.contains(property) && propertyHandler.isInterestedIn(newEntity)) {
-						propertyHandler.decorateDataObject(newEntity, reusablePropertiesDataObject, true);
-						reusableAlreadyInterestedProperties.add(property);
+			if (propertyHandler.isInterestedIn(newEntity) && !reusableAlreadyInterestedProperties.contains(property)) {
+				if (!syncPropagation.isBlocked(property)) {
+					if (syncPropagation.isNearbyPropagation(property) || isOwner) {
+						propertyHandler.decorateDataObject(entity, newEntity, reusablePropertiesDataObject, true);
 					}
 				}
+				reusableAlreadyInterestedProperties.add(property);
 			}
 		}
 		reusableCreatedEventMessage.getDataObject().set(MessageCodes.ENTITY_CREATED_PROPERTIES, reusablePropertiesDataObject);
 		peer.send(reusableCreatedEventMessage);
+	}
+
+	// TODO: Should avatar entities have Owner?
+	private boolean isOwner(int potentialOwnerEntity, int entity) {
+		if (entity == potentialOwnerEntity) {
+			return true;
+		}
+
+		if (observerMapper.has(potentialOwnerEntity)) {
+			if (ownerMapper.has(entity) && observerMapper.get(potentialOwnerEntity).peer.getName().equals(ownerMapper.get(entity).name)) {
+				return true;
+			}
+
+			if (avatarMapper.has(entity) && observerMapper.get(potentialOwnerEntity).peer.getName().equals(avatarMapper.get(entity).name)) {
+				return true;
+			}
+
+			if (observedMapper.has(entity) && observedMapper.get(entity).observerEntity == potentialOwnerEntity) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

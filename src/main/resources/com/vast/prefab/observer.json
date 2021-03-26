@@ -8,7 +8,6 @@
           "distance": 15
         },
         "SyncPropagation": {
-          "ownerPropagationProperties": 1791,
           "blockedProperties": 1791
         },
         "Type": {
@@ -19,10 +18,12 @@
   },
   "archetypes": {
     "0": [
+      "Known",
       "Observer",
       "Transform",
       "Type",
       "Scan",
+      "SyncHistory",
       "SyncPropagation",
       "Transient"
     ]

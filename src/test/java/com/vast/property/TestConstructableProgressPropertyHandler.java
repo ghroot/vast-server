@@ -34,15 +34,6 @@ public class TestConstructableProgressPropertyHandler {
     }
 
     @Test
-    public void givenEmptyEntity_doesNotDecorateDataObject() {
-        DataObject dataObject = new DataObject();
-        boolean decorated = constructableProgressPropertyHandler.decorateDataObject(entity, dataObject, true);
-
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.PROGRESS));
-    }
-
-    @Test
     public void givenConstructable_decoratesDataObject() {
         constructableMapper.create(entity);
 

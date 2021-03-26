@@ -45,6 +45,13 @@ public class DeactivateSystem extends IteratingSystem {
 		if (!peers.containsKey(avatar.name) || peers.get(avatar.name).getId() != observer.peer.getId()) {
 			logger.info("Deactivating peer entity: {} for {} ({})", avatarEntity, avatar.name, observer.peer.getId());
 
+			IntBag knowEntitiesBag = observer.knowEntities;
+			int[] knowEntities = knowEntitiesBag.getData();
+			for (int i = 0, size = knowEntitiesBag.size(); i < size; ++i) {
+				int knowEntity = knowEntities[i];
+				knownMapper.get(knowEntity).knownByEntities.removeValue(observed.observerEntity);
+			}
+
 			observedMapper.remove(avatarEntity);
 			syncMapper.create(avatarEntity).markPropertyAsDirty(Properties.ACTIVE);
 

@@ -32,15 +32,6 @@ public class TestFueledPropertyHandler {
     }
 
     @Test
-    public void givenEmptyEntity_doesNotDecorateDataObject() {
-        DataObject dataObject = new DataObject();
-        boolean decorated = fueledPropertyHandler.decorateDataObject(entity, dataObject, true);
-
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.FUELED));
-    }
-
-    @Test
     public void givenHasFueled_decoratesDataObject() {
         fueledMapper.create(entity);
 

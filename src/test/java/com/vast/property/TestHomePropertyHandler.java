@@ -32,15 +32,6 @@ public class TestHomePropertyHandler {
     }
 
     @Test
-    public void givenEmptyEntity_doesNotDecorateDataObject() {
-        DataObject dataObject = new DataObject();
-        boolean decorated = homePropertyHandler.decorateDataObject(entity, dataObject, true);
-
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.HOME));
-    }
-
-    @Test
     public void givenHasHome_decoratesDataObject() {
         homeMapper.create(entity);
 

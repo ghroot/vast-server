@@ -51,15 +51,12 @@ public class PositionPropertyHandler extends AbstractPropertyHandler<Point2f, do
 	}
 
 	@Override
-	protected void setSyncHistoryData(int entity, Point2f position) {
-		SyncHistory syncHistory = syncHistoryMapper.get(entity);
-		if (syncHistory != null) {
-			Point2f lastSyncedPosition = getSyncHistoryData(entity);
-			if (lastSyncedPosition != null) {
-				lastSyncedPosition.set(position);
-			} else {
-				super.setSyncHistoryData(entity, new Point2f(position));
-			}
+	protected void setSyncHistoryData(int interestedEntity, int propertyEntity, Point2f position) {
+		Point2f lastSyncedPosition = getSyncHistoryData(interestedEntity, propertyEntity);
+		if (lastSyncedPosition != null) {
+			lastSyncedPosition.set(position);
+		} else {
+			super.setSyncHistoryData(interestedEntity, propertyEntity, new Point2f(position));
 		}
 	}
 }
