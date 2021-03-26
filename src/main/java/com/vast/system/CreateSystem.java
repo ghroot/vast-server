@@ -82,7 +82,7 @@ public class CreateSystem extends IteratingSystem {
 					if (propertyHandler.isInterestedIn(createEntity) && !reusableAlreadyInterestedProperties.contains(property)) {
 						if (!syncPropagation.isBlocked(property)) {
 							if (syncPropagation.isNearbyPropagation(property) || isOwner) {
-								propertyHandler.decorateDataObject(createEntity, reusablePropertiesDataObject, true);
+								propertyHandler.decorateDataObject(interestedEntity, createEntity, reusablePropertiesDataObject, true);
 							}
 						}
 						reusableAlreadyInterestedProperties.add(property);

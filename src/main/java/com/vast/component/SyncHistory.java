@@ -13,6 +13,10 @@ public class SyncHistory extends PooledComponent {
 		syncedValues.clear();
 	}
 
+	public boolean hasSyncedPropertyData(int propertyEntity, byte property) {
+		return syncedValues.containsKey(propertyEntity) && syncedValues.get(propertyEntity).containsKey(property);
+	}
+
 	public Object getSyncedPropertyData(int propertyEntity, byte property) {
 		if (syncedValues.containsKey(propertyEntity)) {
 			Map<Byte, Object> syncedValuesForEntity = syncedValues.get(propertyEntity);
@@ -24,5 +28,9 @@ public class SyncHistory extends PooledComponent {
 		} else {
 			return null;
 		}
+	}
+
+	public void removeSyncedPropertyData(int propertyEntity) {
+		syncedValues.remove(propertyEntity);
 	}
 }

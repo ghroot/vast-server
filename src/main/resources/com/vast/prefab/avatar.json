@@ -39,8 +39,7 @@
       "SubType",
       "Teach",
       "Scan",
-      "State",
-      "SyncHistory"
+      "State"
     ]
   },
   "componentIdentifiers": {

@@ -83,7 +83,7 @@ public class SyncSystem extends IteratingSystem {
 					if (propertyHandler.isInterestedIn(syncEntity) && !reusableAlreadyInterestedProperties.contains(property)) {
 						if (!syncPropagation.isBlocked(property)) {
 							if (syncPropagation.isNearbyPropagation(property) || isOwner) {
-								if (propertyHandler.decorateDataObject(syncEntity, reusablePropertiesDataObject, false)) {
+								if (propertyHandler.decorateDataObject(knownByEntity, syncEntity, reusablePropertiesDataObject, false)) {
 									if (!reliable && syncPropagation.isReliable(property)) {
 										reliable = true;
 									}

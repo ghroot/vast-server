@@ -133,7 +133,7 @@ public class CullingSystem extends IteratingSystem {
 			if (propertyHandler.isInterestedIn(newEntity) && !reusableAlreadyInterestedProperties.contains(property)) {
 				if (!syncPropagation.isBlocked(property)) {
 					if (syncPropagation.isNearbyPropagation(property) || isOwner) {
-						propertyHandler.decorateDataObject(newEntity, reusablePropertiesDataObject, true);
+						propertyHandler.decorateDataObject(entity, newEntity, reusablePropertiesDataObject, true);
 					}
 				}
 				reusableAlreadyInterestedProperties.add(property);

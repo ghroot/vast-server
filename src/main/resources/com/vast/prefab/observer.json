@@ -22,6 +22,7 @@
       "Transform",
       "Type",
       "Scan",
+      "SyncHistory",
       "SyncPropagation",
       "Transient"
     ]
