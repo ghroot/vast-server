@@ -37,64 +37,64 @@ public class OrderSystem extends IteratingSystem {
 	}
 
 	@Override
-	public void removed(IntBag entities) {
+	protected void removed(int orderEntity) {
+		cancelOrder(orderEntity);
 	}
 
 	@Override
-	protected void process(int orderQueueEntity) {
-		if (orderMapper.has(orderQueueEntity)) {
-			Order order = orderMapper.get(orderQueueEntity);
-			if (order.handler.isOrderComplete(orderQueueEntity)) {
-				logger.debug("Order completed for entity {} with handler {}", orderQueueEntity, order.handler.getClass().getSimpleName());
-				orderMapper.remove(orderQueueEntity);
+	protected void process(int orderEntity) {
+		if (orderMapper.has(orderEntity)) {
+			Order order = orderMapper.get(orderEntity);
+			if (order.handler.isOrderComplete(orderEntity)) {
+				logger.debug("Order completed for entity {} with handler {}", orderEntity, order.handler.getClass().getSimpleName());
+				order.handler = null;
+				orderMapper.remove(orderEntity);
 				return;
 			}
 		}
 
-		if (orderQueueMapper.has(orderQueueEntity)) {
-			OrderQueue orderQueue = orderQueueMapper.get(orderQueueEntity);
+		if (orderQueueMapper.has(orderEntity)) {
+			OrderQueue orderQueue = orderQueueMapper.get(orderEntity);
 			if (orderQueue.requests.size() > 0) {
 				OrderRequest request = orderQueue.requests.peek();
-				if (orderMapper.has(orderQueueEntity)) {
-					Order order = orderMapper.get(orderQueueEntity);
-					if (order.handler.handlesRequest(request) && order.handler.modifyOrder(orderQueueEntity, request)) {
+				if (orderMapper.has(orderEntity)) {
+					Order order = orderMapper.get(orderEntity);
+					if (order.handler.handlesRequest(request) && order.handler.modifyOrder(orderEntity, request)) {
 						orderQueue.requests.remove();
-						logger.debug("Modifying order for entity {} with handler {}", orderQueueEntity, order.handler.getClass().getSimpleName());
+						logger.debug("Modifying order for entity {} with handler {}", orderEntity, order.handler.getClass().getSimpleName());
 					}
 				} else {
 					orderQueue.requests.remove();
 					OrderHandler handler = getOrderHandler(request);
 					if (handler != null) {
-						startOrder(orderQueueEntity, handler, request);
+						startOrder(orderEntity, handler, request);
 					} else {
 						logger.warn("Could not find order handler for request {}", request.toString());
 					}
 				}
 			} else {
-				orderQueueMapper.remove(orderQueueEntity);
+				orderQueueMapper.remove(orderEntity);
 			}
 		}
 	}
 
-	private void cancelOrder(int orderQueueEntity) {
-		Order order = orderMapper.get(orderQueueEntity);
-		if (order != null) {
-			if (order.handler != null) {
-				logger.debug("Canceling order for entity {} with handler {}", orderQueueEntity, order.handler.getClass().getSimpleName());
-				order.handler.cancelOrder(orderQueueEntity);
-			} else {
-				logger.debug("Canceling order for entity {}", orderQueueEntity);
-			}
-			orderMapper.remove(orderQueueEntity);
+	private void cancelOrder(int orderEntity) {
+		Order order = orderMapper.get(orderEntity);
+		if (order != null && order.handler != null) {
+			logger.debug("Canceling order for entity {} with handler {}", orderEntity, order.handler.getClass().getSimpleName());
+			order.handler.cancelOrder(orderEntity);
+			order.handler = null;
+
+			orderMapper.remove(orderEntity);
 		}
 	}
 
-	private void startOrder(int orderQueueEntity, OrderHandler handler, OrderRequest request) {
-		if (handler.startOrder(orderQueueEntity, request)) {
-			orderMapper.create(orderQueueEntity).handler = handler;
-			logger.debug("Starting order for entity {} with handler {}", orderQueueEntity, handler.getClass().getSimpleName());
+	private void startOrder(int orderEntity, OrderHandler handler, OrderRequest request) {
+		if (handler.startOrder(orderEntity, request)) {
+			orderMapper.create(orderEntity).handler = handler;
+			logger.debug("Starting order for entity {} with handler {}", orderEntity, handler.getClass().getSimpleName());
 		} else {
-			logger.debug("Could not start order for entity {} with handler {}", orderQueueEntity, handler.getClass().getSimpleName());
+			logger.debug("Could not start order for entity {} with handler {}", orderEntity, handler.getClass().getSimpleName());
 		}
 	}
 
