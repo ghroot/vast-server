@@ -11,12 +11,18 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.*;
+
 public class TestFueledPropertyHandler {
     private FueledPropertyHandler fueledPropertyHandler;
     private World world;
     private ComponentMapper<Fueled> fueledMapper;
     private ComponentMapper<SyncHistory> syncHistoryMapper;
-    private int entity;
+    private int interestedEntity;
+    private int propertyEntity;
 
     @Before
     public void setUp() {
@@ -28,68 +34,68 @@ public class TestFueledPropertyHandler {
         fueledMapper = world.getMapper(Fueled.class);
         syncHistoryMapper = world.getMapper(SyncHistory.class);
 
-        entity = world.create();
+        interestedEntity = world.create();
+        propertyEntity = world.create();
     }
 
     @Test
     public void givenHasFueled_decoratesDataObject() {
-        fueledMapper.create(entity);
+        fueledMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = fueledPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = fueledPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertTrue(dataObject.contains(Properties.FUELED));
+        assertTrue(decorated);
+        assertTrue(dataObject.contains(Properties.FUELED));
     }
 
     @Test
     public void givenNoFueledChange_doesNotDecorateDataObject() {
-        fueledMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        fueledMapper.create(propertyEntity);
 
-        syncHistory.syncedValues.put(Properties.FUELED, false);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.FUELED, false)));
 
         DataObject dataObject = new DataObject();
-        boolean decorated = fueledPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = fueledPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertFalse(decorated);
-        Assert.assertFalse(dataObject.contains(Properties.FUELED));
+        assertFalse(decorated);
+        assertFalse(dataObject.contains(Properties.FUELED));
     }
 
     @Test
     public void givenFueledChange_decoratesDataObject() {
-        Fueled fueled = fueledMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        Fueled fueled = fueledMapper.create(propertyEntity);
 
         // Changed from not fueled -> fueled
-        syncHistory.syncedValues.put(Properties.FUELED, false);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.FUELED, false)));
         fueled.timeLeft = 1f;
 
         DataObject dataObject = new DataObject();
-        boolean decorated = fueledPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = fueledPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertTrue((Boolean) syncHistory.syncedValues.get(Properties.FUELED));
+        assertTrue(decorated);
+        assertTrue((Boolean) syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, Properties.FUELED));
     }
 
     @Test
     public void givenNoSyncHistory_decoratesDataObject() {
-        fueledMapper.create(entity);
+        fueledMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = fueledPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = fueledPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertTrue(dataObject.contains(Properties.FUELED));
+        assertTrue(decorated);
+        assertTrue(dataObject.contains(Properties.FUELED));
     }
 
     @Test
     public void givenEmptySyncHistory_populatesSyncHistory() {
-        fueledMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        fueledMapper.create(propertyEntity);
 
-        fueledPropertyHandler.decorateDataObject(entity, new DataObject(), false);
+        syncHistoryMapper.create(interestedEntity);
 
-        Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.FUELED));
+        fueledPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, new DataObject(), false);
+
+        assertTrue(syncHistoryMapper.get(interestedEntity).hasSyncedPropertyData(propertyEntity, Properties.FUELED));
     }
 }

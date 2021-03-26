@@ -66,6 +66,23 @@ public class TestOrderSystem {
 	}
 
 	@Test
+	public void cancelsOrderIfEntityDeleted() {
+		OrderHandler orderHandler = mock(OrderHandler.class);
+		setupWorld(new OrderHandler[] {orderHandler});
+
+		int orderEntity = world.create();
+		orderMapper.create(orderEntity).handler = orderHandler;
+
+		world.process();
+
+		world.delete(orderEntity);
+
+		world.process();
+
+		verify(orderHandler, times(1)).cancelOrder(orderEntity);
+	}
+
+	@Test
 	public void startsOrderWhenQueueHasRequest() {
 		VastPeer peer = createPeer("TestPeer");
 

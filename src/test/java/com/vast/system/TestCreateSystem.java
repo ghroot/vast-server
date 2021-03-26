@@ -82,11 +82,11 @@ public class TestCreateSystem {
 		PropertyHandler firstPropertyHandler = mock(PropertyHandler.class);
 		when(firstPropertyHandler.getProperty()).thenReturn(property);
 		when(firstPropertyHandler.isInterestedIn(anyInt())).thenReturn(true);
-		when(firstPropertyHandler.decorateDataObject(anyInt(), any(), anyBoolean())).thenReturn(true);
+		when(firstPropertyHandler.decorateDataObject(anyInt(), anyInt(), any(), anyBoolean())).thenReturn(true);
 		PropertyHandler secondPropertyHandler = mock(PropertyHandler.class);
 		when(secondPropertyHandler.getProperty()).thenReturn(property);
 		when(secondPropertyHandler.isInterestedIn(anyInt())).thenReturn(true);
-		when(secondPropertyHandler.decorateDataObject(anyInt(), any(), anyBoolean())).thenReturn(true);
+		when(secondPropertyHandler.decorateDataObject(anyInt(), anyInt(), any(), anyBoolean())).thenReturn(true);
 		setupWorld(new PropertyHandler[]{firstPropertyHandler, secondPropertyHandler});
 
 		int observerEntity = world.create();
@@ -102,7 +102,7 @@ public class TestCreateSystem {
 
 		world.process();
 
-		verify(firstPropertyHandler, times(1)).decorateDataObject(anyInt(), any(), anyBoolean());
-		verify(secondPropertyHandler, never()).decorateDataObject(anyInt(), any(), anyBoolean());
+		verify(firstPropertyHandler, times(1)).decorateDataObject(anyInt(), anyInt(), any(), anyBoolean());
+		verify(secondPropertyHandler, never()).decorateDataObject(anyInt(), anyInt(), any(), anyBoolean());
 	}
 }

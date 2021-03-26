@@ -4,7 +4,6 @@ import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.nhnent.haste.protocol.data.DataObject;
-import com.vast.component.Home;
 import com.vast.component.SyncHistory;
 import com.vast.component.Transform;
 import com.vast.network.Properties;
@@ -14,11 +13,18 @@ import org.junit.Test;
 
 import javax.vecmath.Point2f;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.*;
+
 public class TestPositionPropertyHandler {
     private PositionPropertyHandler positionPropertyHandler;
     private World world;
     private ComponentMapper<Transform> transformMapper;
-    private int entity;
+    private ComponentMapper<SyncHistory> syncHistoryMapper;
+    private int interestedEntity;
+    private int propertyEntity;
 
     @Before
     public void setUp() {
@@ -28,80 +34,81 @@ public class TestPositionPropertyHandler {
         world.inject(positionPropertyHandler);
 
         transformMapper = world.getMapper(Transform.class);
+        syncHistoryMapper = world.getMapper(SyncHistory.class);
 
-        entity = world.create();
+        propertyEntity = world.create();
     }
 
     @Test
     public void givenHasTransform_decoratesDataObject() {
-        transformMapper.create(entity);
+        transformMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = positionPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = positionPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertArrayEquals(new double[] {0f, 0f}, (double[]) dataObject.get(Properties.POSITION).value, 0.001);
+        assertTrue(decorated);
+        assertArrayEquals(new double[] {0f, 0f}, (double[]) dataObject.get(Properties.POSITION).value, 0.001);
     }
 
     @Test
     public void givenNoPositionChange_doesNotDecorateDataObject() {
-        Transform transform = transformMapper.create(entity);
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        Transform transform = transformMapper.create(propertyEntity);
 
-        syncHistory.syncedValues.put(Properties.POSITION, new Point2f(transform.position));
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.POSITION, new Point2f(transform.position))));
 
         DataObject dataObject = new DataObject();
-        boolean decorated = positionPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = positionPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.POSITION));
+        assertFalse(decorated);
+        assertNull(dataObject.get(Properties.POSITION));
     }
 
     @Test
     public void givenPositionChange_decoratesDataObject() {
-        Transform transform = transformMapper.create(entity);
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        Transform transform = transformMapper.create(propertyEntity);
 
         // Moved from 0,0 -> 2,0
-        syncHistory.syncedValues.put(Properties.POSITION, new Point2f());
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.POSITION, new Point2f())));
         transform.position.set(2f, 0f);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = positionPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = positionPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertArrayEquals(new double[] {2, 0}, (double[]) dataObject.get(Properties.POSITION).value, 0.001);
-        Assert.assertEquals(transform.position, syncHistory.syncedValues.get(Properties.POSITION));
+        assertTrue(decorated);
+        assertArrayEquals(new double[] {2, 0}, (double[]) dataObject.get(Properties.POSITION).value, 0.001);
+        assertEquals(transform.position, syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, Properties.POSITION));
     }
 
     @Test
     public void givenNoSyncHistory_decoratesDataObject() {
-        transformMapper.create(entity);
+        transformMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = positionPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = positionPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertTrue(dataObject.contains(Properties.POSITION));
+        assertTrue(decorated);
+        assertTrue(dataObject.contains(Properties.POSITION));
     }
 
     @Test
     public void givenEmptySyncHistory_populatesSyncHistory() {
-        transformMapper.create(entity);
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        transformMapper.create(propertyEntity);
 
-        positionPropertyHandler.decorateDataObject(entity, new DataObject(), false);
+        syncHistoryMapper.create(interestedEntity);
 
-        Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.POSITION));
+        positionPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, new DataObject(), false);
+
+        assertTrue(syncHistoryMapper.get(interestedEntity).hasSyncedPropertyData(propertyEntity, Properties.POSITION));
     }
 
     @Test
     public void givenSyncHistory_syncHistoryDataIsNotSameInstanceAsPropertyData() {
-        Transform transform = transformMapper.create(entity);
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        Transform transform = transformMapper.create(propertyEntity);
 
-        positionPropertyHandler.decorateDataObject(entity, new DataObject(), false);
+        syncHistoryMapper.create(interestedEntity);
 
-        Assert.assertNotSame(syncHistory.syncedValues.get(Properties.POSITION), transform.position);
+        positionPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, new DataObject(), false);
+
+        assertNotSame(syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, Properties.POSITION), transform.position);
     }
 }

@@ -11,11 +11,18 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.*;
+
 public class TestStatePropertyHandler {
     private StatePropertyHandler statePropertyHandler;
     private World world;
     private ComponentMapper<State> stateMapper;
-    private int entity;
+    private ComponentMapper<SyncHistory> syncHistoryMapper;
+    private int interestedEntity;
+    private int propertyEntity;
 
     @Before
     public void setUp() {
@@ -25,70 +32,71 @@ public class TestStatePropertyHandler {
         world.inject(statePropertyHandler);
 
         stateMapper = world.getMapper(State.class);
+        syncHistoryMapper = world.getMapper(SyncHistory.class);
 
-        entity = world.create();
+        interestedEntity = world.create();
+        propertyEntity = world.create();
     }
 
     @Test
     public void givenHasState_decoratesDataObject() {
-        stateMapper.create(entity).name = "testState";
+        stateMapper.create(propertyEntity).name = "testState";
 
         DataObject dataObject = new DataObject();
-        boolean decorated = statePropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = statePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertEquals("testState", dataObject.get(Properties.STATE).value);
+        assertTrue(decorated);
+        assertEquals("testState", dataObject.get(Properties.STATE).value);
     }
 
     @Test
     public void givenNoStateChange_doesNotDecorateDataObject() {
-        stateMapper.create(entity).name = "testState";
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        stateMapper.create(propertyEntity).name = "testState";
 
-        syncHistory.syncedValues.put(Properties.STATE, "testState");
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.STATE, "testState")));
 
         DataObject dataObject = new DataObject();
-        boolean decorated = statePropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = statePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.STATE));
+        assertFalse(decorated);
+        assertNull(dataObject.get(Properties.STATE));
     }
 
     @Test
     public void givenStateChange_decoratesDataObject() {
-        State state = stateMapper.create(entity);
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        State state = stateMapper.create(propertyEntity);
 
         // Moved from "testState1" -> "testState2"
-        syncHistory.syncedValues.put(Properties.STATE, "testState1");
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.STATE, "testState1")));
         state.name = "testState2";
 
         DataObject dataObject = new DataObject();
-        boolean decorated = statePropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = statePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertEquals("testState2", dataObject.get(Properties.STATE).value);
-        Assert.assertEquals("testState2", syncHistory.syncedValues.get(Properties.STATE));
+        assertTrue(decorated);
+        assertEquals("testState2", dataObject.get(Properties.STATE).value);
+        assertEquals("testState2", syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, Properties.STATE));
     }
 
     @Test
     public void givenNoSyncHistory_decoratesDataObject() {
-        stateMapper.create(entity).name = "testState";
+        stateMapper.create(propertyEntity).name = "testState";
 
         DataObject dataObject = new DataObject();
-        boolean decorated = statePropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = statePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertEquals("testState", dataObject.get(Properties.STATE).value);
+        assertTrue(decorated);
+        assertEquals("testState", dataObject.get(Properties.STATE).value);
     }
 
     @Test
     public void givenEmptySyncHistory_populatesSyncHistory() {
-        stateMapper.create(entity).name = "testState";
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        stateMapper.create(propertyEntity).name = "testState";
 
-        statePropertyHandler.decorateDataObject(entity, new DataObject(), false);
+        syncHistoryMapper.create(interestedEntity);
 
-        Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.STATE));
+        statePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, new DataObject(), false);
+
+        assertTrue(syncHistoryMapper.get(interestedEntity).hasSyncedPropertyData(propertyEntity, Properties.STATE));
     }
 }

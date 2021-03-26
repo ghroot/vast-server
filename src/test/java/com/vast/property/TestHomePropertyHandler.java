@@ -12,12 +12,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.vecmath.Point2f;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class TestHomePropertyHandler {
     private HomePropertyHandler homePropertyHandler;
     private World world;
     private ComponentMapper<Home> homeMapper;
-    private int entity;
+    private ComponentMapper<SyncHistory> syncHistoryMapper;
+    private int interestedEntity;
+    private int propertyEntity;
 
     @Before
     public void setUp() {
@@ -27,80 +33,82 @@ public class TestHomePropertyHandler {
         world.inject(homePropertyHandler);
 
         homeMapper = world.getMapper(Home.class);
+        syncHistoryMapper = world.getMapper(SyncHistory.class);
 
-        entity = world.create();
+        interestedEntity = world.create();
+        propertyEntity = world.create();
     }
 
     @Test
     public void givenHasHome_decoratesDataObject() {
-        homeMapper.create(entity);
+        homeMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = homePropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = homePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertArrayEquals(new double[] {0f, 0f}, (double[]) dataObject.get(Properties.HOME).value, 0.001);
+        assertTrue(decorated);
+        assertArrayEquals(new double[] {0f, 0f}, (double[]) dataObject.get(Properties.HOME).value, 0.001);
     }
 
     @Test
     public void givenNoHomeChange_doesNotDecorateDataObject() {
-        Home home = homeMapper.create(entity);
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        Home home = homeMapper.create(propertyEntity);
 
-        syncHistory.syncedValues.put(Properties.HOME, new Point2f(home.position));
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.HOME, new Point2f(home.position))));
 
         DataObject dataObject = new DataObject();
-        boolean decorated = homePropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = homePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.HOME));
+        assertFalse(decorated);
+        assertNull(dataObject.get(Properties.HOME));
     }
 
     @Test
     public void givenPositionChange_decoratesDataObject() {
-        Home home = homeMapper.create(entity);
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        Home home = homeMapper.create(propertyEntity);
 
         // Moved from 0,0 -> 2,0
-        syncHistory.syncedValues.put(Properties.HOME, new Point2f());
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.HOME, new Point2f())));
         home.position.set(2f, 0f);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = homePropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = homePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertArrayEquals(new double[] {2, 0}, (double[]) dataObject.get(Properties.HOME).value, 0.001);
-        Assert.assertEquals(home.position, syncHistory.syncedValues.get(Properties.HOME));
+        assertTrue(decorated);
+        assertArrayEquals(new double[] {2, 0}, (double[]) dataObject.get(Properties.HOME).value, 0.001);
+        assertEquals(home.position, syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, Properties.HOME));
     }
 
     @Test
     public void givenNoSyncHistory_decoratesDataObject() {
-        homeMapper.create(entity);
+        homeMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = homePropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = homePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertTrue(dataObject.contains(Properties.HOME));
+        assertTrue(decorated);
+        assertTrue(dataObject.contains(Properties.HOME));
     }
 
     @Test
     public void givenEmptySyncHistory_populatesSyncHistory() {
-        homeMapper.create(entity);
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        homeMapper.create(propertyEntity);
 
-        homePropertyHandler.decorateDataObject(entity, new DataObject(), false);
+        syncHistoryMapper.create(interestedEntity);
 
-        Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.HOME));
+        homePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, new DataObject(), false);
+
+        assertTrue(syncHistoryMapper.get(interestedEntity).hasSyncedPropertyData(propertyEntity, Properties.HOME));
     }
 
     @Test
     public void givenSyncHistory_syncHistoryDataIsNotSameInstanceAsPropertyData() {
-        Home home = homeMapper.create(entity);
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        Home home = homeMapper.create(propertyEntity);
 
-        homePropertyHandler.decorateDataObject(entity, new DataObject(), false);
+        syncHistoryMapper.create(interestedEntity);
 
-        Assert.assertNotSame(syncHistory.syncedValues.get(Properties.HOME), home.position);
+        homePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, new DataObject(), false);
+
+        assertNotSame(syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, Properties.HOME), home.position);
     }
 }

@@ -12,13 +12,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class TestActivePropertyHandler {
     private ActivePropertyHandler activePropertyHandler;
     private World world;
     private ComponentMapper<Avatar> avatarMapper;
     private ComponentMapper<Observed> observedMapper;
     private ComponentMapper<SyncHistory> syncHistoryMapper;
-    private int entity;
+    private int interestedEntity;
+    private int propertyEntity;
 
     @Before
     public void setUp() {
@@ -31,16 +35,17 @@ public class TestActivePropertyHandler {
         observedMapper = world.getMapper(Observed.class);
         syncHistoryMapper = world.getMapper(SyncHistory.class);
 
-        entity = world.create();
+        interestedEntity = world.create();
+        propertyEntity = world.create();
     }
 
     @Test
     public void givenObservedAvatar_decoratesDataObject() {
-        avatarMapper.create(entity);
-        observedMapper.create(entity);
+        avatarMapper.create(propertyEntity);
+        observedMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = activePropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = activePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
         Assert.assertTrue(decorated);
         Assert.assertTrue((Boolean) dataObject.get(Properties.ACTIVE).value);
@@ -48,14 +53,13 @@ public class TestActivePropertyHandler {
 
     @Test
     public void givenNoActiveChange_doesNotDecorateDataObject() {
-        avatarMapper.create(entity);
-        observedMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        avatarMapper.create(propertyEntity);
+        observedMapper.create(propertyEntity);
 
-        syncHistory.syncedValues.put(Properties.ACTIVE, true);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.ACTIVE, true)));
 
         DataObject dataObject = new DataObject();
-        boolean decorated = activePropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = activePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
         Assert.assertFalse(decorated);
         Assert.assertNull(dataObject.get(Properties.POSITION));
@@ -63,26 +67,25 @@ public class TestActivePropertyHandler {
 
     @Test
     public void givenActiveChange_decoratesDataObject() {
-        avatarMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        avatarMapper.create(propertyEntity);
 
         // Changed from active -> inactive
-        syncHistory.syncedValues.put(Properties.ACTIVE, true);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.ACTIVE, true)));
 
         DataObject dataObject = new DataObject();
-        boolean decorated = activePropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = activePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
         Assert.assertTrue(decorated);
-        Assert.assertFalse((Boolean) syncHistory.syncedValues.get(Properties.ACTIVE));
+        Assert.assertFalse((Boolean) syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, Properties.ACTIVE));
     }
 
     @Test
     public void givenNoSyncHistory_decoratesDataObject() {
-        avatarMapper.create(entity);
-        observedMapper.create(entity);
+        avatarMapper.create(propertyEntity);
+        observedMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = activePropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = activePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
         Assert.assertTrue(decorated);
         Assert.assertTrue(dataObject.contains(Properties.ACTIVE));
@@ -90,12 +93,13 @@ public class TestActivePropertyHandler {
 
     @Test
     public void givenEmptySyncHistory_populatesSyncHistory() {
-        avatarMapper.create(entity);
-        observedMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        avatarMapper.create(propertyEntity);
+        observedMapper.create(propertyEntity);
 
-        activePropertyHandler.decorateDataObject(entity, new DataObject(), false);
+        syncHistoryMapper.create(interestedEntity);
 
-        Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.ACTIVE));
+        activePropertyHandler.decorateDataObject(interestedEntity, propertyEntity, new DataObject(), false);
+
+        Assert.assertTrue(syncHistoryMapper.get(interestedEntity).hasSyncedPropertyData(propertyEntity, Properties.ACTIVE));
     }
 }

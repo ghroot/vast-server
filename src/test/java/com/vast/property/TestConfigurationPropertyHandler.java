@@ -13,12 +13,18 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.*;
+
 public class TestConfigurationPropertyHandler {
     private ConfigurationPropertyHandler configurationPropertyHandler;
     private World world;
     private ComponentMapper<Configuration> configurationMapper;
     private ComponentMapper<SyncHistory> syncHistoryMapper;
-    private int entity;
+    private int interestedEntity;
+    private int propertyEntity;
 
     @Before
     public void setUp() {
@@ -30,69 +36,69 @@ public class TestConfigurationPropertyHandler {
         configurationMapper = world.getMapper(Configuration.class);
         syncHistoryMapper = world.getMapper(SyncHistory.class);
 
-        entity = world.create();
+        interestedEntity = world.create();
+        propertyEntity = world.create();
     }
 
     @Test
     public void givenHasConfiguration_decoratesDataObject() {
-        configurationMapper.create(entity);
+        configurationMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = configurationPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = configurationPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertNotNull(dataObject.get(Properties.CONFIGURATION).value);
+        assertTrue(decorated);
+        assertNotNull(dataObject.get(Properties.CONFIGURATION).value);
     }
 
     @Test
     public void givenNoVersionChange_doesNotDecorateDataObject() {
-        Configuration configuration = configurationMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        Configuration configuration = configurationMapper.create(propertyEntity);
 
         configuration.version = 1;
-        syncHistory.syncedValues.put(Properties.CONFIGURATION, (short) 1);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.CONFIGURATION, (short) 1)));
 
         DataObject dataObject = new DataObject();
-        boolean decorated = configurationPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = configurationPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.CONFIGURATION));
+        assertFalse(decorated);
+        assertNull(dataObject.get(Properties.CONFIGURATION));
     }
 
     @Test
     public void givenVersionChange_decoratesDataObject() {
-        Configuration configuration = configurationMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        Configuration configuration = configurationMapper.create(propertyEntity);
 
         // Changed from 0 -> 1
-        syncHistory.syncedValues.put(Properties.CONFIGURATION, (short) 0);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.CONFIGURATION, (short) 0)));
         configuration.version = 1;
 
         DataObject dataObject = new DataObject();
-        boolean decorated = configurationPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = configurationPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertEquals((short) 1, syncHistory.syncedValues.get(Properties.CONFIGURATION));
+        assertTrue(decorated);
+        assertEquals((short) 1, syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, Properties.CONFIGURATION));
     }
 
     @Test
     public void givenNoSyncHistory_decoratesDataObject() {
-        configurationMapper.create(entity);
+        configurationMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = configurationPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = configurationPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertTrue(dataObject.contains(Properties.CONFIGURATION));
+        assertTrue(decorated);
+        assertTrue(dataObject.contains(Properties.CONFIGURATION));
     }
 
     @Test
     public void givenEmptySyncHistory_populatesSyncHistory() {
-        configurationMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        configurationMapper.create(propertyEntity);
 
-        configurationPropertyHandler.decorateDataObject(entity, new DataObject(), false);
+        syncHistoryMapper.create(interestedEntity);
 
-        Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.CONFIGURATION));
+        boolean decorated = configurationPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, new DataObject(), false);
+
+        assertTrue(syncHistoryMapper.get(interestedEntity).hasSyncedPropertyData(propertyEntity, Properties.CONFIGURATION));
     }
 }

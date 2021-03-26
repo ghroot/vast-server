@@ -13,12 +13,18 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.*;
+
 public class TestConstructableProgressPropertyHandler {
     private ConstructableProgressPropertyHandler constructableProgressPropertyHandler;
     private World world;
     private ComponentMapper<Constructable> constructableMapper;
     private ComponentMapper<SyncHistory> syncHistoryMapper;
-    private int entity;
+    private int interestedEntity;
+    private int propertyEntity;
 
     @Before
     public void setUp() {
@@ -30,105 +36,103 @@ public class TestConstructableProgressPropertyHandler {
         constructableMapper = world.getMapper(Constructable.class);
         syncHistoryMapper = world.getMapper(SyncHistory.class);
 
-        entity = world.create();
+        interestedEntity = world.create();
+        propertyEntity = world.create();
     }
 
     @Test
     public void givenConstructable_decoratesDataObject() {
-        constructableMapper.create(entity);
+        constructableMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = constructableProgressPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = constructableProgressPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertEquals((byte) 0, dataObject.get(Properties.PROGRESS).value);
+        assertTrue(decorated);
+        assertEquals((byte) 0, dataObject.get(Properties.PROGRESS).value);
     }
 
     @Test
     public void givenNoProgressChange_doesNotDecorateDataObject() {
-        constructableMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        constructableMapper.create(propertyEntity);
 
-        syncHistory.syncedValues.put(Properties.PROGRESS, 0);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.PROGRESS, 0)));
 
         DataObject dataObject = new DataObject();
-        boolean decorated = constructableProgressPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = constructableProgressPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.PROGRESS));
+        assertFalse(decorated);
+        assertNull(dataObject.get(Properties.PROGRESS));
     }
 
     @Test
     public void givenSmallProgressChange_doesNotDecorateDataObject() {
-        Constructable constructable = constructableMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        Constructable constructable = constructableMapper.create(propertyEntity);
 
         // Changed from 0 -> 5
-        syncHistory.syncedValues.put(Properties.PROGRESS, 0);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.PROGRESS, 0)));
         constructable.buildDuration = 100;
         constructable.buildTime = 5;
 
         DataObject dataObject = new DataObject();
-        boolean decorated = constructableProgressPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = constructableProgressPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.PROGRESS));
+        assertFalse(decorated);
+        assertNull(dataObject.get(Properties.PROGRESS));
     }
 
     @Test
     public void givenLargeProgressChange_decoratesDataObject() {
-        Constructable constructable = constructableMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        Constructable constructable = constructableMapper.create(propertyEntity);
 
         // Changed from 0 -> 80
-        syncHistory.syncedValues.put(Properties.PROGRESS, 0);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.PROGRESS, 0)));
         constructable.buildDuration = 100;
         constructable.buildTime = 80;
 
         DataObject dataObject = new DataObject();
-        boolean decorated = constructableProgressPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = constructableProgressPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertEquals((byte) 80, dataObject.get(Properties.PROGRESS).value);
-        Assert.assertEquals(80, syncHistory.syncedValues.get(Properties.PROGRESS));
+        assertTrue(decorated);
+        assertEquals((byte) 80, dataObject.get(Properties.PROGRESS).value);
+        assertEquals(80, syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, Properties.PROGRESS));
     }
 
     @Test
     public void givenSmallProgressChangeToFull_decoratesDataObject() {
-        Constructable constructable = constructableMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        Constructable constructable = constructableMapper.create(propertyEntity);
 
         // Changed from 95 -> 100
-        syncHistory.syncedValues.put(Properties.PROGRESS, 95);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.PROGRESS, 95)));
         constructable.buildDuration = 100;
         constructable.buildTime = 100;
 
         DataObject dataObject = new DataObject();
-        boolean decorated = constructableProgressPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = constructableProgressPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertEquals((byte) 100, dataObject.get(Properties.PROGRESS).value);
-        Assert.assertEquals(100, syncHistory.syncedValues.get(Properties.PROGRESS));
+        assertTrue(decorated);
+        assertEquals((byte) 100, dataObject.get(Properties.PROGRESS).value);
+        assertEquals(100, syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, Properties.PROGRESS));
     }
 
     @Test
     public void givenNoSyncHistory_decoratesDataObject() {
-        constructableMapper.create(entity);
+        constructableMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = constructableProgressPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = constructableProgressPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertTrue(dataObject.contains(Properties.PROGRESS));
+        assertTrue(decorated);
+        assertTrue(dataObject.contains(Properties.PROGRESS));
     }
 
     @Test
     public void givenEmptySyncHistory_populatesSyncHistory() {
-        constructableMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        constructableMapper.create(propertyEntity);
 
-        constructableProgressPropertyHandler.decorateDataObject(entity, new DataObject(), false);
+        syncHistoryMapper.create(interestedEntity);
 
-        Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.PROGRESS));
+        constructableProgressPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, new DataObject(), false);
+
+        assertTrue(syncHistoryMapper.get(interestedEntity).hasSyncedPropertyData(propertyEntity, Properties.PROGRESS));
     }
 }

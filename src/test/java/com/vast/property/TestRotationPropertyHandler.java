@@ -7,16 +7,21 @@ import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.SyncHistory;
 import com.vast.component.Transform;
 import com.vast.network.Properties;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class TestRotationPropertyHandler {
     private RotationPropertyHandler rotationPropertyHandler;
     private World world;
     private ComponentMapper<Transform> transformMapper;
     private ComponentMapper<SyncHistory> syncHistoryMapper;
-    private int entity;
+    private int interestedEntity;
+    private int propertyEntity;
 
     @Before
     public void setUp() {
@@ -28,85 +33,84 @@ public class TestRotationPropertyHandler {
         transformMapper = world.getMapper(Transform.class);
         syncHistoryMapper = world.getMapper(SyncHistory.class);
 
-        entity = world.create();
+        interestedEntity = world.create();
+        propertyEntity = world.create();
     }
 
     @Test
     public void givenTransform_decoratesDataObject() {
-        transformMapper.create(entity);
+        transformMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = rotationPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = rotationPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertEquals(0f, (float) dataObject.get(Properties.ROTATION).value, 0.001f);
+        assertTrue(decorated);
+        assertEquals(0f, (float) dataObject.get(Properties.ROTATION).value, 0.001f);
     }
 
     @Test
     public void givenNoRotationChange_doesNotDecorateDataObject() {
-        transformMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        transformMapper.create(propertyEntity);
 
-        syncHistory.syncedValues.put(Properties.ROTATION, 0f);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.ROTATION, 0f)));
 
         DataObject dataObject = new DataObject();
-        boolean decorated = rotationPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = rotationPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.ROTATION));
+        assertFalse(decorated);
+        assertNull(dataObject.get(Properties.ROTATION));
     }
 
     @Test
     public void givenSmallProgressChange_doesNotDecorateDataObject() {
-        Transform transform = transformMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        Transform transform = transformMapper.create(propertyEntity);
 
         // Changed from 359 -> 1
-        syncHistory.syncedValues.put(Properties.ROTATION, 359f);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.ROTATION, 359f)));
         transform.rotation = 1f;
 
         DataObject dataObject = new DataObject();
-        boolean decorated = rotationPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = rotationPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.ROTATION));
+        assertFalse(decorated);
+        assertNull(dataObject.get(Properties.ROTATION));
     }
 
     @Test
     public void givenLargeProgressChange_decoratesDataObject() {
-        Transform transform = transformMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        Transform transform = transformMapper.create(propertyEntity);
 
         // Changed from 3 -> 20
-        syncHistory.syncedValues.put(Properties.ROTATION, 3f);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.ROTATION, 3f)));
         transform.rotation = 20f;
 
         DataObject dataObject = new DataObject();
-        boolean decorated = rotationPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = rotationPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertEquals(20f, (float) dataObject.get(Properties.ROTATION).value, 0.001f);
-        Assert.assertEquals(20f, (float) syncHistory.syncedValues.get(Properties.ROTATION), 0.001f);
+        assertTrue(decorated);
+        assertEquals(20f, (float) dataObject.get(Properties.ROTATION).value, 0.001f);
+        assertEquals(20f, (float) syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, Properties.ROTATION), 0.001f);
     }
 
     @Test
     public void givenNoSyncHistory_decoratesDataObject() {
-        transformMapper.create(entity);
+        transformMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = rotationPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = rotationPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertTrue(dataObject.contains(Properties.ROTATION));
+        assertTrue(decorated);
+        assertTrue(dataObject.contains(Properties.ROTATION));
     }
 
     @Test
     public void givenEmptySyncHistory_populatesSyncHistory() {
-        transformMapper.create(entity);
-        SyncHistory syncHistory = syncHistoryMapper.create(entity);
+        transformMapper.create(propertyEntity);
 
-        rotationPropertyHandler.decorateDataObject(entity, new DataObject(), false);
+        syncHistoryMapper.create(interestedEntity);
 
-        Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.ROTATION));
+        rotationPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, new DataObject(), false);
+
+        assertTrue(syncHistoryMapper.get(interestedEntity).hasSyncedPropertyData(propertyEntity, Properties.ROTATION));
     }
 }

@@ -6,17 +6,23 @@ import com.artemis.WorldConfigurationBuilder;
 import com.nhnent.haste.protocol.data.DataObject;
 import com.vast.component.Inventory;
 import com.vast.component.SyncHistory;
-import com.vast.component.Transform;
 import com.vast.network.Properties;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.*;
+
 public class TestInventoryPropertyHandler {
     private InventoryPropertyHandler inventoryPropertyHandler;
     private World world;
     private ComponentMapper<Inventory> inventoryMapper;
-    private int entity;
+    private ComponentMapper<SyncHistory> syncHistoryMapper;
+    private int interestedEntity;
+    private int propertyEntity;
 
     @Before
     public void setUp() {
@@ -26,80 +32,81 @@ public class TestInventoryPropertyHandler {
         world.inject(inventoryPropertyHandler);
 
         inventoryMapper = world.getMapper(Inventory.class);
+        syncHistoryMapper = world.getMapper(SyncHistory.class);
 
-        entity = world.create();
+        propertyEntity = world.create();
     }
 
     @Test
     public void givenHasInventory_decoratesDataObject() {
-        inventoryMapper.create(entity);
+        inventoryMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = inventoryPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = inventoryPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertArrayEquals(new short[0], (short[]) dataObject.get(Properties.INVENTORY).value);
+        assertTrue(decorated);
+        assertArrayEquals(new short[0], (short[]) dataObject.get(Properties.INVENTORY).value);
     }
 
     @Test
     public void givenNoInventoryChange_doesNotDecorateDataObject() {
-        Inventory inventory = inventoryMapper.create(entity);
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        Inventory inventory = inventoryMapper.create(propertyEntity);
 
-        syncHistory.syncedValues.put(Properties.INVENTORY, new short[0]);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.INVENTORY, new short[0])));
 
         DataObject dataObject = new DataObject();
-        boolean decorated = inventoryPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = inventoryPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertFalse(decorated);
-        Assert.assertNull(dataObject.get(Properties.INVENTORY));
+        assertFalse(decorated);
+        assertNull(dataObject.get(Properties.INVENTORY));
     }
 
     @Test
     public void givenInventoryChange_decoratesDataObject() {
-        Inventory inventory = inventoryMapper.create(entity);
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        Inventory inventory = inventoryMapper.create(propertyEntity);
 
         // Changed from [] -> [1]
-        syncHistory.syncedValues.put(Properties.INVENTORY, new short[0]);
+        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.INVENTORY, new short[0])));
         inventory.add(0);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = inventoryPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = inventoryPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertArrayEquals(new short[] {1}, (short[]) dataObject.get(Properties.INVENTORY).value);
-        Assert.assertArrayEquals(inventory.items, (short[]) syncHistory.syncedValues.get(Properties.INVENTORY));
+        assertTrue(decorated);
+        assertArrayEquals(new short[] {1}, (short[]) dataObject.get(Properties.INVENTORY).value);
+        assertArrayEquals(inventory.items, (short[]) syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, Properties.INVENTORY));
     }
 
     @Test
     public void givenNoSyncHistory_decoratesDataObject() {
-        inventoryMapper.create(entity);
+        inventoryMapper.create(propertyEntity);
 
         DataObject dataObject = new DataObject();
-        boolean decorated = inventoryPropertyHandler.decorateDataObject(entity, dataObject, false);
+        boolean decorated = inventoryPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
 
-        Assert.assertTrue(decorated);
-        Assert.assertTrue(dataObject.contains(Properties.INVENTORY));
+        assertTrue(decorated);
+        assertTrue(dataObject.contains(Properties.INVENTORY));
     }
 
     @Test
     public void givenEmptySyncHistory_populatesSyncHistory() {
-        inventoryMapper.create(entity);
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        inventoryMapper.create(propertyEntity);
 
-        inventoryPropertyHandler.decorateDataObject(entity, new DataObject(), false);
+        syncHistoryMapper.create(interestedEntity);
 
-        Assert.assertTrue(syncHistory.syncedValues.containsKey(Properties.INVENTORY));
+        inventoryPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, new DataObject(), false);
+
+        assertTrue(syncHistoryMapper.get(interestedEntity).hasSyncedPropertyData(propertyEntity, Properties.INVENTORY));
     }
 
     @Test
     public void givenSyncHistory_syncHistoryDataIsNotSameInstanceAsPropertyData() {
-        Inventory inventory = inventoryMapper.create(entity);
-        SyncHistory syncHistory = world.getMapper(SyncHistory.class).create(entity);
+        Inventory inventory = inventoryMapper.create(propertyEntity);
 
-        inventoryPropertyHandler.decorateDataObject(entity, new DataObject(), false);
+        syncHistoryMapper.create(interestedEntity);
 
-        Assert.assertNotSame(syncHistory.syncedValues.get(Properties.INVENTORY), inventory.items);
+        inventoryPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, new DataObject(), false);
+
+        assertNotSame(syncHistoryMapper.get(interestedEntity).getSyncedPropertyData(propertyEntity, Properties.INVENTORY), inventory.items);
     }
 }
