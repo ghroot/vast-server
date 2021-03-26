@@ -142,7 +142,8 @@ public class VastWorld implements Runnable {
 			new ParentSystem(),
 			new DeleteSystem(),
 			new EventSystem(metrics),
-			new SyncSystem(peers, propertyHandlers, metrics)
+			new SyncSystem(peers, propertyHandlers, metrics),
+			new SyncHistoryRemoveSystem()
 		).with(
 			new WorldSerializationManager(),
 			new EntityLinkManager()

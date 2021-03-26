@@ -8,8 +8,8 @@ import com.vast.network.Properties;
 public class SyncPropagation extends Component {
 	private static final int DEFAULT_UNRELIABLE = (1 << Properties.POSITION) | (1 << Properties.ROTATION) |
 			(1 << Properties.PROGRESS);
-	private static final int DEFAULT_OWNER_PROPAGATION = (1 << Properties.PROGRESS) | (1 << Properties.INVENTORY) |
-			(1 << Properties.HOME) | (1 << Properties.CONFIGURATION) | (1 << Properties.SKILL) | (1 << Properties.VALID);
+	private static final int DEFAULT_OWNER_PROPAGATION = (1 << Properties.INVENTORY) | (1 << Properties.HOME) |
+			(1 << Properties.CONFIGURATION) | (1 << Properties.SKILL) | (1 << Properties.VALID);
 	private static final int DEFAULT_BLOCKED = 0;
 
 	public int unreliableProperties = DEFAULT_UNRELIABLE;

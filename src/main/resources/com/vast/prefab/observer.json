@@ -18,6 +18,7 @@
   },
   "archetypes": {
     "0": [
+      "Known",
       "Observer",
       "Transform",
       "Type",

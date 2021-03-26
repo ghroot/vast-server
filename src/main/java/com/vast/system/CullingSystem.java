@@ -28,6 +28,7 @@ public class CullingSystem extends IteratingSystem {
 	private ComponentMapper<Owner> ownerMapper;
 	private ComponentMapper<SubType> subTypeMapper;
 	private ComponentMapper<SyncPropagation> syncPropagationMapper;
+	private ComponentMapper<SyncHistory> syncHistoryMapper;
 
 	private PropertyHandler[] propertyHandlers;
 
