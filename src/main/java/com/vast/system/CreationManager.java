@@ -31,7 +31,6 @@ public class CreationManager extends BaseSystem {
 	private ComponentMapper<Speed> speedMapper;
 	private ComponentMapper<Growing> growingMapper;
 	private ComponentMapper<Group> groupMapper;
-	private ComponentMapper<Teach> teachMapper;
 	private ComponentMapper<Owner> ownerMapper;
 	private ComponentMapper<Observer> observerMapper;
 

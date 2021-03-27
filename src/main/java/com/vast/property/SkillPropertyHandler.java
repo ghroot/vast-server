@@ -8,17 +8,17 @@ import com.vast.network.Properties;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SkillPropertyHandler extends AbstractPropertyHandler<Map<String, Byte>, DataObject> {
+public class SkillPropertyHandler extends AbstractPropertyHandler<Map<String, Integer>, DataObject> {
 	private ComponentMapper<Skill> skillMapper;
 
-	private int wordLevelThreshold;
+	private int xpThreshold;
 
 	private DataObject reusableSkillDataObject;
 
-	public SkillPropertyHandler(int wordLevelThreshold) {
+	public SkillPropertyHandler(int xpThreshold) {
 		super(Properties.SKILL);
 
-		this.wordLevelThreshold = wordLevelThreshold;
+		this.xpThreshold = xpThreshold;
 
 		reusableSkillDataObject = new DataObject();
 	}
@@ -29,23 +29,23 @@ public class SkillPropertyHandler extends AbstractPropertyHandler<Map<String, By
 	}
 
 	@Override
-	protected Map<String, Byte> getPropertyData(int entity) {
+	protected Map<String, Integer> getPropertyData(int entity) {
 		Skill skill = skillMapper.get(entity);
-		Map<String, Byte> skillWords = new HashMap<>();
-		for (int i = 0; i < skill.words.length; i++) {
-			skillWords.put(skill.words[i], skill.wordLevels[i]);
+		Map<String, Integer> skillXp = new HashMap<>();
+		for (int i = 0; i < skill.names.length; i++) {
+			skillXp.put(skill.names[i], skill.xp[i]);
 		}
 
-		return skillWords;
+		return skillXp;
 	}
 
 	@Override
-	protected boolean passedThresholdForSync(int entity, Map<String, Byte> lastSyncedSkillWords) {
+	protected boolean passedThresholdForSync(int entity, Map<String, Integer> lastSyncedSkillXp) {
 		Skill skill = skillMapper.get(entity);
-		for (int i = 0; i < skill.words.length; i++) {
-			int lastSyncedLevel = (int) lastSyncedSkillWords.getOrDefault(skill.words[i], (byte) 0);
-			int newLevel = skill.wordLevels[i];
-			if (newLevel - lastSyncedLevel >= wordLevelThreshold) {
+		for (int i = 0; i < skill.names.length; i++) {
+			int lastSyncedLXp = lastSyncedSkillXp.getOrDefault(skill.names[i], 0);
+			int newXp = skill.xp[i];
+			if (newXp - lastSyncedLXp >= xpThreshold) {
 				return true;
 			}
 		}
@@ -54,19 +54,19 @@ public class SkillPropertyHandler extends AbstractPropertyHandler<Map<String, By
 	}
 
 	@Override
-	protected DataObject convertPropertyDataToDataObjectData(Map<String, Byte> skillWords) {
-		String[] words = new String[skillWords.size()];
-		byte[] wordLevels = new byte[skillWords.size()];
+	protected DataObject convertPropertyDataToDataObjectData(Map<String, Integer> skillXp) {
+		String[] names = new String[skillXp.size()];
+		int[] xp = new int[skillXp.size()];
 		int index = 0;
-		for (String word : skillWords.keySet()) {
-			words[index] = word;
-			wordLevels[index] = skillWords.get(word);
+		for (String name : skillXp.keySet()) {
+			names[index] = name;
+			xp[index] = skillXp.get(name);
 			index++;
 		}
 
 		reusableSkillDataObject.clear();
-		reusableSkillDataObject.set((byte) 0, words);
-		reusableSkillDataObject.set((byte) 1, wordLevels);
+		reusableSkillDataObject.set((byte) 0, names);
+		reusableSkillDataObject.set((byte) 1, xp);
 
 		return reusableSkillDataObject;
 	}

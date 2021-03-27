@@ -331,40 +331,26 @@ public class Monitor extends JFrame implements ActionListener {
                             }
                         }
                         detail = s.toString();
-                    } else if (component instanceof Lifetime) {
-                        detail = "" + (Math.round(((Lifetime) component).timeLeft * 100.0f) / 100.0f);
                     } else if (component instanceof Skill) {
                         Skill skill = (Skill) component;
-                        StringBuilder wordsString = new StringBuilder();
-                        for (int j = 0; j < skill.words.length; j++) {
-                            if (skill.wordLevels[j] >= 100) {
-                                wordsString.append(skill.words[j].toUpperCase());
-                            } else {
-                                wordsString.append(skill.words[j]);
-                                wordsString.append(": ");
-                                wordsString.append(skill.wordLevels[j]);
-                            }
-                            if (j < skill.words.length - 1) {
-                                wordsString.append(", ");
+                        StringBuilder skillString = new StringBuilder();
+                        for (int j = 0; j < skill.names.length; j++) {
+                            skillString.append(skill.names[j]);
+                            skillString.append(": ");
+                            skillString.append(skill.xp[j]);
+                            if (j < skill.names.length - 1) {
+                                skillString.append(", ");
                             }
                         }
-                        detail = wordsString.toString();
+                        detail = skillString.toString();
+                    } else if (component instanceof Lifetime) {
+                        detail = "" + (Math.round(((Lifetime) component).timeLeft * 100.0f) / 100.0f);
                     } else if (component instanceof SerializationTag) {
                         SerializationTag serializationTag = (SerializationTag) component;
                         detail = serializationTag.tag;
                     } else if (component instanceof Configuration) {
                         Configuration configuration = (Configuration) component;
                         detail = "" + configuration.version;
-                    } else if (component instanceof Teach) {
-                        Teach teach = (Teach) component;
-                        StringBuilder wordsString = new StringBuilder();
-                        for (int j = 0; j < teach.words.length; j++) {
-                            wordsString.append(teach.words[j]);
-                            if (j < teach.words.length - 1) {
-                                wordsString.append(", ");
-                            }
-                        }
-                        detail = wordsString.toString();
                     } else if (component instanceof Producer) {
                         Producer producer = (Producer) component;
                         detail = producer.recipeId + " " + (Math.round(producer.time * 10f) / 10f);

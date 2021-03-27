@@ -10,18 +10,12 @@
         "Harvestable": {
           "requiredItemTag": "pickaxe",
           "durability": 300,
-          "stateName": "picking",
-          "teachWord": "pick"
+          "stateName": "picking"
         },
         "Inventory": {
           "items": [
             0,
             2
-          ]
-        },
-        "Teach": {
-          "words": [
-            "rock"
           ]
         },
         "Type": {
@@ -40,7 +34,6 @@
       "Static",
       "SubType",
       "SyncPropagation",
-      "Teach",
       "Transform",
       "Type"
     ]
@@ -65,7 +58,6 @@
     "com.vast.component.SubType": "SubType",
     "com.vast.component.SyncHistory": "SyncHistory",
     "com.vast.component.SyncPropagation": "SyncPropagation",
-    "com.vast.component.Teach": "Teach",
     "com.vast.component.Transform": "Transform",
     "com.vast.component.Type": "Type"
   },

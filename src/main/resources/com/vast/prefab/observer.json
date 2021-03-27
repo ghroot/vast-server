@@ -50,7 +50,6 @@
     "com.vast.component.SubType": "SubType",
     "com.vast.component.SyncHistory": "SyncHistory",
     "com.vast.component.SyncPropagation": "SyncPropagation",
-    "com.vast.component.Teach": "Teach",
     "com.vast.component.Transform": "Transform",
     "com.vast.component.Transient": "Transient",
     "com.vast.component.Type": "Type"

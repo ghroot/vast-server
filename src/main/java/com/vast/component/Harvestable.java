@@ -7,6 +7,5 @@ import com.artemis.annotations.PooledWeaver;
 public class Harvestable extends Component {
 	public String requiredItemTag = null;
 	public String stateName = null;
-	public String teachWord = null;
 	public float durability = 0.0f;
 }

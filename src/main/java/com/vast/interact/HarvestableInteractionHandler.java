@@ -23,7 +23,6 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<State> stateMapper;
-	private ComponentMapper<Teach> teachMapper;
 
 	private CreationManager creationManager;
 
@@ -62,9 +61,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 				stateMapper.get(harvestableEntity).name = harvestable.stateName;
 				syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.STATE);
 			}
-			if (harvestable.teachWord != null) {
-				teachMapper.create(playerEntity).addWord(harvestable.teachWord);
-			}
+
 			return true;
 		}
 	}
@@ -78,6 +75,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 				}
 			}
 		}
+
 		return false;
 	}
 
@@ -108,9 +106,6 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 				stateMapper.get(harvestableEntity).name = "none";
 				syncMapper.create(harvestableEntity).markPropertyAsDirty(Properties.STATE);
 			}
-		}
-		if (harvestable.teachWord != null) {
-			teachMapper.create(playerEntity).removeWord(harvestable.teachWord);
 		}
 	}
 }
