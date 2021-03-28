@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	private static final Logger logger = LoggerFactory.getLogger(HarvestableInteractionHandler.class);
 
-	private final float HARVEST_SPEED = 50.0f;
+	private final float BASE_HARVEST_SPEED = 30f;
 
 	private ComponentMapper<Harvestable> harvestableMapper;
 	private ComponentMapper<Inventory> inventoryMapper;
@@ -23,6 +23,7 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	private ComponentMapper<Sync> syncMapper;
 	private ComponentMapper<Event> eventMapper;
 	private ComponentMapper<State> stateMapper;
+	private ComponentMapper<Skill> skillMapper;
 
 	private CreationManager creationManager;
 
@@ -83,8 +84,13 @@ public class HarvestableInteractionHandler extends AbstractInteractionHandler {
 	public boolean process(int playerEntity, int harvestableEntity) {
 		Harvestable harvestable = harvestableMapper.get(harvestableEntity);
 
-		harvestable.durability -= world.getDelta() * HARVEST_SPEED;
-		if (harvestable.durability <= 0f) {
+		if (harvestable.requiredItemTag != null && skillMapper.has(playerEntity)) {
+			skillMapper.get(playerEntity).addXp(harvestable.requiredItemTag);
+		}
+
+		float harvestSpeed = BASE_HARVEST_SPEED + 5f * skillMapper.get(playerEntity).getLevel(harvestable.requiredItemTag);
+		harvestable.durability -= world.getDelta() * harvestSpeed;
+		if (harvestable.isComplete()) {
 			int pickupEntity = creationManager.createPickup("harvestedResources",
 					transformMapper.get(harvestableEntity).position, inventoryMapper.get(harvestableEntity));
 			createMapper.create(pickupEntity).reason = "harvested";
