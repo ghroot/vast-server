@@ -287,8 +287,7 @@ public class Monitor extends JFrame implements ActionListener {
                         detail = "" + (Math.round(((Growing) component).timeLeft * 100.0f) / 100.0f);
                     } else if (component instanceof Constructable) {
                         Constructable constructable = (Constructable) component;
-                        int progress = (int) Math.floor(100.0f * constructable.buildTime / constructable.buildDuration);
-                        detail = "" + progress;
+                        detail = Math.round(constructable.buildTime * 10f) / 10f + " / " + Math.round(constructable.buildDuration * 10f) / 10f;
                     } else if (component instanceof Collision) {
                         detail = "" + (Math.round(((Collision) component).radius * 100.0f) / 100.0f);
                     } else if (component instanceof Owner) {

@@ -23,7 +23,7 @@ public class ConstructableInteractionHandler extends AbstractInteractionHandler 
 
 	@Override
 	public boolean canInteract(int avatarEntity, int constructableEntity) {
-		return !constructableMapper.get(constructableEntity).isComplete();
+		return constructableMapper.has(constructableEntity);
 	}
 
 	@Override
