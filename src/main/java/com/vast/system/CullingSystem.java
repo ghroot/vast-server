@@ -72,10 +72,6 @@ public class CullingSystem extends IteratingSystem {
 		int[] knowEntities = observer.knowEntities.getData();
 		for (int i = 0, size = observer.knowEntities.size(); i < size; ++i) {
 			int knowEntity = knowEntities[i];
-			if (avatarMapper.has(knowEntity) && observer.peer.getName().equals(avatarMapper.get(knowEntity).name)) {
-				// Observers never forget their avatar
-				continue;
-			}
 			if (!scan.nearbyEntities.contains(knowEntity)) {
 				notifyAboutRemovedEntity(observer.peer, knowEntity);
 				reusableRemovedEntities.add(knowEntity);
@@ -100,10 +96,6 @@ public class CullingSystem extends IteratingSystem {
 		int[] nearbyEntities = scan.nearbyEntities.getData();
 		for (int i = 0, size = scan.nearbyEntities.size(); i < size; ++i) {
 			int nearbyEntity = nearbyEntities[i];
-			if (observerMapper.has(nearbyEntity) && observerMapper.get(nearbyEntity) != observer) {
-				// Observers never see other observers
-				continue;
-			}
 			if (!observer.knowEntities.contains(nearbyEntity)) {
 				notifyAboutNewEntity(observer.peer, entity, nearbyEntity);
 				observer.knowEntities.add(nearbyEntity);

@@ -3,6 +3,7 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.BaseEntitySystem;
 import com.artemis.ComponentMapper;
+import com.vast.component.Invisible;
 import com.vast.component.Transform;
 import com.vast.data.WorldConfiguration;
 import net.mostlyoriginal.api.utils.QuadTree;
@@ -18,7 +19,7 @@ public class QuadTreeAddRemoveSystem extends BaseEntitySystem {
 	private WorldConfiguration worldConfiguration;
 
 	public QuadTreeAddRemoveSystem(QuadTree quadTree, WorldConfiguration worldConfiguration) {
-		super(Aspect.all(Transform.class));
+		super(Aspect.all(Transform.class).exclude(Invisible.class));
 		this.quadTree = quadTree;
 		this.worldConfiguration = worldConfiguration;
 	}

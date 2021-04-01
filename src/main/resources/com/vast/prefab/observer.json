@@ -18,6 +18,7 @@
   },
   "archetypes": {
     "0": [
+      "Invisible",
       "Known",
       "Observer",
       "Transform",
@@ -38,6 +39,7 @@
     "com.vast.component.Group": "Group",
     "com.vast.component.Harvestable": "Harvestable",
     "com.vast.component.Inventory": "Inventory",
+    "com.vast.component.Invisible": "Invisible",
     "com.vast.component.Known": "Known",
     "com.vast.component.Lifetime": "Lifetime",
     "com.vast.component.Observer": "Observer",

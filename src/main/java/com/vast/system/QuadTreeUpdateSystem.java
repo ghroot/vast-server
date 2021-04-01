@@ -4,6 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
+import com.vast.component.Invisible;
 import com.vast.component.Static;
 import com.vast.component.Transform;
 import com.vast.data.WorldConfiguration;
@@ -20,7 +21,7 @@ public class QuadTreeUpdateSystem extends IteratingSystem {
 	private WorldConfiguration worldConfiguration;
 
 	public QuadTreeUpdateSystem(QuadTree quadTree, WorldConfiguration worldConfiguration) {
-		super(Aspect.all(Transform.class).exclude(Static.class));
+		super(Aspect.all(Transform.class).exclude(Static.class, Invisible.class));
 		this.quadTree = quadTree;
 		this.worldConfiguration = worldConfiguration;
 	}

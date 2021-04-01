@@ -15,7 +15,7 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TestScanSystem {
+public class TestQuadScanSystem {
 	@Test
 	public void addsNearbyEntities() {
 		QuadTree quadTree = mock(QuadTree.class);
@@ -25,10 +25,10 @@ public class TestScanSystem {
 			return nearbyEntities;
 		});
 		WorldConfiguration worldConfiguration = new WorldConfiguration(30, 30);
-		ScanSystem scanSystem = new ScanSystem(quadTree, worldConfiguration);
+		QuadScanSystem quadScanSystem = new QuadScanSystem(quadTree, worldConfiguration);
 
 		World world = new World(new WorldConfigurationBuilder().with(
-			scanSystem
+				quadScanSystem
 		).build());
 
 		int entity = world.create();
