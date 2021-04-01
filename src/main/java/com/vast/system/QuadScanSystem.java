@@ -11,8 +11,8 @@ import net.mostlyoriginal.api.utils.QuadTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ScanSystem extends IteratingSystem {
-	private static final Logger logger = LoggerFactory.getLogger(ScanSystem.class);
+public class QuadScanSystem extends IteratingSystem {
+	private static final Logger logger = LoggerFactory.getLogger(QuadScanSystem.class);
 
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Scan> scanMapper;
@@ -20,7 +20,7 @@ public class ScanSystem extends IteratingSystem {
 	private QuadTree quadTree;
 	private WorldConfiguration worldConfiguration;
 
-	public ScanSystem(QuadTree quadTree, WorldConfiguration worldConfiguration) {
+	public QuadScanSystem(QuadTree quadTree, WorldConfiguration worldConfiguration) {
 		super(Aspect.all(Transform.class, Scan.class));
 		this.quadTree = quadTree;
 		this.worldConfiguration = worldConfiguration;
@@ -39,7 +39,6 @@ public class ScanSystem extends IteratingSystem {
 		Transform transform = transformMapper.get(scanEntity);
 		Scan scan = scanMapper.get(scanEntity);
 
-		scan.nearbyEntities.clear();
 		quadTree.getExact(scan.nearbyEntities, transform.position.x + worldConfiguration.width / 2f - scan.distance,
 			transform.position.y + worldConfiguration.height / 2f - scan.distance, 2f * scan.distance, 2f * scan.distance);
 	}

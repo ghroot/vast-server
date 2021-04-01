@@ -3,14 +3,14 @@ package com.vast.system;
 import com.artemis.Aspect;
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
+import com.artemis.EntitySubscription;
+import com.artemis.annotations.All;
 import com.artemis.io.JsonArtemisSerializer;
 import com.artemis.io.KryoArtemisSerializer;
 import com.artemis.io.SaveFileFormat;
 import com.artemis.managers.WorldSerializationManager;
 import com.artemis.utils.IntBag;
-import com.vast.component.Event;
-import com.vast.component.Time;
-import com.vast.component.Transient;
+import com.vast.component.*;
 import com.vast.data.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.util.concurrent.TimeUnit;
 
 public class WorldSerializationSystem extends BaseSystem {
 	private static final Logger logger = LoggerFactory.getLogger(WorldSerializationSystem.class);
@@ -28,6 +27,12 @@ public class WorldSerializationSystem extends BaseSystem {
 
 	private CreationManager creationManager;
 	private ComponentMapper<Event> eventMapper;
+	private ComponentMapper<Observer> observerMapper;
+	private ComponentMapper<Observed> observedMapper;
+	private ComponentMapper<Known> knownMapper;
+
+	@All(Observer.class)
+	private EntitySubscription observerSubscription;
 
 	private String snapshotFile;
 	private Metrics metrics;
@@ -77,6 +82,8 @@ public class WorldSerializationSystem extends BaseSystem {
 			return;
 		}
 
+		disconnectObservers();
+
 		long startTime = System.currentTimeMillis();
 		WorldSerializationManager worldSerializationManager = world.getSystem(WorldSerializationManager.class);
 		if (snapshotFile.endsWith(".json")) {
@@ -100,8 +107,35 @@ public class WorldSerializationSystem extends BaseSystem {
 		} catch (Exception exception) {
 			logger.error("Error saving world", exception);
 		}
+
+		reconnectObservers();
+
 		if (metrics != null) {
 			metrics.setLastSerializeTime(System.currentTimeMillis());
+		}
+	}
+
+	private void disconnectObservers() {
+		IntBag observerEntities = observerSubscription.getEntities();
+		for (int i = 0; i < observerEntities.size(); i++) {
+			int observerEntity = observerEntities.get(i);
+			Observer observer = observerMapper.get(observerEntity);
+			observedMapper.get(observer.observedEntity).observerEntity = -1;
+			for (int j = 0; j < observer.knowEntities.size(); j++) {
+				knownMapper.get(observer.knowEntities.get(j)).knownByEntities.removeValue(observerEntity);
+			}
+		}
+	}
+
+	private void reconnectObservers() {
+		IntBag observerEntities = observerSubscription.getEntities();
+		for (int i = 0; i < observerEntities.size(); i++) {
+			int observerEntity = observerEntities.get(i);
+			Observer observer = observerMapper.get(observerEntity);
+			observedMapper.get(observer.observedEntity).observerEntity = observerEntity;
+			for (int j = 0; j < observer.knowEntities.size(); j++) {
+				knownMapper.get(observer.knowEntities.get(j)).knownByEntities.add(observerEntity);
+			}
 		}
 	}
 
