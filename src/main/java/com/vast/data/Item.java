@@ -1,11 +1,13 @@
 package com.vast.data;
 
+import java.util.Set;
+
 public class Item {
 	private int id;
-	private String[] tags;
+	private Set<String> tags;
 	private String name;
 
-	public Item(int id, String[] tags, String name) {
+	public Item(int id, Set<String> tags, String name) {
 		this.id = id;
 		this.tags = tags;
 		this.name = name;
@@ -15,17 +17,8 @@ public class Item {
 		return id;
 	}
 
-	public String[] getTags() {
-		return tags;
-	}
-
 	public boolean hasTag(String tag) {
-		for (String aTag : tags) {
-			if (aTag.equals(tag)) {
-				return true;
-			}
-		}
-		return false;
+		return tags.contains(tag);
 	}
 
 	public String getName() {

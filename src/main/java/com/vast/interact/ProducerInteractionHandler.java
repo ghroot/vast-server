@@ -4,7 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.vast.component.*;
 import com.vast.data.Cost;
-import com.vast.data.Recipe;
+import com.vast.data.ItemRecipe;
 import com.vast.data.Recipes;
 import com.vast.network.Properties;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class ProducerInteractionHandler extends AbstractInteractionHandler {
 		Inventory playerInventory = inventoryMapper.get(avatarEntity);
 
 		if (producer.recipeId >= 0) {
-			Recipe recipe = recipes.getRecipe(producer.recipeId);
+			ItemRecipe recipe = recipes.getItemRecipe(producer.recipeId);
 
 			if (producerInventory.has(recipe.getItemId())) {
 				// Collect produced items

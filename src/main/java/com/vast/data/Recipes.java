@@ -14,26 +14,38 @@ public class Recipes {
 
 	private Items items;
 
-	private Map<Integer, Recipe> recipes;
+	private List<Recipe> allRecipes;
+	private List<ItemRecipe> itemRecipes;
+	private List<EntityRecipe> entityRecipes;
+	private Map<Integer, Recipe> recipesById;
 
 	public Recipes() {
-		recipes = new HashMap<>();
+		allRecipes = new ArrayList<>();
+		itemRecipes = new ArrayList<>();
+		entityRecipes = new ArrayList<>();
+		recipesById = new HashMap<>();
 	}
 
 	public Recipes(Items items) {
 		this.items = items;
 
-		recipes = new HashMap<>();
+		allRecipes = new ArrayList<>();
+		itemRecipes = new ArrayList<>();
+		entityRecipes = new ArrayList<>();
+		recipesById = new HashMap<>();
 	}
 
 	public Recipes(String fileName, Items items) {
 		this.items = items;
 		try {
-			recipes = new HashMap<>();
+			allRecipes = new ArrayList<>();
+			itemRecipes = new ArrayList<>();
+			entityRecipes = new ArrayList<>();
+			recipesById = new HashMap<>();
 			JSONArray recipesData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream(fileName),
 					Charset.defaultCharset()));
-			for (Iterator<Object> it = recipesData.iterator(); it.hasNext();) {
-				JSONObject recipeData = (JSONObject) it.next();
+			for (int i = 0; i < recipesData.length(); i++) {
+				JSONObject recipeData = (JSONObject) recipesData.get(i);
 				int id = -1;
 				String itemName = null;
 				float duration = 0;
@@ -63,14 +75,16 @@ public class Recipes {
 							break;
 					}
 				}
-				Recipe recipe = null;
 				if (itemName != null) {
-					recipe = new Recipe(id, costs, items.getItem(itemName).getId(), duration);
+					ItemRecipe itemRecipe = new ItemRecipe(id, costs, items.getItem(itemName).getId(), duration);
+					allRecipes.add(itemRecipe);
+					itemRecipes.add(itemRecipe);
+					recipesById.put(id, itemRecipe);
 				} else if (entityType != null) {
-					recipe = new Recipe(id, costs, entityType);
-				}
-				if (recipe != null) {
-					recipes.put(id, recipe);
+					EntityRecipe entityRecipe = new EntityRecipe(id, costs, entityType);
+					allRecipes.add(entityRecipe);
+					entityRecipes.add(entityRecipe);
+					recipesById.put(id, entityRecipe);
 				}
 			}
 		} catch (Exception exception) {
@@ -79,37 +93,27 @@ public class Recipes {
 	}
 
 	public List<Recipe> getAllRecipes() {
-		return new ArrayList<>(recipes.values());
+		return allRecipes;
 	}
 
-	public List<Recipe> getItemRecipes() {
-		List<Recipe> itemRecipes = new ArrayList<>();
-		for (Recipe recipe : recipes.values()) {
-			if (recipe.getItemId() >= 0) {
-				itemRecipes.add(recipe);
-			}
-		}
-
+	public List<ItemRecipe> getItemRecipes() {
 		return itemRecipes;
 	}
 
-	public List<Recipe> getEntityRecipes() {
-		List<Recipe> entityRecipes = new ArrayList<>();
-		for (Recipe recipe : recipes.values()) {
-			if (recipe.getEntityType() != null) {
-				entityRecipes.add(recipe);
-			}
-		}
+	public ItemRecipe getItemRecipe(int id) {
+		return (ItemRecipe) recipesById.get(id);
+	}
 
+	public List<EntityRecipe> getEntityRecipes() {
 		return entityRecipes;
 	}
 
-	public Recipe getRecipe(int id) {
-		return recipes.get(id);
+	public EntityRecipe getEntityRecipe(int id) {
+		return (EntityRecipe) recipesById.get(id);
 	}
 
 	public Recipe getRecipeByItemName(String itemName) {
-		for (Recipe recipe : recipes.values()) {
+		for (ItemRecipe recipe : itemRecipes) {
 			if (itemName.equals(items.getItem(recipe.getItemId()).getName())) {
 				return recipe;
 			}

@@ -3,6 +3,7 @@ package com.vast.order.handler.observer;
 import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.vast.component.*;
+import com.vast.data.EntityRecipe;
 import com.vast.data.Recipe;
 import com.vast.data.Recipes;
 import com.vast.network.Properties;
@@ -72,7 +73,7 @@ public class BuildOrderHandler extends AbstractOrderHandler<BuildOrderRequest> {
 		if (buildOrderRequest instanceof BuildStartOrderRequest) {
 			BuildStartOrderRequest buildStartOrderRequest = (BuildStartOrderRequest) buildOrderRequest;
 
-			Recipe recipe = recipes.getRecipe(buildStartOrderRequest.getRecipeId());
+			EntityRecipe recipe = recipes.getEntityRecipe(buildStartOrderRequest.getRecipeId());
 			Transform orderTransform = transformMapper.get(observerEntity);
 
 			Point2f buildPosition = new Point2f(orderTransform.position.x, orderTransform.position.y + 3f);

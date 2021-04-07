@@ -4,6 +4,7 @@ import com.artemis.ComponentMapper;
 import com.vast.component.Craft;
 import com.vast.component.Event;
 import com.vast.component.Inventory;
+import com.vast.data.ItemRecipe;
 import com.vast.data.Items;
 import com.vast.data.Recipe;
 import com.vast.data.Recipes;
@@ -46,7 +47,7 @@ public class CraftOrderHandler extends AbstractOrderHandler<CraftOrderRequest> {
 
 	@Override
 	public boolean startOrder(int avatarEntity, CraftOrderRequest craftOrderRequest) {
-		Recipe recipe = recipes.getRecipe(craftOrderRequest.getRecipeId());
+		ItemRecipe recipe = recipes.getItemRecipe(craftOrderRequest.getRecipeId());
 		Inventory inventory = inventoryMapper.get(avatarEntity);
 		if (inventory.has(recipe.getCosts())) {
 			craftMapper.create(avatarEntity).recipe = recipe;

@@ -12,51 +12,50 @@ import java.util.*;
 public class Items {
 	private static final Logger logger = LoggerFactory.getLogger(Items.class);
 
-	private Map<Integer, Item> items;
+	private List<Item> items;
+	private Map<Integer, Item> itemsById;
+	private Map<String, Item> itemsByName;
 
 	public Items() {
-		items = new HashMap<>();
+		items = new ArrayList<>();
+		itemsById = new HashMap<>();
+		itemsByName = new HashMap<>();
 	}
 
 	public Items(String fileName) {
 		try {
-			items = new HashMap<>();
 			JSONArray itemsData = new JSONArray(IOUtils.toString(getClass().getResourceAsStream(fileName), Charset.defaultCharset()));
-			for (Iterator<Object> it = itemsData.iterator(); it.hasNext();) {
-				JSONObject itemData = (JSONObject) it.next();
+			items = new ArrayList<>();
+			itemsById = new HashMap<>();
+			itemsByName = new HashMap<>();
+			for (int i = 0; i < itemsData.length(); i++) {
+				JSONObject itemData = (JSONObject) itemsData.get(i);
 				int id = itemData.getInt("id");
 				JSONArray tagsArray = itemData.getJSONArray("tags");
-				String[] tags = new String[tagsArray.length()];
-				for (int i = 0; i < tags.length; i++) {
-					tags[i] = tagsArray.optString(i);
+				Set<String> tags = new HashSet<>();
+				for (int j = 0; j < tagsArray.length(); j++) {
+					tags.add(tagsArray.optString(j));
 				}
 				String name = itemData.getString("name");
 				Item item = new Item(id, tags, name);
-				items.put(id, item);
+				items.add(item);
+				itemsById.put(id, item);
+				itemsByName.put(name, item);
 			}
 		} catch (Exception exception) {
 			logger.error("Error parsing items", exception);
 		}
 	}
 
-	public void addItem(Item item) {
-		items.put(item.getId(), item);
-	}
-
 	public List<Item> getAllItems() {
-		return new ArrayList<>(items.values());
+		return items;
 	}
 
 	public Item getItem(int id) {
-		return items.get(id);
+		return itemsById.get(id);
 	}
 
 	public Item getItem(String name) {
-		for (Item item : items.values()) {
-			if (item.getName().equals(name)) {
-				return item;
-			}
-		}
-		return null;
+		return itemsByName.get(name);
 	}
 }

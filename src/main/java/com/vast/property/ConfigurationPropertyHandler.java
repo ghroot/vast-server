@@ -35,10 +35,10 @@ public class ConfigurationPropertyHandler extends AbstractPropertyHandler<Short,
 		}
 		configurationData.set((byte) 0, itemStrings);
 
-		List<Recipe> itemsRecipes = recipes.getItemRecipes();
+		List<ItemRecipe> itemsRecipes = recipes.getItemRecipes();
 		String[] itemRecipeStrings = new String[itemsRecipes.size()];
 		for (int i = 0; i < itemsRecipes.size(); i++) {
-			Recipe itemRecipe = itemsRecipes.get(i);
+			ItemRecipe itemRecipe = itemsRecipes.get(i);
 			StringBuilder recipeStringBuilder = new StringBuilder();
 			recipeStringBuilder.append(itemRecipe.getId());
 			recipeStringBuilder.append(DATA_FIELD_DELIMITER).append(itemRecipe.getItemId());
@@ -52,10 +52,10 @@ public class ConfigurationPropertyHandler extends AbstractPropertyHandler<Short,
 		}
 		configurationData.set((byte) 1, itemRecipeStrings);
 
-		List<Recipe> entityRecipes = recipes.getEntityRecipes();
+		List<EntityRecipe> entityRecipes = recipes.getEntityRecipes();
 		String[] entityRecipeStrings = new String[entityRecipes.size()];
 		for (int i = 0; i < entityRecipes.size(); i++) {
-			Recipe entityRecipe = entityRecipes.get(i);
+			EntityRecipe entityRecipe = entityRecipes.get(i);
 			StringBuilder recipeStringBuilder = new StringBuilder();
 			recipeStringBuilder.append(entityRecipe.getId());
 			recipeStringBuilder.append(DATA_FIELD_DELIMITER).append(entityRecipe.getEntityType());

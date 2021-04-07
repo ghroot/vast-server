@@ -5,6 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
 import com.vast.component.*;
+import com.vast.data.ItemRecipe;
 import com.vast.data.Items;
 import com.vast.data.Recipe;
 import com.vast.data.Recipes;
@@ -39,8 +40,9 @@ public class ProducerSystem extends IteratingSystem {
 		Producer producer = producerMapper.get(producerEntity);
 		Inventory inventory = inventoryMapper.get(producerEntity);
 
+		ItemRecipe recipe = recipes.getItemRecipe(producer.recipeId);
+
 		if (producer.producing) {
-			Recipe recipe = recipes.getRecipe(producer.recipeId);
 			if (producer.time >= recipe.getDuration()) {
 				inventory.add(recipe.getItemId());
 				syncMapper.create(producerEntity).markPropertyAsDirty(Properties.INVENTORY);
@@ -53,7 +55,6 @@ public class ProducerSystem extends IteratingSystem {
 				syncMapper.create(producerEntity).markPropertyAsDirty(Properties.PROGRESS);
 			}
 		} else if (producer.recipeId >= 0) {
-			Recipe recipe = recipes.getRecipe(producer.recipeId);
 			if (inventory.has(recipe.getCosts())) {
 				inventory.remove(recipe.getCosts());
 				syncMapper.create(producerEntity).markPropertyAsDirty(Properties.INVENTORY);
