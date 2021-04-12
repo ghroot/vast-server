@@ -13,14 +13,17 @@ import java.awt.geom.Point2D;
 public class MonitorCanvas extends JComponent {
     private final MonitorWorld monitorWorld;
 
-    public double translateX;
-    public double translateY;
-    public double scale;
-    public AffineTransform at;
+    private Dimension preferredSize;
+    private double translateX;
+    private double translateY;
+    private double scale;
+    private AffineTransform at;
+    private Rectangle lastClipBounds;
 
     public MonitorCanvas(MonitorWorld monitorWorld) {
         this.monitorWorld = monitorWorld;
 
+        preferredSize = new Dimension(monitorWorld.getSize().x, monitorWorld.getSize().y);
         translateX = 0;
         translateY = 0;
         scale = 1;
@@ -28,6 +31,30 @@ public class MonitorCanvas extends JComponent {
         PanningHandler panningHandler = new PanningHandler(this);
         addMouseListener(panningHandler);
         addMouseMotionListener(panningHandler);
+    }
+
+    public Dimension getPreferredSize() {
+        return preferredSize;
+    }
+
+    public double getTranslateX() {
+        return translateX;
+    }
+
+    public double getTranslateY() {
+        return translateY;
+    }
+
+    public double getScale() {
+        return scale;
+    }
+
+    public void setScale(double scale) {
+        this.scale = scale;
+    }
+
+    public Rectangle getLastClipBounds() {
+        return lastClipBounds;
     }
 
     @Override
@@ -53,57 +80,69 @@ public class MonitorCanvas extends JComponent {
             monitorWorld.paint(g2d);
         }
 
+        lastClipBounds = g2d.getClipBounds();
+
         g2d.setTransform(saveTransform);
     }
 
-    public Dimension getPreferredSize() {
-        synchronized (monitorWorld) {
-            return new Dimension(monitorWorld.getSize().x, monitorWorld.getSize().y);
-        }
+    public Point convertPointToWorld(Point point) {
+        double x = point.x;
+        double y = point.y;
+
+        x -= (1f - scale) * getWidth() / 2;
+        y -= (1f - scale) * getHeight() / 2;
+
+        x -= translateX * scale;
+        y -= translateY * scale;
+
+        x /= scale;
+        y /= scale;
+
+        return new Point((int) Math.round(x), (int) Math.round(y));
     }
 
     class PanningHandler extends MouseAdapter implements MouseListener, MouseMotionListener {
-        private MonitorCanvas canvas;
+        private MonitorCanvas monitorCanvas;
 
         private AffineTransform initialTransform;
         private Point2D pressedPoint;
         private Point2D canvasStartPoint;
 
-        public PanningHandler(MonitorCanvas canvas) {
-            this.canvas = canvas;
+        public PanningHandler(MonitorCanvas monitorCanvas) {
+            this.monitorCanvas = monitorCanvas;
 
             canvasStartPoint = new Point();
         }
 
         @Override
-        public void mousePressed(MouseEvent e) {
+        public void mousePressed(MouseEvent mouseEvent) {
             try {
-                pressedPoint = canvas.at.inverseTransform(e.getPoint(), null);
+                pressedPoint = monitorCanvas.at.inverseTransform(mouseEvent.getPoint(), null);
             }
             catch (NoninvertibleTransformException exception) {
                 return;
             }
 
-            initialTransform = canvas.at;
-            canvasStartPoint.setLocation(canvas.translateX, canvas.translateY);
+            initialTransform = monitorCanvas.at;
+            canvasStartPoint.setLocation(monitorCanvas.translateX, monitorCanvas.translateY);
         }
 
         @Override
-        public void mouseDragged(MouseEvent e) {
+        public void mouseDragged(MouseEvent mouseEvent) {
             Point2D mousePoint;
             try {
-                mousePoint = initialTransform.inverseTransform(e.getPoint(), null);
+                mousePoint = initialTransform.inverseTransform(mouseEvent.getPoint(), null);
             }
             catch (NoninvertibleTransformException exception) {
                 return;
             }
 
-            canvas.translateX = canvasStartPoint.getX() +
-                    (mousePoint.getX() - pressedPoint.getX()) * initialTransform.getScaleX() / canvas.scale;
-            canvas.translateY = canvasStartPoint.getY() +
-                    (mousePoint.getY() - pressedPoint.getY()) * initialTransform.getScaleY() / canvas.scale;
+            monitorCanvas.translateX = canvasStartPoint.getX() +
+                    (mousePoint.getX() - pressedPoint.getX()) * initialTransform.getScaleX() / monitorCanvas.scale;
+            monitorCanvas.translateY = canvasStartPoint.getY() +
+                    (mousePoint.getY() - pressedPoint.getY()) * initialTransform.getScaleY() / monitorCanvas.scale;
 
-            canvas.repaint();
+            monitorCanvas.repaint();
         }
     }
 }

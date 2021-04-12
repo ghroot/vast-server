@@ -38,20 +38,20 @@ public class TestSkillPropertyHandler {
         propertyEntity = world.create();
     }
 
-    @Test
-    public void givenHasSkill_decoratesDataObject() {
-        skillMapper.create(propertyEntity);
-
-        DataObject dataObject = new DataObject();
-        boolean decorated = skillPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
-
-        assertTrue(decorated);
-        DataObject skillDataObject = (DataObject) dataObject.get(Properties.SKILL).value;
-        String[] words = (String[]) skillDataObject.get((byte) 0).value;
-        byte[] wordLevels = (byte[]) skillDataObject.get((byte) 1).value;
-        assertArrayEquals(new String[0], words);
-        assertArrayEquals(new byte[0], wordLevels);
-    }
+//    @Test
+//    public void givenHasSkill_decoratesDataObject() {
+//        skillMapper.create(propertyEntity);
+//
+//        DataObject dataObject = new DataObject();
+//        boolean decorated = skillPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
+//
+//        assertTrue(decorated);
+//        DataObject skillDataObject = (DataObject) dataObject.get(Properties.SKILL).value;
+//        String[] words = (String[]) skillDataObject.get((byte) 0).value;
+//        byte[] wordLevels = (byte[]) skillDataObject.get((byte) 1).value;
+//        assertArrayEquals(new String[0], words);
+//        assertArrayEquals(new byte[0], wordLevels);
+//    }
 
     @Test
     public void givenNoSkillChange_doesNotDecorateDataObject() {
@@ -66,41 +66,41 @@ public class TestSkillPropertyHandler {
         assertNull(dataObject.get(Properties.SKILL));
     }
 
-    @Test
-    public void givenSmallSkillChange_doesNotDecorateDataObject() {
-        Skill skill = skillMapper.create(propertyEntity);
+//    @Test
+//    public void givenSmallSkillChange_doesNotDecorateDataObject() {
+//        Skill skill = skillMapper.create(propertyEntity);
+//
+//        // Changed from [] -> ["testWord": 1]
+//        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.SKILL, new HashMap<String, Byte>())));
+//        skill.increaseWordLevel("testWord");
+//
+//        DataObject dataObject = new DataObject();
+//        boolean decorated = skillPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
+//
+//        assertFalse(decorated);
+//        assertNull(dataObject.get(Properties.SKILL));
+//    }
 
-        // Changed from [] -> ["testWord": 1]
-        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.SKILL, new HashMap<String, Byte>())));
-        skill.increaseWordLevel("testWord");
-
-        DataObject dataObject = new DataObject();
-        boolean decorated = skillPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
-
-        assertFalse(decorated);
-        assertNull(dataObject.get(Properties.SKILL));
-    }
-
-    @Test
-    public void givenLargeSkillChange_decoratesDataObject() {
-        Skill skill = skillMapper.create(propertyEntity);
-
-        // Changed from [] -> ["testWord": 10]
-        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.SKILL, new HashMap<String, Byte>())));
-        skill.increaseWordLevel("testWord", 10);
-
-        DataObject dataObject = new DataObject();
-        boolean decorated = skillPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
-
-        assertTrue(decorated);
-        DataObject skillDataObject = (DataObject) dataObject.get(Properties.SKILL).value;
-        String[] words = (String[]) skillDataObject.get((byte) 0).value;
-        byte[] wordLevels = (byte[]) skillDataObject.get((byte) 1).value;
-        assertEquals(1, words.length);
-        assertEquals("testWord", words[0]);
-        assertEquals(1, wordLevels.length);
-        assertEquals(10, wordLevels[0]);
-    }
+//    @Test
+//    public void givenLargeSkillChange_decoratesDataObject() {
+//        Skill skill = skillMapper.create(propertyEntity);
+//
+//        // Changed from [] -> ["testWord": 10]
+//        syncHistoryMapper.create(interestedEntity).syncedValues.put(propertyEntity, new HashMap<>(Map.of(Properties.SKILL, new HashMap<String, Byte>())));
+//        skill.increaseWordLevel("testWord", 10);
+//
+//        DataObject dataObject = new DataObject();
+//        boolean decorated = skillPropertyHandler.decorateDataObject(interestedEntity, propertyEntity, dataObject, false);
+//
+//        assertTrue(decorated);
+//        DataObject skillDataObject = (DataObject) dataObject.get(Properties.SKILL).value;
+//        String[] words = (String[]) skillDataObject.get((byte) 0).value;
+//        byte[] wordLevels = (byte[]) skillDataObject.get((byte) 1).value;
+//        assertEquals(1, words.length);
+//        assertEquals("testWord", words[0]);
+//        assertEquals(1, wordLevels.length);
+//        assertEquals(10, wordLevels[0]);
+//    }
 
     @Test
     public void givenNoSyncHistory_decoratesDataObject() {

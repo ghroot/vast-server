@@ -104,7 +104,7 @@ public class CreationManager extends BaseSystem {
 					createRock(new Point2f(x, y));
 				}
 				if (noise2.GetWhiteNoise(x, y) > 0.999f) {
-					createAnimalGroup(new Point2f(x, y), random.nextFloat() < 0.5f ? "rabbit" : "deer");
+//					createAnimalGroup(new Point2f(x, y), random.nextFloat() < 0.5f ? "rabbit" : "deer");
 				}
 			}
 		}

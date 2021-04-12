@@ -1,7 +1,6 @@
 package com.vast.system;
 
-import com.artemis.Aspect;
-import com.artemis.systems.IntervalSystem;
+import com.artemis.BaseSystem;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.vast.VastWorld;
@@ -9,14 +8,17 @@ import com.vast.monitor.Monitor;
 
 import javax.swing.*;
 
-public class MonitorSystem extends IntervalSystem {
+public class MonitorSystem extends BaseSystem {
     private VastWorld vastWorld;
+    private float interval;
 
+    private float acc;
+    private float intervalDelta;
     private Monitor monitor;
 
-    public MonitorSystem(VastWorld vastWorld) {
-        super(Aspect.all(), 1f / 30);
+    public MonitorSystem(VastWorld vastWorld, float interval) {
         this.vastWorld = vastWorld;
+        this.interval = interval;
     }
 
     @Override
@@ -43,5 +45,21 @@ public class MonitorSystem extends IntervalSystem {
         if (monitor != null) {
             monitor.sync();
         }
+    }
+
+    @Override
+    protected boolean checkProcessing() {
+        acc += getTimeDelta();
+        if(acc >= interval) {
+            acc -= interval;
+            intervalDelta = (acc - intervalDelta);
+
+            return true;
+        }
+        return false;
+    }
+
+    protected float getTimeDelta() {
+        return world.getDelta();
     }
 }

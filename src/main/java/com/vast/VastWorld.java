@@ -3,7 +3,6 @@ package com.vast;
 import com.artemis.*;
 import com.artemis.link.EntityLinkManager;
 import com.artemis.managers.WorldSerializationManager;
-import com.artemis.utils.IntBag;
 import com.vast.behaviour.AdultAnimalBehaviour;
 import com.vast.behaviour.Behaviour;
 import com.vast.behaviour.HumanBehaviour;
@@ -151,7 +150,7 @@ public class VastWorld implements Runnable {
 			new EntityLinkManager()
 		);
 		if (showMonitor) {
-			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOWEST, new MonitorSystem(this));
+			worldConfigurationBuilder.with(WorldConfigurationBuilder.Priority.LOWEST, new MonitorSystem(this, 1f / 30));
 			worldConfigurationBuilder.register(new ProfiledInvocationStrategy(metrics));
 		}
 		world = new World(worldConfigurationBuilder.build());
@@ -203,12 +202,16 @@ public class VastWorld implements Runnable {
 		return timeModifier;
 	}
 
+	public Metrics getMetrics() {
+		return metrics;
+	}
+
 	public WorldConfiguration getWorldConfiguration() {
 		return worldConfiguration;
 	}
 
-	public Metrics getMetrics() {
-		return metrics;
+	public Items getItems() {
+		return items;
 	}
 
 	public QuadTree getQuadTree() {
@@ -217,35 +220,5 @@ public class VastWorld implements Runnable {
 
 	public World getWorld() {
 		return world;
-	}
-
-	public <T extends Component> ComponentMapper<T> getComponentMapper(Class<T> type) {
-		return world.getMapper(type);
-	}
-
-	public EntitySubscription getSubscription(Aspect.Builder builder) {
-		return world.getAspectSubscriptionManager().get(builder);
-	}
-
-	public int[] getEntities(Aspect.Builder builder) {
-		IntBag entitiesBag = world.getAspectSubscriptionManager().get(builder).getEntities();
-		int[] entities = new int[entitiesBag.size()];
-		for (int i = 0; i < entities.length; i++) {
-			entities[i] = entitiesBag.get(i);
-		}
-
-		return entities;
-	}
-
-	public boolean doesEntityExist(int entity) {
-		return world.getEntityManager().isActive(entity);
-	}
-
-	public Items getItems() {
-		return items;
-	}
-
-	public CreationManager getCreationManager() {
-		return world.getSystem(CreationManager.class);
 	}
 }

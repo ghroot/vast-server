@@ -30,7 +30,7 @@ public class Monitor extends JFrame implements ActionListener {
 
     private VastWorld vastWorld;
 
-    private MonitorCanvas canvas;
+    private MonitorCanvas monitorCanvas;
     private JSlider zoomSlider;
 
     private final ModelData modelData;
@@ -43,42 +43,50 @@ public class Monitor extends JFrame implements ActionListener {
 
     private Timer timer;
 
-    private final Map<String, Boolean> debugSettings = new HashMap<>();
+    private final Map<String, Boolean> debugSettings;
     private final MonitorWorld monitorWorld;
     private Point2D clickPoint;
     private Point2D movePoint;
-    private int entityToSelect = -1;
+    private int entityToSelect;
 
     public Monitor(VastWorld vastWorld) {
         super("Vast Monitor");
         this.vastWorld = vastWorld;
 
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setSize(WIDTH, HEIGHT);
-
+        debugSettings = new HashMap<>();
         monitorWorld = new MonitorWorld(debugSettings);
         modelData = new ModelData();
+        entityToSelect = -1;
 
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setSize(WIDTH, HEIGHT);
+        createCanvas();
         setupUI();
         setVisible(true);
         startTimer();
     }
 
-    private void setupUI() {
-        canvas = new MonitorCanvas(monitorWorld);
-        canvas.addMouseListener(new MouseAdapter() {
+    private void createCanvas() {
+        monitorCanvas = new MonitorCanvas(monitorWorld);
+        monitorCanvas.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                clickPoint = convertPointFromEventToWorld(e.getPoint());
+            public void mouseClicked(MouseEvent mouseEvent) {
+                synchronized (monitorWorld) {
+                    clickPoint = monitorCanvas.convertPointToWorld(mouseEvent.getPoint());
+                }
             }
         });
-        canvas.addMouseMotionListener(new MouseAdapter() {
+        monitorCanvas.addMouseMotionListener(new MouseAdapter() {
             @Override
-            public void mouseMoved(MouseEvent e) {
-                movePoint = convertPointFromEventToWorld(e.getPoint());
+            public void mouseMoved(MouseEvent mouseEvent) {
+                synchronized (monitorWorld) {
+                    movePoint = monitorCanvas.convertPointToWorld(mouseEvent.getPoint());
+                }
             }
         });
+    }
 
+    private void setupUI() {
         JPanel topPanel = new JPanel(new BorderLayout());
 
         JPanel toggleContainer = new JPanel(new GridBagLayout());
@@ -105,8 +113,8 @@ public class Monitor extends JFrame implements ActionListener {
         zoomSlider.addChangeListener(e -> {
             JSlider slider = (JSlider) e.getSource();
             int zoomPercent = slider.getValue();
-            canvas.scale = Math.max(0.00001, zoomPercent / 100.0);
-            canvas.repaint();
+            monitorCanvas.setScale(Math.max(0.00001, zoomPercent / 100.0));
+            monitorCanvas.repaint();
         });
         topPanel.add(zoomSlider, BorderLayout.EAST);
 
@@ -149,7 +157,7 @@ public class Monitor extends JFrame implements ActionListener {
         JSplitPane splitPanel3 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         JSplitPane splitPanel4 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
-        splitPanel3.setLeftComponent(canvas);
+        splitPanel3.setLeftComponent(monitorCanvas);
         splitPanel3.setRightComponent(systemMetricsScrollPanel);
 
         splitPanel2.setLeftComponent(splitPanel4);
@@ -166,22 +174,6 @@ public class Monitor extends JFrame implements ActionListener {
         getContentPane().add(splitPanel1);
 
         getContentPane().requestFocusInWindow();
-    }
-
-    private Point convertPointFromEventToWorld(Point point) {
-        double x = point.x;
-        double y = point.y;
-
-        x -= (1f - canvas.scale) * canvas.getWidth() / 2;
-        y -= (1f - canvas.scale) * canvas.getHeight() / 2;
-
-        x -= canvas.translateX * canvas.scale;
-        y -= canvas.translateY * canvas.scale;
-
-        x /= canvas.scale;
-        y /= canvas.scale;
-
-        return new Point((int) Math.round(x), (int) Math.round(y));
     }
 
     private JToggleButton createDebugSettingToggleButton(String name) {
@@ -214,24 +206,19 @@ public class Monitor extends JFrame implements ActionListener {
         int selectedEntity;
         // vastWorld -> monitorWorld
         synchronized (monitorWorld) {
-            monitorWorld.sync(vastWorld, clickPoint, movePoint, entityToSelect);
+            monitorWorld.sync(vastWorld, monitorCanvas, clickPoint, movePoint, entityToSelect);
             selectedEntity = monitorWorld.getSelectedMonitorEntity();
             clickPoint = null;
-
-            if (entityToSelect >= 0) {
-                synchronized (this) {
-                    entityToSelect = -1;
-                }
-            }
+            entityToSelect = -1;
         }
 
         // vastWorld -> modelData
         synchronized (modelData) {
             Map<String, String> worldInfo = new HashMap<>();
             worldInfo.put("World size", "" + vastWorld.getWorldConfiguration().width + " x " + vastWorld.getWorldConfiguration().height);
-            worldInfo.put("Total entities", "" + vastWorld.getEntities(Aspect.all(Transform.class)).length);
-            worldInfo.put("Static entities", "" + vastWorld.getEntities(Aspect.all(Static.class)).length);
-            worldInfo.put("Scanning entities", "" + vastWorld.getEntities(Aspect.all(Scan.class)).length);
+            worldInfo.put("Total entities", "" + vastWorld.getWorld().getAspectSubscriptionManager().get(Aspect.all(Transform.class)).getEntities().size());
+            worldInfo.put("Static entities", "" + vastWorld.getWorld().getAspectSubscriptionManager().get(Aspect.all(Static.class)).getEntities().size());
+            worldInfo.put("Scanning entities", "" + vastWorld.getWorld().getAspectSubscriptionManager().get(Aspect.all(Scan.class)).getEntities().size());
             if (vastWorld.getMetrics() != null) {
                 worldInfo.put("Fps", "" + vastWorld.getMetrics().getFps());
                 worldInfo.put("Collisions", vastWorld.getMetrics().getNumberOfCollisions() + " / " + vastWorld.getMetrics().getNumberOfCollisionChecks());

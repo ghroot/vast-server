@@ -1,6 +1,8 @@
 package com.vast.monitor;
 
 import com.artemis.Aspect;
+import com.artemis.ComponentMapper;
+import com.artemis.utils.IntBag;
 import com.vast.VastWorld;
 import com.vast.component.Observer;
 import com.vast.component.*;
@@ -19,28 +21,57 @@ public class MonitorWorld {
 
     private Map<String, Boolean> debugSettings;
 
-    private Point2i size = new Point2i();
+    private Point2i size;
     private Map<Integer, MonitorEntity> monitorEntities;
     private MonitorEntity selectedMonitorEntity;
     private long selectedTime;
     private MonitorEntity hoveredMonitorEntity;
     private List<Rectangle> quadRects;
-    private List<MonitorEntity> monitoryEntitiesOnScreen;
 
     public MonitorWorld(Map<String, Boolean> debugSettings) {
         this.debugSettings = debugSettings;
+
+        size = new Point2i();
         monitorEntities = new HashMap<>();
-        monitoryEntitiesOnScreen = new ArrayList<>();
+        quadRects = new ArrayList<>();
     }
 
     public int getSelectedMonitorEntity() {
         return selectedMonitorEntity != null ? selectedMonitorEntity.entity : -1;
     }
 
-    public void sync(VastWorld vastWorld, Point2D clickPoint, Point2D movePoint, int entityToSelect) {
+    public void sync(VastWorld vastWorld, MonitorCanvas monitorCanvas, Point2D clickPoint, Point2D movePoint, int entityToSelect) {
         size.set(vastWorld.getWorldConfiguration().width * SCALE, vastWorld.getWorldConfiguration().height * SCALE);
 
-        Set<Integer> entities = Arrays.stream(vastWorld.getEntities(Aspect.all(Transform.class))).boxed().collect(Collectors.toSet());
+        Rectangle lastCanvasClipBounds = monitorCanvas.getLastClipBounds();
+        Set<Integer> entities;
+        if (lastCanvasClipBounds != null) {
+            float distanceX = lastCanvasClipBounds.width / 2f;
+            float distanceY = lastCanvasClipBounds.height / 2f;
+            distanceX /= SCALE;
+            distanceY /= SCALE;
+
+            float x = (lastCanvasClipBounds.width / 2f) / SCALE * (float) monitorCanvas.getScale() - (float) monitorCanvas.getTranslateX() / SCALE;
+            float y = (lastCanvasClipBounds.height / 2f) / SCALE * (float) monitorCanvas.getScale() - (float) monitorCanvas.getTranslateY() / SCALE;
+            y = -y;
+            x -= vastWorld.getWorldConfiguration().width / 2f;
+            y += vastWorld.getWorldConfiguration().height / 2f;
+
+            IntBag nearbyEntities = new IntBag();
+            vastWorld.getQuadTree().get(nearbyEntities, x + vastWorld.getWorldConfiguration().width / 2f - distanceX,
+                    y + vastWorld.getWorldConfiguration().height / 2f - distanceY, 2f * distanceX, 2f * distanceY);
+
+            // Include all observers for now
+            IntBag observerEntities = vastWorld.getWorld().getAspectSubscriptionManager().get(Aspect.all(Observer.class)).getEntities();
+            nearbyEntities.addAll(observerEntities);
+
+            int[] nearbyEntitiesData = nearbyEntities.getData();
+            int[] nearbyEntitiesArray = new int[nearbyEntities.size()];
+            System.arraycopy(nearbyEntitiesData, 0, nearbyEntitiesArray, 0, nearbyEntitiesArray.length);
+            entities = Arrays.stream(nearbyEntitiesArray).boxed().collect(Collectors.toSet());
+        } else {
+            entities = new HashSet<>();
+        }
 
         if (clickPoint != null) {
             MonitorEntity closestMonitorEntity = getMonitorEntityClosestTo(clickPoint);
@@ -76,6 +107,17 @@ public class MonitorWorld {
             hoveredMonitorEntity = getMonitorEntityClosestTo(movePoint);
         }
 
+        ComponentMapper<Type> typeMapper = vastWorld.getWorld().getMapper(Type.class);
+        ComponentMapper<Transform> transformMapper = vastWorld.getWorld().getMapper(Transform.class);
+        ComponentMapper<Collision> collisionMapper = vastWorld.getWorld().getMapper(Collision.class);
+        ComponentMapper<Scan> scanMapper = vastWorld.getWorld().getMapper(Scan.class);
+        ComponentMapper<Path> pathMapper = vastWorld.getWorld().getMapper(Path.class);
+        ComponentMapper<Interact> interactMapper = vastWorld.getWorld().getMapper(Interact.class);
+        ComponentMapper<Observed> observedMapper = vastWorld.getWorld().getMapper(Observed.class);
+        ComponentMapper<Avatar> avatarMapper = vastWorld.getWorld().getMapper(Avatar.class);
+        ComponentMapper<Observer> observerMapper = vastWorld.getWorld().getMapper(Observer.class);
+        ComponentMapper<Static> staticMapper = vastWorld.getWorld().getMapper(Static.class);
+
         monitorEntities.entrySet().removeIf(entry -> !entities.contains(entry.getValue().entity));
         for (int entity : entities) {
             MonitorEntity monitorEntity;
@@ -83,72 +125,82 @@ public class MonitorWorld {
                 monitorEntity = monitorEntities.get(entity);
             } else {
                 monitorEntity = new MonitorEntity(entity);
+
+                monitorEntity.type = typeMapper.get(entity).type;
+
+                Collision collision = collisionMapper.get(entity);
+                if (collision != null) {
+                    monitorEntity.collisionRadius = (int) (collision.radius * SCALE);
+                } else {
+                    monitorEntity.collisionRadius = 0;
+                }
+
+                monitorEntity.isStatic = staticMapper.has(entity);
+
                 monitorEntities.put(entity, monitorEntity);
             }
-            monitorEntity.type = vastWorld.getComponentMapper(com.vast.component.Type.class).get(entity).type;
-            Point2f position = vastWorld.getComponentMapper(Transform.class).get(entity).position;
-            monitorEntity.position = new Point2i(size.x / 2 + (int) (position.x * SCALE),
-                    size.y / 2 - (int) (position.y * SCALE));
 
-            if (vastWorld.getComponentMapper(Collision.class).has(entity)) {
-                monitorEntity.collisionRadius = (int) (vastWorld.getComponentMapper(Collision.class).get(entity).radius * SCALE);
-            } else {
-                monitorEntity.collisionRadius = 0;
+            if (monitorEntity.position == null || !monitorEntity.isStatic) {
+                Transform transform = transformMapper.get(entity);
+                Point2f position = transform.position;
+                monitorEntity.position = new Point2i(size.x / 2 + (int) (position.x * SCALE),
+                        size.y / 2 - (int) (position.y * SCALE));
             }
 
-            if (vastWorld.getComponentMapper(Scan.class).has(entity) &&
-                    (selectedMonitorEntity == null || monitorEntity == selectedMonitorEntity ||
-                            !vastWorld.getComponentMapper(Scan.class).has(selectedMonitorEntity.entity))) {
-                monitorEntity.scanDistance = (int) (vastWorld.getComponentMapper(Scan.class).get(entity).distance * SCALE);
-            } else {
-                monitorEntity.scanDistance = 0;
-            }
-
-            if (vastWorld.getComponentMapper(Path.class).has(entity)) {
-                Point2f targetPosition = vastWorld.getComponentMapper(Path.class).get(entity).targetPosition;
-                monitorEntity.pathPosition = new Point2i(size.x / 2 + (int) (targetPosition.x * SCALE),
-                        size.y / 2 - (int) (targetPosition.y * SCALE));
-            } else {
-                monitorEntity.pathPosition = null;
-            }
-
-            if (vastWorld.getComponentMapper(Interact.class).has(entity)) {
-                int interactEntity = vastWorld.getComponentMapper(Interact.class).get(entity).entity;
-                if (interactEntity >= 0) {
-                    Point2f interactPosition = vastWorld.getComponentMapper(Transform.class).get(interactEntity).position;
-                    monitorEntity.interactPosition = new Point2i(size.x / 2 + (int) (interactPosition.x * SCALE),
-                            size.y / 2 - (int) (interactPosition.y * SCALE));
+            if (!monitorEntity.isStatic) {
+                Scan scan = scanMapper.get(entity);
+                if (scan != null && (selectedMonitorEntity == null || monitorEntity == selectedMonitorEntity ||
+                        !scanMapper.has(selectedMonitorEntity.entity))) {
+                    monitorEntity.scanDistance = (int) (scan.distance * SCALE);
+                } else {
+                    monitorEntity.scanDistance = 0;
                 }
-                else {
+
+                Path path = pathMapper.get(entity);
+                if (path != null) {
+                    Point2f targetPosition = path.targetPosition;
+                    monitorEntity.pathPosition = new Point2i(size.x / 2 + (int) (targetPosition.x * SCALE),
+                            size.y / 2 - (int) (targetPosition.y * SCALE));
+                } else {
+                    monitorEntity.pathPosition = null;
+                }
+
+                Interact interact = interactMapper.get(entity);
+                if (interact != null) {
+                    if (interact.entity >= 0) {
+                        Point2f interactPosition = transformMapper.get(interact.entity).position;
+                        monitorEntity.interactPosition = new Point2i(size.x / 2 + (int) (interactPosition.x * SCALE),
+                                size.y / 2 - (int) (interactPosition.y * SCALE));
+                    } else {
+                        monitorEntity.interactPosition = null;
+                    }
+                } else {
                     monitorEntity.interactPosition = null;
                 }
-            } else {
-                monitorEntity.interactPosition = null;
-            }
 
-            if (vastWorld.getComponentMapper(Observed.class).has(entity) &&
-                    vastWorld.getComponentMapper(Observed.class).get(entity).observerEntity >= 0) {
-                Point2f observedPosition = vastWorld.getComponentMapper(Transform.class).get(
-                        vastWorld.getComponentMapper(Observed.class).get(entity).observerEntity).position;
-                monitorEntity.observedPosition = new Point2i(size.x / 2 + (int) (observedPosition.x * SCALE),
-                        size.y / 2 - (int) (observedPosition.y * SCALE));
-            } else {
-                monitorEntity.observedPosition = null;
-            }
+                Avatar avatar = avatarMapper.get(entity);
+                if (avatar != null) {
+                    monitorEntity.name = avatar.name;
 
-            if (vastWorld.getComponentMapper(Avatar.class).has(entity)) {
-                monitorEntity.name = vastWorld.getComponentMapper(Avatar.class).get(entity).name;
-            } else {
-                monitorEntity.name = null;
+                    Observed observed = observedMapper.get(entity);
+                    if (observed != null && observed.observerEntity >= 0) {
+                        Point2f observedPosition = transformMapper.get(observed.observerEntity).position;
+                        monitorEntity.observedPosition = new Point2i(size.x / 2 + (int) (observedPosition.x * SCALE),
+                                size.y / 2 - (int) (observedPosition.y * SCALE));
+                    } else {
+                        monitorEntity.observedPosition = null;
+                    }
+                } else {
+                    monitorEntity.name = null;
+                }
             }
 
             if (selectedMonitorEntity != null) {
-                if (vastWorld.getComponentMapper(Observer.class).has(selectedMonitorEntity.entity)) {
-                    Observer observer = vastWorld.getComponentMapper(Observer.class).get(selectedMonitorEntity.entity);
+                if (observerMapper.has(selectedMonitorEntity.entity)) {
+                    Observer observer = observerMapper.get(selectedMonitorEntity.entity);
                     monitorEntity.colored = observer.knowEntities.contains(entity);
-                } else if (vastWorld.getComponentMapper(Scan.class).has(selectedMonitorEntity.entity)) {
-                    Scan scan = vastWorld.getComponentMapper(Scan.class).get(selectedMonitorEntity.entity);
-                    monitorEntity.colored = scan.nearbyEntities.contains(entity);
+                } else if (scanMapper.has(selectedMonitorEntity.entity)) {
+                    monitorEntity.colored = scanMapper.get(selectedMonitorEntity.entity).nearbyEntities.contains(entity);
                 } else {
                     monitorEntity.colored = true;
                 }
@@ -157,12 +209,13 @@ public class MonitorWorld {
             }
         }
 
-        List<Rectangle> newQuadRects = new ArrayList<>();
-        addQuadContainers(newQuadRects, vastWorld.getQuadTree());
-        quadRects = newQuadRects;
+        if (debugSettings.get("Quad")) {
+            quadRects.clear();
+            addQuadContainers(vastWorld.getQuadTree(), quadRects);
+        }
     }
 
-    private void addQuadContainers(List<Rectangle> quadRectsToAddTo, QuadTree quadTree) {
+    private void addQuadContainers(QuadTree quadTree, List<Rectangle> quadRectsToAddTo) {
         int x = (int) (quadTree.getBounds().getX() * SCALE);
         int y = (int) -(quadTree.getBounds().getY() * SCALE);
         y -= quadTree.getBounds().getHeight() * SCALE;
@@ -171,7 +224,7 @@ public class MonitorWorld {
                 (int) (quadTree.getBounds().getWidth() * SCALE), (int) (quadTree.getBounds().getHeight() * SCALE)));
         for (QuadTree child : quadTree.getNodes()) {
             if (child != null) {
-                addQuadContainers(quadRectsToAddTo, child);
+                addQuadContainers(child, quadRectsToAddTo);
             }
         }
     }
@@ -204,25 +257,18 @@ public class MonitorWorld {
             }
         }
 
-        monitoryEntitiesOnScreen.clear();
         for (MonitorEntity monitorEntity : monitorEntities.values()) {
-            if (g.getClipBounds().contains(monitorEntity.position.x, monitorEntity.position.y)) {
-                monitoryEntitiesOnScreen.add(monitorEntity);
-            }
-        }
-
-        for (MonitorEntity monitorEntity : monitoryEntitiesOnScreen) {
             if (monitorEntity == hoveredMonitorEntity && monitorEntity != selectedMonitorEntity) {
                 g.setColor(Color.DARK_GRAY);
                 g.drawArc(monitorEntity.position.x - 15, monitorEntity.position.y - 15, 30, 30, 0, 360);
             }
         }
 
-        for (MonitorEntity monitorEntity : monitoryEntitiesOnScreen) {
+        for (MonitorEntity monitorEntity : monitorEntities.values()) {
             monitorEntity.paintDebugBottom(g, debugSettings);
         }
 
-        for (MonitorEntity monitorEntity : monitoryEntitiesOnScreen) {
+        for (MonitorEntity monitorEntity : monitorEntities.values()) {
             monitorEntity.paint(g);
         }
 
@@ -239,7 +285,7 @@ public class MonitorWorld {
             g.drawArc(selectedMonitorEntity.position.x - size / 2, selectedMonitorEntity.position.y - size / 2, size, size, 0, 360);
         }
 
-        for (MonitorEntity monitorEntity : monitoryEntitiesOnScreen) {
+        for (MonitorEntity monitorEntity : monitorEntities.values()) {
             monitorEntity.paintDebugTop(g, debugSettings);
         }
     }

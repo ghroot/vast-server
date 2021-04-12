@@ -14,6 +14,7 @@ public class MonitorEntity {
     public final int entity;
     public String type;
     public Point2i position;
+    public boolean isStatic;
     public int collisionRadius;
     public int scanDistance;
     public Point2i pathPosition;
