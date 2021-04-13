@@ -351,6 +351,8 @@ public class Monitor extends JFrame implements ActionListener {
                         detail = "" + ((Used) component).usedByEntity;
                     } else if (component instanceof Fueled) {
                         detail = "" + (Math.round(((Fueled) component).timeLeft * 10f) / 10f);
+                    } else if (component instanceof Layer) {
+                        detail = ((Layer) component).name;
                     }
 
                     entityData.put(componentName, detail != null ? detail : "");

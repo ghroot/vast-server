@@ -30,10 +30,7 @@ import net.mostlyoriginal.api.utils.QuadTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class VastWorld implements Runnable {
@@ -45,7 +42,7 @@ public class VastWorld implements Runnable {
 	private Metrics metrics;
 	private WorldConfiguration worldConfiguration;
 	private Map<String, VastPeer> peers;
-	private QuadTree quadTree;
+	private Map<String, QuadTree> quadTrees;
 	private Items items;
 
 	private World world;
@@ -62,7 +59,9 @@ public class VastWorld implements Runnable {
 
 		peers = new HashMap<>();
 		Map<String, List<IncomingRequest>> incomingRequestsByPeer = new HashMap<>();
-		quadTree = new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height);
+		quadTrees = new HashMap<>();
+		quadTrees.put("default", new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height));
+		quadTrees.put("observers", new QuadTree(0, 0, worldConfiguration.width, worldConfiguration.height));
 		InteractionHandler[] interactionHandlers = {
 			new GrowingInteractionHandler(),
 			new HarvestableInteractionHandler(items),
@@ -117,9 +116,9 @@ public class VastWorld implements Runnable {
 			new DeactivateSystem(peers),
 			new ActivateSystem(peers),
 			new ConfigurationSystem(),
-			new QuadTreeAddRemoveSystem(quadTree, worldConfiguration),
-			new QuadTreeUpdateSystem(quadTree, worldConfiguration),
-			new QuadScanSystem(quadTree, worldConfiguration),
+			new QuadTreeAddRemoveSystem(quadTrees, worldConfiguration),
+			new QuadTreeUpdateSystem(quadTrees, worldConfiguration),
+			new QuadScanSystem(quadTrees.get("default"), worldConfiguration),
 			new ObserverScanSystem(),
 			new CreateSystem(propertyHandlers),
 			new CullingSystem(propertyHandlers),
@@ -130,7 +129,7 @@ public class VastWorld implements Runnable {
 			new AISystem(behaviours, random),
 			new EncumbranceSystem(75),
 			new PathMoveSystem(3f),
-			new CollisionSystem(worldConfiguration, quadTree, random, metrics),
+			new CollisionSystem(worldConfiguration, quadTrees.get("default"), random, metrics),
 			new FollowSystem(),
 			new FuelSystem(),
 			new CraftSystem(items),
@@ -214,8 +213,12 @@ public class VastWorld implements Runnable {
 		return items;
 	}
 
-	public QuadTree getQuadTree() {
-		return quadTree;
+	public Collection<QuadTree> getQuadTrees() {
+		return quadTrees.values();
+	}
+
+	public QuadTree getQuadTree(String name) {
+		return quadTrees.get(name);
 	}
 
 	public World getWorld() {

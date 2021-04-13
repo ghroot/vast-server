@@ -4,5 +4,6 @@ import com.artemis.Component;
 import com.artemis.annotations.PooledWeaver;
 
 @PooledWeaver
-public class Invisible extends Component {
+public class Layer extends Component {
+    public String name = "default";
 }

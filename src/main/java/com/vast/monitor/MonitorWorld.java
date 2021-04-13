@@ -58,12 +58,10 @@ public class MonitorWorld {
             y += vastWorld.getWorldConfiguration().height / 2f;
 
             IntBag nearbyEntities = new IntBag();
-            vastWorld.getQuadTree().get(nearbyEntities, x + vastWorld.getWorldConfiguration().width / 2f - distanceX,
-                    y + vastWorld.getWorldConfiguration().height / 2f - distanceY, 2f * distanceX, 2f * distanceY);
-
-            // Include all observers for now
-            IntBag observerEntities = vastWorld.getWorld().getAspectSubscriptionManager().get(Aspect.all(Observer.class)).getEntities();
-            nearbyEntities.addAll(observerEntities);
+            for (QuadTree quadTree : vastWorld.getQuadTrees()) {
+                quadTree.get(nearbyEntities, x + vastWorld.getWorldConfiguration().width / 2f - distanceX,
+                        y + vastWorld.getWorldConfiguration().height / 2f - distanceY, 2f * distanceX, 2f * distanceY);
+            }
 
             int[] nearbyEntitiesData = nearbyEntities.getData();
             int[] nearbyEntitiesArray = new int[nearbyEntities.size()];
@@ -211,7 +209,7 @@ public class MonitorWorld {
 
         if (debugSettings.get("Quad")) {
             quadRects.clear();
-            addQuadContainers(vastWorld.getQuadTree(), quadRects);
+            addQuadContainers(vastWorld.getQuadTree("default"), quadRects);
         }
     }
 

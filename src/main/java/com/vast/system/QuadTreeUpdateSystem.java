@@ -4,7 +4,7 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.artemis.utils.IntBag;
-import com.vast.component.Invisible;
+import com.vast.component.Quad;
 import com.vast.component.Static;
 import com.vast.component.Transform;
 import com.vast.data.WorldConfiguration;
@@ -12,17 +12,20 @@ import net.mostlyoriginal.api.utils.QuadTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 public class QuadTreeUpdateSystem extends IteratingSystem {
 	private static final Logger logger = LoggerFactory.getLogger(QuadTreeUpdateSystem.class);
 
 	private ComponentMapper<Transform> transformMapper;
+	private ComponentMapper<Quad> quadMapper;
 
-	private QuadTree quadTree;
+	private Map<String, QuadTree> quadTrees;
 	private WorldConfiguration worldConfiguration;
 
-	public QuadTreeUpdateSystem(QuadTree quadTree, WorldConfiguration worldConfiguration) {
-		super(Aspect.all(Transform.class).exclude(Static.class, Invisible.class));
-		this.quadTree = quadTree;
+	public QuadTreeUpdateSystem(Map<String, QuadTree> quadTrees, WorldConfiguration worldConfiguration) {
+		super(Aspect.all(Transform.class, Quad.class).exclude(Static.class));
+		this.quadTrees = quadTrees;
 		this.worldConfiguration = worldConfiguration;
 	}
 
@@ -37,7 +40,10 @@ public class QuadTreeUpdateSystem extends IteratingSystem {
 	@Override
 	protected void process(int entity) {
 		Transform transform = transformMapper.get(entity);
-		quadTree.update(entity, transform.position.x + worldConfiguration.width / 2f,
-			transform.position.y + worldConfiguration.height / 2f, 0, 0);
+		Quad quad = quadMapper.get(entity);
+
+		quad.tree.update(entity,
+				transform.position.x + worldConfiguration.width / 2f,
+				transform.position.y + worldConfiguration.height / 2f, 0, 0);
 	}
 }

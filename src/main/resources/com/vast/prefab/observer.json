@@ -4,6 +4,9 @@
       "archetype": 0,
       "key": "observer",
       "components": {
+        "Layer": {
+          "name": "observers"
+        },
         "Scan": {
           "distance": 15
         },
@@ -18,8 +21,8 @@
   },
   "archetypes": {
     "0": [
-      "Invisible",
       "Known",
+      "Layer",
       "Observer",
       "Transform",
       "Type",
@@ -39,8 +42,8 @@
     "com.vast.component.Group": "Group",
     "com.vast.component.Harvestable": "Harvestable",
     "com.vast.component.Inventory": "Inventory",
-    "com.vast.component.Invisible": "Invisible",
     "com.vast.component.Known": "Known",
+    "com.vast.component.Layer": "Layer",
     "com.vast.component.Lifetime": "Lifetime",
     "com.vast.component.Observer": "Observer",
     "com.vast.component.Owner": "Owner",
