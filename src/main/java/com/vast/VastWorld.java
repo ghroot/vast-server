@@ -117,7 +117,7 @@ public class VastWorld implements Runnable {
 			new ActivateSystem(peers),
 			new ConfigurationSystem(),
 			new QuadTreeAddRemoveSystem(quadTrees, worldConfiguration),
-			new QuadTreeUpdateSystem(quadTrees, worldConfiguration),
+			new QuadTreeUpdateSystem(worldConfiguration),
 			new QuadScanSystem(quadTrees.get("default"), worldConfiguration),
 			new ObserverScanSystem(),
 			new CreateSystem(propertyHandlers),

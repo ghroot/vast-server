@@ -20,12 +20,10 @@ public class QuadTreeUpdateSystem extends IteratingSystem {
 	private ComponentMapper<Transform> transformMapper;
 	private ComponentMapper<Quad> quadMapper;
 
-	private Map<String, QuadTree> quadTrees;
 	private WorldConfiguration worldConfiguration;
 
-	public QuadTreeUpdateSystem(Map<String, QuadTree> quadTrees, WorldConfiguration worldConfiguration) {
+	public QuadTreeUpdateSystem(WorldConfiguration worldConfiguration) {
 		super(Aspect.all(Transform.class, Quad.class).exclude(Static.class));
-		this.quadTrees = quadTrees;
 		this.worldConfiguration = worldConfiguration;
 	}
 
