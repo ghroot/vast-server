@@ -84,6 +84,17 @@ public class Monitor extends JFrame implements ActionListener {
                 }
             }
         });
+        monitorCanvas.addMouseWheelListener(new MouseAdapter() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
+                int wheelRotation = mouseWheelEvent.getWheelRotation();
+                if (wheelRotation < 0) {
+                    zoomSlider.setValue(zoomSlider.getValue() + 5);
+                } else if (wheelRotation > 0) {
+                    zoomSlider.setValue(zoomSlider.getValue() - 5);
+                }
+            }
+        });
     }
 
     private void setupUI() {
