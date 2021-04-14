@@ -8,6 +8,7 @@ import com.artemis.utils.Bag;
 import com.vast.VastWorld;
 import com.vast.component.*;
 import com.vast.component.Observer;
+import com.vast.data.SystemMetrics;
 import com.vast.monitor.model.EntityModel;
 import com.vast.monitor.model.ModelData;
 import com.vast.monitor.model.SystemMetricsModel;
@@ -148,7 +149,7 @@ public class Monitor extends JFrame implements ActionListener {
         worldInfoTable.getColumn("Value").setPreferredWidth(120);
         JScrollPane worldInfoScrollPanel = new JScrollPane(worldInfoTable);
         worldInfoScrollPanel.setPreferredSize(new Dimension(250, HEIGHT));
-        worldInfoScrollPanel.setMinimumSize(new Dimension(250, 200));
+        worldInfoScrollPanel.setMinimumSize(new Dimension(250, 220));
         worldInfoTable.setPreferredScrollableViewportSize(new Dimension(250, HEIGHT));
 
         entityModel = new EntityModel();
@@ -227,18 +228,15 @@ public class Monitor extends JFrame implements ActionListener {
         synchronized (modelData) {
             Map<String, String> worldInfo = new HashMap<>();
             worldInfo.put("World size", "" + vastWorld.getWorldConfiguration().width + " x " + vastWorld.getWorldConfiguration().height);
-            worldInfo.put("Total entities", "" + vastWorld.getWorld().getAspectSubscriptionManager().get(Aspect.all(Transform.class)).getEntities().size());
+            worldInfo.put("Total entities", "" + vastWorld.getWorld().getAspectSubscriptionManager().get(Aspect.all()).getEntities().size());
             worldInfo.put("Static entities", "" + vastWorld.getWorld().getAspectSubscriptionManager().get(Aspect.all(Static.class)).getEntities().size());
+            worldInfo.put("Moving entities", "" + vastWorld.getWorld().getAspectSubscriptionManager().get(Aspect.all(Transform.class).exclude(Static.class)).getEntities().size());
             worldInfo.put("Scanning entities", "" + vastWorld.getWorld().getAspectSubscriptionManager().get(Aspect.all(Scan.class)).getEntities().size());
             if (vastWorld.getMetrics() != null) {
-                worldInfo.put("Fps", "" + vastWorld.getMetrics().getFps());
+                worldInfo.put("Fps", vastWorld.getMetrics().getFps() + " / " + vastWorld.getMetrics().getTimePerFrameMs() + " ms");
+                worldInfo.put("Total processing time", "" + vastWorld.getMetrics().getSystemMetrics().values().stream().mapToInt(SystemMetrics::getProcessingTime).sum() + " ms");
                 worldInfo.put("Collisions", vastWorld.getMetrics().getNumberOfCollisions() + " / " + vastWorld.getMetrics().getNumberOfCollisionChecks());
-                Map<Byte, Integer> syncedProperties = vastWorld.getMetrics().getSyncedProperties();
-                int totalSyncedProperties = 0;
-                for (byte property : syncedProperties.keySet()) {
-                    totalSyncedProperties += syncedProperties.get(property);
-                }
-                worldInfo.put("Synced properties", "" + totalSyncedProperties);
+                worldInfo.put("Synced properties", "" + vastWorld.getMetrics().getSyncedProperties().values().stream().reduce(0, Integer::sum));
             }
 
             modelData.worldInfo = worldInfo;
