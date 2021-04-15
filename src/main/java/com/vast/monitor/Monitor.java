@@ -5,6 +5,7 @@ import com.artemis.BaseSystem;
 import com.artemis.Component;
 import com.artemis.components.SerializationTag;
 import com.artemis.utils.Bag;
+import com.nhnent.haste.transport.QoS;
 import com.vast.VastWorld;
 import com.vast.component.*;
 import com.vast.component.Observer;
@@ -12,7 +13,7 @@ import com.vast.data.SystemMetrics;
 import com.vast.monitor.model.EntityModel;
 import com.vast.monitor.model.ModelData;
 import com.vast.monitor.model.SystemMetricsModel;
-import com.vast.monitor.model.WorldInfoModel;
+import com.vast.monitor.model.InfoModel;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -31,16 +32,37 @@ public class Monitor extends JFrame implements ActionListener {
 
     private VastWorld vastWorld;
 
+    private final String[] PROPERTY_NAMES = new String[]{
+        "Position",
+        "Rotation",
+        "Active",
+        "Progress",
+        "State",
+        "Inventory",
+        "Fueled",
+        "Home",
+        "Configuration",
+        "Skill",
+        "Valid"
+    };
+
+    private final String[] MESSAGE_NAMES = new String[]{
+        "EntityCreated",
+        "EntityDestroyed",
+        "UpdateProperties",
+        "Event"
+    };
+
     private MonitorCanvas monitorCanvas;
     private JSlider zoomSlider;
 
     private final ModelData modelData;
-    private SystemMetricsModel systemMetricsModel;
-    private JTable systemMetricsTable;
+    private InfoModel<String> worldInfoModel;
     private EntityModel entityModel;
-    private JTable entityTable;
-    private WorldInfoModel worldInfoModel;
-    private JTable worldInfoTable;
+    private SystemMetricsModel systemMetricsModel;
+    private InfoModel<String> messageInfoModel;
+    private InfoModel<Integer> propertyInfoModel;
+    private InfoModel<Integer> eventInfoModel;
 
     private Timer timer;
 
@@ -130,8 +152,29 @@ public class Monitor extends JFrame implements ActionListener {
         });
         topPanel.add(zoomSlider, BorderLayout.EAST);
 
+        worldInfoModel = new InfoModel<>(new String[]{"Name", "Value"}, String.class);
+        JTable worldInfoTable = new JTable(worldInfoModel);
+        worldInfoTable.setFocusable(false);
+        worldInfoTable.getColumn("Name").setPreferredWidth(130);
+        worldInfoTable.getColumn("Value").setPreferredWidth(120);
+        JScrollPane worldInfoScrollPanel = new JScrollPane(worldInfoTable);
+        worldInfoScrollPanel.setPreferredSize(new Dimension(250, HEIGHT));
+        worldInfoScrollPanel.setMinimumSize(new Dimension(250, 220));
+        worldInfoTable.setPreferredScrollableViewportSize(new Dimension(250, HEIGHT));
+
+        entityModel = new EntityModel();
+        JTable entityTable = new JTable(entityModel);
+        entityTable.setFocusable(false);
+        sortTable(entityTable);
+        entityTable.getColumn("Component").setPreferredWidth(110);
+        entityTable.getColumn("Detail").setPreferredWidth(140);
+        JScrollPane entityScrollPanel = new JScrollPane(entityTable);
+        entityScrollPanel.setPreferredSize(new Dimension(250, HEIGHT));
+        entityScrollPanel.setMinimumSize(new Dimension(250, 300));
+        entityTable.setPreferredScrollableViewportSize(new Dimension(250, HEIGHT));
+
         systemMetricsModel = new SystemMetricsModel();
-        systemMetricsTable = new JTable(systemMetricsModel);
+        JTable systemMetricsTable = new JTable(systemMetricsModel);
         systemMetricsTable.setFocusable(false);
         sortTable(systemMetricsTable);
         systemMetricsTable.getColumn("System").setPreferredWidth(120);
@@ -142,26 +185,52 @@ public class Monitor extends JFrame implements ActionListener {
         systemMetricsScrollPanel.setMinimumSize(new Dimension(220, HEIGHT));
         systemMetricsTable.setPreferredScrollableViewportSize(new Dimension(220, HEIGHT));
 
-        worldInfoModel = new WorldInfoModel();
-        worldInfoTable = new JTable(worldInfoModel);
-        worldInfoTable.setFocusable(false);
-        worldInfoTable.getColumn("Name").setPreferredWidth(130);
-        worldInfoTable.getColumn("Value").setPreferredWidth(120);
-        JScrollPane worldInfoScrollPanel = new JScrollPane(worldInfoTable);
-        worldInfoScrollPanel.setPreferredSize(new Dimension(250, HEIGHT));
-        worldInfoScrollPanel.setMinimumSize(new Dimension(250, 220));
-        worldInfoTable.setPreferredScrollableViewportSize(new Dimension(250, HEIGHT));
+        messageInfoModel = new InfoModel<>(new String[]{"Message", "Detail"}, String.class);
+        JTable messageInfoTable = new JTable(messageInfoModel);
+        messageInfoTable.setFocusable(false);
+        sortTable(messageInfoTable);
+        messageInfoTable.getColumn("Message").setPreferredWidth(130);
+        messageInfoTable.getColumn("Detail").setPreferredWidth(90);
+        JScrollPane messageInfoScrollPanel = new JScrollPane(messageInfoTable);
+        messageInfoScrollPanel.setPreferredSize(new Dimension(220, 200));
+        messageInfoScrollPanel.setMinimumSize(new Dimension(220, 200));
+        messageInfoTable.setPreferredScrollableViewportSize(new Dimension(220, 200));
 
-        entityModel = new EntityModel();
-        entityTable = new JTable(entityModel);
-        entityTable.setFocusable(false);
-        sortTable(entityTable);
-        entityTable.getColumn("Component").setPreferredWidth(110);
-        entityTable.getColumn("Detail").setPreferredWidth(140);
-        JScrollPane entityScrollPanel = new JScrollPane(entityTable);
-        entityScrollPanel.setPreferredSize(new Dimension(250, HEIGHT));
-        entityScrollPanel.setMinimumSize(new Dimension(250, 300));
-        entityTable.setPreferredScrollableViewportSize(new Dimension(250, HEIGHT));
+        propertyInfoModel = new InfoModel<>(new String[]{"Property", "Count"}, Integer.class);
+        JTable propertyInfoTable = new JTable(propertyInfoModel);
+        propertyInfoTable.setFocusable(false);
+        sortTable(propertyInfoTable);
+        propertyInfoTable.getColumn("Property").setPreferredWidth(130);
+        propertyInfoTable.getColumn("Count").setPreferredWidth(90);
+        JScrollPane propertyInfoScrollPanel = new JScrollPane(propertyInfoTable);
+        propertyInfoScrollPanel.setPreferredSize(new Dimension(220, 200));
+        propertyInfoScrollPanel.setMinimumSize(new Dimension(220, 200));
+        propertyInfoTable.setPreferredScrollableViewportSize(new Dimension(220, 200));
+
+        eventInfoModel = new InfoModel<>(new String[]{"Event", "Count"}, Integer.class);
+        JTable eventInfoTable = new JTable(eventInfoModel);
+        eventInfoTable.setFocusable(false);
+        sortTable(eventInfoTable);
+        eventInfoTable.getColumn("Event").setPreferredWidth(130);
+        eventInfoTable.getColumn("Count").setPreferredWidth(90);
+        JScrollPane eventInfoScrollPanel = new JScrollPane(eventInfoTable);
+        eventInfoScrollPanel.setPreferredSize(new Dimension(220, 200));
+        eventInfoScrollPanel.setMinimumSize(new Dimension(220, 200));
+        eventInfoTable.setPreferredScrollableViewportSize(new Dimension(220, 200));
+
+        JSplitPane networkSplitPanel1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        JSplitPane networkSplitPanel2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        networkSplitPanel1.setTopComponent(messageInfoScrollPanel);
+        networkSplitPanel1.setBottomComponent(networkSplitPanel2);
+        networkSplitPanel2.setTopComponent(propertyInfoScrollPanel);
+        networkSplitPanel2.setBottomComponent(eventInfoScrollPanel);
+
+        JTabbedPane tabbedPanel = new JTabbedPane();
+        tabbedPanel.setFocusable(false);
+        tabbedPanel.setPreferredSize(new Dimension(220, HEIGHT));
+        tabbedPanel.setMinimumSize(new Dimension(220, HEIGHT));
+        tabbedPanel.add("Systems", systemMetricsScrollPanel);
+        tabbedPanel.add("Network", networkSplitPanel1);
 
         JSplitPane splitPanel1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
@@ -170,7 +239,7 @@ public class Monitor extends JFrame implements ActionListener {
         JSplitPane splitPanel4 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
         splitPanel3.setLeftComponent(monitorCanvas);
-        splitPanel3.setRightComponent(systemMetricsScrollPanel);
+        splitPanel3.setRightComponent(tabbedPanel);
 
         splitPanel2.setLeftComponent(splitPanel4);
         splitPanel2.setRightComponent(splitPanel3);
@@ -240,6 +309,49 @@ public class Monitor extends JFrame implements ActionListener {
             }
 
             modelData.worldInfo = worldInfo;
+
+            if (vastWorld.getMetrics() != null) {
+                if (modelData.messagesInfo != null) {
+                    modelData.messagesInfo.clear();
+                } else {
+                    modelData.messagesInfo = new HashMap<>();
+                }
+                for (short messageCode : vastWorld.getMetrics().getSentMessages().keySet()) {
+                    Map<QoS, int[]> sentMessages = vastWorld.getMetrics().getSentMessages().get(messageCode);
+                    for (QoS qos : sentMessages.keySet()) {
+                        String qosString = qos == QoS.RELIABLE_SEQUENCED ? "reliable" : "unreliable";
+                        int count = sentMessages.get(qos)[0];
+                        int bytes = sentMessages.get(qos)[1];
+                        String sizeString;
+                        if (bytes < 1000) {
+                            sizeString = bytes + " B";
+                        } else if (bytes < 1000000) {
+                            sizeString = (bytes / 1000) + " KB";
+                        } else {
+                            sizeString = (bytes / 1000000) + " MB";
+                        }
+                        modelData.messagesInfo.put(MESSAGE_NAMES[messageCode] + " (" + qosString + ")", count + " (" + sizeString + ")");
+                    }
+                }
+
+                if (modelData.propertyInfo != null) {
+                    modelData.propertyInfo.clear();
+                } else {
+                    modelData.propertyInfo = new HashMap<>();
+                }
+                for (byte property : vastWorld.getMetrics().getSyncedProperties().keySet()) {
+                    modelData.propertyInfo.put(PROPERTY_NAMES[property], vastWorld.getMetrics().getSyncedProperties().get(property));
+                }
+
+                if (modelData.eventsInfo != null) {
+                    modelData.eventsInfo.clear();
+                } else {
+                    modelData.eventsInfo = new HashMap<>();
+                }
+                for (String event : vastWorld.getMetrics().getSentEvents().keySet()) {
+                    modelData.eventsInfo.put(event, vastWorld.getMetrics().getSentEvents().get(event));
+                }
+            }
 
             if (vastWorld.getMetrics() != null) {
                 modelData.systemMetrics = vastWorld.getMetrics().getSystemMetrics().entrySet()
@@ -386,11 +498,14 @@ public class Monitor extends JFrame implements ActionListener {
 
         // modelData -> table models
         synchronized (modelData) {
-            systemMetricsModel.refresh(modelData.systemMetrics);
             worldInfoModel.refresh(modelData.worldInfo);
             entityModel.refresh(modelData.selectedEntity);
+            systemMetricsModel.refresh(modelData.systemMetrics);
+            messageInfoModel.refresh(modelData.messagesInfo);
+            propertyInfoModel.refresh(modelData.propertyInfo);
+            eventInfoModel.refresh(modelData.eventsInfo);
         }
 
-        repaint();
+        monitorCanvas.repaint();
     }
 }

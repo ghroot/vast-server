@@ -3,39 +3,44 @@ package com.vast.monitor.model;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class WorldInfoModel implements TableModel {
+public class InfoModel<T> implements TableModel {
+    private String[] columnNames;
+    private Class<T> valueClass;
+
     private List<TableModelListener> listeners;
     private String[] names;
-    private String[] values;
+    private List<T> values;
 
-    public WorldInfoModel() {
+    public InfoModel(String[] columnNames, Class<T> valueClass) {
+        this.columnNames = columnNames;
+        this.valueClass = valueClass;
+
         listeners = new ArrayList<>();
         names = new String[0];
-        values = new String[0];
+        values = new ArrayList<>();
     }
 
-    public void refresh(Map<String, String> worldInfo) {
-        if (worldInfo != null) {
-            int size = worldInfo.size();
+    public void refresh(Map<String, T> info) {
+        if (info != null) {
+            int size = info.size();
             if (names == null || names.length != size) {
                 names = new String[size];
             }
-            if (values == null || values.length != size) {
-                values = new String[size];
-            }
+            values.clear();
             int index = 0;
-            for (String name : worldInfo.keySet()) {
+            for (String name : info.keySet()) {
                 names[index] = name;
-                values[index] = worldInfo.get(name);
+                values.add(info.get(name));
                 index++;
             }
         } else {
             names = new String[0];
-            values = new String[0];
+            values.clear();
         }
 
         for (TableModelListener l : listeners) {
@@ -55,18 +60,16 @@ public class WorldInfoModel implements TableModel {
 
     @Override
     public String getColumnName(int columnIndex) {
-        if (columnIndex == 0) {
-            return "Name";
-        } else if (columnIndex == 1) {
-            return "Value";
-        } else {
-            return null;
-        }
+        return columnNames[columnIndex];
     }
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        return String.class;
+        if (columnIndex == 0) {
+            return String.class;
+        } else {
+            return valueClass;
+        }
     }
 
     @Override
@@ -79,7 +82,7 @@ public class WorldInfoModel implements TableModel {
         if (columnIndex == 0) {
             return names[rowIndex];
         } else if (columnIndex == 1) {
-            return values[rowIndex];
+            return values.get(rowIndex);
         } else {
             return null;
         }
